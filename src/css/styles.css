@@ -1,0 +1,42 @@
+/* GLOBAL */
+
+body {
+  overflow: hidden;
+  margin:0;
+  background: blue;
+}
+#container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-around;
+  align-items: stretch;
+}
+#game {
+  height: 100vh;
+}
+#header {
+  width: 100%;
+  height: 3rem;
+  background-color: black;
+  color: white;
+  display: inline-flex;
+  justify-content: space-around;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  font-size: 1.5rem;
+}
+#footer {
+  width: 100%;
+  height: 3rem;
+  background-color: black;
+  color: white;
+  display: inline-flex;
+  justify-content: space-around;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}

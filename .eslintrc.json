@@ -1,0 +1,77 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "settings": {
+        "react":{
+            "version": "6.4.1"
+        }
+    },
+    "plugins": [
+        "react"
+    ],
+    "overrides": [
+        {
+            "files": [ "App.jsx" ],
+            "rules": {
+                "no-undef": 0,
+                "no-unused-vars": 0
+            }
+        }
+    ],
+    "rules": {
+        "react/jsx-handler-names": 2,
+        "react/require-render-return": 2,
+        "react/no-unused-state": 1,
+        "react/prefer-stateless-function": 2,
+        "react/no-direct-mutation-state": 2,
+        "react/jsx-key": 2,
+        "react/jsx-uses-vars": 2,
+        "react/jsx-uses-react": 2,
+        "react/jsx-no-duplicate-props": 2,
+        "react/jsx-no-undef": 2,
+        "react/no-multi-comp": 2,
+        "react/jsx-indent-props": [
+            "error",
+            2
+        ],
+        "react/jsx-pascal-case": 2,
+        "react/prop-types": 2,
+        "react/jsx-indent": [
+            "error",
+            2
+        ],
+        "indent": [
+            "error",
+            2
+        ],
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "no-console": [
+            0
+        ]
+    }
+}
