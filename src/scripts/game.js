@@ -1,11 +1,10 @@
-export function Game() {
+export class Game {
+  constructor() {
+    this.deck = [
+      
+    ];
+    this.players = [];
 
-}
+  }
 
-export function Player() {
-
-}
-
-export function Card() {
-  
 }
