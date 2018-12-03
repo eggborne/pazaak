@@ -3,6 +3,7 @@ import React from 'react';
 import Footer from './Footer';
 import Header from './Header';
 import Card from './Card';
+import CardBack from './CardBack';
 import createGame from '../scripts/init';
 
 let shorterDimension;
@@ -13,7 +14,7 @@ window.innerWidth < window.innerHeight
 let cardSize = {
   width: '3rem',
   height: '5rem'
-}
+};
 
 class App extends React.Component {
   constructor(props) {
@@ -31,22 +32,28 @@ class App extends React.Component {
     return (
       <div id='container'>
         <Header />
-        <div id='game'>
-          <div className='hand'>
+        <div id='game-board'>
+          <div id='opponent-hand' className='hand'>
+            <CardBack size={cardSize} />
+            <CardBack size={cardSize} />
+            <CardBack size={cardSize} />
+            <CardBack size={cardSize} />
+          </div>
+          <div id='player-hand' className='hand'>
             <Card size={cardSize}
-              value={4}   
+              value={4}
               type='house'
             />
             <Card size={cardSize}
-              value={2}   
+              value={2}
               type='plus'
             />
             <Card size={cardSize}
-              value={3}   
+              value={3}
               type='minus'
             />
             <Card size={cardSize}
-              value={10}   
+              value={10}
               type='plus'
             />
           </div>
