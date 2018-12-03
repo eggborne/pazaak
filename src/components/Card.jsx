@@ -29,7 +29,7 @@ function Card(props) {
           background-color: ${color};
         }
       `}</style>
-        <div className='number-badge'>{props.value}</div>
+      <div className='number-badge'>{props.value}</div>
       <div className='inner-band'>
         <div className='corner-bubble'>{cornerSymbol}</div>
         <div className='band-arrow-up-bg'></div>
