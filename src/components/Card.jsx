@@ -6,32 +6,58 @@ function Card(props) {
   let color;
   let cornerSymbol;
   if (props.type === 'plus') {
-    color = 'blue';
+    color = '#0C00B2';
     cornerSymbol = '+';
   } else if (props.type === 'minus') {
-    color = 'red';
+    color = '#A70003';
     cornerSymbol = '-';
   } else {
-    color = 'yellow';
+    color = '#D3D300';
     cornerSymbol = '';
   }
+  let cardHeight = props.size.height;
   return (
-    <div className='card'>
+    <div id={`card-${props.id}`} onClick={props.onClickCard} className='card'>
       <style jsx>{`
         .card {
-          width: ${props.size.width};
-          height: ${props.size.height};
+          width: ${props.size.width}px;
+          height: ${cardHeight}px;
         }
         .inner-band {
           background-color: ${color}
         }
         .corner-bubble {
           background-color: ${color};
+          width: ${cardHeight * 0.16}px;
+          height: ${cardHeight * 0.16}px;
+        }
+        .band-arrow-up, .band-arrow-down {
+          border-left: ${cardHeight * 0.07}px solid transparent;
+          border-right: ${cardHeight * 0.07}px solid transparent;
+        }
+        .band-arrow-up-bg, .band-arrow-down-bg {
+          border-left: ${cardHeight * 0.1}px solid transparent;
+          border-right: ${cardHeight * 0.1}px solid transparent;
+        }
+        .band-arrow-up {
+          border-bottom: ${cardHeight * 0.07}px solid white;
+        }
+        .band-arrow-up-bg {
+          border-bottom: ${cardHeight * 0.1}px solid black;
+        }
+        .band-arrow-down {
+          border-top: ${cardHeight * 0.07}px solid white;
+        }
+        .band-arrow-down-bg {
+          border-top: ${cardHeight * 0.1}px solid black;
+        }
+        .number-badge, .corner-bubble {
+          font-size: ${cardHeight * 0.2}px;
         }
       `}</style>
-      <div className='number-badge'>{props.value}</div>
+      <div className='number-badge'>{cornerSymbol}{props.value}</div>
       <div className='inner-band'>
-        <div className='corner-bubble'>{cornerSymbol}</div>
+        <div className='corner-bubble no-corner-border'>{cornerSymbol}</div>
         <div className='band-arrow-up-bg'></div>
         <div className='band-arrow-up'></div>
       </div>
@@ -46,9 +72,11 @@ function Card(props) {
 }
 
 Card.propTypes = {
+  id: PropTypes.number,
   size: PropTypes.object,
   value: PropTypes.number,
-  type: PropTypes.string
+  type: PropTypes.string,
+  onClickCard: PropTypes.func
 };
 
 
