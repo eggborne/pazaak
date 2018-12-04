@@ -37,6 +37,12 @@ button {
 #header {
   box-sizing: border-box;
   font-family: 'Bungee';
+  letter-spacing: 0.05rem;
+  text-shadow:
+   -1px -1px 0 #000,  
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+     1px 1px 0 #000;
   width: 100%;
   height: 3rem;
   background-color: #560000;
@@ -44,7 +50,6 @@ button {
   justify-content: space-around;
   align-items: center;
   font-size: 1.5rem;
-  text-shadow: 0px 0px 3px black;
 }
 #footer {
   height: 3rem;
@@ -67,6 +72,7 @@ button {
   padding: 0.25rem;
 }
 .card {
+  box-sizing: border-box;
   color: white;
   background: #ccc;
   border: 1px solid black;
@@ -75,7 +81,6 @@ button {
   flex-direction: column;
   align-items: center;
   position: relative;
-  margin: 0.2rem;
   font-family: 'Nova Square';
   cursor: pointer;
 }
@@ -146,7 +151,13 @@ button {
 }
 #player-hand {
   background-color: rgba(0, 0, 255, 0.05);
-
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#player-hand>.card, #opponent-hand>.card {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 #grids {
   width: 100%;
@@ -158,7 +169,7 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-grow: 1;
+  flex-grow: 2;
 }
 #opponent-area {
   border-top: 1px solid #555;
@@ -172,13 +183,11 @@ button {
   background-color: rgba(0, 0, 255, 0.05);
 }
 .deal-grid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  
-}
-.deal-row {
+  box-sizing: border-box;
   display: inline-flex;
+  align-items: top;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 .total-display {
   font-family: 'Nova Square';
@@ -187,6 +196,8 @@ button {
   background-color: black;
   padding: 0.5rem 1rem 0.5rem 1rem;
   margin-left: 1rem;
+  align-self: start;
+  margin-top: 1rem;
 }
 .total-outline {
   border-radius: 0.25rem;
