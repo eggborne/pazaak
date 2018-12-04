@@ -5,7 +5,7 @@ import Header from './Header';
 import Card from './Card';
 import CardBack from './CardBack';
 import createGame from '../scripts/init';
-let Util = require('../scripts/util')
+let Util = require('../scripts/util');
 
 let shorterDimension;
 window.innerWidth < window.innerHeight
@@ -42,14 +42,12 @@ class App extends React.Component {
   }
   handleClickEndTurn(event) {
     event.preventDefault();
-    console.log('END TURN');
     let clicked = event.target.id;
     Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
     Util.flash(clicked, 'background-color', 'black', '#111');
   }
   handleClickStand(event) {
     event.preventDefault();
-    console.log('STAND')
     let clicked = event.target.id;
     Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
     Util.flash(clicked, 'background-color', 'black', '#111');
