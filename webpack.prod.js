@@ -61,7 +61,7 @@ module.exports = {
       meta: {
         'viewport': 'width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no',
         'mobile-web-app-capable': 'yes',
-        'theme-color': '#004'
+        'theme-color': '#560000'
       }
     }),
   ],
