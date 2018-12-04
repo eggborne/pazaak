@@ -1,17 +1,31 @@
 /* GLOBAL */
 
 body {
-  overflow: hidden;
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;
   margin:0;
   background: rgb(107, 121, 138);
-  font-family: 'Bungee';
   color: rgb(255, 247, 213);
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  outline: 0;
+  font-family: 'Audiowide';
+  background-color: black;
+  color: #5CB3FF;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  border: solid #111;
+  position: relative;
 }
 #container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   justify-content: space-between;
+  min-width: 300px;
 }
 #game-board {
   display: flex;
@@ -21,48 +35,52 @@ body {
   flex-grow: 1;
 }
 #header {
+  box-sizing: border-box;
+  font-family: 'Bungee';
   width: 100%;
   height: 3rem;
-  background-color: black;
+  background-color: #560000;
   display: inline-flex;
   justify-content: space-around;
   align-items: center;
   font-size: 1.5rem;
+  text-shadow: 0px 0px 3px black;
 }
 #footer {
-  width: 100%;
   height: 3rem;
-  background-color: black;
+  background-color: #560000;
   display: inline-flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
   align-items: center;
-  position: absolute;
-  bottom: 0;
-  left: 0;
+}
+.move-button {
+  width: 40%;
+  font-size: 1.2rem;
+  padding: 0.35rem;
 }
 .hand {
+  box-sizing: border-box;
   width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* background-color: lightgreen; */
   padding: 0.25rem;
 }
 .card {
   color: white;
   background: #ccc;
   border: 1px solid black;
-  border-radius: 0.3rem;
+  border-radius: 7%;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  margin-left: 0.2rem;
-  margin-right: 0.2rem;
   margin: 0.2rem;
   font-family: 'Nova Square';
+  cursor: pointer;
 }
 .inner-band {
+  pointer-events: none;
   border: 1px solid black;
   position: relative;
   width: 75%;
@@ -78,62 +96,42 @@ body {
   border-radius: 12% 12% 0% 0%;
   height: 20%;
 }
+.band-arrow-up, .band-arrow-up-bg, .band-arrow-down, .band-arrow-down-bg {
+  pointer-events: none;
+  width: 0; 
+  height: 0;
+}
 .band-arrow-up {
   position: absolute;
-  width: 0; 
-  height: 0;
-  border-left: 0.4rem solid transparent;
-  border-right: 0.4rem solid transparent;
-  border-bottom: 0.4rem solid white;
 }
-.band-arrow-up-bg {
-  width: 0; 
-  height: 0;
-  border-left: 0.5rem solid transparent;
-  border-right: 0.5rem solid transparent;
-  border-bottom: 0.5rem solid black;
-}
-.band-arrow-down {
+.band-arrow-down {  
   position: absolute;
-  width: 0; 
-  height: 0;
-  border-left: 0.4rem solid transparent;
-  border-right: 0.4rem solid transparent;
-  border-top: 0.4rem solid white;
-}
-.band-arrow-down-bg {
-  width: 0; 
-  height: 0;
-  border-left: 0.45rem solid transparent;
-  border-right: 0.45rem solid transparent;
-  border-top: 0.45rem solid black;
 }
 .corner-bubble {
-  font-size: 1rem;
+  box-sizing: border-box;
+  pointer-events: none;
   position: absolute;
   border-radius: 50%;
   right: -10%;
   top: -35%;
-  width: 0.7rem;
-  height: 0.7rem;
   border: 1px solid black;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
+.no-corner-border {
+  border-left: 0 none;
+  border-bottom: 0 none;
+}
 .back-bubble {
-  font-size: 0.75rem;
+  box-sizing: border-box;
   border-radius: 50%;
-  width: 0.9rem;
-  height: 0.9rem;
-  border: 1px solid black;
-  z-index: 3;
-  transform: translateY(-60%)
+  transform: translateY(-60%);
 }
 .number-badge {
-  font-size: 1rem;
+  pointer-events: none;
   width: 60%;
-  height: 22%;
+  height: 23%;
   top: 28%;
   background-color: black;
   border-radius: 10%;
@@ -159,6 +157,7 @@ body {
 .player-area {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   flex-grow: 1;
 }
 #opponent-area {
@@ -167,19 +166,31 @@ body {
   background-color: rgba(255, 0, 0, 0.05);
 
 }
-#player-area {
+#user-area {
   border-top: 1px solid #555;
   border-bottom: 1px solid #555;
   background-color: rgba(0, 0, 255, 0.05);
 }
 .deal-grid {
-  position: relative;
-  border: 1px solid #444;
-  border-radius: 0.25rem;
-  max-width: 64%;
-  display: inline-flex;
-  flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
+  
+}
+.deal-row {
+  display: inline-flex;
+}
+.total-display {
+  font-family: 'Nova Square';
+  font-size: 1rem;
+  border-radius: 1rem;
+  background-color: black;
+  padding: 0.5rem 1rem 0.5rem 1rem;
   margin-left: 1rem;
+}
+.total-outline {
+  border-radius: 0.25rem;
+  background-color: transparent;
+  border: 2px solid #933500;
+  padding: 0.1rem 0.5rem 0.1rem 0.5rem;
 }
