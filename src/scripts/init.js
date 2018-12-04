@@ -1,7 +1,6 @@
-export default function createGame() {
+export default function createGame(app) {
 
-  console.log('createGame...');
-  
+  console.log('createGame...', app);
 
   // touch handling
 
