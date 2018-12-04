@@ -1,8 +1,3 @@
-export function pointWithinBounds(pointX, pointY, boundsX, boundsY, boundsWidth, boundsHeight = boundsWidth) {
-  return pointX > boundsX && pointX < boundsX + boundsWidth
-    && pointY > boundsY && pointY < boundsY + boundsHeight;
-}
-
 export function flash(elementId, property, origColor, flashColor) {
   let el = document.getElementById(elementId);
   el.style[property] = flashColor;
@@ -15,4 +10,9 @@ export function flash(elementId, property, origColor, flashColor) {
       }, 50);
     }, 50);
   }, 50);
+}
+
+export function shuffle(arr) {
+  arr.sort(() => Math.random() - 0.5);
+  return arr;
 }
