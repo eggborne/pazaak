@@ -5,9 +5,11 @@ import PropTypes from 'prop-types';
 function Card(props) {
   let color;
   let cornerSymbol;
+  let valueDisplay = props.value;
   if (props.type === 'plus') {
     color = '#0C00B2';
     cornerSymbol = '+';
+    valueDisplay = `+${props.value}`;
   } else if (props.type === 'minus') {
     color = '#A70003';
     cornerSymbol = '-';
@@ -17,13 +19,13 @@ function Card(props) {
   }
   let cardHeight = props.size.height;
   return (
-    <div id={`card-${props.id}`} onClick={props.onClickCard} className='card'>
+    <div id={`card-${props.id}`} onClick={() => props.onClickCard(props.value, props.type) } className='card'>
       <style jsx>{`
         .card {
           width: ${props.size.width}px;
           height: ${cardHeight}px;
-          margin-left: ${cardHeight * 0.04}px;
-          margin-right: ${cardHeight * 0.04}px;
+          margin-left: ${cardHeight * 0.03}px;
+          margin-right: ${cardHeight * 0.03}px;
         }
         .inner-band {
           background-color: ${color}
@@ -57,7 +59,7 @@ function Card(props) {
           font-size: ${cardHeight * 0.2}px;
         }
       `}</style>
-      <div className='number-badge'>{cornerSymbol}{props.value}</div>
+      <div className='number-badge'>{valueDisplay}</div>
       <div className='inner-band'>
         <div className='corner-bubble no-corner-border'>{cornerSymbol}</div>
         <div className='band-arrow-up-bg'></div>
