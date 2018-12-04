@@ -12,7 +12,7 @@ export function flash(elementId, property, origColor, flashColor) {
       el.style[property] = flashColor;
       setTimeout(() => {
         el.style[property] = origColor;
-      }, 50)
-    }, 50)
+      }, 50);
+    }, 50);
   }, 50);
 }
