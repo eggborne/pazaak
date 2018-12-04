@@ -52,7 +52,9 @@ class App extends React.Component {
       userHand: [],
       opponentHand: [],
       userGrid: [],
-      opponentGrid: []
+      opponentGrid: [],
+      userTotal: 0,
+      opponentTotal: 0
     };
 
     let deck = [];
@@ -90,6 +92,9 @@ class App extends React.Component {
 
   componentDidMount() {
     document.getElementById('container').style.height = window.innerHeight + 'px';
+    document.getElementById('deck-selection-grid').style.minWidth = `${cardSize.width*6}px`;
+    document.getElementById('deck-selection-grid').style.maxWidth = `${cardSize.width*6}px`;
+    // document.getElementById('deck-selection-grid').style.maxWidth = '300px';
     Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
       el.style.width = `${(cardSize.width * 4) + (cardSize.height * 0.42)}px`;
       el.style.height = `${cardSize.height * 2.2}px`;
@@ -152,16 +157,24 @@ class App extends React.Component {
       let deckCopy = this.state.deck.slice();
       let newCard = Util.shuffle(deckCopy)[0];
       newGridCards.push(newCard);
+      let newTotal = 0;
+      newTotal += this.state.userTotal + newCard.value;
+      console.log(`new ${player} total ${newTotal}`);
       this.setState({
-        userGrid: newGridCards
+        userGrid: newGridCards,
+        userTotal: newTotal
       });
     } else {
       let newGridCards = this.state.opponentGrid.slice();
       let deckCopy = this.state.deck.slice();
       let newCard = Util.shuffle(deckCopy)[0];
       newGridCards.push(newCard);
+      let newTotal = 0;
+      newTotal += this.state.opponentTotal + newCard.value;
+      console.log(`new ${player} total ${newTotal}`);
       this.setState({
-        opponentGrid: newGridCards
+        opponentGrid: newGridCards,
+        opponentTotal: newTotal
       });
     }
   }
@@ -221,8 +234,9 @@ class App extends React.Component {
     let clicked = event.target.id;
     Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
     Util.flash(clicked, 'background-color', 'black', '#111');
-
-    this.dealToMainDeck('user');
+    if (this.state.userTotal < 20 && this.state.userGrid.length < 9) {
+      this.dealToMainDeck('user');
+    }
   }
   handleClickStand(event) {
     event.preventDefault();
@@ -230,7 +244,10 @@ class App extends React.Component {
     Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
     Util.flash(clicked, 'background-color', 'black', '#111');
 
-    this.dealToMainDeck('opponent');
+
+    if (this.state.opponentTotal < 20 && this.state.opponentGrid.length < 9) {
+      this.dealToMainDeck('opponent');
+    }
   }
 
   render() {
@@ -267,14 +284,30 @@ class App extends React.Component {
           Options
         </div>
         <div style={deckSelectScreen} id='deck-select-screen'>
-          Select deck
-          <button onClick={this.handleClickPlay} className='intro-button' id='options-button'>Play!</button>
+          <div id='deck-select-title'>
+            Create deck
+            <div className='smaller'>choose 4 cards</div>
+            </div>
+          
+          <div id='deck-selection-area'>
+            <div id='deck-selection-grid'>
+              {this.state.userDeck.map((card, i) => 
+                <Card key={card.id} id={card.id} size={cardSize} value={card.value} type={card.type} />
+              )}
+            </div>
+          </div>
+          <div id='preview-deck'>
+            HAND
+          </div>
+          <div id='deck-select-footer'>
+            <button onClick={this.handleClickPlay} className='intro-button' id='options-button'>Play!</button>
+          </div>
         </div>
         <div style={gameStarted} id='game-board'>
           <div id='opponent-hand' className='hand'>
-            {this.state.opponentHand.map((card, i) => {
-              return <CardBack key={i} size={cardSize} />;
-            })}
+            {this.state.opponentHand.map((card, i) => 
+              <CardBack key={i} size={cardSize} />
+            )}
           </div>
           <div id='grids'>
             <div id='opponent-area' className='player-area'>
@@ -285,7 +318,7 @@ class App extends React.Component {
               </div>
               <div className='total-display'>
                 <div className='total-outline'>
-                  <div id='opponent-total'>18</div>
+                  <div id='opponent-total'>{this.state.opponentTotal}</div>
                 </div>
               </div>
             </div>
@@ -297,7 +330,7 @@ class App extends React.Component {
               </div>
               <div className='total-display'>
                 <div className='total-outline'>
-                  <div id='user-total'>16</div>
+                  <div id='user-total'>{this.state.userTotal}</div>
                 </div>
               </div>
             </div>
