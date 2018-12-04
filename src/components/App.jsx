@@ -23,6 +23,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      phase: 'splashScreen',
       deck: [],
       userDeck: [
         { id: 1, value: 1, type: 'plus' },
@@ -50,12 +51,8 @@ class App extends React.Component {
       ],
       userHand: [],
       opponentHand: [],
-      userGrid: [
-       
-      ],
-      opponentGrid: [
-        
-      ]
+      userGrid: [],
+      opponentGrid: []
     };
 
     let deck = [];
@@ -81,6 +78,11 @@ class App extends React.Component {
     this.shuffleDeck = this.shuffleDeck.bind(this);
     this.getPlayerHands = this.getPlayerHands.bind(this);
     this.dealToMainDeck = this.dealToMainDeck.bind(this);
+    this.handleClickStart = this.handleClickStart.bind(this);
+    this.handleClickHow = this.handleClickHow.bind(this);
+    this.handleClickOptions = this.handleClickOptions.bind(this);
+    this.handleClickPlay = this.handleClickPlay.bind(this);
+    this.dealToMainDeck = this.dealToMainDeck.bind(this);
     this.handleClickCard = this.handleClickCard.bind(this);
     this.handleClickEndTurn = this.handleClickEndTurn.bind(this);
     this.handleClickStand = this.handleClickStand.bind(this);
@@ -90,8 +92,8 @@ class App extends React.Component {
     document.getElementById('container').style.height = window.innerHeight + 'px';
     Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
       el.style.width = `${(cardSize.width * 4) + (cardSize.height * 0.42)}px`;
-      el.style.height = `${cardSize.height*2.2}px`;
-      el.style.paddingTop = `${cardSize.height*0.05}px`;
+      el.style.height = `${cardSize.height * 2.2}px`;
+      el.style.paddingTop = `${cardSize.height * 0.05}px`;
     });
   }
 
@@ -164,6 +166,52 @@ class App extends React.Component {
     }
   }
 
+  handleClickStart(event) {
+    event.preventDefault();
+    let clicked = event.target.id;
+    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
+    Util.flash(clicked, 'background-color', 'black', '#111');
+    setTimeout(() => {
+      this.setState({
+        phase: 'selectingDeck'
+      });
+    }, 150);
+  }
+  handleClickPlay(event) {
+    event.preventDefault();
+    let clicked = event.target.id;
+    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
+    Util.flash(clicked, 'background-color', 'black', '#111');
+    setTimeout(() => {
+      this.setState({
+        phase: 'gameStarted'
+      });
+    }, 100);
+  }
+  handleClickHow(event) {
+    event.preventDefault();
+    let clicked = event.target.id;
+    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
+    Util.flash(clicked, 'background-color', 'black', '#111');
+    let self = this;
+    setTimeout(() => {
+      this.setState({
+        phase: 'showingInstructions'
+      });
+    }, 150);
+  }
+  handleClickOptions(event) {
+    event.preventDefault();
+    let clicked = event.target.id;
+    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
+    Util.flash(clicked, 'background-color', 'black', '#111');
+    setTimeout(() => {
+      this.setState({
+        phase: 'showingOptions'
+      });
+    }, 150);
+  }
+
   handleClickCard(event) {
     event.preventDefault();
 
@@ -175,7 +223,6 @@ class App extends React.Component {
     Util.flash(clicked, 'background-color', 'black', '#111');
 
     this.dealToMainDeck('user');
-    
   }
   handleClickStand(event) {
     event.preventDefault();
@@ -184,15 +231,46 @@ class App extends React.Component {
     Util.flash(clicked, 'background-color', 'black', '#111');
 
     this.dealToMainDeck('opponent');
-
   }
 
   render() {
-
+    let footerOn = { position: 'absolute', bottom: '-3rem' };
+    let gameStarted = { display: 'none' };
+    let introScreen = { display: 'none' };
+    let instructionsScreen = { display: 'none' };
+    let optionsScreen = { display: 'none' };
+    let deckSelectScreen = { display: 'none' };
+    if (this.state.phase === 'gameStarted') {
+      gameStarted = { display: 'flex' };
+      footerOn = { position: 'relative', bottom: '0' };
+    } else if (this.state.phase === 'selectingDeck') {
+      deckSelectScreen = { display: 'flex' };
+    } else if (this.state.phase === 'showingOptions') {
+      optionsScreen = { display: 'flex' };
+    } else if (this.state.phase === 'showingInstructions') {
+      instructionsScreen = { display: 'flex' };
+    } else if (this.state.phase === 'splashScreen') {
+      introScreen = { display: 'flex' };
+    }
     return (
       <div id='container'>
         <Header />
-        <div id='game-board'>
+        <div style={introScreen} id='intro-screen'>
+          <button onClick={this.handleClickStart} className='intro-button' id='start-button'>Start Game</button>
+          <button onClick={this.handleClickHow} className='intro-button' id='how-button'>How to Play</button>
+          <button onClick={this.handleClickOptions} className='intro-button' id='options-button'>Options</button>
+        </div>
+        <div style={instructionsScreen} id='instructions-screen'>
+          How to play
+        </div>
+        <div style={optionsScreen} id='options-screen'>
+          Options
+        </div>
+        <div style={deckSelectScreen} id='deck-select-screen'>
+          Select deck
+          <button onClick={this.handleClickPlay} className='intro-button' id='options-button'>Play!</button>
+        </div>
+        <div style={gameStarted} id='game-board'>
           <div id='opponent-hand' className='hand'>
             {this.state.opponentHand.map((card, i) => {
               return <CardBack key={i} size={cardSize} />;
@@ -230,9 +308,8 @@ class App extends React.Component {
                 onClickCard={this.handleClickCard} />;
             })}
           </div>
-
         </div>
-        <Footer onClickEndTurn={this.handleClickEndTurn} onClickStand={this.handleClickStand} />
+        <Footer display={footerOn} onClickEndTurn={this.handleClickEndTurn} onClickStand={this.handleClickStand} />
       </div>
     );
   }
