@@ -1,6 +1,6 @@
 export default function createGame() {
 
-  console.log('createGame...')
+  console.log('createGame...');
   
 
   // touch handling
@@ -8,7 +8,6 @@ export default function createGame() {
   // const app = document.getElementById('container');
   // app.touches = [];
   // app.addEventListener('touchstart', (event) => {
-  //   console.log(';ticeds')
   //   if (!app.touches.length) {
   //     app.fingerDown = true;
   //   }
