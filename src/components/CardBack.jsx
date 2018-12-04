@@ -3,12 +3,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function CardBack(props) {
+  let cardHeight = props.size.height;
   return (
     <div className='card'>
       <style jsx>{`
         .card {
-          width: ${props.size.width};
-          height: ${props.size.height};
+          width: ${props.size.width}px;
+          height: ${props.size.height}px;
+          border-radius: ${cardHeight*0.05}px
         }
         .inner-band {
           background-color: grey;
@@ -18,23 +20,43 @@ function CardBack(props) {
           background-color: #ccc;
           border-color: #444;
         }
+        .corner-bubble {
+          width: ${cardHeight * 0.16}px;
+          height: ${cardHeight * 0.16}px;
+        }
         .back-bubble {
-          border: none;
+          width: ${cardHeight * 0.18}px;
+          height: ${cardHeight * 0.18}px;
+        }
+        .back-bubble {
+          border-bottom: 1px solid black;
         }
         .number-badge {
           background-color: #ccc;
+          border: 1px solid black;
+          border-top: none;
+          border-bottom: none;
+        }
+
+        .band-arrow-up, .band-arrow-down {
+          border-left: ${cardHeight * 0.07}px solid transparent;
+          border-right: ${cardHeight * 0.07}px solid transparent;
+        }
+        .band-arrow-up-bg, .band-arrow-down-bg {
+          border-left: ${cardHeight * 0.1}px solid transparent;
+          border-right: ${cardHeight * 0.1}px solid transparent;
         }
         .band-arrow-up {
-          border-bottom: 0.4rem solid #ccc;
-        }
-        .band-arrow-down {
-          border-top: 0.4rem solid #ccc;
+          border-bottom: ${cardHeight * 0.07}px solid #ccc;
         }
         .band-arrow-up-bg {
-          border-bottom: 0.65rem solid #ccc;
+          border-bottom: ${cardHeight * 0.1}px solid #ccc;
+        }
+        .band-arrow-down {
+          border-top: ${cardHeight * 0.07}px solid #ccc;
         }
         .band-arrow-down-bg {
-          border-top: 0.65rem solid #ccc;
+          border-top: ${cardHeight * 0.1}px solid #ccc;
         }
         .inner-band:nth-child(2) {
           border-bottom: none;
