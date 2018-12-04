@@ -62,15 +62,59 @@ button {
   flex-grow: 2;
 }
 #deck-select-screen {
+  font-size: 2rem;
+  font-family: 'Bungee';
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: space-between;
   min-width: 300px;
-  align-items: center;
-  padding-top: 20vh;
-  padding-bottom: 20vh;
   flex-grow: 2;
+}
+#deck-select-title {
+  flex-direction: column;
+  flex-grow: 1;
+}
+#deck-select-footer {
+  background-color: rgba(0, 0, 255, 0.05);
+}
+.smaller {
+  font-size: 0.4em;
+  transform: translateY(-50%);
+}
+#deck-select-title, #deck-select-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#deck-selection-area {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-grow: 2;
+  /* background-color: red; */
+  padding: 2rem;
+}
+#deck-selection-grid {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: top;
+  justify-content: center;
+  flex-wrap: wrap;
+  /* min-width: 300px;
+  max-width: 300px; */
+}
+#deck-selection-grid > .card {
+  margin-bottom: 0.5rem;
+}
+#preview-deck {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-grow: 5;
+  /* background-color: orange; */
+  background-color: rgba(0, 0, 255, 0.05);
+
 }
 .intro-button {
   width: 60%;
@@ -110,7 +154,7 @@ button {
   align-items: center;
   bottom: -3rem;
   position: absolute;
-  transition: all 400ms ease;
+  transition: all 300ms ease;
 }
 .move-button {
   width: 40%;
@@ -245,6 +289,7 @@ button {
 }
 .total-display {
   font-family: 'Nova Square';
+  width: 2rem;
   font-size: 1rem;
   border-radius: 1rem;
   background-color: black;
@@ -258,4 +303,7 @@ button {
   background-color: transparent;
   border: 2px solid #933500;
   padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
