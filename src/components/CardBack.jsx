@@ -10,7 +10,8 @@ function CardBack(props) {
         .card {
           width: ${props.size.width}px;
           height: ${props.size.height}px;
-          border-radius: ${cardHeight*0.05}px
+          margin-left: ${cardHeight * 0.04}px;
+          margin-right: ${cardHeight * 0.04}px;
         }
         .inner-band {
           background-color: grey;
@@ -36,8 +37,8 @@ function CardBack(props) {
           border: 1px solid black;
           border-top: none;
           border-bottom: none;
+          top: 27%;
         }
-
         .band-arrow-up, .band-arrow-down {
           border-left: ${cardHeight * 0.07}px solid transparent;
           border-right: ${cardHeight * 0.07}px solid transparent;

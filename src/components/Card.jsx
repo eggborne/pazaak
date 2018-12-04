@@ -22,6 +22,8 @@ function Card(props) {
         .card {
           width: ${props.size.width}px;
           height: ${cardHeight}px;
+          margin-left: ${cardHeight * 0.04}px;
+          margin-right: ${cardHeight * 0.04}px;
         }
         .inner-band {
           background-color: ${color}
