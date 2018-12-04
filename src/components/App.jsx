@@ -64,7 +64,7 @@ class App extends React.Component {
       let currentValue = i;
       if (i > 10) {
         if (i.toString()[1] === '0') {
-          currentValue = 10
+          currentValue = 10;
         } else {
           currentValue = parseInt(i.toString()[1]);
         }
@@ -166,7 +166,7 @@ class App extends React.Component {
 
   handleClickCard(event) {
     event.preventDefault();
-    
+
   }
   handleClickEndTurn(event) {
     event.preventDefault();
@@ -174,7 +174,7 @@ class App extends React.Component {
     Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
     Util.flash(clicked, 'background-color', 'black', '#111');
 
-    this.dealToMainDeck('user')
+    this.dealToMainDeck('user');
     
   }
   handleClickStand(event) {
@@ -183,7 +183,7 @@ class App extends React.Component {
     Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
     Util.flash(clicked, 'background-color', 'black', '#111');
 
-    this.dealToMainDeck('opponent')
+    this.dealToMainDeck('opponent');
 
   }
 
@@ -195,14 +195,14 @@ class App extends React.Component {
         <div id='game-board'>
           <div id='opponent-hand' className='hand'>
             {this.state.opponentHand.map((card, i) => {
-              return <CardBack key={i} size={cardSize} />
+              return <CardBack key={i} size={cardSize} />;
             })}
           </div>
           <div id='grids'>
             <div id='opponent-area' className='player-area'>
               <div id='opponent-grid' className='deal-grid'>
                 {this.state.opponentGrid.map((card, i) => {
-                  return <Card key={i} size={cardSize} value={card.value} type={card.type} />
+                  return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
                 })}
               </div>
               <div className='total-display'>
@@ -214,7 +214,7 @@ class App extends React.Component {
             <div id='user-area' className='player-area'>
               <div id='user-grid' className='deal-grid'>
                 {this.state.userGrid.map((card, i) => {
-                  return <Card key={i} size={cardSize} value={card.value} type={card.type} />
+                  return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
                 })}
               </div>
               <div className='total-display'>
