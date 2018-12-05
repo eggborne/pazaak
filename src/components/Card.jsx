@@ -19,7 +19,7 @@ function Card(props) {
   }
   let cardHeight = props.size.height;
   return (
-    <div id={`card-${props.id}`} onClick={() => props.onClickCard(props.value, props.type) } className='card'>
+    <div id={`card-${props.id}`} onClick={(event) => props.onClickCard(event, props.value, props.type) } className='card'>
       <style jsx>{`
         .card {
           width: ${props.size.width}px;
