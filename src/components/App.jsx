@@ -18,6 +18,8 @@ let miniCardSize = {};
 
 let cardHeight = (window.innerHeight / 6) * 0.8;
 
+let instructionsText = `${''}And what of the Rebellion? If the Rebels have obtained a complete technical readout of this station, it is possible, however unlikely, that they might find a weakness and exploit it. The plans you refer to will soon be back in our hands. Any attack made by the Rebels against this station would be a useless gesture, no matter what technical data they've obtained. This station is now the ultimate power in the universe. I suggest we use it! Are they away? They have just made the jump into hyperspace. You're sure the homing beacon is secure aboard their ship? I'm taking an awful risk, Vader. This had better work. Aren't you a little short to be a stormtrooper? What? Oh...the uniform. I'm Luke Skywalker. I'm here to rescue you. You're who? I'm here to rescue you. I've got your R2 unit. I'm here with Ben Kenobi. Ben Kenobi is here! Where is he? Come on! The ship's all yours. If the scanners pick up anything, report it immediately. All right, let's go. Hey down there, could you give us a hand with this? TX-four-one-two. Why aren't you at your post? TX-four-one-two, do you copy? Take over. We've got a bad transmitter. I'll see what I can do. You know, between his howling and your blasting everything in sight, it's a wonder the whole station doesn't know we're here. Bring them on! I prefer a straight fight to all this sneaking around. We found the computer outlet, sir. Plug in. He should be able to interpret the entire Imperial computer network. That malfunctioning little twerp. This is all his fault! He tricked me into going this way, but he'll do no better. Wait, what's that? A transport! I'm saved! Over here! Help! Please, help! Artoo-Detoo! It's you! It's you!`;
+
 cardSize.width = (cardHeight / 1.66);
 cardSize.height = cardHeight;
 mediumCardSize.width = cardSize.width * 0.85;
@@ -46,18 +48,7 @@ class App extends React.Component {
         { id: 111111, value: -5, type: 'minus' },
         { id: 121212, value: -6, type: 'minus' },
       ],
-      userDeck: [
-        // { id: 1, value: 1, type: 'plus' },
-        // { id: 2, value: 2, type: 'plus' },
-        // { id: 3, value: 3, type: 'plus' },
-        // { id: 4, value: 3, type: 'plus' },
-        // { id: 5, value: 4, type: 'plus' },
-        // { id: 6, value: 5, type: 'plus' },
-        // { id: 7, value: 6, type: 'plus' },
-        // { id: 8, value: -2, type: 'minus' },
-        // { id: 9, value: -3, type: 'minus' },
-        // { id: 10, value: -5, type: 'minus' },
-      ],
+      userDeck: [],
       opponentDeck: [
         { id: 1, value: 1, type: 'plus' },
         { id: 2, value: 3, type: 'plus' },
@@ -76,7 +67,8 @@ class App extends React.Component {
       userGrid: [],
       opponentGrid: [],
       userTotal: 0,
-      opponentTotal: 0
+      opponentTotal: 0,
+      turn: 'user'
     };
 
     let deck = [];
@@ -94,11 +86,17 @@ class App extends React.Component {
       deck[i - 1].type = 'house';
     }
 
+    this.buttonTextColor = window.getComputedStyle(document.body).getPropertyValue('--button-text-color');
+    this.buttonBgColor = window.getComputedStyle(document.body).getPropertyValue('--button-bg-color');
+
     this.state.deck = this.shuffleDeck(deck);
 
     this.shuffleDeck = this.shuffleDeck.bind(this);
     this.getPlayerHands = this.getPlayerHands.bind(this);
     this.dealToPlayerGrid = this.dealToPlayerGrid.bind(this);
+    this.handleToggleOption = this.handleToggleOption.bind(this);
+    this.handleClickBack = this.handleClickBack.bind(this);
+    this.handleClickHeader = this.handleClickHeader.bind(this);
     this.handleClickStart = this.handleClickStart.bind(this);
     this.handleClickHow = this.handleClickHow.bind(this);
     this.handleClickOptions = this.handleClickOptions.bind(this);
@@ -106,11 +104,15 @@ class App extends React.Component {
     this.handleClickCard = this.handleClickCard.bind(this);
     this.handleClickEndTurn = this.handleClickEndTurn.bind(this);
     this.handleClickStand = this.handleClickStand.bind(this);
+    this.removeCardFromHand = this.removeCardFromHand.bind(this);
+    this.addCardtoGrid = this.addCardtoGrid.bind(this);
+    this.changeCardTotal = this.changeCardTotal.bind(this);
     this.getCardIndexById = this.getCardIndexById.bind(this);
   }
 
   componentDidMount() {
     document.getElementById('container').style.height = window.innerHeight + 'px';
+    document.getElementById('player-hand').style.height = (cardSize.height * 1.1) + 'px';
     Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
       el.style.width = `${(cardSize.width * 4) + (cardSize.height * 0.42)}px`;
       el.style.height = `${cardSize.height * 2.2}px`;
@@ -171,49 +173,64 @@ class App extends React.Component {
   }
 
   dealToPlayerGrid(player) {
-    if (player === 'user') {
-      let newGridCards = this.state.userGrid.slice();
-      let deckCopy = this.state.deck.slice();
-      let newCard = Util.shuffle(deckCopy)[0];
-      newGridCards.push(newCard);
-      let newTotal = 0;
-      newTotal += this.state.userTotal + newCard.value;
-      if (newTotal === 20) {
-        document.getElementById('user-total').style.color = 'green';
-      } else if (newTotal > 20) {
-        document.getElementById('user-total').style.color = 'red';
+    let newGridCards = this.state[`${player}Grid`].slice();
+    let deckCopy = this.state.deck.slice();
+    let newCard = Util.shuffle(deckCopy)[0];
+    newGridCards.push(newCard);
+    let newTotal = 0;
+    newTotal += this.state[`${player}Total`] + newCard.value;
+    if (newTotal === 20) {
+      document.getElementById(`${player}-total`).style.color = 'green';
+      document.getElementById(`${player}-total-outline`).style.borderColor = '#933500';
+
+    } else if (newTotal > 20) {
+      document.getElementById(`${player}-total`).style.color = 'red';
+      document.getElementById(`${player}-total-outline`).style.borderColor = 'red';
+    }
+    this.setState({
+      [`${player}Grid`]: newGridCards,
+      [`${player}Total`]: newTotal
+    });
+  }
+  handleToggleOption(event) {
+    var el = event.target;
+    if (el.classList.length > 1) {
+      el.classList.remove('option-off');
+      el.innerHTML = 'ON';
+      if (event.target.id === 'sound-fx-toggle') {
+        // sound fx on
       }
-      this.setState({
-        userGrid: newGridCards,
-        userTotal: newTotal
-      });
+      if (event.target.id === 'ambience-toggle') {
+        // ambience on
+      }
+      if (event.target.id === 'dark-mode-toggle') {
+        // dark mode on
+      }
     } else {
-      let newGridCards = this.state.opponentGrid.slice();
-      let deckCopy = this.state.deck.slice();
-      let newCard = Util.shuffle(deckCopy)[0];
-      newGridCards.push(newCard);
-      let newTotal = 0;
-      newTotal += this.state.opponentTotal + newCard.value;
-      if (newTotal === 20) {
-        document.getElementById('opponent-total').style.color = 'green';
-      } else if (newTotal > 20) {
-        document.getElementById('opponent-total').style.color = 'red';
+      el.classList.add('option-off');
+      el.innerHTML = 'OFF';
+      if (event.target.id === 'sound-fx-toggle') {
+        // sound fx off
       }
-      this.setState({
-        opponentGrid: newGridCards,
-        opponentTotal: newTotal
-      });
+      if (event.target.id === 'ambience-toggle') {
+        // ambience off
+      }
+      if (event.target.id === 'dark-mode-toggle') {
+        // dark mode off
+      }
     }
   }
-
+  handleClickHeader() {
+    this.setState({
+      phase: 'splashScreen'
+    });
+  }
   handleClickStart(event) {
     event.preventDefault();
     let clicked = event.target.id;
-    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
-    Util.flash(clicked, 'background-color', 'black', '#111');
-
+    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
+    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
     document.getElementById('deck-select-footer').style.transform = 'translateY(0%)';
-
     setTimeout(() => {
       this.setState({
         phase: 'selectingDeck'
@@ -223,8 +240,8 @@ class App extends React.Component {
   handleClickPlay(event) {
     event.preventDefault();
     let clicked = event.target.id;
-    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
-    Util.flash(clicked, 'background-color', 'black', '#111');
+    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
+    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
 
     let hands = this.getPlayerHands();
     // this.state.userHand = hands[0];
@@ -238,12 +255,22 @@ class App extends React.Component {
       });
     }, 150);
   }
+  handleClickBack(event) {
+    event.preventDefault();
+    let clicked = event.target.id;
+    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
+    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
+    setTimeout(() => {
+      this.setState({
+        phase: 'splashScreen'
+      });
+    }, 150);
+  }
   handleClickHow(event) {
     event.preventDefault();
     let clicked = event.target.id;
-    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
-    Util.flash(clicked, 'background-color', 'black', '#111');
-    let self = this;
+    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
+    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
     setTimeout(() => {
       this.setState({
         phase: 'showingInstructions'
@@ -253,8 +280,8 @@ class App extends React.Component {
   handleClickOptions(event) {
     event.preventDefault();
     let clicked = event.target.id;
-    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
-    Util.flash(clicked, 'background-color', 'black', '#111');
+    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
+    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
     setTimeout(() => {
       this.setState({
         phase: 'showingOptions'
@@ -264,8 +291,8 @@ class App extends React.Component {
   handleClickEndTurn(event) {
     event.preventDefault();
     let clicked = event.target.id;
-    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
-    Util.flash(clicked, 'background-color', 'black', '#111');
+    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
+    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
     if (this.state.userTotal < 20 && this.state.userGrid.length < 9) {
       this.dealToPlayerGrid('user');
     }
@@ -273,14 +300,17 @@ class App extends React.Component {
   handleClickStand(event) {
     event.preventDefault();
     let clicked = event.target.id;
-    Util.flash(clicked, 'color', '#5CB3FF', '#cc0');
-    Util.flash(clicked, 'background-color', 'black', '#111');
+    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
+    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
     if (this.state.opponentTotal < 20 && this.state.opponentGrid.length < 9) {
       this.dealToPlayerGrid('opponent');
     }
   }
-  handleClickCard(value, type) {
+  handleClickCard(event, value, type) {
     event.preventDefault();
+
+    // SELECTING DECK
+
     if (this.state.phase === 'selectingDeck') {
       if (event.target.id.toString().length > 9) {
         // it's a selection card, so put it in player deck
@@ -288,7 +318,6 @@ class App extends React.Component {
           let deckCopy = this.state.userDeck.slice();
           let newCard = { id: this.state.idCount, value: value, type: type };
           deckCopy.push(newCard);
-          let newCount = this.state.idCount;
           if (deckCopy.length === 10) {
             document.getElementById('play-button').classList.remove('disabled-button');
           }
@@ -311,6 +340,48 @@ class App extends React.Component {
         });
       }
     }
+
+    // GAME STARTED
+
+    if (this.state.phase === 'gameStarted') {
+      if ((this.state.userTotal + value < 20) && this.state.userGrid.length < 9) {
+        this.removeCardFromHand('user', event.target.id);
+        this.addCardtoGrid('user', value, type);
+        this.changeCardTotal('user', this.state.userTotal + value);
+      }
+    }
+
+  }
+  removeCardFromHand(player, cardId) {
+    let handCopy = this.state[`${player}Hand`].slice();
+    let indextoRemove = this.getCardIndexById(handCopy, cardId);
+    handCopy.splice(indextoRemove, 1);
+    this.setState({
+      [`${player}Hand`]: handCopy
+    });
+  }
+  addCardtoGrid(player, value, type) {
+    let gridCopy = this.state[`${player}Grid`].slice();
+    let newCard = { value: value, type: type };
+    gridCopy.push(newCard);
+    this.setState({
+      [`${player}Grid`]: gridCopy
+    });
+  }
+  changeCardTotal(player, newTotal) {
+    if (newTotal === 20) {
+      document.getElementById('user-total').style.color = 'green';
+      document.getElementById('user-total').style.borderColor = 'red';
+    } else if (newTotal > 20) {
+      document.getElementById('user-total').style.color = 'red';
+      document.getElementById('user-total').style.borderColor = 'red';
+    } else {
+      document.getElementById('user-total').style.color = 'white';
+      document.getElementById('user-total').style.borderColor = '#933500';
+    }
+    this.setState({
+      [`${player}Total`]: newTotal
+    });
   }
   getCardIndexById(arr, id) {
     let match = undefined;
@@ -352,11 +423,12 @@ class App extends React.Component {
     if (cardsLeft === 0) {
       cardsLeft = 1;
       cardPlural = '';
-      chooseStyle.opacity = 0;
+      chooseStyle.color = 'green';
+      document.getElementById('choose-text').innerHTML = 'Ready to play!';
     }
     return (
       <div id='container'>
-        <Header />
+        <Header onClickHeader={this.handleClickHeader} />
 
         {/* INTRO */}
         <div style={introScreen} id='intro-screen'>
@@ -367,20 +439,36 @@ class App extends React.Component {
 
         {/* INSTRUCTIONS */}
         <div style={instructionsScreen} id='instructions-screen'>
-          How to play
+          <div className='options-instructions-title shadowed-text'>How to play</div>
+          <div id='instructions' className='shadowed-text'>
+            {instructionsText}
+          </div>
+          <button onClick={this.handleClickBack} className='back-button' id='instructions-back-button'>Back</button>
+
         </div>
 
         {/* OPTIONS */}
         <div style={optionsScreen} id='options-screen'>
-          Options
+          <div className='options-instructions-title shadowed-text'>Options</div>
+          <div id='options' className='shadowed-text'>
+            <div id='options-grid'>
+              <div className='option-label'>Sound FX</div><div onClick={this.handleToggleOption} id='sound-fx-toggle' className='option-toggle option-off'>OFF</div>
+              <div className='option-label'>Ambience</div><div onClick={this.handleToggleOption} id='ambience-toggle' className='option-toggle option-off'>OFF</div>
+              <div className='option-label'>Dark Mode</div><div onClick={this.handleToggleOption} id='dark-mode-toggle' className='option-toggle option-off'>OFF</div>
+            </div>
+          </div>
+          <button onClick={this.handleClickBack} className='back-button' id='options-back-button'>Back</button>
+
         </div>
 
         {/* DECK SELECT */}
         <div style={deckSelectScreen} id='deck-select-screen'>
+
           <div id='deck-select-title'>
             <div className='shadowed-text'>Create deck</div>
-            <div style={chooseStyle} className='smaller shadowed-text'>choose {cardsLeft} card{cardPlural}</div>
+            <div id='choose-text' style={chooseStyle} className='smaller shadowed-text'>choose {cardsLeft} card{cardPlural}</div>
           </div>
+
           <div id='deck-selection-area'>
             <div id='deck-selection-grid'>
               {this.state.cardSelection.map((card, i) =>
@@ -388,17 +476,20 @@ class App extends React.Component {
               )}
             </div>
           </div>
-          <div className='smaller shadowed-text'>YOUR DECK:</div>
+
           <div id='preview-deck-area'>
+            <div id='preview-deck-title' className='smaller shadowed-text'>YOUR DECK:</div>
             <div id='preview-deck-grid'>
               {this.state.userDeck.map((card, i) =>
                 <Card className='cock' key={card.id} id={card.id} onClickCard={this.handleClickCard} size={cardSize} value={card.value} type={card.type} />
               )}
             </div>
           </div>
+
           <div id='deck-select-footer'>
             <button className='disabled-button' onClick={this.handleClickPlay} id='play-button'>Ready!</button>
           </div>
+
         </div>
 
         {/* GAME BOARD */}
@@ -416,7 +507,7 @@ class App extends React.Component {
                 })}
               </div>
               <div className='total-display'>
-                <div className='total-outline'>
+                <div id='opponent-total-outline' className='total-outline'>
                   <div id='opponent-total'>{this.state.opponentTotal}</div>
                 </div>
               </div>
@@ -428,7 +519,7 @@ class App extends React.Component {
                 })}
               </div>
               <div className='total-display'>
-                <div className='total-outline'>
+                <div id='user-total-outline' className='total-outline'>
                   <div id='user-total'>{this.state.userTotal}</div>
                 </div>
               </div>
