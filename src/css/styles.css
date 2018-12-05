@@ -1,21 +1,33 @@
 /* GLOBAL */
 
 body {
+
+  --main-bg-color: rgb(107, 121, 138);
+  --main-text-color: rgb(255, 247, 213);
+  --option-on-color: rgb(113, 151, 113);
+  --option-off-color: rgb(151, 113, 113);
+  --trans-red-bg-color: rgba(255, 0, 0, 0.05);
+  --trans-blue-bg-color: rgba(0, 0, 255, 0.05);
+  --button-bg-color: #000000;
+  --button-text-color: #5CB3FF;
+  --red-bg-color: #560000;
+  --card-text-color: #FFFFFF;
+
   -webkit-user-select: none;  /* Chrome all / Safari all */
   -moz-user-select: none;     /* Firefox all */
   -ms-user-select: none;      /* IE 10+ */
   user-select: none;
   margin:0;
-  background: rgb(107, 121, 138);
-  color: rgb(255, 247, 213);
+  background: var(--main-bg-color);
+  color: var(--main-text-color);
   -webkit-tap-highlight-color: transparent;
   overflow-y: hidden;
 }
 button {
   outline: 0;
   font-family: 'Audiowide';
-  background-color: black;
-  color: #5CB3FF;
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
   border-radius: 0.25rem;
   cursor: pointer;
   border: solid #111;
@@ -33,61 +45,81 @@ button {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
   min-width: 300px;
   align-items: center;
-  padding-top: 20vh;
-  padding-bottom: 20vh;
-  flex-grow: 2;
+  padding-top: 10vh;
+  padding-bottom: 10vh;
+  flex-grow: 1;
 }
-#instructions-screen {
+.options-instructions-title {
+  font-family: 'Bungee';
+  font-size: 2rem;
+  line-height: 100%;
+}
+#instructions-screen, #options-screen {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: space-around;
   min-width: 300px;
   align-items: center;
-  padding-top: 20vh;
-  padding-bottom: 20vh;
-  flex-grow: 2;
+  flex-grow: 1;
 }
-#options-screen {
+#instructions {
+  font-family: 'Nova Square';
+  padding: 2rem;
+  padding-top: 0;
+  overflow: scroll;
+  height: 50vh;
+}
+#options {
+  font-family: 'Bungee';
+  padding: 2rem;
+}
+#options-grid {
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  min-width: 300px;
+  /* border: 1px solid black; */
+  width: 80vw;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  justify-items: stretch;
+  height: 40vh;
+}
+.option-label, .option-toggle {
+  display: inline-flex;
   align-items: center;
-  padding-top: 20vh;
-  padding-bottom: 20vh;
-  flex-grow: 2;
+  justify-content: center;
+}
+.option-toggle {
+  background-color: var(--option-on-color);
+  margin: 0.25rem;
+  transition: all 150ms ease;
+}
+.option-off {
+  background-color: var(--option-off-color);
 }
 #deck-select-screen {
-  font-size: 2rem;
-  font-family: 'Bungee';
-  box-sizing: border-box;
+  font-size: 1.5rem;
+  font-family: 'Nova Square';
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center;
-  min-width: 300px;
   flex-grow: 2;
+  justify-content: flex-start;
 }
 #deck-select-title {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  margin-top: 0.5rem;
-  line-height: 100%;
-  padding: 0.5rem;
-  background-color: rgba(255, 0, 0, 0.05);
+  margin-top: 1vh;
+  margin-bottom: 1vh;
 }
 #deck-select-footer {
-  height: 3rem;
-  width: 100%;
+  position: absolute;
+  bottom: 0px;
+  padding: 1vh;
 }
 .smaller {
-  font-size: 1rem;
+  font-size: 0.8rem;
 }
 #deck-select-title, #deck-select-footer {
   box-sizing: border-box;
@@ -98,48 +130,49 @@ button {
 }
 #deck-selection-area {
   display: inline-flex;
-  align-items: flex-start;
   justify-content: center;
-  flex-grow: 0;
-  padding: 0;
-  width: 100%;
-  background-color: rgba(255, 0, 0, 0.05);
-  padding-bottom: 2rem;
 }
 #deck-selection-grid {
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  grid-gap: 0.25rem;
+  grid-column-gap: 0.5rem;
   grid-row-gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+#deck-selection-grid > .card, #preview-deck-grid > .card {
+  margin: 0;
 }
 #preview-deck-area {
-  display: inline-flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-grow: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 2vh;
+}
+#preview-deck-title {
+  margin-bottom: 1.5vh;
 }
 #preview-deck-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  grid-gap: 0.5rem;
-}
-#preview-deck-grid > .card {
-  margin: 0.125rem;
+  grid-gap: 0.25rem;
 }
 .intro-button {
   width: 60%;
   font-size: 1.5rem;
   padding: 1rem;
+  min-width: 224px;
+  margin-bottom: 2rem;
 }
 #game-board {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  flex-grow: 1;
+  height: 100%;
 }
 #header {
   box-sizing: border-box;
@@ -147,11 +180,15 @@ button {
   letter-spacing: 0.05rem;
   width: 100%;
   height: 3rem;
-  background-color: #560000;
+  min-height: 3rem;
+  background-color: var(--red-bg-color);
   display: inline-flex;
   justify-content: space-around;
   align-items: center;
   font-size: 1.5rem;
+}
+#header-link {
+  cursor: pointer;
 }
 .shadowed-text {
   text-shadow:
@@ -163,7 +200,7 @@ button {
 #footer {
   width: 100%;
   height: 3rem;
-  background-color: #560000;
+  background-color: var(--red-bg-color);
   display: inline-flex;
   justify-content: space-evenly;
   align-items: center;
@@ -172,11 +209,15 @@ button {
   transition: all 300ms ease;
 }
 #play-button {
-  margin-bottom: 2rem;
   width: 50%;
   font-size: 1.5rem;
   padding: 0.5rem;
   transition: all 300ms ease;
+}
+.back-button {
+  width: 50%;
+  font-size: 1.5rem;
+  padding: 0.5rem;
 }
 .disabled-button {
   border-color: #555;
@@ -199,7 +240,7 @@ button {
 }
 .card {
   box-sizing: border-box;
-  color: white;
+  color: var(--card-text-color);
   background: #ccc;
   border: 1px solid black;
   border-radius: 7%;
@@ -273,10 +314,10 @@ button {
   z-index: 1;
 }
 #opponent-hand {
-  background-color: rgba(255, 0, 0, 0.05);
+  background-color: var(--trans-red-bg-color);
 }
 #player-hand {
-  background-color: rgba(0, 0, 255, 0.05);
+  background-color: var(--trans-blue-bg-color);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -296,19 +337,18 @@ button {
   align-items: center;
   justify-content: flex-start;
   justify-content: space-evenly;
-
   flex-grow: 2;
 }
 #opponent-area {
   border-top: 1px solid #555;
   border-bottom: 1px solid #555;
-  background-color: rgba(255, 0, 0, 0.05);
+  background-color: var(--trans-red-bg-color);
 
 }
 #user-area {
   border-top: 1px solid #555;
   border-bottom: 1px solid #555;
-  background-color: rgba(0, 0, 255, 0.05);
+  background-color: var(--trans-blue-bg-color);
 }
 .deal-grid {
   box-sizing: border-box;
