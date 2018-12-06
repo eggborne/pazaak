@@ -22,6 +22,8 @@ body {
   color: var(--main-text-color);
   -webkit-tap-highlight-color: transparent;
   overflow-y: hidden;
+  /* max-width: 800px; */
+  margin: 0 auto;
 }
 button {
   outline: 0;
@@ -40,6 +42,8 @@ button {
   height: 100vh;
   justify-content: space-between;
   min-width: 300px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 #intro-screen {
   box-sizing: border-box;
@@ -127,6 +131,7 @@ button {
   align-items: center;
   justify-content: center;
   width: 100%;
+  max-width: 800px;
 }
 #deck-selection-area {
   display: inline-flex;
@@ -220,10 +225,10 @@ button {
   padding: 0.5rem;
 }
 .disabled-button {
-  border-color: #555;
-  background-color: #333;
-  color: #222;
-  pointer-events: none;
+  border-color: #555 !important;
+  background-color: #333 !important;
+  color: #222 !important;
+  pointer-events: none !important;
 }
 .move-button {
   width: 40%;
@@ -242,6 +247,7 @@ button {
   position: relative;
   font-family: 'Nova Square';
   cursor: pointer;
+  transition: all 300ms ease;
 }
 .inner-band {
   pointer-events: none;
@@ -311,7 +317,7 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 1rem;
+  padding-left: 2rem;
   padding-right: 1rem;
 }
 #opponent-hand {
@@ -339,8 +345,8 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 1%;
-  padding-right: 2%;
+  padding-left: 3%;
+  padding-right: 3%;
   flex-grow: 2;
 }
 #opponent-area {
@@ -396,7 +402,18 @@ button {
   transition: all 500ms ease;
 }
 .turn-lighted {
-  background-color: red;
+  animation: pulse 800ms infinite;
+}
+@keyframes pulse {
+  0% {
+    background-color: rgb(124, 0, 0);
+  }
+  50% {
+    background-color: red;
+  }
+  100% {
+    background-color: rgb(124, 0, 0);
+  }
 }
 .win-symbol-area {
   display: inline-flex;
@@ -425,4 +442,8 @@ button {
 }
 .win-symbol-lighted {
   background-color: orange;
+}
+.ninth-card {
+  position: absolute;
+  z-index: 12;
 }
