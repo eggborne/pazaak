@@ -4,6 +4,7 @@ import Footer from './Footer';
 import Header from './Header';
 import Card from './Card';
 import CardBack from './CardBack';
+import ResultModal from './ResultModal';
 import createGame from '../scripts/init';
 let Util = require('../scripts/util');
 
@@ -69,9 +70,13 @@ class App extends React.Component {
       opponentTotal: 0,
       turn: 'user',
       userWins: 0,
-      opponentWins: 0
+      opponentWins: 0,
+      resultMessage: {
+        title: 'Winner',
+        winner: '',
+        buttonText: 'Next Round'
+      }
     };
-
     let deck = [];
     for (let i = 1; i < 41; i++) {
       deck[i - 1] = {};
@@ -111,6 +116,11 @@ class App extends React.Component {
     this.getCardIndexById = this.getCardIndexById.bind(this);
     this.swapTurn = this.swapTurn.bind(this);
     this.makeOpponentMove = this.makeOpponentMove.bind(this);
+    this.callResultModal = this.callResultModal.bind(this);
+    this.dismissResultModal = this.dismissResultModal.bind(this);
+    this.handleClickOKButton = this.handleClickOKButton.bind(this);
+    this.resetBoard = this.resetBoard.bind(this);
+
   }
 
   componentDidMount() {
@@ -186,17 +196,9 @@ class App extends React.Component {
     newGridCards.push(newCard);
     let newTotal = 0;
     newTotal += this.state[`${player}Total`] + newCard.value;
-    if (newTotal === 20) {
-      document.getElementById(`${player}-total`).style.color = 'green';
-      document.getElementById(`${player}-total-outline`).style.borderColor = '#933500';
-
-    } else if (newTotal > 20) {
-      document.getElementById(`${player}-total`).style.color = 'red';
-      document.getElementById(`${player}-total-outline`).style.borderColor = 'red';
-    }
+    this.changeCardTotal(player, newTotal);
     this.setState({
       [`${player}Grid`]: newGridCards,
-      [`${player}Total`]: newTotal
     });
   }
   handleToggleOption(event) {
@@ -297,10 +299,15 @@ class App extends React.Component {
     let clicked = event.target.id;
     Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
     Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
-    let newTurn = this.swapTurn();
-    this.makeOpponentMove(1600);
-    if (this.state[`${newTurn}Grid`].length < 9) {
-      this.dealToPlayerGrid(newTurn);
+
+    if (this.state.userTotal > 20) {
+      this.declareWinner('opponent', 300);
+    } else {
+      let newTurn = this.swapTurn();
+      this.makeOpponentMove(800);
+      if (this.state[`${newTurn}Grid`].length < 9) {
+        this.dealToPlayerGrid(newTurn);
+      }
     }
   }
   handleClickStand(event) {
@@ -309,9 +316,9 @@ class App extends React.Component {
     Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
     Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
 
-    if (this.state.opponentTotal < 20 && this.state.opponentGrid.length < 9) {
-      this.dealToPlayerGrid('opponent');
-    }
+    // if (this.state.opponentTotal < 20 && this.state.opponentGrid.length < 9) {
+    //   this.dealToPlayerGrid('opponent');
+    // }
   }
   handleClickCard(event, value, type) {
     event.preventDefault();
@@ -356,8 +363,14 @@ class App extends React.Component {
         this.addCardtoGrid('user', value, type);
         this.changeCardTotal('user', this.state.userTotal + value);
       }
+      Util.flash('end-turn-button', 'color', this.buttonTextColor, '#cc0');
+      Util.flash('end-turn-button', 'background-color', this.buttonBgColor, '#111');
+      let newTurn = this.swapTurn();
+      this.makeOpponentMove(800);
+      if (this.state[`${newTurn}Grid`].length < 9) {
+        this.dealToPlayerGrid(newTurn);
+      }
     }
-
   }
   removeCardFromHand(player, cardId) {
     let handCopy = this.state[`${player}Hand`].slice();
@@ -377,14 +390,12 @@ class App extends React.Component {
   }
   changeCardTotal(player, newTotal) {
     if (newTotal === 20) {
-      document.getElementById('user-total').style.color = 'green';
-      document.getElementById('user-total').style.borderColor = 'red';
+      document.getElementById(`${player}-total`).classList.add('green-total');
     } else if (newTotal > 20) {
-      document.getElementById('user-total').style.color = 'red';
-      document.getElementById('user-total').style.borderColor = 'red';
+      document.getElementById(`${player}-total`).classList.add('red-total');
     } else {
-      document.getElementById('user-total').style.color = 'white';
-      document.getElementById('user-total').style.borderColor = '#933500';
+      document.getElementById(`${player}-total`).classList.remove('red-total');
+      document.getElementById(`${player}-total`).classList.remove('green-total');
     }
     this.setState({
       [`${player}Total`]: newTotal
@@ -398,6 +409,17 @@ class App extends React.Component {
       }
     });
     return match;
+  }
+
+  declareWinner(winner, delay) {
+    this.setState({
+      turn: null,
+      [`${winner}Wins`]: this.state[`${winner}Wins`] + 1
+    });
+    setTimeout(() => {
+      document.getElementById('game-board').style.opacity = 0.3;
+      this.callResultModal('WINNER!', winner, 'Next Round');
+    }, delay);
   }
 
   swapTurn() {
@@ -423,23 +445,99 @@ class App extends React.Component {
 
   makeOpponentMove(delay) {
     setTimeout(() => {
-
+      console.warn('opponent moving');
       // play a card?
 
-      // this.removeCardFromHand('opponent', event.target.id);
-      // this.addCardtoGrid('opponent', value, type);
-      // this.changeCardTotal('opponent', this.state.userTotal + value);
+      if (this.state.opponentTotal < 20) {
+        for (let i = 0; i < this.state.opponentHand.length; i++) {
+          let card = this.state.opponentHand[i];
+          let potentialScore = this.state.opponentTotal + card.value;
+          if (potentialScore >= 17 && potentialScore <= 20) {
+            let cardToPlay = card;
+            this.removeCardFromHand('opponent', cardToPlay.id);
+            this.addCardtoGrid('opponent', cardToPlay.value, cardToPlay.type);
+            this.changeCardTotal('opponent', this.state.opponentTotal + cardToPlay.value);
+            console.warn('OPPONENT STANDS');
+            break;
+          }
+        }
 
-
-      let newTurn = this.swapTurn();
-      if (this.state[`${newTurn}Grid`].length < 9) {
-        this.dealToPlayerGrid(newTurn);
+      } else {
+        for (let i = 0; i < this.state.opponentHand.length; i++) {
+          let card = this.state.opponentHand[i];
+          let potentialScore = this.state.opponentTotal + card.value;
+          if (potentialScore <= 20) {
+            let cardToPlay = card;
+            this.removeCardFromHand('opponent', cardToPlay.id);
+            this.addCardtoGrid('opponent', cardToPlay.value, cardToPlay.type);
+            this.changeCardTotal('opponent', this.state.opponentTotal + cardToPlay.value);
+            if (potentialScore >= 17) {
+              console.warn('OPPONENT STANDS after MINUS');
+            }
+            break;
+          }
+        }
+      }
+      if (this.state.opponentTotal > 20) {
+        this.declareWinner('user', 300);
+      } else {
+        let newTurn = this.swapTurn();
+        if (this.state[`${newTurn}Grid`].length < 9) {
+          this.dealToPlayerGrid(newTurn);
+        }
       }
     }, delay);
   }
 
   playOpponentCard() {
 
+  }
+
+  callResultModal(title, winner, buttonText) {
+    let modal = document.getElementById('result-modal');
+    this.setState({
+      resultMessage: {
+        title: title,
+        winner: winner,
+        buttonText: buttonText
+      }
+    });
+    modal.classList.add('onscreen');
+  }
+  dismissResultModal() {
+    let modal = document.getElementById('result-modal');
+    modal.classList.remove('onscreen');
+  }
+
+  handleClickOKButton() {
+    event.preventDefault();
+    let clicked = event.target.id;
+    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
+    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
+
+    document.getElementById('game-board').style.opacity = 1;
+
+    this.resetBoard('user');
+
+    setTimeout(() => {
+      this.dismissResultModal();
+      this.dealToPlayerGrid(this.state.turn);
+    }, 150);
+  }
+
+  resetBoard(newTurn) {
+    document.getElementById('user-total').classList.remove('red-total');
+    document.getElementById('user-total').classList.remove('green-total');
+    document.getElementById('opponent-total').classList.remove('red-total');
+    document.getElementById('opponent-total').classList.remove('green-total');
+    this.getPlayerHands();
+    this.setState({
+      userGrid: [],
+      opponentGrid: [],
+      userTotal: 0,
+      opponentTotal: 0,
+      turn: newTurn
+    });
   }
 
   render() {
@@ -479,7 +577,7 @@ class App extends React.Component {
     let opponentTurn = '';
     if (this.state.turn === 'user') {
       userTurn = 'turn-lighted';
-    } else {
+    } else if (this.state.turn === 'opponent') {
       opponentTurn = 'turn-lighted';
     }
     let userWins = ['', '', ''];
@@ -595,7 +693,7 @@ class App extends React.Component {
                   }
                 })}
                 <div className='ninth-card' id='opponent-ninth-card'>
-                  {ninthCards.opponent.map((card, i) => 
+                  {ninthCards.opponent.map((card, i) =>
                     <Card key={i} size={cardSize} value={card.value} type={card.type} />
                   )}
                 </div>
@@ -622,7 +720,7 @@ class App extends React.Component {
                   }
                 })}
                 <div className='ninth-card' id='user-ninth-card'>
-                  {ninthCards.user.map((card, i) => 
+                  {ninthCards.user.map((card, i) =>
                     <Card key={i} size={cardSize} value={card.value} type={card.type} />
                   )}
                 </div>
@@ -643,7 +741,7 @@ class App extends React.Component {
           </div>
           <div id='user-hand' className='player-hand-area'>
             <div id='user-cards' className='player-cards'>
-              {this.state.userHand.map((card, i) => 
+              {this.state.userHand.map((card, i) =>
                 <Card key={i} id={card.id} size={cardSize} value={card.value} type={card.type}
                   onClickCard={this.handleClickCard} />
               )}
@@ -651,6 +749,11 @@ class App extends React.Component {
             <div className={`turn-indicator ${userTurn}`}></div>
           </div>
         </div>
+
+        <ResultModal onClickOKButton={this.handleClickOKButton}
+          titleText={this.state.resultMessage.title}
+          winner={this.state.resultMessage.winner}
+          buttonText={this.state.resultMessage.buttonText} />
 
         <Footer display={footerOn} onClickEndTurn={this.handleClickEndTurn} onClickStand={this.handleClickStand} />
       </div>
