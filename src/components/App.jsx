@@ -16,7 +16,7 @@ let cardSize = {};
 let mediumCardSize = {};
 let miniCardSize = {};
 
-let cardHeight = (window.innerHeight / 6) * 0.8;
+let cardHeight = (window.innerHeight / 6) * 0.825;
 
 let instructionsText = `${''}And what of the Rebellion? If the Rebels have obtained a complete technical readout of this station, it is possible, however unlikely, that they might find a weakness and exploit it. The plans you refer to will soon be back in our hands. Any attack made by the Rebels against this station would be a useless gesture, no matter what technical data they've obtained. This station is now the ultimate power in the universe. I suggest we use it! Are they away? They have just made the jump into hyperspace. You're sure the homing beacon is secure aboard their ship? I'm taking an awful risk, Vader. This had better work. Aren't you a little short to be a stormtrooper? What? Oh...the uniform. I'm Luke Skywalker. I'm here to rescue you. You're who? I'm here to rescue you. I've got your R2 unit. I'm here with Ben Kenobi. Ben Kenobi is here! Where is he? Come on! The ship's all yours. If the scanners pick up anything, report it immediately. All right, let's go. Hey down there, could you give us a hand with this? TX-four-one-two. Why aren't you at your post? TX-four-one-two, do you copy? Take over. We've got a bad transmitter. I'll see what I can do. You know, between his howling and your blasting everything in sight, it's a wonder the whole station doesn't know we're here. Bring them on! I prefer a straight fight to all this sneaking around. We found the computer outlet, sir. Plug in. He should be able to interpret the entire Imperial computer network. That malfunctioning little twerp. This is all his fault! He tricked me into going this way, but he'll do no better. Wait, what's that? A transport! I'm saved! Over here! Help! Please, help! Artoo-Detoo! It's you! It's you!`;
 
@@ -51,15 +51,15 @@ class App extends React.Component {
       userDeck: [],
       opponentDeck: [
         { id: 1, value: 1, type: 'plus' },
-        { id: 2, value: 3, type: 'plus' },
+        { id: 2, value: 2, type: 'plus' },
         { id: 3, value: 3, type: 'plus' },
-        { id: 4, value: 4, type: 'plus' },
+        { id: 4, value: 3, type: 'plus' },
+        { id: 5, value: 4, type: 'plus' },
+        { id: 5, value: 5, type: 'plus' },
         { id: 5, value: 5, type: 'plus' },
         { id: 6, value: -1, type: 'minus' },
         { id: 7, value: -2, type: 'minus' },
-        { id: 8, value: -4, type: 'minus' },
         { id: 9, value: -4, type: 'minus' },
-        { id: 10, value: -6, type: 'minus' },
       ],
       idCount: 11,
       userHand: [],
@@ -68,7 +68,9 @@ class App extends React.Component {
       opponentGrid: [],
       userTotal: 0,
       opponentTotal: 0,
-      turn: 'user'
+      turn: 'user',
+      userWins: 0,
+      opponentWins: 0
     };
 
     let deck = [];
@@ -111,8 +113,12 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    document.getElementById('container').style.height = window.innerHeight + 'px';
-    document.getElementById('player-hand').style.height = (cardSize.height * 1.1) + 'px';
+    document.getElementById('container').style.height = `${window.innerHeight}px`;
+    document.getElementById('user-hand').style.height = `${cardSize.height * 1.1}px`;
+    document.getElementById('opponent-hand').style.height = `${miniCardSize.height * 1.1}px`;
+    Array.from(document.getElementsByClassName('turn-indicator')).map((el) => {
+      el.style.height = el.style.width = `${cardSize.height / 2.75}px`;
+    });
     Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
       el.style.width = `${(cardSize.width * 4) + (cardSize.height * 0.42)}px`;
       el.style.height = `${cardSize.height * 2.2}px`;
@@ -244,8 +250,6 @@ class App extends React.Component {
     Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
 
     let hands = this.getPlayerHands();
-    // this.state.userHand = hands[0];
-    // this.state.opponentHand = hands[1];
 
     document.getElementById('deck-select-footer').style.transform = 'transform: translateY(100%)';
 
@@ -426,6 +430,28 @@ class App extends React.Component {
       chooseStyle.color = 'green';
       document.getElementById('choose-text').innerHTML = 'Ready to play!';
     }
+    let userTurn = '';
+    let opponentTurn = '';
+    if (this.state.turn === 'user') {
+      userTurn = 'turn-lighted';
+    } else {
+      opponentTurn = 'turn-lighted';
+    }
+    let userWins = ['', '', ''];
+    let opponentWins = ['', '', ''];
+    if (this.state.userWins === 1) {
+      userWins[0] = 'win-symbol-lighted';
+    }
+    if (this.state.userWins === 2) {
+      userWins[0] = userWins[1] = 'win-symbol-lighted';
+    }
+    if (this.state.opponentWins === 1) {
+      opponentWins[0] = 'win-symbol-lighted';
+    }
+    if (this.state.opponentWins === 2) {
+      opponentWins[0] = opponentWins[1] = 'win-symbol-lighted';
+    }
+
     return (
       <div id='container'>
         <Header onClickHeader={this.handleClickHeader} />
@@ -494,10 +520,13 @@ class App extends React.Component {
 
         {/* GAME BOARD */}
         <div style={gameStarted} id='game-board'>
-          <div id='opponent-hand' className='hand'>
-            {this.state.opponentHand.map((card, i) =>
-              <CardBack key={i} size={miniCardSize} />
-            )}
+          <div id='opponent-hand' className='player-hand-area'>
+            <div id='opponent-cards' className='player-cards'>
+              {this.state.opponentHand.map((card, i) =>
+                <CardBack key={i} size={miniCardSize} />
+              )}
+            </div>
+            <div className={`turn-indicator ${opponentTurn}`}></div>
           </div>
           <div id='grids'>
             <div id='opponent-area' className='player-area'>
@@ -506,9 +535,16 @@ class App extends React.Component {
                   return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
                 })}
               </div>
-              <div className='total-display'>
-                <div id='opponent-total-outline' className='total-outline'>
-                  <div id='opponent-total'>{this.state.opponentTotal}</div>
+              <div className='stats-area'>
+                <div className='total-display'>
+                  <div id='opponent-total-outline' className='total-outline'>
+                    <div id='opponent-total'>{this.state.opponentTotal}</div>
+                  </div>
+                </div>
+                <div className='win-symbol-area'>
+                  <div className={`win-symbol-bg ${opponentWins[0]}`}><div className={`win-symbol ${opponentWins[0]}`}></div></div>
+                  <div className={`win-symbol-bg ${opponentWins[1]}`}><div className={`win-symbol ${opponentWins[1]}`}></div></div>
+                  <div className={`win-symbol-bg ${opponentWins[2]}`}><div className={`win-symbol ${opponentWins[2]}`}></div></div>
                 </div>
               </div>
             </div>
@@ -518,18 +554,28 @@ class App extends React.Component {
                   return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
                 })}
               </div>
-              <div className='total-display'>
-                <div id='user-total-outline' className='total-outline'>
-                  <div id='user-total'>{this.state.userTotal}</div>
+              <div className='stats-area'>
+                <div className='total-display'>
+                  <div id='user-total-outline' className='total-outline'>
+                    <div id='user-total'>{this.state.userTotal}</div>
+                  </div>
+                </div>
+                <div className='win-symbol-area'>
+                  <div className={`win-symbol-bg ${userWins[0]}`}><div className={`win-symbol ${userWins[0]}`}></div></div>
+                  <div className={`win-symbol-bg ${userWins[1]}`}><div className={`win-symbol ${userWins[1]}`}></div></div>
+                  <div className={`win-symbol-bg ${userWins[2]}`}><div className={`win-symbol ${userWins[2]}`}></div></div>
                 </div>
               </div>
             </div>
           </div>
-          <div id='player-hand' className='hand'>
-            {this.state.userHand.map((card, i) => {
-              return <Card key={i} id={card.id} size={cardSize} value={card.value} type={card.type}
-                onClickCard={this.handleClickCard} />;
-            })}
+          <div id='user-hand' className='player-hand-area'>
+            <div id='user-cards' className='player-cards'>
+              {this.state.userHand.map((card, i) => {
+                return <Card key={i} id={card.id} size={cardSize} value={card.value} type={card.type}
+                  onClickCard={this.handleClickCard} />;
+              })}
+            </div>
+            <div className={`turn-indicator ${userTurn}`}></div>
           </div>
         </div>
 
