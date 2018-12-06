@@ -19,7 +19,6 @@ let miniCardSize = {};
 let cardHeight = (window.innerHeight / 6) * 0.825;
 
 let instructionsText = `${''}And what of the Rebellion? If the Rebels have obtained a complete technical readout of this station, it is possible, however unlikely, that they might find a weakness and exploit it. The plans you refer to will soon be back in our hands. Any attack made by the Rebels against this station would be a useless gesture, no matter what technical data they've obtained. This station is now the ultimate power in the universe. I suggest we use it! Are they away? They have just made the jump into hyperspace. You're sure the homing beacon is secure aboard their ship? I'm taking an awful risk, Vader. This had better work. Aren't you a little short to be a stormtrooper? What? Oh...the uniform. I'm Luke Skywalker. I'm here to rescue you. You're who? I'm here to rescue you. I've got your R2 unit. I'm here with Ben Kenobi. Ben Kenobi is here! Where is he? Come on! The ship's all yours. If the scanners pick up anything, report it immediately. All right, let's go. Hey down there, could you give us a hand with this? TX-four-one-two. Why aren't you at your post? TX-four-one-two, do you copy? Take over. We've got a bad transmitter. I'll see what I can do. You know, between his howling and your blasting everything in sight, it's a wonder the whole station doesn't know we're here. Bring them on! I prefer a straight fight to all this sneaking around. We found the computer outlet, sir. Plug in. He should be able to interpret the entire Imperial computer network. That malfunctioning little twerp. This is all his fault! He tricked me into going this way, but he'll do no better. Wait, what's that? A transport! I'm saved! Over here! Help! Please, help! Artoo-Detoo! It's you! It's you!`;
-
 cardSize.width = (cardHeight / 1.66);
 cardSize.height = cardHeight;
 mediumCardSize.width = cardSize.width * 0.85;
@@ -110,6 +109,8 @@ class App extends React.Component {
     this.addCardtoGrid = this.addCardtoGrid.bind(this);
     this.changeCardTotal = this.changeCardTotal.bind(this);
     this.getCardIndexById = this.getCardIndexById.bind(this);
+    this.swapTurn = this.swapTurn.bind(this);
+    this.makeOpponentMove = this.makeOpponentMove.bind(this);
   }
 
   componentDidMount() {
@@ -248,12 +249,10 @@ class App extends React.Component {
     let clicked = event.target.id;
     Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
     Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
-
     let hands = this.getPlayerHands();
-
     document.getElementById('deck-select-footer').style.transform = 'transform: translateY(100%)';
-
     setTimeout(() => {
+      this.dealToPlayerGrid(this.state.turn);
       this.setState({
         phase: 'gameStarted'
       });
@@ -271,15 +270,16 @@ class App extends React.Component {
     }, 150);
   }
   handleClickHow(event) {
-    event.preventDefault();
-    let clicked = event.target.id;
-    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
-    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
-    setTimeout(() => {
-      this.setState({
-        phase: 'showingInstructions'
-      });
-    }, 150);
+    window.open('https://starwars.wikia.com/wiki/Pazaak/Legends', '_blank');
+    // event.preventDefault();
+    // let clicked = event.target.id;
+    // Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
+    // Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
+    // setTimeout(() => {
+    //   this.setState({
+    //     phase: 'showingInstructions'
+    //   });
+    // }, 150);
   }
   handleClickOptions(event) {
     event.preventDefault();
@@ -297,8 +297,10 @@ class App extends React.Component {
     let clicked = event.target.id;
     Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
     Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
-    if (this.state.userTotal < 20 && this.state.userGrid.length < 9) {
-      this.dealToPlayerGrid('user');
+    let newTurn = this.swapTurn();
+    this.makeOpponentMove(1600);
+    if (this.state[`${newTurn}Grid`].length < 9) {
+      this.dealToPlayerGrid(newTurn);
     }
   }
   handleClickStand(event) {
@@ -306,6 +308,7 @@ class App extends React.Component {
     let clicked = event.target.id;
     Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
     Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
+
     if (this.state.opponentTotal < 20 && this.state.opponentGrid.length < 9) {
       this.dealToPlayerGrid('opponent');
     }
@@ -397,6 +400,48 @@ class App extends React.Component {
     return match;
   }
 
+  swapTurn() {
+    let newTurn;
+    if (this.state.turn === 'user') {
+      newTurn = 'opponent';
+      setTimeout(() => {
+        Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
+          el.classList.add('disabled-button');
+        });
+      }, 150);
+    } else {
+      newTurn = 'user';
+      Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
+        el.classList.remove('disabled-button');
+      });
+    }
+    this.setState({
+      turn: newTurn
+    });
+    return newTurn;
+  }
+
+  makeOpponentMove(delay) {
+    setTimeout(() => {
+
+      // play a card?
+
+      // this.removeCardFromHand('opponent', event.target.id);
+      // this.addCardtoGrid('opponent', value, type);
+      // this.changeCardTotal('opponent', this.state.userTotal + value);
+
+
+      let newTurn = this.swapTurn();
+      if (this.state[`${newTurn}Grid`].length < 9) {
+        this.dealToPlayerGrid(newTurn);
+      }
+    }, delay);
+  }
+
+  playOpponentCard() {
+
+  }
+
   render() {
     let footerOn = { position: 'absolute', bottom: '-3rem' };
     let gameStarted = { display: 'none' };
@@ -450,6 +495,19 @@ class App extends React.Component {
     }
     if (this.state.opponentWins === 2) {
       opponentWins[0] = opponentWins[1] = 'win-symbol-lighted';
+    }
+
+    let ninthCards = {
+      user: [],
+      opponent: []
+    };
+    if (this.state.userGrid.length === 9) {
+      let ninthCard = this.state.userGrid[8];
+      ninthCards.user.push(ninthCard);
+    }
+    if (this.state.opponentGrid.length === 9) {
+      let ninthCard = this.state.opponentGrid[8];
+      ninthCards.opponent.push(ninthCard);
     }
 
     return (
@@ -532,9 +590,17 @@ class App extends React.Component {
             <div id='opponent-area' className='player-area'>
               <div id='opponent-grid' className='deal-grid'>
                 {this.state.opponentGrid.map((card, i) => {
-                  return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
+                  if (i < 8) {
+                    return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
+                  }
                 })}
+                <div className='ninth-card' id='opponent-ninth-card'>
+                  {ninthCards.opponent.map((card, i) => 
+                    <Card key={i} size={cardSize} value={card.value} type={card.type} />
+                  )}
+                </div>
               </div>
+
               <div className='stats-area'>
                 <div className='total-display'>
                   <div id='opponent-total-outline' className='total-outline'>
@@ -551,8 +617,15 @@ class App extends React.Component {
             <div id='user-area' className='player-area'>
               <div id='user-grid' className='deal-grid'>
                 {this.state.userGrid.map((card, i) => {
-                  return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
+                  if (i < 8) {
+                    return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
+                  }
                 })}
+                <div className='ninth-card' id='user-ninth-card'>
+                  {ninthCards.user.map((card, i) => 
+                    <Card key={i} size={cardSize} value={card.value} type={card.type} />
+                  )}
+                </div>
               </div>
               <div className='stats-area'>
                 <div className='total-display'>
@@ -570,10 +643,10 @@ class App extends React.Component {
           </div>
           <div id='user-hand' className='player-hand-area'>
             <div id='user-cards' className='player-cards'>
-              {this.state.userHand.map((card, i) => {
-                return <Card key={i} id={card.id} size={cardSize} value={card.value} type={card.type}
-                  onClickCard={this.handleClickCard} />;
-              })}
+              {this.state.userHand.map((card, i) => 
+                <Card key={i} id={card.id} size={cardSize} value={card.value} type={card.type}
+                  onClickCard={this.handleClickCard} />
+              )}
             </div>
             <div className={`turn-indicator ${userTurn}`}></div>
           </div>
