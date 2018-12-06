@@ -1,5 +1,6 @@
 export function flash(elementId, property, origColor, flashColor) {
   let el = document.getElementById(elementId);
+  el.style.pointerEvents = 'none';
   el.style[property] = flashColor;
   setTimeout(() => {
     el.style[property] = origColor;
@@ -7,6 +8,7 @@ export function flash(elementId, property, origColor, flashColor) {
       el.style[property] = flashColor;
       setTimeout(() => {
         el.style[property] = origColor;
+        el.style.pointerEvents = 'all';
       }, 50);
     }, 50);
   }, 50);
