@@ -70,7 +70,7 @@ module.exports = {
   },
   output: {
     path: resolve(__dirname, 'dist'),
-    publicPath: 'https://www.eggborne.com/pazaak/dist/',
+    publicPath: 'https://pazaak.online/dist/',
     filename: 'app.bundle.js'
   }
 };
