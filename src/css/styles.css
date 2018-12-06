@@ -230,14 +230,6 @@ button {
   font-size: 1.2rem;
   padding: 0.35rem;
 }
-.hand {
-  box-sizing: border-box;
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem;
-}
 .card {
   box-sizing: border-box;
   color: var(--card-text-color);
@@ -313,16 +305,27 @@ button {
   justify-content: center;
   z-index: 1;
 }
+.player-hand-area {
+  box-sizing: border-box;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
 #opponent-hand {
   background-color: var(--trans-red-bg-color);
 }
-#player-hand {
+#user-hand {
   background-color: var(--trans-blue-bg-color);
+}
+.player-cards {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
-#player-hand>.card, #opponent-hand>.card {
+#user-hand>.card, #opponent-hand>.card {
   margin-top: 0;
   margin-bottom: 0;
 }
@@ -335,8 +338,9 @@ button {
 .player-area {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
-  justify-content: space-evenly;
+  justify-content: space-between;
+  padding-left: 1%;
+  padding-right: 2%;
   flex-grow: 2;
 }
 #opponent-area {
@@ -357,23 +361,68 @@ button {
   flex-wrap: wrap;
   justify-content: flex-start;
 }
+.stats-area {
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.5rem;
+}
 .total-display {
   font-family: 'Nova Square';
-  width: 2rem;
+  width: 2.5rem;
   font-size: 1rem;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   background-color: black;
-  padding: 0.5rem 1rem 0.5rem 1rem;
-  /* margin-left: 1rem; */
-  margin-top: 1rem;
-  align-self: start;
-}
-.total-outline {
-  border-radius: 0.25rem;
-  background-color: transparent;
-  border: 2px solid #933500;
-  padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+  padding: 0.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.total-outline {
+  width: 100%;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  border: 2px solid #933500;
+  padding: 0.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.turn-indicator {
+  border-radius: 50%;
+  background-color: gray;
+  border: 1px solid black;
+  transition: all 500ms ease;
+}
+.turn-lighted {
+  background-color: red;
+}
+.win-symbol-area {
+  display: inline-flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+.win-symbol-bg {
+  border-radius: 50%;
+  background-color: rgb(163, 163, 163);
+  width: 1rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid black;
+}
+.win-symbol {
+  box-sizing: border-box;
+  border-radius: 50%;
+  background-color: rgb(163, 163, 163);
+  border: 0.1rem solid #222;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+.win-symbol-lighted {
+  background-color: orange;
 }
