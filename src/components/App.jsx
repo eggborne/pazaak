@@ -1,25 +1,18 @@
-import style from '../css/styles.css';
 import React from 'react';
 import Footer from './Footer';
 import Header from './Header';
-import Card from './Card';
-import CardBack from './CardBack';
+import IntroScreen from './IntroScreen';
+import InstructionsScreen from './InstructionsScreen';
+import OptionsScreen from './OptionsScreen';
+import DeckSelectionScreen from './DeckSelectionScreen';
+import GameBoard from './GameBoard';
 import ResultModal from './ResultModal';
-import createGame from '../scripts/init';
 let Util = require('../scripts/util');
-
-let shorterDimension;
-window.innerWidth < window.innerHeight
-  ? shorterDimension = window.innerWidth
-  : shorterDimension = window.innerHeight;
 
 let cardSize = {};
 let mediumCardSize = {};
 let miniCardSize = {};
-
 let cardHeight = (window.innerHeight / 6) * 0.825;
-
-let instructionsText = `${''}And what of the Rebellion? If the Rebels have obtained a complete technical readout of this station, it is possible, however unlikely, that they might find a weakness and exploit it. The plans you refer to will soon be back in our hands. Any attack made by the Rebels against this station would be a useless gesture, no matter what technical data they've obtained. This station is now the ultimate power in the universe. I suggest we use it! Are they away? They have just made the jump into hyperspace. You're sure the homing beacon is secure aboard their ship? I'm taking an awful risk, Vader. This had better work. Aren't you a little short to be a stormtrooper? What? Oh...the uniform. I'm Luke Skywalker. I'm here to rescue you. You're who? I'm here to rescue you. I've got your R2 unit. I'm here with Ben Kenobi. Ben Kenobi is here! Where is he? Come on! The ship's all yours. If the scanners pick up anything, report it immediately. All right, let's go. Hey down there, could you give us a hand with this? TX-four-one-two. Why aren't you at your post? TX-four-one-two, do you copy? Take over. We've got a bad transmitter. I'll see what I can do. You know, between his howling and your blasting everything in sight, it's a wonder the whole station doesn't know we're here. Bring them on! I prefer a straight fight to all this sneaking around. We found the computer outlet, sir. Plug in. He should be able to interpret the entire Imperial computer network. That malfunctioning little twerp. This is all his fault! He tricked me into going this way, but he'll do no better. Wait, what's that? A transport! I'm saved! Over here! Help! Please, help! Artoo-Detoo! It's you! It's you!`;
 cardSize.width = (cardHeight / 1.66);
 cardSize.height = cardHeight;
 mediumCardSize.width = cardSize.width * 0.85;
@@ -27,58 +20,79 @@ mediumCardSize.height = cardSize.height * 0.85;
 miniCardSize.width = cardSize.width * 0.75;
 miniCardSize.height = cardSize.height * 0.75;
 
-
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       phase: 'splashScreen',
+      menuShowing: false,
       deck: [],
-      cardSelection: [
-        { id: 11111, value: 1, type: 'plus' },
-        { id: 22222, value: 2, type: 'plus' },
-        { id: 33333, value: 3, type: 'plus' },
-        { id: 44444, value: 4, type: 'plus' },
-        { id: 55555, value: 5, type: 'plus' },
-        { id: 66666, value: 6, type: 'plus' },
-        { id: 77777, value: -1, type: 'minus' },
-        { id: 88888, value: -2, type: 'minus' },
-        { id: 99999, value: -3, type: 'minus' },
-        { id: 101010, value: -4, type: 'minus' },
-        { id: 111111, value: -5, type: 'minus' },
-        { id: 121212, value: -6, type: 'minus' },
-      ],
+      cardSelection: [],
+      idCount: 0,
       userDeck: [],
-      opponentDeck: [
-        { id: 1, value: 1, type: 'plus' },
-        { id: 2, value: 2, type: 'plus' },
-        { id: 3, value: 3, type: 'plus' },
-        { id: 4, value: 3, type: 'plus' },
-        { id: 5, value: 4, type: 'plus' },
-        { id: 5, value: 5, type: 'plus' },
-        { id: 5, value: 5, type: 'plus' },
-        { id: 6, value: -1, type: 'minus' },
-        { id: 7, value: -2, type: 'minus' },
-        { id: 9, value: -4, type: 'minus' },
-      ],
-      idCount: 11,
+      opponentDeck: [],
+      // opponentDeck: [
+      //   { id: 1, value: 1, type: 'plus' },
+      //   { id: 2, value: 2, type: 'plus' },
+      //   { id: 3, value: 3, type: 'plus' },
+      //   { id: 4, value: 4, type: 'plus' },
+      //   { id: 5, value: 5, type: 'plus' },
+      //   { id: 5, value: -6, type: 'minus' },
+      //   { id: 5, value: -5, type: 'minus' },
+      //   { id: 6, value: -1, type: 'minus' },
+      //   { id: 7, value: -2, type: 'minus' },
+      //   { id: 9, value: -4, type: 'minus' },
+      // ],
       userHand: [],
       opponentHand: [],
       userGrid: [],
       opponentGrid: [],
       userTotal: 0,
       opponentTotal: 0,
-      turn: 'user',
       userWins: 0,
       opponentWins: 0,
+      turn: 'user',
+      userStatus: {
+        deck: { user: [], opponent: [] },
+        hand: { user: [], opponent: [] },
+        grid: { user: [], opponent: [] },
+        total: { user: [], opponent: [] },
+        wins: { user: [], opponent: [] },
+      },
+      turnStatus: {
+        user: { playedCards: 0, standing: false },
+        opponent: { playedCards: 0, standing: false }
+      },
       resultMessage: {
         title: 'Winner',
         winner: '',
         buttonText: 'Next Round'
+      },
+      options: {
+        sound: false,
+        ambience: false,
+        darkTheme: false,
+        turnInterval: 300,
+        flashInterval: 180,
+        opponentMoveInterval: 1000,
       }
     };
+
+    // make the selection deck (12 dummy cards 1-6, plus and minus)...
+    let cardSelection = [];
+    for (let i = 1; i <= 12; i++) {
+      let value = i;
+      let sign = 'plus';
+      if (i > 6) {
+        value -= 6;
+        value *= -1;
+        sign = 'minus';
+      }
+      cardSelection.push({ id: i * 1111, value: value, type: sign });
+    }
+    // ...make a deck of 40, 4 each of value 1-10...
     let deck = [];
-    for (let i = 1; i < 41; i++) {
+    for (let i = 1; i <= 40; i++) {
       deck[i - 1] = {};
       let currentValue = i;
       if (i > 10) {
@@ -91,14 +105,26 @@ class App extends React.Component {
       deck[i - 1].value = currentValue;
       deck[i - 1].type = 'house';
     }
+    // ..make a random 10-card deck for opponent...
+    let opponentDeck = [];
+    let selectionCopy = Util.shuffle(cardSelection.slice());
+    for (let i = 0; i < 10; i++) {
+      let deckCard = selectionCopy[i];
+      let newCard = { id: i, value: deckCard.value, type: deckCard.type };
+      opponentDeck.push(newCard);
+    }
+    // ...put them all in state
+    this.state.opponentDeck = opponentDeck;
+    this.state.idCount = 10;
+    this.state.cardSelection = cardSelection;
+    this.state.deck = this.shuffleDeck(deck);
 
     this.buttonTextColor = window.getComputedStyle(document.body).getPropertyValue('--button-text-color');
     this.buttonBgColor = window.getComputedStyle(document.body).getPropertyValue('--button-bg-color');
 
-    this.state.deck = this.shuffleDeck(deck);
-
+    this.playSound = this.playSound.bind(this);
     this.shuffleDeck = this.shuffleDeck.bind(this);
-    this.getPlayerHands = this.getPlayerHands.bind(this);
+    this.getNewPlayerHands = this.getNewPlayerHands.bind(this);
     this.dealToPlayerGrid = this.dealToPlayerGrid.bind(this);
     this.handleToggleOption = this.handleToggleOption.bind(this);
     this.handleClickBack = this.handleClickBack.bind(this);
@@ -115,26 +141,39 @@ class App extends React.Component {
     this.changeCardTotal = this.changeCardTotal.bind(this);
     this.getCardIndexById = this.getCardIndexById.bind(this);
     this.swapTurn = this.swapTurn.bind(this);
+    this.changeTurn = this.changeTurn.bind(this);
     this.makeOpponentMove = this.makeOpponentMove.bind(this);
     this.callResultModal = this.callResultModal.bind(this);
     this.dismissResultModal = this.dismissResultModal.bind(this);
+    this.handleClickRandomize = this.handleClickRandomize.bind(this);
     this.handleClickOKButton = this.handleClickOKButton.bind(this);
+    this.handleClickHamburger = this.handleClickHamburger.bind(this);
     this.resetBoard = this.resetBoard.bind(this);
-
+    this.determineWinnerFromTotal = this.determineWinnerFromTotal.bind(this);
   }
 
   componentDidMount() {
+    this.sizeElements();
+  }
+
+  sizeElements() {
     document.getElementById('container').style.height = `${window.innerHeight}px`;
-    document.getElementById('user-hand').style.height = `${cardSize.height * 1.1}px`;
+    document.getElementById('user-hand').style.height = `${mediumCardSize.height * 1.1}px`;
     document.getElementById('opponent-hand').style.height = `${miniCardSize.height * 1.1}px`;
     Array.from(document.getElementsByClassName('turn-indicator')).map((el) => {
-      el.style.height = el.style.width = `${cardSize.height / 2.75}px`;
+      el.style.height = el.style.width = `${cardSize.height / 2.7}px`;
     });
     Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
       el.style.width = `${(cardSize.width * 4) + (cardSize.height * 0.42)}px`;
       el.style.height = `${cardSize.height * 2.2}px`;
       el.style.paddingTop = `${cardSize.height * 0.05}px`;
     });
+  }
+
+  playSound(sound) {
+    if (this.state.options.sound) {
+      document.getElementById(`${sound}-sound`).play();
+    }
   }
 
   shuffleDeck(deck) {
@@ -147,7 +186,7 @@ class App extends React.Component {
     return deckCopy;
   }
 
-  getPlayerHands() {
+  getNewPlayerHands() {
     let userDeckCopy = Util.shuffle(this.state.userDeck.slice());
     let opponentDeckCopy = Util.shuffle(this.state.opponentDeck.slice());
     let newUserHand = [];
@@ -197,37 +236,76 @@ class App extends React.Component {
     let newTotal = 0;
     newTotal += this.state[`${player}Total`] + newCard.value;
     this.changeCardTotal(player, newTotal);
+    this.playSound('draw');
     this.setState({
       [`${player}Grid`]: newGridCards,
     });
   }
   handleToggleOption(event) {
-    var el = event.target;
+    let el = event.target;
+    let optionsCopy = Object.assign({}, this.state.options);
     if (el.classList.length > 1) {
       el.classList.remove('option-off');
       el.innerHTML = 'ON';
       if (event.target.id === 'sound-fx-toggle') {
-        // sound fx on
+        optionsCopy.sound = true;
       }
       if (event.target.id === 'ambience-toggle') {
-        // ambience on
+        optionsCopy.ambience = true;
       }
-      if (event.target.id === 'dark-mode-toggle') {
-        // dark mode on
+      if (event.target.id === 'quick-mode-toggle') {
+        document.body.style.setProperty('--pulse-speed', '400ms');
+        optionsCopy.turnInterval = 90;
+        optionsCopy.flashInterval = 3;
+        optionsCopy.opponentMoveInterval = 100;
       }
+      if (event.target.id === 'dark-theme-toggle') {
+        document.body.style.setProperty('--main-bg-color', '#050505');
+        document.body.style.setProperty('--main-text-color', '#999');
+        document.body.style.setProperty('--card-bg-color', '#333');
+        document.body.style.setProperty('--house-card-color', '#330');
+        document.body.style.setProperty('--plus-card-color', '#003');
+        document.body.style.setProperty('--minus-card-color', '#300');
+        document.body.style.setProperty('--card-back-color', '#555');
+        document.body.style.setProperty('--card-back-bg-color', '#333');
+        document.body.style.setProperty('--card-back-border-color', '#222');
+        optionsCopy.darkTheme = true;
+      }
+
     } else {
       el.classList.add('option-off');
       el.innerHTML = 'OFF';
       if (event.target.id === 'sound-fx-toggle') {
-        // sound fx off
+        optionsCopy.sound = false;
       }
       if (event.target.id === 'ambience-toggle') {
-        // ambience off
+        optionsCopy.ambience = false;
       }
-      if (event.target.id === 'dark-mode-toggle') {
-        // dark mode off
+      if (event.target.id === 'quick-mode-toggle') {
+        document.body.style.setProperty('--pulse-speed', '900ms');
+        optionsCopy.turnInterval = 300;
+        optionsCopy.flashInterval = 180;
+        optionsCopy.opponentMoveInterval = 1000;
+      }
+      if (event.target.id === 'dark-theme-toggle') {
+        document.body.style.setProperty('--main-bg-color', 'rgb(107, 121, 138)');
+        document.body.style.setProperty('--main-text-color', 'rgb(255, 247, 213)');
+        document.body.style.setProperty('--card-bg-color', '#ccc');
+        document.body.style.setProperty('--house-card-color', '#D3D300');
+        document.body.style.setProperty('--plus-card-color', '#0C00B2');
+        document.body.style.setProperty('--minus-card-color', '#A70003');
+        document.body.style.setProperty('--card-back-color', '#ccc');
+        document.body.style.setProperty('--card-back-bg-color', 'grey');
+        document.body.style.setProperty('--card-back-border-color', '#444');
+        optionsCopy.darkTheme = false;
       }
     }
+    this.setState({
+      options: optionsCopy
+    });
+  }
+  flashButton(button) {
+
   }
   handleClickHeader() {
     this.setState({
@@ -236,89 +314,77 @@ class App extends React.Component {
   }
   handleClickStart(event) {
     event.preventDefault();
-    let clicked = event.target.id;
-    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
-    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
+    this.playSound('click');
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
     document.getElementById('deck-select-footer').style.transform = 'translateY(0%)';
     setTimeout(() => {
       this.setState({
         phase: 'selectingDeck'
       });
-    }, 150);
+    }, this.state.options.flashInterval);
   }
   handleClickPlay(event) {
     event.preventDefault();
-    let clicked = event.target.id;
-    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
-    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
-    let hands = this.getPlayerHands();
+    this.playSound('click');
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    this.getNewPlayerHands();
     document.getElementById('deck-select-footer').style.transform = 'transform: translateY(100%)';
     setTimeout(() => {
-      this.dealToPlayerGrid(this.state.turn);
+      setTimeout(() => {
+        this.dealToPlayerGrid(this.state.turn);
+      }, this.state.options.turnInterval);
       this.setState({
         phase: 'gameStarted'
       });
-    }, 150);
+    }, this.state.options.flashInterval);
   }
   handleClickBack(event) {
     event.preventDefault();
-    let clicked = event.target.id;
-    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
-    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
+    this.playSound('click');
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
     setTimeout(() => {
       this.setState({
         phase: 'splashScreen'
       });
-    }, 150);
+    }, this.state.options.flashInterval);
   }
   handleClickHow(event) {
-    window.open('https://starwars.wikia.com/wiki/Pazaak/Legends', '_blank');
-    // event.preventDefault();
-    // let clicked = event.target.id;
-    // Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
-    // Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
-    // setTimeout(() => {
-    //   this.setState({
-    //     phase: 'showingInstructions'
-    //   });
-    // }, 150);
+    this.playSound('click');
+    // window.open('https://starwars.wikia.com/wiki/Pazaak/Legends', '_blank');
+    event.preventDefault();
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    setTimeout(() => {
+      this.setState({
+        phase: 'showingInstructions'
+      });
+    }, this.state.options.flashInterval);
   }
   handleClickOptions(event) {
     event.preventDefault();
-    let clicked = event.target.id;
-    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
-    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
+    this.playSound('click');
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
     setTimeout(() => {
       this.setState({
         phase: 'showingOptions'
       });
-    }, 150);
+    }, this.state.options.flashInterval);
   }
   handleClickEndTurn(event) {
     event.preventDefault();
-    let clicked = event.target.id;
-    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
-    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
-
-    if (this.state.userTotal > 20) {
-      this.declareWinner('opponent', 300);
-    } else {
-      let newTurn = this.swapTurn();
-      this.makeOpponentMove(800);
-      if (this.state[`${newTurn}Grid`].length < 9) {
-        this.dealToPlayerGrid(newTurn);
-      }
-    }
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    this.playSound('click');
+    this.changeTurn('opponent');
   }
   handleClickStand(event) {
     event.preventDefault();
-    let clicked = event.target.id;
-    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
-    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
-
-    // if (this.state.opponentTotal < 20 && this.state.opponentGrid.length < 9) {
-    //   this.dealToPlayerGrid('opponent');
-    // }
+    this.playSound('click');
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+    turnStatusCopy.user.standing = true;
+    this.setState({
+      turnStatus: turnStatusCopy
+    });
+    this.changeTurn('opponent');
   }
   handleClickCard(event, value, type) {
     event.preventDefault();
@@ -358,20 +424,43 @@ class App extends React.Component {
     // GAME STARTED
 
     if (this.state.phase === 'gameStarted') {
-      if ((this.state.userTotal + value < 20) && this.state.userGrid.length < 9) {
-        this.removeCardFromHand('user', event.target.id);
-        this.addCardtoGrid('user', value, type);
-        this.changeCardTotal('user', this.state.userTotal + value);
+      if (this.state.turnStatus.opponent.standing) {
+        // opponent standing
+        if (this.state.userGrid.length < 9) {
+          this.playHandCard('user', { id: event.target.id, value: value, type: type });
+        }
+      } else {
+        // opponent still in play
+        if (!this.state.turnStatus.user.playedCards && this.state.userGrid.length < 9) {
+          this.playHandCard('user', { id: event.target.id, value: value, type: type });
+        }
       }
-      Util.flash('end-turn-button', 'color', this.buttonTextColor, '#cc0');
-      Util.flash('end-turn-button', 'background-color', this.buttonBgColor, '#111');
-      let newTurn = this.swapTurn();
-      this.makeOpponentMove(800);
-      if (this.state[`${newTurn}Grid`].length < 9) {
-        this.dealToPlayerGrid(newTurn);
-      }
+
+      // Util.flash('end-turn-button', 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval/3);
+      // Util.flash('end-turn-button', 'background-color', this.buttonBgColor, '#111', this.state.options.flashInterval/3);
+      // let newTurn = this.swapTurn();
+      // if (this.state[`${newTurn}Grid`].length < 9) {
+      //   setTimeout(() => {
+      //     this.makeOpponentMove(this.state.options.opponentMoveInterval);
+      //     this.dealToPlayerGrid(newTurn);
+      //   }, this.state.options.turnInterval);
+      // }
     }
   }
+
+  playHandCard(player, cardObject, delay) {
+    setTimeout(() => {
+      this.removeCardFromHand(player, cardObject.id);
+      this.addCardtoGrid(player, cardObject.value, cardObject.type);
+      this.changeCardTotal(player, this.state[`${player}Total`] + cardObject.value);
+      let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+      turnStatusCopy.user.playedCards = this.state.turnStatus[player].playedCards + 1;
+      this.setState({
+        turnStatus: turnStatusCopy
+      });
+    }, delay);
+  }
+
   removeCardFromHand(player, cardId) {
     let handCopy = this.state[`${player}Hand`].slice();
     let indextoRemove = this.getCardIndexById(handCopy, cardId);
@@ -412,14 +501,30 @@ class App extends React.Component {
   }
 
   declareWinner(winner, delay) {
-    this.setState({
-      turn: null,
-      [`${winner}Wins`]: this.state[`${winner}Wins`] + 1
-    });
-    setTimeout(() => {
-      document.getElementById('game-board').style.opacity = 0.3;
-      this.callResultModal('WINNER!', winner, 'Next Round');
-    }, delay);
+    let newWins;
+    if (winner !== 'TIE') {
+      newWins = this.state[`${winner}Wins`] + 1;
+      this.setState({
+        turn: null,
+        [`${winner}Wins`]: newWins
+      });
+      setTimeout(() => {
+        document.getElementById('game-board').style.opacity = 0.3;
+        this.callResultModal(winner);
+      }, delay);
+    } else {
+      newWins = this.state[`${winner}Wins`];
+      if (winner === 'opponent') {
+        winner = 'CPU';
+      }
+      this.setState({
+        turn: null,
+      });
+      setTimeout(() => {
+        document.getElementById('game-board').style.opacity = 0.3;
+        this.callResultModal('tie');
+      }, delay);
+    }
   }
 
   swapTurn() {
@@ -430,7 +535,7 @@ class App extends React.Component {
         Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
           el.classList.add('disabled-button');
         });
-      }, 150);
+      }, this.state.options.flashInterval);
     } else {
       newTurn = 'user';
       Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
@@ -440,65 +545,240 @@ class App extends React.Component {
     this.setState({
       turn: newTurn
     });
+    this.playSound('turn');
     return newTurn;
   }
 
   makeOpponentMove(delay) {
     setTimeout(() => {
-      console.warn('opponent moving');
-      // play a card?
-
-      if (this.state.opponentTotal < 20) {
-        for (let i = 0; i < this.state.opponentHand.length; i++) {
-          let card = this.state.opponentHand[i];
-          let potentialScore = this.state.opponentTotal + card.value;
-          if (potentialScore >= 17 && potentialScore <= 20) {
-            let cardToPlay = card;
-            this.removeCardFromHand('opponent', cardToPlay.id);
-            this.addCardtoGrid('opponent', cardToPlay.value, cardToPlay.type);
-            this.changeCardTotal('opponent', this.state.opponentTotal + cardToPlay.value);
-            console.warn('OPPONENT STANDS');
-            break;
-          }
-        }
-
-      } else {
-        for (let i = 0; i < this.state.opponentHand.length; i++) {
-          let card = this.state.opponentHand[i];
-          let potentialScore = this.state.opponentTotal + card.value;
-          if (potentialScore <= 20) {
-            let cardToPlay = card;
-            this.removeCardFromHand('opponent', cardToPlay.id);
-            this.addCardtoGrid('opponent', cardToPlay.value, cardToPlay.type);
-            this.changeCardTotal('opponent', this.state.opponentTotal + cardToPlay.value);
-            if (potentialScore >= 17) {
-              console.warn('OPPONENT STANDS after MINUS');
+      if (this.state.turnStatus.user.standing) {
+        // user standing means no limit on playedCards / drawn cards
+        // see if cards can improve total
+        if (this.state.opponentTotal < 20) {
+          let dealInterval = this.state.options.turnInterval * 2;
+          let cardsToPlay = [];
+          let cardLimit = 4;
+          let scoreMinimum = this.state.userTotal;
+          let delay = 0;
+          for (let i = 0; i < this.state.opponentHand.length; i++) {
+            if (this.state.opponentHand[i].type === 'plus') {
+              let card = this.state.opponentHand[i];
+              let totalValuePlayed = 0;
+              cardsToPlay.map((card) => {
+                totalValuePlayed += card.value;
+              });
+              let potentialScore = this.state.opponentTotal + totalValuePlayed + card.value;
+              if (((this.state.opponentTotal + totalValuePlayed) < scoreMinimum || (this.state.opponentTotal + totalValuePlayed) === scoreMinimum && Math.random() < 0.5) && this.state.turnStatus.opponent.playedCards < cardLimit && potentialScore >= scoreMinimum && potentialScore <= 20) {
+                let cardToPlay = card;
+                cardsToPlay.push(cardToPlay);
+                this.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type }, delay);
+                delay += dealInterval;
+              }
             }
-            break;
           }
+          // now just to compare scores and declare a winner
+          // wait for card timeouts!
+          setTimeout(() => {
+            this.determineWinnerFromTotal();
+          }, (cardsToPlay.length * dealInterval));
+          return;
+        } else if (this.state.opponentTotal > 20) {
+
+          // see if minus cards can get total below 20
+          let dealInterval = this.state.options.turnInterval * 2;
+          let cardsToPlay = [];
+          let delay = 0;
+          for (let i = 0; i < this.state.opponentHand.length; i++) {
+            if (this.state.opponentHand[i].type === 'minus') {
+              let card = this.state.opponentHand[i];
+              let totalValuePlayed = 0;
+              cardsToPlay.map((card) => {
+                totalValuePlayed += card.value;
+              });
+              let currentTally = this.state.opponentTotal + totalValuePlayed;
+              let potentialScore = currentTally + card.value;
+              if (potentialScore <= 20) {
+                let cardToPlay = card;
+                cardsToPlay.push(cardToPlay);
+                this.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type }, delay);
+                delay += dealInterval;
+              }
+            }
+          }
+          // now just to compare scores and declare a winner
+          // wait for card timeouts!
+          setTimeout(() => {
+            this.determineWinnerFromTotal();
+          }, (cardsToPlay.length * dealInterval));
+          return;
+        } else {
+          // is 20
+          let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+          turnStatusCopy.opponent.standing = true;
+          this.setState({
+            turnStatus: turnStatusCopy
+          });
         }
-      }
-      if (this.state.opponentTotal > 20) {
-        this.declareWinner('user', 300);
+        // ...then, if did not reach a stand state, 'click' End Turn
+        this.changeTurn('user');
       } else {
-        let newTurn = this.swapTurn();
-        if (this.state[`${newTurn}Grid`].length < 9) {
-          this.dealToPlayerGrid(newTurn);
+        if (this.state.opponentTotal < 20) {
+          let cardLimit = 1;
+          let scoreMinimum = 17;
+          for (let i = 0; i < this.state.opponentHand.length; i++) {
+            if (this.state.opponentHand[i].type === 'plus') {
+              let card = this.state.opponentHand[i];
+              let potentialScore = this.state.opponentTotal + card.value;
+              if (this.state.turnStatus.opponent.playedCards < cardLimit && potentialScore >= scoreMinimum && potentialScore <= 20) {
+                let cardToPlay = card;
+                this.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
+                let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+                turnStatusCopy.opponent.standing = true;
+                this.setState({
+                  turnStatus: turnStatusCopy
+                });
+                break;
+              }
+            }
+          }
+        } else if (this.state.opponentTotal > 20) {
+          for (let i = 0; i < this.state.opponentHand.length; i++) {
+            if (this.state.opponentHand[i].type === 'minus') {
+              let card = this.state.opponentHand[i];
+              let potentialScore = this.state.opponentTotal + card.value;
+              if (potentialScore <= 20) {
+                let cardToPlay = card;
+                this.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
+                break;
+              }
+            }
+          }
+        } else {
+          // is 20
+          let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+          turnStatusCopy.opponent.standing = true;
+          this.setState({
+            turnStatus: turnStatusCopy
+          });
         }
+        //must delay or this.state.opponentTotal is wrong in changeTurn()!
+        setTimeout(() => {
+          this.changeTurn('user');
+        }, 150);
       }
     }, delay);
   }
 
-  playOpponentCard() {
+  determineWinnerFromTotal() {
+    let winner;
+    if (this.state.userTotal > this.state.opponentTotal) {
+      if (this.state.userTotal <= 20) {
+        winner = 'user';
+      } else {
+        winner = 'opponent';
+      }
+      this.declareWinner(winner, this.state.options.turnInterval);
+    } else if (this.state.userTotal < this.state.opponentTotal) {
+      if (this.state.opponentTotal <= 20) {
+        winner = 'opponent';
+      } else {
+        winner = 'user';
+      }
+      this.declareWinner(winner, this.state.options.turnInterval);
+    } else {
+      this.declareWinner('TIE', this.state.options.turnInterval);
+    }
 
   }
 
-  callResultModal(title, winner, buttonText) {
+  changeTurn(newPlayer) {
+    if (newPlayer === 'user') {
+      if (this.state.turnStatus.opponent.standing) {
+        // see if opponent has losing score
+        if (this.state.opponentTotal > 20) {
+          console.warn('CPU STOOD to pass turn to user with TOTAL > 20', this.state.opponentTotal);
+          this.declareWinner('user', this.state.options.turnInterval);
+        } else {
+          this.playSound('click');
+          setTimeout(() => {
+            let newTurn = this.swapTurn();
+            setTimeout(() => {
+              this.dealToPlayerGrid(newTurn);
+            }, this.state.options.turnInterval);
+          }, this.state.options.turnInterval);
+        }
+      } else {
+        // see if opponent has losing score
+        if (this.state.opponentTotal > 20) {
+          this.declareWinner('user', this.state.options.turnInterval);
+        } else {
+          // if not, deal card to user
+          this.playSound('click');
+          setTimeout(() => {
+            let newTurn = this.swapTurn();
+            setTimeout(() => {
+              this.dealToPlayerGrid(newTurn);
+            }, this.state.options.turnInterval);
+          }, this.state.options.turnInterval);
+        }
+      }
+    } else {
+      if (this.state.userTotal > 20) {
+        this.declareWinner('opponent', this.state.options.turnInterval);
+      } else {
+        if (!this.state.turnStatus.opponent.standing) {
+          let newTurn = this.swapTurn();
+          setTimeout(() => {
+            this.makeOpponentMove(this.state.options.opponentMoveInterval);
+            if (this.state[`${newTurn}Grid`].length < 9) {
+              this.dealToPlayerGrid(newTurn);
+            }
+          }, this.state.options.turnInterval * 2);
+        } else {
+          this.determineWinnerFromTotal();
+        }
+      }
+    }
+    let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+    turnStatusCopy.user.playedCards = 0;
+    turnStatusCopy.opponent.playedCards = 0;
+    this.setState({
+      turnStatus: turnStatusCopy
+    });
+  }
+
+  callResultModal(winner) {
+    let bgColor = 'var(--red-bg-color)';
+    let title;
+    let winnerDisplay = '';
+    let buttonText = 'Next Round';
+    if (winner === 'user') {
+      this.playSound('win');
+      title = 'YOU WIN';
+      bgColor = 'green';
+    } else if (winner === 'opponent') {
+      this.playSound('lose');
+      title = 'YOU LOSE';
+    } else {
+
+      title = 'It\'s a tie';
+      bgColor = 'var(--main-bg-color)';
+    }
+    if (this.state.userWins === 3 || this.state.opponentWins === 3) {
+      bgColor = 'var(--house-card-color)';
+      title = 'GAME\nWINNER';
+      winnerDisplay = winner;
+      if (winner === 'opponent') {
+        winnerDisplay = 'CPU';
+      }
+      buttonText = 'New Game';
+    }
     let modal = document.getElementById('result-modal');
+    modal.style.backgroundColor = bgColor;
     this.setState({
       resultMessage: {
         title: title,
-        winner: winner,
+        winner: winnerDisplay,
         buttonText: buttonText
       }
     });
@@ -508,254 +788,150 @@ class App extends React.Component {
     let modal = document.getElementById('result-modal');
     modal.classList.remove('onscreen');
   }
-
-  handleClickOKButton() {
+  handleClickRandomize(event) {
     event.preventDefault();
-    let clicked = event.target.id;
-    Util.flash(clicked, 'color', this.buttonTextColor, '#cc0');
-    Util.flash(clicked, 'background-color', this.buttonBgColor, '#111');
-
-    document.getElementById('game-board').style.opacity = 1;
-
-    this.resetBoard('user');
-
-    setTimeout(() => {
-      this.dismissResultModal();
-      this.dealToPlayerGrid(this.state.turn);
-    }, 150);
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    let selectionCopy = Util.shuffle(this.state.cardSelection.slice());
+    let userDeckCopy = [];
+    for (let i = 0; i < 10; i++) {
+      let deckCard = selectionCopy[i];
+      let newCard = { id: this.state.idCount + (i + 1), value: deckCard.value, type: deckCard.type };
+      userDeckCopy.push(newCard);
+    }
+    this.setState({
+      userDeck: userDeckCopy,
+      idCount: (this.state.idCount + 1)
+    });
+    document.getElementById('play-button').classList.remove('disabled-button');
   }
-
+  handleClickOKButton(event) {
+    event.preventDefault();
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    document.getElementById('game-board').style.opacity = 1;
+    if (this.state.userWins === 3 || this.state.opponentWins === 3) {
+      this.getNewPlayerHands();
+      this.setState({
+        userWins: 0,
+        opponentWins: 0,
+      });
+    }
+    this.setState({
+      userGrid: [],
+      opponentGrid: [],
+    });
+    setTimeout(() => {
+      this.setState({
+        turn: 'user'
+      });
+      this.dismissResultModal();
+      this.resetBoard('user');
+      setTimeout(() => {
+        this.dealToPlayerGrid(this.state.turn);
+      }, this.state.options.turnInterval);
+    }, this.state.options.flashInterval);
+  }
+  handleClickHamburger() {
+    let topBar = document.getElementById('top-hamburger-bar');
+    let bottomBar = document.getElementById('bottom-hamburger-bar');
+    if (this.state.menuShowing) {
+      topBar.style.transform = 'none';
+      bottomBar.style.transform = 'none';
+    } else {
+      topBar.style.transform = 'rotate(29deg) scaleX(0.675) translateX(55%) translateY(-215%)';
+      bottomBar.style.transform = 'rotate(-29deg) scaleX(0.675) translateX(55%) translateY(215%)';
+    }
+    this.setState({
+      menuShowing: !this.state.menuShowing
+    });
+  }
   resetBoard(newTurn) {
     document.getElementById('user-total').classList.remove('red-total');
     document.getElementById('user-total').classList.remove('green-total');
     document.getElementById('opponent-total').classList.remove('red-total');
     document.getElementById('opponent-total').classList.remove('green-total');
-    this.getPlayerHands();
+    document.getElementById('end-turn-button').classList.remove('disabled-button');
+    document.getElementById('stand-button').classList.remove('disabled-button');
+    // this.getNewPlayerHands();
     this.setState({
       userGrid: [],
       opponentGrid: [],
       userTotal: 0,
       opponentTotal: 0,
-      turn: newTurn
+      turn: newTurn,
+      turnStatus: {
+        user: {
+          playedCards: 0,
+          standing: false
+        },
+        opponent: {
+          playedCards: 0,
+          standing: false
+        }
+      },
     });
   }
-
   render() {
-    let footerOn = { position: 'absolute', bottom: '-3rem' };
-    let gameStarted = { display: 'none' };
-    let introScreen = { display: 'none' };
-    let instructionsScreen = { display: 'none' };
-    let optionsScreen = { display: 'none' };
-    let deckSelectScreen = { display: 'none' };
-    let cardsLeft = 10 - this.state.userDeck.length;
-    let chooseStyle = {
-      transition: 'all 300ms ease'
-    };
+    // default styles are hidden...
+    let footerStyle = { position: 'absolute', bottom: '-3rem' };
+    let gameBoardStyle = { display: 'none' };
+    let introStyle = { display: 'none' };
+    let instructionsStyle = { display: 'none' };
+    let optionsStyle = { display: 'none' };
+    let deckSelectStyle = { display: 'none' };
+    // but shown if proper state.phase
     if (this.state.phase === 'gameStarted') {
-      gameStarted = { display: 'flex' };
-      footerOn = { position: 'relative', bottom: '0' };
+      gameBoardStyle = { display: 'flex' };
+      footerStyle = { position: 'relative', bottom: '0' };
     } else if (this.state.phase === 'selectingDeck') {
-      deckSelectScreen = { display: 'flex' };
+      deckSelectStyle = { display: 'flex' };
     } else if (this.state.phase === 'showingOptions') {
-      optionsScreen = { display: 'flex' };
+      optionsStyle = { display: 'flex' };
     } else if (this.state.phase === 'showingInstructions') {
-      instructionsScreen = { display: 'flex' };
+      instructionsStyle = { display: 'flex' };
     } else if (this.state.phase === 'splashScreen') {
-      introScreen = { display: 'flex' };
+      introStyle = { display: 'flex' };
     }
-    let cardPlural = 's';
-    if (cardsLeft === 1) {
-      cardPlural = '';
-    }
-    if (cardsLeft === 0) {
-      cardsLeft = 1;
-      cardPlural = '';
-      chooseStyle.color = 'green';
-      document.getElementById('choose-text').innerHTML = 'Ready to play!';
-    }
-    let userTurn = '';
-    let opponentTurn = '';
-    if (this.state.turn === 'user') {
-      userTurn = 'turn-lighted';
-    } else if (this.state.turn === 'opponent') {
-      opponentTurn = 'turn-lighted';
-    }
-    let userWins = ['', '', ''];
-    let opponentWins = ['', '', ''];
-    if (this.state.userWins === 1) {
-      userWins[0] = 'win-symbol-lighted';
-    }
-    if (this.state.userWins === 2) {
-      userWins[0] = userWins[1] = 'win-symbol-lighted';
-    }
-    if (this.state.opponentWins === 1) {
-      opponentWins[0] = 'win-symbol-lighted';
-    }
-    if (this.state.opponentWins === 2) {
-      opponentWins[0] = opponentWins[1] = 'win-symbol-lighted';
-    }
-
-    let ninthCards = {
-      user: [],
-      opponent: []
-    };
-    if (this.state.userGrid.length === 9) {
-      let ninthCard = this.state.userGrid[8];
-      ninthCards.user.push(ninthCard);
-    }
-    if (this.state.opponentGrid.length === 9) {
-      let ninthCard = this.state.opponentGrid[8];
-      ninthCards.opponent.push(ninthCard);
-    }
-
     return (
       <div id='container'>
         <Header onClickHeader={this.handleClickHeader} />
-
-        {/* INTRO */}
-        <div style={introScreen} id='intro-screen'>
-          <button onClick={this.handleClickStart} className='intro-button' id='start-button'>Start Game</button>
-          <button onClick={this.handleClickHow} className='intro-button' id='how-button'>How to Play</button>
-          <button onClick={this.handleClickOptions} className='intro-button' id='options-button'>Options</button>
-        </div>
-
-        {/* INSTRUCTIONS */}
-        <div style={instructionsScreen} id='instructions-screen'>
-          <div className='options-instructions-title shadowed-text'>How to play</div>
-          <div id='instructions' className='shadowed-text'>
-            {instructionsText}
-          </div>
-          <button onClick={this.handleClickBack} className='back-button' id='instructions-back-button'>Back</button>
-
-        </div>
-
-        {/* OPTIONS */}
-        <div style={optionsScreen} id='options-screen'>
-          <div className='options-instructions-title shadowed-text'>Options</div>
-          <div id='options' className='shadowed-text'>
-            <div id='options-grid'>
-              <div className='option-label'>Sound FX</div><div onClick={this.handleToggleOption} id='sound-fx-toggle' className='option-toggle option-off'>OFF</div>
-              <div className='option-label'>Ambience</div><div onClick={this.handleToggleOption} id='ambience-toggle' className='option-toggle option-off'>OFF</div>
-              <div className='option-label'>Dark Mode</div><div onClick={this.handleToggleOption} id='dark-mode-toggle' className='option-toggle option-off'>OFF</div>
-            </div>
-          </div>
-          <button onClick={this.handleClickBack} className='back-button' id='options-back-button'>Back</button>
-
-        </div>
-
-        {/* DECK SELECT */}
-        <div style={deckSelectScreen} id='deck-select-screen'>
-
-          <div id='deck-select-title'>
-            <div className='shadowed-text'>Create deck</div>
-            <div id='choose-text' style={chooseStyle} className='smaller shadowed-text'>choose {cardsLeft} card{cardPlural}</div>
-          </div>
-
-          <div id='deck-selection-area'>
-            <div id='deck-selection-grid'>
-              {this.state.cardSelection.map((card, i) =>
-                <Card key={card.id} id={card.id} onClickCard={this.handleClickCard} size={mediumCardSize} value={card.value} type={card.type} />
-              )}
-            </div>
-          </div>
-
-          <div id='preview-deck-area'>
-            <div id='preview-deck-title' className='smaller shadowed-text'>YOUR DECK:</div>
-            <div id='preview-deck-grid'>
-              {this.state.userDeck.map((card, i) =>
-                <Card className='cock' key={card.id} id={card.id} onClickCard={this.handleClickCard} size={cardSize} value={card.value} type={card.type} />
-              )}
-            </div>
-          </div>
-
-          <div id='deck-select-footer'>
-            <button className='disabled-button' onClick={this.handleClickPlay} id='play-button'>Ready!</button>
-          </div>
-
-        </div>
-
-        {/* GAME BOARD */}
-        <div style={gameStarted} id='game-board'>
-          <div id='opponent-hand' className='player-hand-area'>
-            <div id='opponent-cards' className='player-cards'>
-              {this.state.opponentHand.map((card, i) =>
-                <CardBack key={i} size={miniCardSize} />
-              )}
-            </div>
-            <div className={`turn-indicator ${opponentTurn}`}></div>
-          </div>
-          <div id='grids'>
-            <div id='opponent-area' className='player-area'>
-              <div id='opponent-grid' className='deal-grid'>
-                {this.state.opponentGrid.map((card, i) => {
-                  if (i < 8) {
-                    return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
-                  }
-                })}
-                <div className='ninth-card' id='opponent-ninth-card'>
-                  {ninthCards.opponent.map((card, i) =>
-                    <Card key={i} size={cardSize} value={card.value} type={card.type} />
-                  )}
-                </div>
-              </div>
-
-              <div className='stats-area'>
-                <div className='total-display'>
-                  <div id='opponent-total-outline' className='total-outline'>
-                    <div id='opponent-total'>{this.state.opponentTotal}</div>
-                  </div>
-                </div>
-                <div className='win-symbol-area'>
-                  <div className={`win-symbol-bg ${opponentWins[0]}`}><div className={`win-symbol ${opponentWins[0]}`}></div></div>
-                  <div className={`win-symbol-bg ${opponentWins[1]}`}><div className={`win-symbol ${opponentWins[1]}`}></div></div>
-                  <div className={`win-symbol-bg ${opponentWins[2]}`}><div className={`win-symbol ${opponentWins[2]}`}></div></div>
-                </div>
-              </div>
-            </div>
-            <div id='user-area' className='player-area'>
-              <div id='user-grid' className='deal-grid'>
-                {this.state.userGrid.map((card, i) => {
-                  if (i < 8) {
-                    return <Card key={i} size={cardSize} value={card.value} type={card.type} />;
-                  }
-                })}
-                <div className='ninth-card' id='user-ninth-card'>
-                  {ninthCards.user.map((card, i) =>
-                    <Card key={i} size={cardSize} value={card.value} type={card.type} />
-                  )}
-                </div>
-              </div>
-              <div className='stats-area'>
-                <div className='total-display'>
-                  <div id='user-total-outline' className='total-outline'>
-                    <div id='user-total'>{this.state.userTotal}</div>
-                  </div>
-                </div>
-                <div className='win-symbol-area'>
-                  <div className={`win-symbol-bg ${userWins[0]}`}><div className={`win-symbol ${userWins[0]}`}></div></div>
-                  <div className={`win-symbol-bg ${userWins[1]}`}><div className={`win-symbol ${userWins[1]}`}></div></div>
-                  <div className={`win-symbol-bg ${userWins[2]}`}><div className={`win-symbol ${userWins[2]}`}></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id='user-hand' className='player-hand-area'>
-            <div id='user-cards' className='player-cards'>
-              {this.state.userHand.map((card, i) =>
-                <Card key={i} id={card.id} size={cardSize} value={card.value} type={card.type}
-                  onClickCard={this.handleClickCard} />
-              )}
-            </div>
-            <div className={`turn-indicator ${userTurn}`}></div>
-          </div>
-        </div>
-
+        <IntroScreen style={introStyle}
+          onClickStart={this.handleClickStart}
+          onClickHow={this.handleClickHow}
+          onClickOptions={this.handleClickOptions} />
+        <InstructionsScreen style={instructionsStyle}
+          onClickBack={this.handleClickBack} />
+        <OptionsScreen style={optionsStyle}
+          onToggleOption={this.handleToggleOption}
+          onClickBack={this.handleClickBack} />
+        <DeckSelectionScreen style={deckSelectStyle}
+          cardSelection={this.state.cardSelection}
+          userDeck={this.state.userDeck}
+          onClickRandomize={this.handleClickRandomize}
+          onClickPlay={this.handleClickPlay}
+          onClickCard={this.handleClickCard}
+          cardSize={cardSize}
+          mediumCardSize={mediumCardSize} />
+        <GameBoard style={gameBoardStyle}
+          hands={{ user: this.state.userHand, opponent: this.state.opponentHand }}
+          grids={{ user: this.state.userGrid, opponent: this.state.opponentGrid }}
+          totals={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
+          wins={{ user: this.state.userWins, opponent: this.state.opponentWins }}
+          turn={this.state.turn}
+          turnStatus={this.state.turnStatus}
+          cardSize={cardSize}
+          mediumCardSize={mediumCardSize}
+          miniCardSize={miniCardSize}
+          onClickCard={this.handleClickCard} />
         <ResultModal onClickOKButton={this.handleClickOKButton}
           titleText={this.state.resultMessage.title}
           winner={this.state.resultMessage.winner}
+          finalScores={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
           buttonText={this.state.resultMessage.buttonText} />
 
-        <Footer display={footerOn} onClickEndTurn={this.handleClickEndTurn} onClickStand={this.handleClickStand} />
+        <Footer style={footerStyle}
+          onClickEndTurn={this.handleClickEndTurn}
+          onClickStand={this.handleClickStand}
+          onClickHamburger={this.handleClickHamburger} />
       </div>
     );
   }
