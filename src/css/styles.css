@@ -1,7 +1,5 @@
 /* GLOBAL */
-
 body {
-
   --main-bg-color: rgb(107, 121, 138);
   --main-text-color: rgb(255, 247, 213);
   --option-on-color: rgb(113, 151, 113);
@@ -10,9 +8,17 @@ body {
   --trans-blue-bg-color: rgba(0, 0, 255, 0.05);
   --button-bg-color: #000000;
   --button-text-color: #5CB3FF;
+  --button-border-color: #111;
   --red-bg-color: #560000;
   --card-text-color: #FFFFFF;
-
+  --pulse-speed: 900ms;
+  --card-bg-color: #ccc;
+  --house-card-color: #D3D300;
+  --plus-card-color: #0C00B2;
+  --minus-card-color: #A70003;
+  --card-back-color: #ccc;
+  --card-back-bg-color: grey;
+  --card-back-border-color: #444;
   -webkit-user-select: none;  /* Chrome all / Safari all */
   -moz-user-select: none;     /* Firefox all */
   -ms-user-select: none;      /* IE 10+ */
@@ -24,6 +30,7 @@ body {
   overflow: hidden;
   /* max-width: 800px; */
   margin: 0 auto;
+  transition: background-color 300ms ease;
 }
 button {
   outline: 0;
@@ -32,7 +39,7 @@ button {
   color: var(--button-text-color);
   border-radius: 0.25rem;
   cursor: pointer;
-  border: solid #111;
+  border: solid var(--button-border-color);
   position: relative;
   max-width: 400px;
 }
@@ -69,11 +76,18 @@ button {
   align-items: center;
   flex-grow: 1;
 }
+#instructions-screen {
+  background-color: var(--trans-red-bg-color);
+  font-size: 1.1rem;
+}
+#options-screen {
+  background-color: var(--trans-blue-bg-color);
+}
 #instructions {
   font-family: 'Nova Square';
   padding: 2rem;
   padding-top: 0;
-  overflow: scroll;
+  overflow-y: scroll;
   height: 50vh;
 }
 #options {
@@ -90,15 +104,20 @@ button {
   justify-items: stretch;
   height: 40vh;
 }
+.option-label {
+  justify-self: left;
+}
 .option-label, .option-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 .option-toggle {
+  border: 1px solid black;
   background-color: var(--option-on-color);
   margin: 0.25rem;
-  transition: all 150ms ease;
+  font-size: 1.25rem;
+  transition: background 200ms ease;
 }
 .option-off {
   background-color: var(--option-off-color);
@@ -121,6 +140,8 @@ button {
   position: absolute;
   bottom: 0px;
   padding: 1vh;
+  display: flex;
+  flex-direction: column;
 }
 .smaller {
   font-size: 0.8rem;
@@ -209,16 +230,49 @@ button {
   background-color: var(--red-bg-color);
   display: inline-flex;
   justify-content: space-evenly;
-  align-items: center;
+  align-items: stretch;
   bottom: -3rem;
   position: absolute;
   transition: all 300ms ease;
+}
+#footer-button-area {
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: space-evenly;
+  flex-grow: 2; 
+}
+#hamburger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 3rem;
+  background-color: var(--button-bg-color);
+  border: solid #222;
+  cursor: pointer;
+}
+.hamburger-bar {
+  position: relative;
+  width: 75%;
+  height: 0.25rem;
+  background-color: #222;
+  transition: all 300ms ease;
+}
+#top-hamburger-bar {
+  transform-origin: 0% 50%;
+}
+#bottom-hamburger-bar {
+  transform-origin: 0% 50%;
 }
 #play-button {
   width: 50%;
   font-size: 1.5rem;
   padding: 0.5rem;
-  transition: all 300ms ease;
+  transition: background 300ms ease;
+}
+#randomize-button {
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 1rem 0.25rem 1rem;
 }
 .back-button {
   width: 50%;
@@ -228,18 +282,20 @@ button {
 .disabled-button {
   border-color: #555 !important;
   background-color: #333 !important;
-  color: #222 !important;
+  color: #666 !important;
   pointer-events: none !important;
+  opacity: 0.9;
 }
 .move-button {
   width: 40%;
   font-size: 1.2rem;
   padding: 0.35rem;
+  transition: all 300ms ease, color 0ms;
 }
 .card {
   box-sizing: border-box;
   color: var(--card-text-color);
-  background: #ccc;
+  background-color: var(--card-bg-color);
   border: 1px solid black;
   border-radius: 7%;
   display: flex;
@@ -377,8 +433,8 @@ button {
 }
 .total-display {
   font-family: 'Nova Square';
-  width: 2.5rem;
-  font-size: 1rem;
+  width: 2.75rem;
+  font-size: 1.2rem;
   border-radius: 0.75rem;
   background-color: black;
   padding: 0.35rem;
@@ -415,7 +471,10 @@ button {
   transition: all 500ms ease;
 }
 .turn-lighted {
-  animation: pulse 800ms infinite;
+  animation: pulse var(--pulse-speed) infinite;
+}
+.standing {
+  background-color: rgb(189, 189, 95);
 }
 @keyframes pulse {
   0% {
@@ -436,6 +495,7 @@ button {
   margin-top: 0.5rem;
 }
 .win-symbol-bg {
+  /* box-sizing: border-box; */
   border-radius: 50%;
   background-color: rgb(163, 163, 163);
   width: 1rem;
@@ -443,15 +503,15 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid black;
+  border: 0.1rem solid black;
 }
 .win-symbol {
   box-sizing: border-box;
   border-radius: 50%;
   background-color: rgb(163, 163, 163);
   border: 0.1rem solid #222;
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 0.8rem;
+  height: 0.8rem;
 }
 .win-symbol-lighted {
   background-color: orange;
@@ -460,14 +520,13 @@ button {
   position: absolute;
   z-index: 12;
 }
-
 #result-modal {
   box-sizing: border-box;
   position: absolute;
   width: 75%;
   height: 14rem;
   font-family: "Bungee";
-  background-color: var(--red-bg-color);
+  /* background-color: var(--red-bg-color); */
   color: var(--main-text-color);
   border-radius: 3vmin;
   margin-left: 12.5%;
@@ -480,20 +539,33 @@ button {
   line-height: 2.5rem;
   box-shadow: 0px 0px 0.5rem black;
   transform: translateY(-95vw);
-  transition: all 300ms ease;
+  opacity: 0;
+  transition: transform 300ms ease, opacity 600ms ease;;
 }
 #result-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
+  text-align: center;
 }
 #result-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   font-size: 1.5rem;
   padding: 1rem;
 }
+#result-winner {
+  font-size: 1.25rem;
+}
+#result-scores {
+  font-size: 1rem;
+}
 .onscreen {
   transform: translateX(0%) !important;
+  opacity: 1 !important;
 }
 #ok-button {
+  box-sizing: border-box;
   font-size: 1.25rem;
   padding: 0.75rem 2rem 0.75rem 2rem;
-  
+  margin-bottom: 0.5rem;
 }
