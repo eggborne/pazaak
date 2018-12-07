@@ -7,14 +7,14 @@ function Card(props) {
   let cornerSymbol;
   let valueDisplay = props.value;
   if (props.type === 'plus') {
-    color = '#0C00B2';
+    color = 'var(--plus-card-color)';
     cornerSymbol = '+';
     valueDisplay = `+${props.value}`;
   } else if (props.type === 'minus') {
-    color = '#A70003';
+    color = 'var(--minus-card-color)';
     cornerSymbol = '-';
-  } else {
-    color = '#D3D300';
+  } else if (props.type==='house') {
+    color = 'var(--house-card-color)';
     cornerSymbol = '';
   }
   let cardHeight = props.size.height;
