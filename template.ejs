@@ -5,6 +5,11 @@
   <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
   <body>
+    <audio id='click-sound' src='https://pazaak.online/assets/sounds/click.wav'></audio>
+    <audio id='turn-sound' src='https://pazaak.online/assets/sounds/startturn.wav'></audio>
+    <audio id='draw-sound' src='https://pazaak.online/assets/sounds/drawcard.wav'></audio>
+    <audio id='win-sound' src='https://pazaak.online/assets/sounds/win.wav'></audio>
+    <audio id='lose-sound' src='https://pazaak.online/assets/sounds/lose.wav'></audio>
     <% if (htmlWebpackPlugin.options.appMountId) { %>
       <div id="<%= htmlWebpackPlugin.options.appMountId%>"></div>
     <% } %>
