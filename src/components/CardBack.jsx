@@ -14,12 +14,12 @@ function CardBack(props) {
           margin-right: ${cardHeight * 0.04}px;
         }
         .inner-band {
-          background-color: grey;
-          border-color: #444;
+          background-color: var(--card-back-bg-color);
+          border-color: var(--card-back-border-color);
         }
         .corner-bubble, .back-bubble {
-          background-color: #ccc;
-          border-color: #444;
+          background-color: var(--card-back-color);
+          border-color: var(--card-back-border-color);
         }
         .corner-bubble {
           width: ${cardHeight * 0.16}px;
@@ -33,7 +33,7 @@ function CardBack(props) {
           border-bottom: 1px solid black;
         }
         .number-badge {
-          background-color: #ccc;
+          background-color: var(--card-back-color);
           border: 1px solid black;
           border-top: none;
           border-bottom: none;
@@ -48,16 +48,16 @@ function CardBack(props) {
           border-right: ${cardHeight * 0.1}px solid transparent;
         }
         .band-arrow-up {
-          border-bottom: ${cardHeight * 0.07}px solid #ccc;
+          border-bottom: ${cardHeight * 0.07}px solid var(--card-back-color);
         }
         .band-arrow-up-bg {
-          border-bottom: ${cardHeight * 0.1}px solid #ccc;
+          border-bottom: ${cardHeight * 0.1}px solid var(--card-back-color);
         }
         .band-arrow-down {
-          border-top: ${cardHeight * 0.07}px solid #ccc;
+          border-top: ${cardHeight * 0.07}px solid var(--card-back-color);
         }
         .band-arrow-down-bg {
-          border-top: ${cardHeight * 0.1}px solid #ccc;
+          border-top: ${cardHeight * 0.1}px solid var(--card-back-color);
         }
         .inner-band:nth-child(2) {
           border-bottom: none;
@@ -68,7 +68,7 @@ function CardBack(props) {
           border-radius: 0 0 12% 12%;
         }
         .inner-band:nth-child(4) {
-          border-bottom: 1px solid #444;
+          border-bottom: 1px solid var(--card-back-border-color);
         }
         .inner-band:nth-child(5) {
           height: 15%;
