@@ -1,4 +1,5 @@
-export function flash(elementId, property, origColor, flashColor) {
+export function flash(elementId, property, origColor, flashColor, interval) {
+  interval = Math.round(interval);
   let el = document.getElementById(elementId);
   el.style.pointerEvents = 'none';
   el.style[property] = flashColor;
@@ -9,9 +10,9 @@ export function flash(elementId, property, origColor, flashColor) {
       setTimeout(() => {
         el.style[property] = origColor;
         el.style.pointerEvents = 'all';
-      }, 50);
-    }, 50);
-  }, 50);
+      }, interval);
+    }, interval);
+  }, interval);
 }
 
 export function shuffle(arr) {
