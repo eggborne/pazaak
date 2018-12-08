@@ -55,7 +55,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'template.ejs',
       appMountId: 'react-app-root',
-      title: 'Pazaak',
+      title: 'Pazaak.online',
       favicon: './src/assets/images/favicon.png',
       filename: resolve(__dirname, "./", "index.html"),
       meta: {
