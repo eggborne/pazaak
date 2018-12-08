@@ -44,13 +44,13 @@ function Card(props) {
           border-right: ${cardHeight * 0.1}px solid transparent;
         }
         .band-arrow-up {
-          border-bottom: ${cardHeight * 0.07}px solid white;
+          border-bottom: ${cardHeight * 0.07}px solid;
         }
         .band-arrow-up-bg {
           border-bottom: ${cardHeight * 0.1}px solid black;
         }
         .band-arrow-down {
-          border-top: ${cardHeight * 0.07}px solid white;
+          border-top: ${cardHeight * 0.07}px solid;
         }
         .band-arrow-down-bg {
           border-top: ${cardHeight * 0.1}px solid black;
