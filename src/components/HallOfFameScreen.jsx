@@ -16,8 +16,8 @@ function HallOfFameScreen(props) {
           return (
             <div key={i} id={entry.id} className='high-score-entry'>
               <div>{entry.playerName}</div>
-              <div>{entry.setWins}</div>
-              <div>{entry.roundWins}</div>
+              <div>{entry.setWins} / {entry.totalSets}</div>
+              <div>{entry.roundWins} / {entry.totalRounds}</div>
             </div>);
         })}
       </div>
