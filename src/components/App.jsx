@@ -1,6 +1,6 @@
 import React from 'react';
-import Footer from './Footer';
 import Header from './Header';
+import Footer from './Footer';
 import IntroScreen from './IntroScreen';
 import InstructionsScreen from './InstructionsScreen';
 import OptionsScreen from './OptionsScreen';
@@ -9,70 +9,8 @@ import DeckSelectionScreen from './DeckSelectionScreen';
 import GameBoard from './GameBoard';
 import HamburgerMenu from './HamburgerMenu';
 import ResultModal from './ResultModal';
-import { EventEmitter } from 'events';
 let Util = require('../scripts/util');
-import axios from 'axios';
-
-const getScores = () =>
-  axios({
-    method: 'get',
-    url: 'https://www.eggborne.com/scripts/getpazaakscores.php',
-    headers: {
-      'Content-type': 'application/x-www-form-urlencoded'
-    }
-  });
-
-const getScoresForPlayer = (playerName) =>
-  axios({
-    method: 'get',
-    url: 'https://www.eggborne.com/scripts/getpazaakplayer.php',
-    headers: {
-      'Content-type': 'application/x-www-form-urlencoded'
-    },
-    params: {
-      playerName: playerName,
-    }
-  });
-
-const saveUser = (playerName, setWins, roundWins) => {
-  return axios({
-    method: 'post',
-    url: 'https://www.eggborne.com/scripts/savepazaakscore.php',
-    headers: {
-      'Content-type': 'application/x-www-form-urlencoded'
-    },
-    params: {
-      user: playerName,
-      setWins: setWins,
-      roundWins: roundWins
-    }
-  });
-};
-
-const incrementSetWins = (playerName) => {
-  return axios({
-    method: 'post',
-    url: 'https://www.eggborne.com/scripts/updatepazaaksetwins.php',
-    headers: {
-      'Content-type': 'application/x-www-form-urlencoded'
-    },
-    params: {
-      user: playerName,
-    }
-  });
-};
-const incrementRoundWins = (playerName) => {
-  return axios({
-    method: 'post',
-    url: 'https://www.eggborne.com/scripts/updatepazaakroundwins.php',
-    headers: {
-      'Content-type': 'application/x-www-form-urlencoded'
-    },
-    params: {
-      user: playerName,
-    }
-  });
-};
+let DB = require('../scripts/db');
 
 const setCookie = (cname, cvalue, exdays) => {
   var d = new Date();
@@ -98,7 +36,6 @@ const getCookie = (cname) => {
 const checkCookie = () => {
   var playerName = getCookie('username');
   if (playerName != '') {
-    console.log('Welcome again ' + playerName);
     document.getElementById('player-name-input').value = playerName;
   }
 };
@@ -154,6 +91,8 @@ class App extends React.Component {
         loggedInAs: '',
         totalSetWins: 0,
         totalRoundWins: 0,
+        totalSetsPlayed: 0,
+        totalRoundsPlayed: 0,
         deck: { user: [], opponent: [] },
         hand: { user: [], opponent: [] },
         grid: { user: [], opponent: [] },
@@ -264,43 +203,47 @@ class App extends React.Component {
     this.sizeElements();
     checkCookie();
     this.getHighScores();
-
   }
 
   getHighScores() {
-    getScores().then((response) => {
+    DB.getScores().then((response) => {
+      let scoreArray = response.data;
+      if (!response.data) {
+        scoreArray = [];
+      }
       this.setState({
-        highScores: response.data
+        highScores: scoreArray
       });
     });
   }
 
   evaluatePlayerName(playerName) {
-    getScoresForPlayer(playerName).then((response) => {
+    DB.getScoresForPlayer(playerName).then((response) => {
+      let userStatusCopy = Object.assign({}, this.state.userStatus);
       if (response.data) {
         let playerObj = response.data[0];
-        console.warn(`${playerName} FOUND! setWins ${playerObj.setWins} roundWins ${playerObj.roundWins}!`);
-        let userStatusCopy = this.state.userStatus;
         userStatusCopy.loggedInAs = playerObj.playerName;
         userStatusCopy.totalSetWins = playerObj.setWins;
         userStatusCopy.totalRoundWins = playerObj.roundWins;
-        this.setState({
-          userStatus: userStatusCopy
-        });
       } else {
-        console.warn(`${playerName} NOT FOUND! Creating cookie and new entry in db!`);
+        userStatusCopy.loggedInAs = playerName;
         setCookie('username', playerName, 365);
-        saveUser(playerName, 0, 0);
+        DB.saveUser(playerName);
       }
+      this.setState({
+        userStatus: userStatusCopy
+      });
     });
   }
 
+  incrementPlayerTotalGames(playerName, type) {
+    let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
+    eval(funcName)(playerName);
+  }
+
   incrementPlayerScore(playerName, type) {
-    if (type === 'setWins') {
-      incrementSetWins(playerName);
-    } else {
-      incrementRoundWins(playerName);
-    }
+    let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
+    eval(funcName)(playerName);
   }
 
   sizeElements() {
@@ -424,6 +367,7 @@ class App extends React.Component {
         document.body.style.setProperty('--card-back-color', '#555');
         document.body.style.setProperty('--card-back-bg-color', '#333');
         document.body.style.setProperty('--card-back-border-color', '#222');
+        document.body.style.setProperty('--modal-shadow-color', 'black');
         optionsCopy.darkTheme = true;
       }
 
@@ -454,6 +398,8 @@ class App extends React.Component {
         document.body.style.setProperty('--card-back-color', '#ccc');
         document.body.style.setProperty('--card-back-bg-color', 'grey');
         document.body.style.setProperty('--card-back-border-color', '#444');
+        document.body.style.setProperty('--modal-shadow-color', 'rgb(46, 46, 46)');
+
         optionsCopy.darkTheme = false;
       }
     }
@@ -594,15 +540,14 @@ class App extends React.Component {
         });
       }
     }
-
     // GAME STARTED
-
     if (this.state.phase === 'gameStarted') {
       if (this.state.turnStatus.opponent.standing) {
         // opponent standing
         if (this.state.userGrid.length < 9) {
           this.playHandCard('user', { id: event.target.id, value: value, type: type });
         }
+        
       } else {
         // opponent still in play
         if (!this.state.turnStatus.user.playedCards && this.state.userGrid.length < 9) {
@@ -610,18 +555,8 @@ class App extends React.Component {
         }
       }
 
-      // Util.flash('end-turn-button', 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval/3);
-      // Util.flash('end-turn-button', 'background-color', this.buttonBgColor, '#111', this.state.options.flashInterval/3);
-      // let newTurn = this.swapTurn();
-      // if (this.state[`${newTurn}Grid`].length < 9) {
-      //   setTimeout(() => {
-      //     this.makeOpponentMove(this.state.options.opponentMoveInterval);
-      //     this.dealToPlayerGrid(newTurn);
-      //   }, this.state.options.turnInterval);
-      // }
     }
   }
-
   playHandCard(player, cardObject, delay) {
     setTimeout(() => {
       this.removeCardFromHand(player, cardObject.id);
@@ -673,19 +608,21 @@ class App extends React.Component {
     });
     return match;
   }
-
   declareWinner(winner, delay) {
-    let newWins;
     if (winner !== 'TIE') {
-      newWins = this.state[`${winner}Wins`] + 1;
-      if (winner === 'user') {
-        if (this.state.userStatus.loggedInAs) {
-          let user = this.state.userStatus.loggedInAs;
-          console.warn('Saving SET win of logged in user', user);
-          this.incrementPlayerScore(user, 'setWins');
+      let newWins = this.state[`${winner}Wins`] + 1;
+      if (this.state.playerNames.user !== 'Player' && this.state.userStatus.loggedInAs) {
+        let playerName = this.state.userStatus.loggedInAs;
+        this.incrementPlayerTotalGames(playerName, 'sets');
+        if (winner === 'user') {
+          this.incrementPlayerScore(playerName, 'setWins');
           if (newWins === 3) {
-            console.warn('Saving ROUND win of logged in user', user);
-            this.incrementPlayerScore(user, 'roundWins');
+            this.incrementPlayerScore(playerName, 'roundWins');
+            this.incrementPlayerTotalGames(playerName, 'rounds');
+          }
+        } else {
+          if (newWins === 3) {
+            this.incrementPlayerTotalGames(playerName, 'rounds');
           }
         }
       }
@@ -698,9 +635,10 @@ class App extends React.Component {
         this.callResultModal(winner);
       }, delay);
     } else {
-      newWins = this.state[`${winner}Wins`];
-      if (winner === 'opponent') {
-        winner = 'CPU';
+      // TIE
+      if (this.state.playerNames.user !== 'Player' && this.state.userStatus.loggedInAs) {
+        let playerName = this.state.userStatus.loggedInAs;
+        this.incrementPlayerTotalGames(playerName, 'sets');
       }
       this.setState({
         turn: null,
@@ -710,8 +648,8 @@ class App extends React.Component {
         this.callResultModal('tie');
       }, delay);
     }
-  }
 
+  }
   swapTurn() {
     let newTurn;
     if (this.state.turn === 'user') {
@@ -733,7 +671,6 @@ class App extends React.Component {
     this.playSound('turn');
     return newTurn;
   }
-
   makeOpponentMove(delay) {
     setTimeout(() => {
       if (this.state.turnStatus.user.standing) {
@@ -853,7 +790,6 @@ class App extends React.Component {
       }
     }, delay);
   }
-
   determineWinnerFromTotal() {
     let winner;
     if (this.state.userTotal > this.state.opponentTotal) {
@@ -873,15 +809,12 @@ class App extends React.Component {
     } else {
       this.declareWinner('TIE', this.state.options.turnInterval);
     }
-
   }
-
   changeTurn(newPlayer) {
     if (newPlayer === 'user') {
       if (this.state.turnStatus.opponent.standing) {
         // see if opponent has losing score
         if (this.state.opponentTotal > 20) {
-          console.warn('CPU STOOD to pass turn to user with TOTAL > 20', this.state.opponentTotal);
           this.declareWinner('user', this.state.options.turnInterval);
         } else {
           this.playSound('click');
@@ -931,7 +864,6 @@ class App extends React.Component {
       turnStatus: turnStatusCopy
     });
   }
-
   callResultModal(winner) {
     let bgColor = 'var(--red-bg-color)';
     let title;
@@ -981,7 +913,7 @@ class App extends React.Component {
     }
     this.setState({
       userDeck: userDeckCopy,
-      idCount: (this.state.idCount + 1)
+      idCount: (this.state.idCount + 11)
     });
     document.getElementById('play-button').classList.remove('disabled-button');
   }
@@ -1059,24 +991,24 @@ class App extends React.Component {
       },
     });
     if (total) {
+      // only disable if clearing player deck
+      // document.getElementById('play-button').classList.add('disabled-button');
       this.getNewPlayerHands();
       this.setState({
         phase: 'splashScreen',
         userWins: 0,
         opponentWins: 0,
-        userDeck: []
+        // must disable button if this is reset
+        // userDeck: []
       });
     }
   }
-
   handleClickHamburgerOptions(event) {
     Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
 
   }
-
   handleClickHamburgerQuit(event) {
     Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
-    console.log('clicked quit');
     this.setState({
       menuShowing: false
     });
