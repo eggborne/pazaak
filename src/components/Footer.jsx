@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Hamburger from './Hamburger';
 
 function Footer(props) {
   return (
@@ -8,11 +9,7 @@ function Footer(props) {
         <button className='move-button' onClick={props.onClickEndTurn} id='end-turn-button'>End Turn</button>
         <button className='move-button' onClick={props.onClickStand} id='stand-button'>Stand</button>
       </div>
-      <div onClick={props.onClickHamburger} id='hamburger'>
-        <div className='hamburger-bar' id='top-hamburger-bar'></div>
-        <div className='hamburger-bar'></div>
-        <div className='hamburger-bar' id='bottom-hamburger-bar'></div>
-      </div>
+      <Hamburger onClickHamburger={props.onClickHamburger} />
     </div>
   );
 }
@@ -21,7 +18,7 @@ Footer.propTypes = {
   style: PropTypes.object,
   onClickEndTurn: PropTypes.func,
   onClickStand: PropTypes.func,
-  onClickHamburger: PropTypes.func
+  onClickHamburger: PropTypes.func,
 };
 
 
