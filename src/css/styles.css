@@ -19,6 +19,7 @@ body {
   --card-back-color: #ccc;
   --card-back-bg-color: grey;
   --card-back-border-color: #444;
+  --modal-shadow-color: rgb(46, 46, 46);
   -webkit-user-select: none;  /* Chrome all / Safari all */
   -moz-user-select: none;     /* Firefox all */
   -ms-user-select: none;      /* IE 10+ */
@@ -103,6 +104,9 @@ input {
 }
 #options-screen {
   background-color: var(--trans-blue-bg-color);
+  font-size: 2.75vh;
+  line-height: 100%;
+  
 }
 #hall-of-fame-screen {
   
@@ -119,11 +123,14 @@ input {
   font-family: 'Bungee';
   padding: 2rem;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 #options-grid {
   box-sizing: border-box;
   width: 80%;
-  margin-left: 10%;
+  /* margin-left: 10%; */
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
@@ -183,8 +190,8 @@ input {
   color: green;
 }
 .option-label {
-  justify-self: right;
-  padding-right: 1rem;
+  /* justify-self: right; */
+  padding-right: 1.5rem;
 }
 .option-label, .option-toggle {
   display: inline-flex;
@@ -195,7 +202,7 @@ input {
   border: 1px solid black;
   background-color: var(--option-on-color);
   margin: 0.25rem;
-  font-size: 1.25rem;
+  font-size: 2rem;
   transition: background 200ms ease;
 }
 .option-off {
@@ -620,7 +627,7 @@ input {
   align-items: center;
   justify-content: center;
   line-height: 2.5rem;
-  box-shadow: 0px 0px 2rem rgb(46, 46, 46);
+  box-shadow: 0px 0px 2rem var(--modal-shadow-color);
   transform: translateY(-95vw);
   opacity: 0;
   transition: transform 300ms ease, opacity 600ms ease;;
@@ -654,8 +661,8 @@ input {
 }
 #hamburger-menu {
   position: fixed;
-  width: 60vw;
-  height: 80vw;
+  width: 60vmin;
+  height: 80vmin;
   background-color: rgba(0, 0, 0, 0.75);
   right: -60vw;
   bottom: 2.75rem;
