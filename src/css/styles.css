@@ -32,6 +32,10 @@ body {
   margin: 0 auto;
   transition: background-color 300ms ease;
 }
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
 button {
   outline: 0;
   font-family: 'Audiowide';
@@ -42,6 +46,22 @@ button {
   border: solid var(--button-border-color);
   position: relative;
   max-width: 400px;
+}
+input {
+  font-family: 'Nova Square';
+  background-color: var(--card-back-color);
+  box-sizing: border-box;
+  width: 50%;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  min-width: 224px;
+  max-width: 400px;
+  text-align: center;
+}
+#name-input-label {
+  color: var(--main-text-color);
+  font-family: 'Nova Square';
+  margin-bottom: 0.25rem;
 }
 #container {
   display: flex;
@@ -67,7 +87,7 @@ button {
   font-size: 2rem;
   line-height: 100%;
 }
-#instructions-screen, #options-screen {
+#instructions-screen, #options-screen, #hall-of-fame-screen {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -79,9 +99,13 @@ button {
 #instructions-screen {
   background-color: var(--trans-red-bg-color);
   font-size: 1.1rem;
+  /* justify-content: space-evenly; */
 }
 #options-screen {
   background-color: var(--trans-blue-bg-color);
+}
+#hall-of-fame-screen {
+  
 }
 #instructions {
   font-family: 'Nova Square';
@@ -90,22 +114,77 @@ button {
   overflow-y: scroll;
   height: 50vh;
 }
+
 #options {
   font-family: 'Bungee';
   padding: 2rem;
+  width: 100%;
 }
 #options-grid {
   box-sizing: border-box;
-  /* border: 1px solid black; */
-  width: 80vw;
+  width: 80%;
+  margin-left: 10%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
   justify-items: stretch;
   height: 40vh;
 }
+#high-scores-list {
+  box-sizing: border-box;
+  width: 100%;
+  font-family: 'Nova Square';
+  overflow-y: scroll;
+  height: 50vh;
+}
+#high-score-title {
+  margin-bottom: 1rem;
+}
+#hall-of-fame-screen {
+  justify-content: space-evenly;
+}
+#high-score-heading {
+  box-sizing: border-box;
+  width: 100%;
+  font-family: 'Nova Square';
+  font-size: 1.2rem;
+  display: inline-flex;
+  /* justify-content: space-between; */
+  padding: 0 3rem 0 3rem;
+}
+.heading-label {
+  display: flex;
+  align-items: flex-end;
+  /* justify-content: center; */
+}
+#high-score-heading > div:nth-child(1) {
+  width: 50%;
+}
+#high-score-heading > div:nth-child(2), #high-score-heading > div:nth-child(3) {
+  width: 25%;
+  /* text-align: center; */
+}
+.high-score-entry {
+  box-sizing: border-box;
+  display: inline-flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 3rem 0.5rem 3rem;
+}
+.high-score-entry > div:nth-child(1) {
+  width: 50%;
+  /* text-align: center; */
+}
+.high-score-entry > div:nth-child(2), .high-score-entry > div:nth-child(3) {
+  width: 22.5%;
+  /* text-align: center; */
+}
+.set-win-count {
+  color: green;
+}
 .option-label {
-  justify-self: left;
+  justify-self: right;
+  padding-right: 1rem;
 }
 .option-label, .option-toggle {
   display: inline-flex;
@@ -120,7 +199,7 @@ button {
   transition: background 200ms ease;
 }
 .option-off {
-  background-color: var(--option-off-color);
+  background-color: var(--option-off-color) !important;
 }
 #deck-select-screen {
   font-size: 1.5rem;
@@ -193,6 +272,9 @@ button {
   min-width: 224px;
   margin-bottom: 2rem;
 }
+#hall-of-fame-button {
+  color: rgb(255, 255, 163);
+}
 #game-board {
   display: flex;
   flex-direction: column;
@@ -232,7 +314,6 @@ button {
   justify-content: space-evenly;
   align-items: stretch;
   bottom: -3rem;
-  position: absolute;
   transition: all 300ms ease;
 }
 #footer-button-area {
@@ -287,14 +368,14 @@ button {
   opacity: 0.9;
 }
 .move-button {
-  width: 40%;
+  width: 50%;
   font-size: 1.2rem;
   padding: 0.35rem;
   transition: all 300ms ease, color 0ms;
 }
 .card {
   box-sizing: border-box;
-  color: var(--card-text-color);
+  color: var(--card-back-color);
   background-color: var(--card-bg-color);
   border: 1px solid black;
   border-radius: 7%;
@@ -330,9 +411,11 @@ button {
 }
 .band-arrow-up {
   position: absolute;
+  border-bottom-color: var(--card-back-color) !important;
 }
 .band-arrow-down {  
   position: absolute;
+  border-top-color: var(--card-back-color) !important;
 }
 .corner-bubble {
   box-sizing: border-box;
@@ -525,7 +608,7 @@ button {
   position: absolute;
   width: 75%;
   height: 14rem;
-  font-family: "Bungee";
+  font-family: 'Bungee';
   /* background-color: var(--red-bg-color); */
   color: var(--main-text-color);
   border-radius: 3vmin;
@@ -537,13 +620,13 @@ button {
   align-items: center;
   justify-content: center;
   line-height: 2.5rem;
-  box-shadow: 0px 0px 0.5rem black;
+  box-shadow: 0px 0px 2rem rgb(46, 46, 46);
   transform: translateY(-95vw);
   opacity: 0;
   transition: transform 300ms ease, opacity 600ms ease;;
 }
 #result-title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   text-align: center;
 }
 #result-body {
@@ -568,4 +651,58 @@ button {
   font-size: 1.25rem;
   padding: 0.75rem 2rem 0.75rem 2rem;
   margin-bottom: 0.5rem;
+}
+#hamburger-menu {
+  position: fixed;
+  width: 60vw;
+  height: 80vw;
+  background-color: rgba(0, 0, 0, 0.75);
+  right: -60vw;
+  bottom: 2.75rem;
+  font-size: 4vw;
+  font-family: 'Nova Square';
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  flex-direction: column;
+  transition: right 400ms ease;
+  padding: 1rem;
+  box-sizing: border-box;
+  z-index: 20;
+}
+#hamburger-options-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-grow: 1;
+}
+.mini-option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+.mini-option-label {
+  
+}
+.mini-option-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bungee';
+  background-color: var(--option-on-color);
+  height: 6vh;
+  width: 40%;
+  transition: background 200ms ease;
+}
+.hamburger-button {
+  position: relative;
+  font-size: inherit;
+  width: 100%;
+  padding: 1rem;
+}
+.hamburger-on {
+  right: 0 !important;
 }
