@@ -11,34 +11,7 @@ import HamburgerMenu from './HamburgerMenu';
 import ResultModal from './ResultModal';
 let Util = require('../scripts/util');
 let DB = require('../scripts/db');
-
-const setCookie = (cname, cvalue, exdays) => {
-  var d = new Date();
-  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-  var expires = 'expires=' + d.toUTCString();
-  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
-};
-const getCookie = (cname) => {
-  var name = cname + '=';
-  var decodedCookie = decodeURIComponent(document.cookie);
-  var ca = decodedCookie.split(';');
-  for (var i = 0; i < ca.length; i++) {
-    var c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return '';
-};
-const checkCookie = () => {
-  var playerName = getCookie('username');
-  if (playerName != '') {
-    document.getElementById('player-name-input').value = playerName;
-  }
-};
+let AI = require('../scripts/ai');
 
 let cardSize = {};
 let mediumCardSize = {};
@@ -55,6 +28,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      vsCPU: true,
       playerNames: {
         user: 'Player',
         opponent: 'CPU'
@@ -66,18 +40,6 @@ class App extends React.Component {
       idCount: 0,
       userDeck: [],
       opponentDeck: [],
-      // opponentDeck: [
-      //   { id: 1, value: 1, type: 'plus' },
-      //   { id: 2, value: 2, type: 'plus' },
-      //   { id: 3, value: 3, type: 'plus' },
-      //   { id: 4, value: 4, type: 'plus' },
-      //   { id: 5, value: 5, type: 'plus' },
-      //   { id: 5, value: -6, type: 'minus' },
-      //   { id: 5, value: -5, type: 'minus' },
-      //   { id: 6, value: -1, type: 'minus' },
-      //   { id: 7, value: -2, type: 'minus' },
-      //   { id: 9, value: -4, type: 'minus' },
-      // ],
       userHand: [],
       opponentHand: [],
       userGrid: [],
@@ -100,8 +62,22 @@ class App extends React.Component {
         wins: { user: [], opponent: [] },
       },
       turnStatus: {
-        user: { playedCards: 0, standing: false },
-        opponent: { playedCards: 0, standing: false }
+        user: {
+          playedCards: 0,
+          highlightedCard: {
+            element: null,
+            obj: null
+          },
+          standing: false
+        },
+        opponent: {
+          playedCards: 0,
+          highlightedCard: {
+            element: null,
+            obj: null
+          },
+          standing: false
+        }
       },
       resultMessage: {
         title: 'Winner',
@@ -119,19 +95,22 @@ class App extends React.Component {
       highScores: []
     };
 
-    // make the selection deck (12 dummy cards 1-6, plus and minus)...
+    // make the selection deck (12 dummy cards 1-6, plus and minus)
     let cardSelection = [];
     for (let i = 1; i <= 12; i++) {
       let value = i;
-      let sign = 'plus';
-      if (i > 6) {
+      let sign = '+';
+      if (i > 6 && i < 11) {
         value -= 6;
         value *= -1;
-        sign = 'minus';
+        sign = '-';
+      } else if (i >= 11) {
+        value = i - 8;
+        sign = '±';
       }
       cardSelection.push({ id: i * 1111, value: value, type: sign });
     }
-    // ...make a deck of 40, 4 each of value 1-10...
+    // make a deck of 40, 4 each of value 1-10...
     let deck = [];
     for (let i = 1; i <= 40; i++) {
       deck[i - 1] = {};
@@ -146,23 +125,29 @@ class App extends React.Component {
       deck[i - 1].value = currentValue;
       deck[i - 1].type = 'house';
     }
-    // ..make a random 10-card deck for opponent...
+    // make a random 10-card deck for opponent...
     let opponentDeck = [];
     let selectionCopy = Util.shuffle(cardSelection.slice());
     for (let i = 0; i < 10; i++) {
       let deckCard = selectionCopy[i];
       let newCard = { id: i, value: deckCard.value, type: deckCard.type };
+      if (newCard.type === '±') {
+        newCard.type = '-';
+        newCard.value = Math.abs(newCard.value) * -1;
+      }
       opponentDeck.push(newCard);
     }
     // ...put them all in state
     this.state.opponentDeck = opponentDeck;
-    this.state.idCount = 10;
+    this.state.idCount = 10; // these are the 10 opponent deck cards
     this.state.cardSelection = cardSelection;
     this.state.deck = this.shuffleDeck(deck);
 
+    // get these for easy reference when calling Util.flash()
     this.buttonTextColor = window.getComputedStyle(document.body).getPropertyValue('--button-text-color');
     this.buttonBgColor = window.getComputedStyle(document.body).getPropertyValue('--button-bg-color');
 
+    // are all of these necessary?
     this.playSound = this.playSound.bind(this);
     this.getHighScores = this.getHighScores.bind(this);
     this.incrementPlayerScore = this.incrementPlayerScore.bind(this);
@@ -180,6 +165,7 @@ class App extends React.Component {
     this.handleClickPlay = this.handleClickPlay.bind(this);
     this.handleClickCard = this.handleClickCard.bind(this);
     this.handleClickEndTurn = this.handleClickEndTurn.bind(this);
+    this.handleClickSwitchSign = this.handleClickSwitchSign.bind(this);
     this.handleClickStand = this.handleClickStand.bind(this);
     this.removeCardFromHand = this.removeCardFromHand.bind(this);
     this.addCardtoGrid = this.addCardtoGrid.bind(this);
@@ -187,7 +173,6 @@ class App extends React.Component {
     this.getCardIndexById = this.getCardIndexById.bind(this);
     this.swapTurn = this.swapTurn.bind(this);
     this.changeTurn = this.changeTurn.bind(this);
-    this.makeOpponentMove = this.makeOpponentMove.bind(this);
     this.callResultModal = this.callResultModal.bind(this);
     this.dismissResultModal = this.dismissResultModal.bind(this);
     this.handleClickRandomize = this.handleClickRandomize.bind(this);
@@ -201,7 +186,7 @@ class App extends React.Component {
 
   componentDidMount() {
     this.sizeElements();
-    checkCookie();
+    Util.checkCookie();
     this.getHighScores();
   }
 
@@ -218,6 +203,12 @@ class App extends React.Component {
   }
 
   evaluatePlayerName(playerName) {
+    /**
+     * Loads player data into this.state.userStatus from database if found
+     * OR:
+     * - sets a new cookie for user
+     * - saves the new player name in DB
+     */
     DB.getScoresForPlayer(playerName).then((response) => {
       let userStatusCopy = Object.assign({}, this.state.userStatus);
       if (response.data) {
@@ -227,7 +218,7 @@ class App extends React.Component {
         userStatusCopy.totalRoundWins = playerObj.roundWins;
       } else {
         userStatusCopy.loggedInAs = playerName;
-        setCookie('username', playerName, 365);
+        Util.setCookie('username', playerName, 365);
         DB.saveUser(playerName);
       }
       this.setState({
@@ -289,14 +280,14 @@ class App extends React.Component {
     let opponentMinus = [];
     // separate pluses and minuses into their own arrays
     newUserHandSlice.map((card) => {
-      if (card.type === 'plus') {
+      if (card.type === '+') {
         userPlus.push(card);
       } else {
         userMinus.push(card);
       }
     });
     newOpponentHandSlice.map((card) => {
-      if (card.type === 'plus') {
+      if (card.type === '+') {
         opponentPlus.push(card);
       } else {
         opponentMinus.push(card);
@@ -312,32 +303,40 @@ class App extends React.Component {
     userMinus.map(card => newUserHand.push(card));
     opponentPlus.map(card => newOpponentHand.push(card));
     opponentMinus.map(card => newOpponentHand.push(card));
+
+    // newOpponentHand = [];
+
     this.setState({
       userHand: newUserHand,
       opponentHand: newOpponentHand
     });
+    console.warn('hands', newUserHand, newOpponentHand);
   }
 
-  dealToPlayerGrid(player) {
-    let newGridCards = this.state[`${player}Grid`].slice();
+  dealToPlayerGrid(player, delay) {
     let deckCopy = this.state.deck.slice();
     let newCard = Util.shuffle(deckCopy)[0];
-    newGridCards.push(newCard);
-    let newTotal = 0;
-    newTotal += this.state[`${player}Total`] + newCard.value;
-    this.changeCardTotal(player, newTotal);
-    this.playSound('draw');
-    this.setState({
-      [`${player}Grid`]: newGridCards,
-    });
+    setTimeout(() => {
+      let newGridCards = this.state[`${player}Grid`].slice();
+      newGridCards.push(newCard);
+      let newTotal = 0;
+      newTotal += this.state[`${player}Total`] + newCard.value;
+      this.changeCardTotal(player, newTotal);
+      this.playSound('draw');
+      this.setState({
+        [`${player}Grid`]: newGridCards,
+      });
+    }, delay);
+    return newCard.value;
   }
   handleToggleOption(event) {
     let el = event.target;
     let el2;
-    if (event.target.id.slice(0, 3) === 'ham') {
-      el2 = document.getElementById(event.target.id.slice(10, event.target.id.length));
+    let eventId = event.target.id;
+    if (eventId.slice(0, 3) === 'ham') {
+      el2 = document.getElementById(eventId.slice(10, eventId.length));
     } else {
-      el2 = document.getElementById(`hamburger-${event.target.id}`);
+      el2 = document.getElementById(`hamburger-${eventId}`);
     }
     let optionsCopy = Object.assign({}, this.state.options);
     if (el.classList.contains('option-off')) {
@@ -345,19 +344,19 @@ class App extends React.Component {
       el2.classList.remove('option-off');
       el.innerHTML = 'ON';
       el2.innerHTML = 'ON';
-      if (event.target.id === 'sound-fx-toggle' || event.target.id === 'hamburger-sound-fx-toggle') {
+      if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = true;
       }
-      if (event.target.id === 'ambience-toggle' || event.target.id === 'hamburger-ambience-toggle') {
+      if (eventId === 'ambience-toggle' || eventId === 'hamburger-ambience-toggle') {
         optionsCopy.ambience = true;
       }
-      if (event.target.id === 'quick-mode-toggle' || event.target.id === 'hamburger-quick-mode-toggle') {
+      if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
         document.body.style.setProperty('--pulse-speed', '400ms');
         optionsCopy.turnInterval = 90;
         optionsCopy.flashInterval = 3;
         optionsCopy.opponentMoveInterval = 100;
       }
-      if (event.target.id === 'dark-theme-toggle' || event.target.id === 'hamburger-dark-theme-toggle') {
+      if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
         document.body.style.setProperty('--main-bg-color', '#050505');
         document.body.style.setProperty('--main-text-color', '#999');
         document.body.style.setProperty('--card-bg-color', '#333');
@@ -376,19 +375,19 @@ class App extends React.Component {
       el2.classList.add('option-off');
       el.innerHTML = 'OFF';
       el2.innerHTML = 'OFF';
-      if (event.target.id === 'sound-fx-toggle' || event.target.id === 'hamburger-sound-fx-toggle') {
+      if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = false;
       }
-      if (event.target.id === 'ambience-toggle' || event.target.id === 'hamburger-ambience-toggle') {
+      if (eventId === 'ambience-toggle' || eventId === 'hamburger-ambience-toggle') {
         optionsCopy.ambience = false;
       }
-      if (event.target.id === 'quick-mode-toggle' || event.target.id === 'hamburger-quick-mode-toggle') {
+      if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
         document.body.style.setProperty('--pulse-speed', '900ms');
         optionsCopy.turnInterval = 300;
         optionsCopy.flashInterval = 180;
         optionsCopy.opponentMoveInterval = 1000;
       }
-      if (event.target.id === 'dark-theme-toggle' || event.target.id === 'hamburger-dark-theme-toggle') {
+      if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
         document.body.style.setProperty('--main-bg-color', 'rgb(107, 121, 138)');
         document.body.style.setProperty('--main-text-color', 'rgb(255, 247, 213)');
         document.body.style.setProperty('--card-bg-color', '#ccc');
@@ -431,6 +430,24 @@ class App extends React.Component {
         phase: 'selectingDeck'
       });
     }, this.state.options.flashInterval);
+  }
+  handleClickSwitchSign(event) {
+    event.preventDefault();
+    let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+    let displaySign = turnStatusCopy.user.highlightedCard.element.children[0].innerHTML[0];
+    if (displaySign === '±' || displaySign === '-') {
+      turnStatusCopy.user.highlightedCard.obj.value = Math.abs(turnStatusCopy.user.highlightedCard.obj.value);
+    } else if (displaySign === '+') {
+      turnStatusCopy.user.highlightedCard.obj.value = Math.abs(turnStatusCopy.user.highlightedCard.obj.value) * -1;
+    }
+    let displayValue = turnStatusCopy.user.highlightedCard.obj.value;
+    if (displayValue > 0) {
+      displayValue = `+${displayValue.toString()}`;
+    }
+    turnStatusCopy.user.highlightedCard.element.children[0].innerHTML = displayValue;
+    this.setState({
+      turnStatus: turnStatusCopy
+    });
   }
   handleClickPlay(event) {
     event.preventDefault();
@@ -493,18 +510,62 @@ class App extends React.Component {
     event.preventDefault();
     Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
     this.playSound('click');
-    this.changeTurn('opponent');
+    let buttonText = document.getElementById('end-turn-button').innerHTML;
+    if (buttonText === 'End Turn') {
+      if (!this.state.turnStatus.opponent.standing) {
+        this.changeTurn('opponent');
+      }
+    } else if (buttonText === 'Draw') {
+      // can continuously draw cards, or play ONE hand card
+      if (this.state.userGrid.length < 9) {
+        if (this.state.userGrid.length === 8) {
+          document.getElementById('end-turn-button').innerHTML = 'End Turn';
+        }
+        this.dealToPlayerGrid('user');
+      }
+    } else if (buttonText === 'Play Card') {
+      let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+      let handCardElement = this.state.turnStatus.user.highlightedCard.element;
+      let handCardObj = turnStatusCopy.user.highlightedCard.obj;
+      this.playHandCard('user', handCardObj);
+      this.state.turnStatus.user.highlightedCard.element.classList.remove('highlighted-card');
+      turnStatusCopy.user.highlightedCard.element = null;
+      turnStatusCopy.user.highlightedCard.obj = null;
+      this.setState({
+        turnStatus: turnStatusCopy
+      });
+      if (!this.state.turnStatus.opponent.standing) {
+        document.getElementById('end-turn-button').innerHTML = 'End Turn';
+      } else {
+        document.getElementById('end-turn-button').innerHTML = 'Draw';
+      }
+      document.getElementById('stand-button').innerHTML = 'Stand';
+    }
   }
   handleClickStand(event) {
     event.preventDefault();
     this.playSound('click');
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
-    let turnStatusCopy = Object.assign({}, this.state.turnStatus);
-    turnStatusCopy.user.standing = true;
-    this.setState({
-      turnStatus: turnStatusCopy
-    });
-    this.changeTurn('opponent');
+    let buttonText = document.getElementById('stand-button').innerHTML;
+    if (buttonText === 'Stand') {
+      Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+      let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+      turnStatusCopy.user.standing = true;
+      this.setState({
+        turnStatus: turnStatusCopy
+      });
+      this.changeTurn('opponent');
+    } else if (buttonText === 'Cancel') {
+      this.state.turnStatus.user.highlightedCard.element.classList.remove('highlighted-card');
+      let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+      turnStatusCopy.user.highlightedCard.element = null;
+      turnStatusCopy.user.highlightedCard.obj = null;
+      this.setState({
+        turnStatus: turnStatusCopy
+      });
+      document.getElementById('switch-sign-button').classList.add('hidden-button');
+      document.getElementById('end-turn-button').innerHTML = 'End Turn';
+      document.getElementById('stand-button').innerHTML = 'Stand';
+    }
   }
   handleClickCard(event, value, type) {
     event.preventDefault();
@@ -540,21 +601,53 @@ class App extends React.Component {
         });
       }
     }
+
     // GAME STARTED
+
     if (this.state.phase === 'gameStarted') {
-      if (this.state.turnStatus.opponent.standing) {
-        // opponent standing
-        if (this.state.userGrid.length < 9) {
-          this.playHandCard('user', { id: event.target.id, value: value, type: type });
-        }
-        
-      } else {
-        // opponent still in play
-        if (!this.state.turnStatus.user.playedCards && this.state.userGrid.length < 9) {
-          this.playHandCard('user', { id: event.target.id, value: value, type: type });
+      // highlight card and change footer buttons
+      if (!this.state.turnStatus.user.playedCards && this.state.userGrid.length < 9) {
+        // no card played and room on grid for a card
+        if (!event.target.classList.contains('highlighted-card')) {
+          // card clicked is not highlighted
+          event.target.classList.add('highlighted-card');
+          // unhighlight currently highlighted card, if it exists
+          if (this.state.turnStatus.user.highlightedCard.element) {
+            this.state.turnStatus.user.highlightedCard.element.classList.remove('highlighted-card');
+          }
+          // add highlighted card to state
+          let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+          turnStatusCopy.user.highlightedCard.element = event.target;
+          turnStatusCopy.user.highlightedCard.obj = { id: event.target.id, value: value, type: type };
+          this.setState({
+            turnStatus: turnStatusCopy
+          });
+          // show the switch sign button...
+          document.getElementById('switch-sign-button').classList.remove('hidden-button');
+          let cardObj = this.state.userHand[this.getCardIndexById(this.state.userHand, event.target.id)];
+          // ... but only enable it if the card is a plus-minus
+          if (cardObj.type === '±') {
+            document.getElementById('switch-sign-button').classList.remove('disabled-button');
+          } else {
+            document.getElementById('switch-sign-button').classList.add('disabled-button');
+          }
+          // change the button texts
+          document.getElementById('stand-button').innerHTML = 'Cancel';
+          document.getElementById('end-turn-button').innerHTML = 'Play Card';
+        } else {
+          // card clicked was already highlighted
+          event.target.classList.remove('highlighted-card');
+          let turnStatusCopy = Object.assign({}, this.state.turnStatus);
+          turnStatusCopy.user.highlightedCard.element = null;
+          turnStatusCopy.user.highlightedCard.obj = null;
+          this.setState({
+            turnStatus: turnStatusCopy
+          });
+          document.getElementById('switch-sign-button').classList.add('hidden-button');
+          document.getElementById('end-turn-button').innerHTML = 'End Turn';
+          document.getElementById('stand-button').innerHTML = 'Stand';
         }
       }
-
     }
   }
   playHandCard(player, cardObject, delay) {
@@ -564,22 +657,36 @@ class App extends React.Component {
       this.changeCardTotal(player, this.state[`${player}Total`] + cardObject.value);
       let turnStatusCopy = Object.assign({}, this.state.turnStatus);
       turnStatusCopy.user.playedCards = this.state.turnStatus[player].playedCards + 1;
+      turnStatusCopy.user.highlightedCard.element = null;
+      turnStatusCopy.user.highlightedCard.obj = null;
       this.setState({
         turnStatus: turnStatusCopy
       });
+      document.getElementById('switch-sign-button').classList.add('hidden-button');
+      if (!this.state.turnStatus.opponent.standing) {
+        document.getElementById('end-turn-button').innerHTML = 'End Turn';
+      } else {
+        document.getElementById('end-turn-button').innerHTML = 'Draw';
+      }
+      document.getElementById('stand-button').innerHTML = 'Stand';
     }, delay);
   }
 
   removeCardFromHand(player, cardId) {
     let handCopy = this.state[`${player}Hand`].slice();
-    let indextoRemove = this.getCardIndexById(handCopy, cardId);
-    handCopy.splice(indextoRemove, 1);
+    let indexToRemove = this.getCardIndexById(handCopy, cardId);
+    handCopy.splice(indexToRemove, 1);
     this.setState({
       [`${player}Hand`]: handCopy
     });
   }
   addCardtoGrid(player, value, type) {
     let gridCopy = this.state[`${player}Grid`].slice();
+    if (type === '±') {
+      if (value > 0) {
+        value = `+${value.toString()}`;
+      }
+    }
     let newCard = { value: value, type: type };
     gridCopy.push(newCard);
     this.setState({
@@ -671,126 +778,9 @@ class App extends React.Component {
     this.playSound('turn');
     return newTurn;
   }
-  makeOpponentMove(delay) {
-    setTimeout(() => {
-      if (this.state.turnStatus.user.standing) {
-        // user standing means no limit on playedCards / drawn cards
-        // see if cards can improve total
-        if (this.state.opponentTotal < 20) {
-          let dealInterval = this.state.options.turnInterval * 2;
-          let cardsToPlay = [];
-          let cardLimit = 4;
-          let scoreMinimum = this.state.userTotal;
-          let delay = 0;
-          for (let i = 0; i < this.state.opponentHand.length; i++) {
-            if (this.state.opponentHand[i].type === 'plus') {
-              let card = this.state.opponentHand[i];
-              let totalValuePlayed = 0;
-              cardsToPlay.map((card) => {
-                totalValuePlayed += card.value;
-              });
-              let potentialScore = this.state.opponentTotal + totalValuePlayed + card.value;
-              if (((this.state.opponentTotal + totalValuePlayed) < scoreMinimum || (this.state.opponentTotal + totalValuePlayed) === scoreMinimum && Math.random() < 0.5) && this.state.turnStatus.opponent.playedCards < cardLimit && potentialScore >= scoreMinimum && potentialScore <= 20) {
-                let cardToPlay = card;
-                cardsToPlay.push(cardToPlay);
-                this.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type }, delay);
-                delay += dealInterval;
-              }
-            }
-          }
-          // now just to compare scores and declare a winner
-          // wait for card timeouts!
-          setTimeout(() => {
-            this.determineWinnerFromTotal();
-          }, (cardsToPlay.length * dealInterval));
-          return;
-        } else if (this.state.opponentTotal > 20) {
 
-          // see if minus cards can get total below 20
-          let dealInterval = this.state.options.turnInterval * 2;
-          let cardsToPlay = [];
-          let delay = 0;
-          for (let i = 0; i < this.state.opponentHand.length; i++) {
-            if (this.state.opponentHand[i].type === 'minus') {
-              let card = this.state.opponentHand[i];
-              let totalValuePlayed = 0;
-              cardsToPlay.map((card) => {
-                totalValuePlayed += card.value;
-              });
-              let currentTally = this.state.opponentTotal + totalValuePlayed;
-              let potentialScore = currentTally + card.value;
-              if (potentialScore <= 20) {
-                let cardToPlay = card;
-                cardsToPlay.push(cardToPlay);
-                this.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type }, delay);
-                delay += dealInterval;
-              }
-            }
-          }
-          // now just to compare scores and declare a winner
-          // wait for card timeouts!
-          setTimeout(() => {
-            this.determineWinnerFromTotal();
-          }, (cardsToPlay.length * dealInterval));
-          return;
-        } else {
-          // is 20
-          let turnStatusCopy = Object.assign({}, this.state.turnStatus);
-          turnStatusCopy.opponent.standing = true;
-          this.setState({
-            turnStatus: turnStatusCopy
-          });
-        }
-        // ...then, if did not reach a stand state, 'click' End Turn
-        this.changeTurn('user');
-      } else {
-        if (this.state.opponentTotal < 20) {
-          let cardLimit = 1;
-          let scoreMinimum = 17;
-          for (let i = 0; i < this.state.opponentHand.length; i++) {
-            if (this.state.opponentHand[i].type === 'plus') {
-              let card = this.state.opponentHand[i];
-              let potentialScore = this.state.opponentTotal + card.value;
-              if (this.state.turnStatus.opponent.playedCards < cardLimit && potentialScore >= scoreMinimum && potentialScore <= 20) {
-                let cardToPlay = card;
-                this.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
-                let turnStatusCopy = Object.assign({}, this.state.turnStatus);
-                turnStatusCopy.opponent.standing = true;
-                this.setState({
-                  turnStatus: turnStatusCopy
-                });
-                break;
-              }
-            }
-          }
-        } else if (this.state.opponentTotal > 20) {
-          for (let i = 0; i < this.state.opponentHand.length; i++) {
-            if (this.state.opponentHand[i].type === 'minus') {
-              let card = this.state.opponentHand[i];
-              let potentialScore = this.state.opponentTotal + card.value;
-              if (potentialScore <= 20) {
-                let cardToPlay = card;
-                this.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
-                break;
-              }
-            }
-          }
-        } else {
-          // is 20
-          let turnStatusCopy = Object.assign({}, this.state.turnStatus);
-          turnStatusCopy.opponent.standing = true;
-          this.setState({
-            turnStatus: turnStatusCopy
-          });
-        }
-        //must delay or this.state.opponentTotal is wrong in changeTurn()!
-        setTimeout(() => {
-          this.changeTurn('user');
-        }, 150);
-      }
-    }, delay);
-  }
   determineWinnerFromTotal() {
+    console.error(`app.determineWinnerFromTotal is comparing userTotal ${this.state.userTotal} - opponentTotal ${this.state.opponentTotal}`);
     let winner;
     if (this.state.userTotal > this.state.opponentTotal) {
       if (this.state.userTotal <= 20) {
@@ -814,7 +804,7 @@ class App extends React.Component {
     if (newPlayer === 'user') {
       if (this.state.turnStatus.opponent.standing) {
         // see if opponent has losing score
-        if (this.state.opponentTotal > 20) {
+        if (this.state.opponentTotal > 20 || this.state.turnStatus.user.standing) {
           this.declareWinner('user', this.state.options.turnInterval);
         } else {
           this.playSound('click');
@@ -850,7 +840,10 @@ class App extends React.Component {
             if (this.state[`${newTurn}Grid`].length < 9) {
               this.dealToPlayerGrid(newTurn);
             }
-            this.makeOpponentMove(this.state.options.opponentMoveInterval);
+            if (this.state.vsCPU) {
+              // this.makeOpponentMove();
+              AI.makeOpponentMove(this);
+            }
           }, this.state.options.turnInterval);
         } else {
           this.determineWinnerFromTotal();
@@ -982,11 +975,19 @@ class App extends React.Component {
       turnStatus: {
         user: {
           playedCards: 0,
-          standing: false
+          standing: false,
+          highlightedCard: {
+            element: null,
+            obj: null
+          }
         },
         opponent: {
           playedCards: 0,
-          standing: false
+          standing: false,
+          highlightedCard: {
+            element: null,
+            obj: null
+          }
         }
       },
     });
@@ -1021,7 +1022,7 @@ class App extends React.Component {
   render() {
     let roundOver = (this.state.userWins === 3 || this.state.opponentWins === 3);
     // default styles are hidden...
-    let footerStyle = { position: 'absolute', bottom: '-3rem' };
+    let footerStyle = { pointerEvents: 'none', opacity: 0, position: 'absolute', bottom: '-3rem' };
     let gameBoardStyle = { display: 'none' };
     let introStyle = { display: 'none' };
     let instructionsStyle = { display: 'none' };
@@ -1031,7 +1032,7 @@ class App extends React.Component {
     // but shown if proper state.phase
     if (this.state.phase === 'gameStarted') {
       gameBoardStyle = { display: 'flex' };
-      footerStyle = { position: 'relative', bottom: '0' };
+      footerStyle = { pointerEvents: 'all', opacity: 1, position: 'relative', bottom: '0' };
     } else if (this.state.phase === 'selectingDeck') {
       deckSelectStyle = { display: 'flex' };
     } else if (this.state.phase === 'showingOptions') {
@@ -1083,6 +1084,7 @@ class App extends React.Component {
           onClickEndTurn={this.handleClickEndTurn}
           onClickStand={this.handleClickStand}
           onClickHamburger={this.handleClickHamburger}
+          onClickSwitchSign={this.handleClickSwitchSign}
         />
         <HamburgerMenu onClickHamburgerOptions={this.handleClickHamburgerOptions}
           onClickHamburgerQuit={this.handleClickHamburgerQuit}
