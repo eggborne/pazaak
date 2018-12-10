@@ -7,6 +7,7 @@ function Footer(props) {
     <div style={props.style} id='footer'>
       <div id='footer-button-area'>
         <button className='move-button' onClick={props.onClickEndTurn} id='end-turn-button'>End Turn</button>
+        <button className='move-button disabled-button hidden-button' onClick={props.onClickSwitchSign} id='switch-sign-button'>+/-</button>
         <button className='move-button' onClick={props.onClickStand} id='stand-button'>Stand</button>
       </div>
       <Hamburger onClickHamburger={props.onClickHamburger} />
@@ -17,6 +18,7 @@ function Footer(props) {
 Footer.propTypes = {
   style: PropTypes.object,
   onClickEndTurn: PropTypes.func,
+  onClickSwitchSign: PropTypes.func,
   onClickStand: PropTypes.func,
   onClickHamburger: PropTypes.func,
 };
