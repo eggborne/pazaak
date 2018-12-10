@@ -54,10 +54,13 @@ function GameBoard(props) {
     }
   }
   if (document.getElementById('end-turn-button')) {
-    if (props.turnStatus.opponent.standing) {
+    if (props.turnStatus.opponent.standing && !props.turnStatus.user.highlightedCard.element) {
       document.getElementById('end-turn-button').innerHTML = 'Draw';
+    } else if (props.turnStatus.user.highlightedCard.element) {
+      document.getElementById('end-turn-button').innerHTML = 'Play Card';
     } else {
       document.getElementById('end-turn-button').innerHTML = 'End Turn';
+
     }
   }
   return (
