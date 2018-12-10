@@ -4,18 +4,21 @@ import PropTypes from 'prop-types';
 
 function Card(props) {
   let color;
-  let cornerSymbol;
-  let valueDisplay = props.value;
-  if (props.type === 'plus') {
+  let altColor;
+  let cornerSymbol = props.type;
+  let valueDisplay = `${props.type}${Math.abs(props.value)}`;
+  if (props.type === '+') {
+    color = altColor = 'var(--plus-card-color)';
+  } else if (props.type === '-') {
+    color = altColor = 'var(--minus-card-color)';
+  } else if (props.type === '±') {
     color = 'var(--plus-card-color)';
-    cornerSymbol = '+';
-    valueDisplay = `+${props.value}`;
-  } else if (props.type === 'minus') {
-    color = 'var(--minus-card-color)';
-    cornerSymbol = '-';
+    altColor = 'var(--minus-card-color)';
+    valueDisplay = props.value;
   } else if (props.type==='house') {
-    color = 'var(--house-card-color)';
+    color = altColor = 'var(--house-card-color)';
     cornerSymbol = '';
+    valueDisplay = props.value;
   }
   let cardHeight = props.size.height;
   return (
@@ -30,8 +33,11 @@ function Card(props) {
         .inner-band {
           background-color: ${color}
         }
+        .inner-band:nth-child(3) {
+          background-color: ${altColor}
+        }
         .corner-bubble {
-          background-color: ${color};
+          background-color: ${altColor};
           width: ${cardHeight * 0.16}px;
           height: ${cardHeight * 0.16}px;
         }
@@ -78,7 +84,10 @@ function Card(props) {
 Card.propTypes = {
   id: PropTypes.number,
   size: PropTypes.object,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number
+  ]),
   type: PropTypes.string,
   onClickCard: PropTypes.func
 };
