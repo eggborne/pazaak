@@ -27,7 +27,7 @@ function ResultModal(props) {
       <div className='shadowed-text' id='result-body'>
         <div style={winnerStyle} id='result-winner'>{props.winner}</div>
         <div style={scoresStyle} id='result-scores'>
-          {props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span> - {props.playerNames.opponent}: <span style={opponentScoreStyle}>{props.finalScores.opponent}</span>
+          {props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span><br />{props.playerNames.opponent}: <span style={opponentScoreStyle}>{props.finalScores.opponent}</span>
         </div>
       </div>
       <button onClick={(event) => props.onClickOKButton(event)} id='ok-button'>{props.buttonText}</button>
