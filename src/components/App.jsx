@@ -521,15 +521,8 @@ class App extends React.PureComponent {
         portrait.style.fontSize = (Math.round(contWidth * (0.35)) / 7) + 'px';
       }
     });
-    // Array.from(document.getElementsByClassName('turn-indicator')).map((el) => {
-    //   el.style.height = el.style.width = `${cardSize.height / 2.5}px`;
-    // });
     Array.from(document.getElementsByClassName('player-area')).map((el) => {
       el.style.minHeight = `${(cardSize.height * 2) + (Math.round(cardSize.height * 0.12))}px`;
-    });
-    Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
-      el.style.width = `${(cardSize.width * 4) + (parseInt(cardSizes.cardSize.margin) * 8)}px`;
-      el.style.height = `${(cardSize.height * 2) + (Math.round(cardSize.height * 0.03))}px`;
     });
     if (document.getElementById('mini-portrait')) {
       document.getElementById('mini-portrait').style.width = document.getElementById('mini-portrait').style.height = miniCardSize.height - 2 + 'px';
@@ -537,8 +530,6 @@ class App extends React.PureComponent {
       let opponentIndex = Object.keys(this.characters).indexOf(this.state.CPUOpponent);
       document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (miniCardSize.height - 2) + 'px';
     }
-    document.getElementById('user-hand').style.height = mediumCardSize.height + 'px';
-    document.getElementById('opponent-hand').style.height = miniCardSize.height + 'px';
   }
 
   playSound(sound) {
@@ -621,7 +612,7 @@ class App extends React.PureComponent {
     }, this.state.options.turnInterval);
     return newCard.value;
   }
-  handleToggleOption() {
+  handleToggleOption(event) {
     let el = event.target;
     let el2;
     let eventId = event.target.id;
@@ -1297,17 +1288,13 @@ class App extends React.PureComponent {
     if (position === 'hamburger') {
       middleBar.style.transform = middleBar2.style.transform = 'none';
       topBar.style.opacity = bottomBar.style.opacity = 1;
-      setTimeout(() => {
-        topBar.style.transform = bottomBar.style.transform = 'translateY(0)';
-      }, 150);
+      topBar.style.transform = bottomBar.style.transform = 'translateY(0)';
     } else {
       topBar.style.transform = 'translateY(2.5vmax)';
       bottomBar.style.transform = 'translateY(-2.5vmax)';
-      setTimeout(() => {
-        topBar.style.opacity = bottomBar.style.opacity = 0;
-        middleBar.style.transform = 'rotate(45deg) scaleX(1.1)';
-        middleBar2.style.transform = 'rotate(-45deg) scaleX(1.1)';
-      }, 150);
+      topBar.style.opacity = bottomBar.style.opacity = 0;
+      middleBar.style.transform = 'rotate(45deg) scaleX(1.1)';
+      middleBar2.style.transform = 'rotate(-45deg) scaleX(1.1)';
     }
   }
   handleClickHamburger() {
@@ -1433,13 +1420,13 @@ class App extends React.PureComponent {
     let opponentSelectStyle = { display: 'none' };
     let deckSelectStyle = { display: 'none' };
     switch (this.state.phase) {
-    case 'splashScreen': introStyle = { display: 'flex' }; break;
-    case 'selectingOpponent': opponentSelectStyle = { display: 'flex' }; break;
-    case 'showingOptions': optionsStyle = { display: 'flex' }; break;
-    case 'selectingDeck': deckSelectStyle = { display: 'flex' }; break;
-    case 'showingHallOfFame': hallOfFameStyle = { display: 'flex' }; break;
-    case 'showingInstructions': instructionsStyle = { display: 'flex' }; break;
-    case 'gameStarted': gameBoardStyle.display = 'flex', footerStyle = { pointerEvents: 'all', opacity: 1, position: 'relative', bottom: '0' }; break;
+      case 'splashScreen': introStyle = { display: 'flex' }; break;
+      case 'selectingOpponent': opponentSelectStyle = { display: 'flex' }; break;
+      case 'showingOptions': optionsStyle = { display: 'flex' }; break;
+      case 'selectingDeck': deckSelectStyle = { display: 'flex' }; break;
+      case 'showingHallOfFame': hallOfFameStyle = { display: 'flex' }; break;
+      case 'showingInstructions': instructionsStyle = { display: 'flex' }; break;
+      case 'gameStarted': gameBoardStyle.display = 'flex', footerStyle = { pointerEvents: 'all', opacity: 1, position: 'relative', bottom: '0' }; break;
     }
     return (
       <div id='container'>
