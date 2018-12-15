@@ -56,10 +56,10 @@ export function getCardSizes() {
   let mediumCardSize = {};
   let miniCardSize = {};
   let microCardSize = {};
-  // let cardHeight = Math.round((window.innerHeight / 6) * 0.82);
-  let cardHeight = Math.round((window.innerHeight / 6) * 0.85);
+  let cardHeight = Math.round((window.innerHeight / 6) * 0.775);
+  // let cardHeight = Math.round((window.innerHeight / 6) * 0.85);
   // cardSize.width = Math.round(cardHeight / 1.55);
-  cardSize.width = (cardHeight / 1.66);
+  cardSize.width = (cardHeight / 1.55);
   if ((window.innerWidth / cardHeight) < 3.5) {
     cardHeight = Math.round((window.innerHeight / 6) * 0.83);
     cardSize.width = (cardHeight / 1.68);
