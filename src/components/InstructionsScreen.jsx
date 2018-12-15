@@ -10,7 +10,9 @@ function InstructionsScreen(props) {
       <div id='instructions' className='shadowed-text'>
         {instructionsText}
       </div>
-      <button onClick={props.onClickBack} className='back-button' id='instructions-back-button'>Back</button>
+      <div className='option-footer'>
+        <button onClick={(event) => props.onClickBack(event, 'splashScreen')} className='back-button' id='instructions-back-button'>Back</button>
+      </div>
     </div>
   );
 }
