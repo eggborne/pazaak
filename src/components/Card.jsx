@@ -1,84 +1,115 @@
-import style from '../css/styles.css';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-function Card(props) {
-  let color;
-  let altColor;
-  let cornerSymbol = props.type;
-  let valueDisplay = `${props.type}${Math.abs(props.value)}`;
-  if (props.type === '+') {
-    color = altColor = 'var(--plus-card-color)';
-  } else if (props.type === '-') {
-    color = altColor = 'var(--minus-card-color)';
-  } else if (props.type === '±') {
-    color = 'var(--plus-card-color)';
-    altColor = 'var(--minus-card-color)';
-    valueDisplay = props.value;
-  } else if (props.type==='house') {
-    color = altColor = 'var(--house-card-color)';
-    cornerSymbol = '';
-    valueDisplay = props.value;
+class Card extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
   }
-  let cardHeight = props.size.height;
-  return (
-    <div id={`card-${props.id}`} onClick={(event) => props.onClickCard(event, props.value, props.type) } className='card'>
-      <style jsx>{`
+  handleClick(event) {
+    this.props.onClickCard(event, this.props.value, this.props.type);
+  }
+  render() {
+    let color;
+    let altColor;
+    let cornerSymbol = this.props.type;
+    let valueDisplay = `${cornerSymbol}${Math.abs(this.props.value)}`;
+    if (cornerSymbol === '+') {
+      color = altColor = 'var(--plus-card-color)';
+    } else if (cornerSymbol === '-') {
+      color = altColor = 'var(--minus-card-color)';
+    } else if (cornerSymbol === '±') {
+      color = 'var(--plus-card-color)';
+      altColor = 'var(--minus-card-color)';
+      valueDisplay = this.props.value;
+    } else if (cornerSymbol === 'house') {
+      color = altColor = 'var(--house-card-color)';
+      cornerSymbol = '';
+      valueDisplay = this.props.value;
+    }
+    let cardHeight = this.props.size.height;
+    let cardBorderSize = this.props.size.borderSize;
+    let arrowBorderSize = this.props.size.arrowBorderSize;
+    let cardRadius = this.props.size.borderRadius;
+    let bandRadius = this.props.size.bandRadius;
+    let badgeRadius = this.props.size.badgeRadius;
+    let cardMargin = this.props.size.margin;
+    let bubbleSize = this.props.size.bubbleSize;
+    let fontSize = this.props.size.fontSize;
+    return (
+      <div id={`card-${this.props.id}`} onClick={this.handleClick} className='card'>
+        <style jsx>{`
         .card {
-          width: ${props.size.width}px;
+          width: ${this.props.size.width}px;
           height: ${cardHeight}px;
-          margin-left: ${cardHeight * 0.03}px;
-          margin-right: ${cardHeight * 0.03}px;
+          margin-left: ${cardMargin};
+          margin-right: ${cardMargin};
+          border-radius: ${cardRadius};
+          border-width: ${cardBorderSize};
         }
         .inner-band {
-          background-color: ${color}
+          background-color: ${color};
+          border-radius: ${bandRadius};
         }
         .inner-band:nth-child(3) {
           background-color: ${altColor}
         }
+        .inner-band:nth-child(4) {
+          border-radius: ${bandRadius} ${bandRadius} 0 0;
+        }
         .corner-bubble {
+          border: ${cardBorderSize} solid black;
           background-color: ${altColor};
-          width: ${cardHeight * 0.16}px;
-          height: ${cardHeight * 0.16}px;
+          width: ${bubbleSize};
+          height: ${bubbleSize};
+        }
+        .no-corner-border {
+          border-left: 0 none;
+          border-bottom: 0 none;
         }
         .band-arrow-up, .band-arrow-down {
-          border-left: ${cardHeight * 0.07}px solid transparent;
-          border-right: ${cardHeight * 0.07}px solid transparent;
+          border-left: ${arrowBorderSize} solid transparent;
+          border-right: ${arrowBorderSize} solid transparent;
         }
         .band-arrow-up-bg, .band-arrow-down-bg {
-          border-left: ${cardHeight * 0.1}px solid transparent;
-          border-right: ${cardHeight * 0.1}px solid transparent;
+          border-left: ${arrowBorderSize} solid transparent;
+          border-right: ${arrowBorderSize} solid transparent;
         }
         .band-arrow-up {
-          border-bottom: ${cardHeight * 0.07}px solid;
+          border-bottom: ${arrowBorderSize} solid;
         }
         .band-arrow-up-bg {
-          border-bottom: ${cardHeight * 0.1}px solid black;
+          border-bottom: ${arrowBorderSize} solid black;
         }
         .band-arrow-down {
-          border-top: ${cardHeight * 0.07}px solid;
+          border-top: ${arrowBorderSize} solid;
         }
         .band-arrow-down-bg {
-          border-top: ${cardHeight * 0.1}px solid black;
+          border-top: ${arrowBorderSize} solid black;
         }
         .number-badge, .corner-bubble {
-          font-size: ${cardHeight * 0.2}px;
+          font-size: ${fontSize};
+        }
+        .number-badge {
+          border-radius: ${badgeRadius};
         }
       `}</style>
-      <div className='number-badge'>{valueDisplay}</div>
-      <div className='inner-band'>
-        <div className='corner-bubble no-corner-border'>{cornerSymbol}</div>
-        <div className='band-arrow-up-bg'></div>
-        <div className='band-arrow-up'></div>
+        <div className='number-badge'>{valueDisplay}</div>
+        <div className='inner-band'>
+          <div className='corner-bubble no-corner-border'>{cornerSymbol}</div>
+          <div className='band-arrow-up-bg'></div>
+          <div className='band-arrow-up'></div>
+        </div>
+        <div className='inner-band'>
+          <div className='band-arrow-down-bg'></div>
+          <div className='band-arrow-down'></div>
+        </div>
+        <div className='inner-band'>
+        </div>
       </div>
-      <div className='inner-band'>
-        <div className='band-arrow-down-bg'></div>
-        <div className='band-arrow-down'></div>
-      </div>
-      <div className='inner-band'>
-      </div>
-    </div>
-  );
+    );
+
+  }
 }
 
 Card.propTypes = {
