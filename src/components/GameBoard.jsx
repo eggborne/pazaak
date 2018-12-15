@@ -60,18 +60,21 @@ function GameBoard(props) {
       document.getElementById('end-turn-button').innerHTML = 'Play Card';
     } else {
       document.getElementById('end-turn-button').innerHTML = 'End Turn';
-
     }
   }
   return (
     <div style={props.style} id='game-board'>
       <div id='opponent-hand' className='player-hand-area'>
+        <div className='opponent-portrait' id='mini-portrait'>
+          <div className='mini-portrait-label shadowed-text'>{props.playerNames.opponent}</div></div>
         <div id='opponent-cards' className='player-cards'>
           {props.hands.opponent.map((card, i) =>
             <CardBack key={i} size={props.miniCardSize} />
           )}
         </div>
-        <div className={`turn-indicator ${opponentTurn}`}></div>
+        <div className='turn-indicator-area'>
+          <div id='opponent-turn-indicator' className={`turn-indicator ${opponentTurn}`}></div>
+        </div>
       </div>
       <div id='grids'>
         <div id='opponent-area' className='player-area'>
@@ -129,13 +132,18 @@ function GameBoard(props) {
         </div>
       </div>
       <div id='user-hand' className='player-hand-area'>
+        <div className='opponent-portrait' id='user-portrait'>
+          <div className='mini-portrait-label shadowed-text'>{props.playerNames.user}</div>
+        </div>
         <div id='user-cards' className='player-cards'>
           {props.hands.user.map((card, i) =>
-            <Card key={i} id={card.id} size={props.mediumCardSize} value={card.value} type={card.type}
+            <Card key={i} id={card.id} size={props.miniCardSize} value={card.value} type={card.type}
               onClickCard={props.onClickCard} />
           )}
         </div>
-        <div className={`turn-indicator ${userTurn}`}></div>
+        <div className='turn-indicator-area'>
+          <div id='user-turn-indicator' className={`turn-indicator ${userTurn}`}></div>
+        </div>
       </div>
     </div>
   );
@@ -148,6 +156,7 @@ GameBoard.propTypes = {
   wins: PropTypes.object,
   turn: PropTypes.string,
   turnStatus: PropTypes.object,
+  playerNames: PropTypes.object,
   cardSize: PropTypes.object,
   mediumCardSize: PropTypes.object,
   miniCardSize: PropTypes.object,
