@@ -1,4 +1,4 @@
-
+import {randomInt} from './util'; 
 export function makeOpponentMove(app) {
   /**
    * Stands at 17
@@ -12,8 +12,8 @@ export function makeOpponentMove(app) {
    * When holding minus cards, largest minus value is subtracted from 
    * total when calculating whether to use a hand card:
    * 
-   * When total <= 14, is willing to draw rather than use a hand card
-   * When total > 14, would rather use a hand card to reach 17+ than draw
+   * When total-largestMinusValue <= 14, is willing to draw rather than use a hand card
+   * When total-largestMinusValue > 14, would rather use a hand card to reach 17+ than draw
    * 
    * Always receives new card at beginning of turn, so deals with that new information first!
    * 
@@ -27,13 +27,14 @@ export function makeOpponentMove(app) {
      * 
      * Establishes highestMinusValue and safeToDraw
      */
-
     let highestMinusValue = 0;
     let safeToDraw = true;
-
+    let acceptTie = randomInt(0, 10) < app.characters[app.state.CPUOpponent].strategy.tie.chanceToBreak;
+    let standAt = app.characters[app.state.CPUOpponent].strategy.stand.standAt;
+    // console.warn(`acceptTie: ${acceptTie}, standAt: ${standAt}`);
     for (let i = 0; i < app.state.opponentHand.length; i++) {
       let card = app.state.opponentHand[i];
-      console.log(`checking hand card ${i}: #card-${card.id} ${card.value} ${card.type}`);
+      // console.log(`checking hand card ${i}: #card-${card.id} ${card.value} ${card.type}`);
       if (card.type === '-' || card.type === '±') {
         if (Math.abs(card.value) > highestMinusValue) {
           highestMinusValue = Math.abs(card.value);
@@ -61,6 +62,16 @@ export function makeOpponentMove(app) {
       // USER STANDING
       console.warn('Player stood! Beginning CPU standoff sequence...........................................................');
 
+      if (app.state.userTotal > 20 || app.state.userTotal < app.state.opponentTotal) {
+        console.warn(`USER TOTAL ${app.state.userTotal} is over 20 or less than opponent total ${app.state.opponentTotal}! standing and returning`);
+        console.error('CPU STAND');
+        standCPU(app);
+        setTimeout(() => {
+          app.determineWinnerFromTotal();
+        }, (app.state.options.turnInterval * 2));
+        return;
+      }
+
       if (app.state.opponentTotal <= 20 && app.state.opponentTotal > app.state.userTotal) {
         console.warn('CPU already beats userTotal at beginning of turn!');
         console.error('CPU STAND');
@@ -80,9 +91,15 @@ export function makeOpponentMove(app) {
         console.warn('Seeing if a hand card can beat userTotal');
         for (let i = 0; i < app.state.opponentHand.length; i++) {
           let card = app.state.opponentHand[i];
+          let totalComparison;
           if (app.state.opponentHand[i].type === '+') {
             let potentialScore = app.state.opponentTotal + card.value;
-            if (potentialScore >= app.state.userTotal && potentialScore <= 20 && !app.state.turnStatus.opponent.playedCards) {
+            if (acceptTie) {
+              totalComparison = potentialScore >= app.state.userTotal;
+            } else {
+              totalComparison = potentialScore > app.state.userTotal;
+            }
+            if (totalComparison && potentialScore <= 20 && !app.state.turnStatus.opponent.playedCard) {
               app.playHandCard('opponent', { id: card.id, value: card.value, type: card.type });
               console.warn(`PLAYING #card-${card.id} (${card.value} ${card.type}) for winning total ${potentialScore}!`);
               newTotal = potentialScore;
@@ -128,13 +145,19 @@ export function makeOpponentMove(app) {
           // CHECK HAND MINUSES
           for (let i = 0; i < app.state.opponentHand.length; i++) {
             let card = app.state.opponentHand[i];
+            let totalComparison;
             if (app.state.opponentHand[i].type === '-') {
               let potentialScore = newTotal + card.value;
-              if (potentialScore <= 20 && potentialScore >= app.state.userTotal) {
+              if (acceptTie) {
+                totalComparison = potentialScore >= app.state.userTotal;
+              } else {
+                totalComparison = potentialScore > app.state.userTotal;
+              }
+              if (totalComparison && potentialScore <= 20) {
                 let cardToPlay = card;
                 app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type }, app.state.options.dealInterval);
                 console.warn(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore} (under 20 and beats/ties ${app.state.userTotal}), so CPU is playing it!`);
-                if (potentialScore >= 17) {
+                if (potentialScore >= standAt) {
                   standCPU(app);
                 }
                 break;
@@ -162,6 +185,7 @@ export function makeOpponentMove(app) {
       } else if (app.state.opponentTotal > 20) {
         console.warn('CPU total > 20 when user standing');
         let newTotal;
+        let totalComparison;
         // see if minus cards can get total below 20
         for (let i = 0; i < app.state.opponentHand.length; i++) {
           if (app.state.opponentHand[i].type === '-') {
@@ -176,8 +200,13 @@ export function makeOpponentMove(app) {
         }
 
         console.warn(`CPU played a card to get total to ${newTotal}`);
-
-        if (newTotal < app.state.userTotal) {
+        if (acceptTie) {
+          totalComparison = newTotal < app.state.userTotal;
+        } else {
+          totalComparison = newTotal <= app.state.userTotal;
+          // will draw again after a tie
+        }
+        if (totalComparison) {
           console.warn('Under 20, but still too low to win! Draw a card?');
 
           app.dealToPlayerGrid('opponent');
@@ -207,22 +236,19 @@ export function makeOpponentMove(app) {
 
       // USER STILL IN PLAY
 
-      if ((app.state.opponentTotal >= 17 && app.state.opponentTotal >= app.state.userTotal) && app.state.opponentTotal < 20) {
+      if (app.state.opponentTotal >= standAt && app.state.opponentTotal < 20) {
         standCPU(app);
         console.error('CPU immediately STANDS after initial draw!');
       } else if (app.state.opponentTotal < 20) {
 
         // UNDER 20
-
-        let scoreMinimum = 17;
         if (!safeToDraw) {
-
           // CHECK HAND PLUSES
           for (let i = 0; i < app.state.opponentHand.length; i++) {
             let card = app.state.opponentHand[i];
             if (app.state.opponentHand[i].type === '+') {
               let potentialScore = app.state.opponentTotal + card.value;
-              if (!app.state.turnStatus.opponent.playedCards && potentialScore >= scoreMinimum && potentialScore <= 20) {
+              if (!app.state.turnStatus.opponent.playedCard && potentialScore >= standAt && potentialScore <= 20) {
                 let cardToPlay = card;
                 app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
                 standCPU(app);
@@ -254,7 +280,7 @@ export function makeOpponentMove(app) {
               let cardToPlay = card;
               app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
               console.warn(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore}, so CPU is playing it!`);
-              if (potentialScore >= 17) {
+              if (potentialScore >= standAt) {
                 standCPU(app);
               }
               break;
