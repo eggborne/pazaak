@@ -42,8 +42,6 @@ class Card extends React.PureComponent {
         .card {
           width: ${this.props.size.width}px;
           height: ${cardHeight}px;
-          margin-left: ${cardMargin};
-          margin-right: ${cardMargin};
           border-radius: ${cardRadius};
           border-width: ${cardBorderSize};
         }
