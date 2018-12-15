@@ -441,21 +441,21 @@ class App extends React.PureComponent {
     Util.checkCookie();
     this.sizeElements();
     this.getHighScores();
-    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
-    document.addEventListener('msfullscreenchange', this.handleFullscreenChange);
+    document.getElementById('container').addEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.getElementById('container').addEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.getElementById('container').addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.getElementById('container').addEventListener('msfullscreenchange', this.handleFullscreenChange);
   }
 
   handleFullscreenChange() {
-
-    setTimeout(() => {
-      this.setState({
-        cardSizes: Util.getCardSizes()
-      });
-      this.sizeElements();
-      document.getElementById('container').style.opacity = 1;
-    }, 500);
+    document.getElementById('container').style.opacity = 1;
+    // setTimeout(() => {
+    //   let newSizes = Util.getCardSizes();
+    //   this.setState({
+    //     cardSizes: newSizes
+    //   });
+    //   this.sizeElements(newSizes);
+    // }, 500);
   }
 
   getHighScores() {
@@ -621,7 +621,7 @@ class App extends React.PureComponent {
     }, this.state.options.turnInterval);
     return newCard.value;
   }
-  handleToggleOption(event) {
+  handleToggleOption() {
     let el = event.target;
     let el2;
     let eventId = event.target.id;
@@ -662,19 +662,18 @@ class App extends React.PureComponent {
         optionsCopy.darkTheme = true;
       }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
-        // let container = document.getElementById('container');
-        // container.style.opacity = 0;
-        document.getElementById('container').style.opacity = 0.5;
+        Util.toggleFullScreen(this);
+        document.getElementById('container').style.opacity = 0.3;
         setTimeout(() => {
-          Util.toggleFullScreen(this);
-        }, 150);
-        // setTimeout(() => {
-        //   let newCardSizes = Util.getCardSizes();
-        //   this.setState({
-        //     cardSizes: newCardSizes
-        //   });
-        //   this.sizeElements();
-        // }, 150);
+          let newSizes = Util.getCardSizes();
+          this.setState({
+            cardSizes: newSizes
+          });
+          this.sizeElements(newSizes);
+          setTimeout(() => {
+            document.getElementById('container').style.opacity = 1;
+          }, 250);
+        }, 500);
       }
 
     } else {
@@ -708,13 +707,18 @@ class App extends React.PureComponent {
         optionsCopy.darkTheme = false;
       }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
-        // let container = document.getElementById('container');
-        // container.style.opacity = 0;
-        document.getElementById('container').style.opacity = 0.5;
+        Util.toggleFullScreen(this);
+        document.getElementById('container').style.opacity = 0.3;
         setTimeout(() => {
-          Util.toggleFullScreen(this);
+          let newSizes = Util.getCardSizes();
+          this.setState({
+            cardSizes: newSizes
+          });
+          this.sizeElements(newSizes);
+          setTimeout(() => {
+            document.getElementById('container').style.opacity = 1;
+          }, 250);
         }, 500);
-
       }
     }
 
