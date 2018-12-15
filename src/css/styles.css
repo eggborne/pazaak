@@ -52,20 +52,21 @@ button {
   cursor: pointer;
   border: solid var(--button-border-color);
   position: relative;
+  border-width: 0.25rem;
   /* max-width: 80%; */
 }
-.select-button {
-  /* box-sizing: border-box; */
-  margin-bottom: 1rem;
-  margin-left: 0;
-  padding: 10% 2% 10% 2% !important;
+.ready-button, .select-button {
+  height: 8vmax;
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem 0.5rem 1rem;
+  transition: all 300ms ease;
 }
 .select-button::before {
   content: "Select";
 }
 .disabled-select-button::before {
   content: "Selected";
-  /* font-size: 0.9em; */
+  font-size: 0.9em;
 }
 
 ul {
@@ -115,6 +116,7 @@ li:before {
   flex-direction: column;
   height: 100%;
   justify-content: space-between;
+  width: 100%;
   min-width: 300px;
   /* max-width: 800px; */
   margin: 0 auto;
@@ -390,14 +392,6 @@ li:before {
   transition: all 300ms ease;
   background-color: var(--trans-blue-bg-color);
 }
-.opponent-select-cover {
-  box-sizing: border-box;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--trans-red-bg-color);
-}
 .opponent-select-entry:nth-child(1) {
   border-top: transparent;
   background-color: var(--option-on-color);
@@ -409,15 +403,6 @@ li:before {
 .panel-selected {
   background-color: var(--option-on-color);
 }
-.left-opponent-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 35%;
-  min-width: 120px;
-  padding-left: 1rem;
-  padding-top: 1rem;
-}
 .opponent-portrait {
   position: relative;
   box-sizing: border-box;
@@ -428,20 +413,17 @@ li:before {
   background-image: url('https://pazaak.online/assets/images/opponentssheet.jpg');
   background-size: cover;
   background-repeat: no-repeat;
-  align-self: stretch;
 }
 #mini-portrait, #user-portrait {
   display: flex;
   align-items: flex-end;
   box-sizing: content-box;
-  /* position: absolute; */
-  /* top: calc(8vmax + 0.25rem); */
-  left: 1vw;
+  align-self: center;
 }
 #user-portrait {
   background-image: url('https://pazaak.online/assets/images/playerportrait.jpg');
   /* border: none; */
-  align-self: center;
+  /* align-self: center; */
 }
 .portrait-label {
   font-size: 1rem;
@@ -481,12 +463,23 @@ li:before {
   /* border-radius: 0.3rem; */
   background: rgba(0, 0, 0, 0.1);
 }
+.left-opponent-panel {
+  /* display: flex;
+  flex-direction: column;
+  align-items: center; */
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  align-items: flex-end;
+  width: 35%;
+  min-width: 120px;
+  padding: 1vh;
+  /* padding-left: 1rem;
+  padding-top: 1rem; */
+}
 .opponent-description {
   box-sizing: border-box;
-  padding-top: 0.5rem;
-  padding-bottom: 1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding: 1vh;
   width: 65%;
   font-size: 1rem;
   display: flex;
@@ -497,12 +490,13 @@ li:before {
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 1fr 1.5fr 1fr 1fr 1.5fr;
+  grid-template-rows: 1fr auto auto;
   align-self: start;
   width: 100%;
+  grid-row-gap: 1vh;
 }
 .opponent-stats-grid > div {
-  /* border: 1px solid black; */
+  
 }
 .opponent-prize-label, .skill-label {
   padding: 0.25rem;
@@ -512,12 +506,19 @@ li:before {
   width: 100%;
 }
 .opponent-prize-area {
+  display: flex;
+  flex-direction: column;
+}
+.opponent-prize-body {
   padding-left: 0.5rem;
   display: inline-flex;
   align-items: center;
   border: 0.35vw solid rgb(67, 78, 67);
   border-top: 0;
-  border-bottom: 0;
+  border-radius: 0 0 0.5rem 0.5rem;
+  /* padding-top: 1vh;
+  padding-bottom: 1vh; */
+  
 }
 .opponent-prize-credits {
   align-self: center;
@@ -535,14 +536,20 @@ li:before {
   border-radius: 0 0 0.5rem 0.5rem;
   margin-bottom: 2vw;
 }
-.difficulty-bar {
+.difficulty-area {
+  display: flex;
+  flex-direction: column;
+}
+.difficulty-bar-body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 0 0 0.5rem 0.5rem;
   border: 0.35vw solid rgb(67, 78, 67);
   border-top: 0;
-  margin-bottom: 2vw;
+  height: auto;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
 }
 .difficulty-bar-segment {
   position: relative;
@@ -568,8 +575,9 @@ li:before {
 .opponent-strategy-area {
   display: flex;
   flex-direction: column;
-  grid-column-start: 1;
-  grid-column-end: 3;  
+  align-self: stretch;
+  /* height: 50%; */
+  position: relative;
 }
 .opponent-strategy-label, .opponent-prize-label, .skill-label {
   border-radius: 0.3rem 0.3rem 0 0;
@@ -583,14 +591,18 @@ li:before {
 }
 .opponent-strategy-list {
   box-sizing: border-box;
-  padding-top: 0.5rem;
-  padding-right: 5vw;
+  /* padding-top: 0.5rem;
+  padding-right: 5vw; */
   font-size: 0.9rem;
   border: 0.35vw solid rgb(67, 78, 67);
   border-top: 0;
   border-radius: 0 0 0.5rem 0.5rem;
-  padding-bottom: 2vw;
-  
+  /* padding-top: 2vh;
+  padding-bottom: 2vh; */
+  padding: 1vh;
+  padding-left: 0;
+  padding-right: 3vw;
+  height : 100%;
 }
 .opponent-strategy-item {
   margin: 0 0.25rem 0 0.5rem;
@@ -625,18 +637,7 @@ li:before {
   flex-grow: 2;
 } */
 
-#deck-selection-grid {
-  /* box-sizing: border-box; */
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  grid-column-gap: 1vw;
-  grid-row-gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-#deck-selection-grid > .card, #preview-deck-grid > .card {
-  margin: 0;
-}
+
 #preview-deck-area {
   display: flex;
   flex-direction: column;
@@ -647,13 +648,7 @@ li:before {
 #preview-deck-title {
   margin-bottom: 1.5vh;
 }
-#preview-deck-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  grid-row-gap: 0.25rem;
-  grid-column-gap: 0.75vh;
-}
+
 .intro-button {
   min-height: 11vmax;
   /* margin-top: 2vh; */
@@ -735,12 +730,7 @@ li:before {
   justify-content: space-between;
   flex-grow: 1; 
 }
-.ready-button, .select-button {
-  height: 8vmax;
-  font-size: 1.5rem;
-  padding: 0.5rem 1rem 0.5rem 1rem;
-  transition: all 300ms ease;
-}
+
 #play-button, #opponent-ready-button, .select-button {
   /* width: 50%; */
   
@@ -876,29 +866,26 @@ li:before {
 .player-hand-area {
   box-sizing: border-box;
   width: 100%;
-  display: inline-flex;
-  align-items: stretch;
-  justify-content: space-between;
-  /* padding-right: 1rem; */
-}
-#user-hand {
-  /* background-color: var(--trans-blue-bg-color); */
-  /* padding-top: 1%; */
-  /* margin-bottom: 1%; */
-  /* padding-left: 2rem; */
-}
-#opponent-hand {
-  /* background-color: var(--trans-red-bg-color); */
-  margin-top: 1%;
+  /* display: inline-flex;
+  justify-content: center; */
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  justify-items: center;
 
 }
 .player-cards {
-  display: inline-flex;
-  align-items: center;
-  /* justify-content: center; */
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
+  grid-column-gap: 0.5vw;
+
 }
-#opponent-cards {
-  /* flex-grow: 1; */
+#opponent-hand {
+  padding-top: 0.5vh;
+}
+#user-hand {
+  padding-bottom: 0.5vh;
+  
 }
 #grids {
   width: 100%;
@@ -910,13 +897,10 @@ li:before {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 3%;
-  padding-right: 3%;
   box-sizing: border-box;
-  /* flex-grow: 1; */
 }
 #opponent-area {
-  box-sizing: content-box;
+  /* box-sizing: content-box; */
   /* border-top: 1px solid #555; */
   border-bottom: 1px solid #555;
   /* background-color: var(--trans-red-bg-color); */
@@ -926,120 +910,12 @@ li:before {
   /* border-bottom: 1px solid #555; */
   /* background-color: var(--trans-blue-bg-color); */
 }
-.deal-grid {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  /* border: 2px solid black; */
-}
-.stats-area {
-  align-self: flex-start;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 0.5rem;
-}
-.total-display {
-  font-family: 'Nova Square';
-  width: 3.5rem;
-  font-size: 1.75rem;
-  border-radius: 0.75rem;
-  background-color: black;
-  padding: 0.35rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.total-outline {
-  width: 100%;
-  border-radius: 0.5rem;
-  background-color: transparent;
-  border: 2px solid #933500;
-  padding: 0.1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#user-total, #opponent-total {
-  color: white;
-  border-color: #933500;
-}
-.red-total {
-  color: red !important;
-  border-color: red !important;
-}
-.green-total {
-  color: green !important;
-  border-color: green !important;
-}
-.turn-indicator {
-  width: 5vmax;
-  height: 5vmax;
-  border-radius: 50%;
-  background-color: gray;
-  border: 1px solid black;
-  transition: all 500ms ease;
-}
-.turn-indicator-area {
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-left: 3vw;
-  padding-right: 4vw;
-  justify-self: flex-end;
-}
-.turn-lighted {
-  animation: pulse var(--pulse-speed) infinite;
-}
-.standing {
-  background-color: rgb(189, 189, 95);
-}
-@keyframes pulse {
-  0% {
-    background-color: rgb(124, 0, 0);
-  }
-  50% {
-    background-color: red;
-  }
-  100% {
-    background-color: rgb(124, 0, 0);
-  }
-}
-.win-symbol-area {
-  display: inline-flex;
-  justify-content: space-around;
-  align-items: center;
-  width: 100%;
-  margin-top: 0.5rem;
-}
-.win-symbol-bg {
-  /* box-sizing: border-box; */
-  border-radius: 50%;
-  background-color: rgb(163, 163, 163);
-  width: 1rem;
-  height: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 0.1rem solid black;
-}
-.win-symbol {
-  box-sizing: border-box;
-  border-radius: 50%;
-  background-color: rgb(163, 163, 163);
-  border: 0.1rem solid #222;
-  width: 0.8rem;
-  height: 0.8rem;
-}
-.win-symbol-lighted {
-  background-color: orange;
-}
-.ninth-card {
+
+
+/* .ninth-card {
   position: absolute;
   z-index: 12;
-}
+} */
 #result-modal {
   box-sizing: border-box;
   position: fixed;
@@ -1092,6 +968,18 @@ li:before {
 }
 
 @media (orientation: landscape) and (min-width: 600px) {
+  body {
+    /* max-width: 800px; */
+  }
+  #container, #opponent-select-footer, #deck-select-footer {
+    max-width: 800px;
+  }
+  #footer {
+    max-width: 800px;
+  }
+  .option-footer {
+    max-width: 800px;
+  }
   ::-webkit-scrollbar {
     width: 1.5rem;
     background-color: var(--main-bg-color);
