@@ -13,14 +13,17 @@ function Hamburger(props) {
           justify-content: space-evenly;
           width: 10vmax;
           background-color: var(--button-bg-color);
-          border: solid #222;
+          border: solid var(--button-border-color);
           cursor: pointer;
+          border-radius: 0.5rem;
+          border-width: 0.25rem;
         }
         .hamburger-bar {
           width: 7vmax;
           height: 1.1vmax;
-          background-color: #222;
+          background-color: rgb(59, 107, 150);
           transition: all 200ms ease;
+          border-radius: 0.1rem;
         }
         #top-hamburger-bar {
           transform-origin: 50% 50%;
@@ -30,7 +33,7 @@ function Hamburger(props) {
         }
         #middle-hamburger-bar-2 {
           position: absolute;
-          width: 7vmax;
+          // width: 7vmax;
         }
       `}
       </style>
