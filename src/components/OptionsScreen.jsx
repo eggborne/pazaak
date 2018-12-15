@@ -12,10 +12,12 @@ function OptionsScreen(props) {
           <div className='option-label'>Ambience</div><div onClick={props.onToggleOption} id='ambience-toggle' className='option-toggle option-off'>OFF</div>
           <div className='option-label'>Quick Mode</div><div onClick={props.onToggleOption} id='quick-mode-toggle' className='option-toggle option-off'>OFF</div>
           <div className='option-label'>Dark Theme</div><div onClick={props.onToggleOption} id='dark-theme-toggle' className='option-toggle option-off'>OFF</div>
+          <div className='option-label'>Full Screen</div><div onClick={props.onToggleOption} id='full-screen-toggle' className='option-toggle option-off'>OFF</div>
         </div>
       </div>
-      <button onClick={props.onClickBack} className='back-button' id='options-back-button'>Back</button>
-
+      <div className='option-footer'>
+        <button onClick={(event) => props.onClickBack(event, 'splashScreen')} className='back-button' id='options-back-button'>Back</button>
+      </div>
     </div>
   );
 }
