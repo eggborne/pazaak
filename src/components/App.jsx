@@ -1,40 +1,279 @@
 import React from 'react';
 import Header from './Header';
-import Footer from './Footer';
+import ControlFooter from './ControlFooter';
+
 import IntroScreen from './IntroScreen';
 import InstructionsScreen from './InstructionsScreen';
 import OptionsScreen from './OptionsScreen';
 import HallOfFameScreen from './HallOfFameScreen';
-import DeckSelectionScreen from './DeckSelectionScreen';
+import DeckSelectionScreen from './DeckSelectScreen';
 import GameBoard from './GameBoard';
 import HamburgerMenu from './HamburgerMenu';
 import ResultModal from './ResultModal';
+import OpponentSelectScreen from './OpponentSelectScreen';
 let Util = require('../scripts/util');
 let DB = require('../scripts/db');
 let AI = require('../scripts/ai');
 
-let cardSize = {};
-let mediumCardSize = {};
-let miniCardSize = {};
-let cardHeight = (window.innerHeight / 6) * 0.825;
-cardSize.width = (cardHeight / 1.66);
-cardSize.height = cardHeight;
-mediumCardSize.width = cardSize.width * 0.85;
-mediumCardSize.height = cardSize.height * 0.85;
-miniCardSize.width = cardSize.width * 0.75;
-miniCardSize.height = cardSize.height * 0.75;
+let plusMinusSymbol = '±';
 
-class App extends React.Component {
+let characters = {
+  jarjarbinks: {
+    name: 'jarjarbinks',
+    displayName: 'Jar Jar Binks',
+    skillLevel: 2,
+    prize: {
+      credits: 50,
+      cards: [
+        { value: 1, type: plusMinusSymbol }
+      ]
+    },
+    strategy: {
+      stand: {
+        description: 'Stands at 15',
+        standAt: 15
+      },
+      handCards: {
+        description: 'Plays hand cards recklessly'
+      },
+      tie: {
+        description: 'Never attempts to break a tie',
+        chanceToAccept: 10
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: '+' },
+      { id: 1, value: 1, type: '+' },
+      { id: 2, value: 2, type: '+' },
+      { id: 3, value: 2, type: '+' },
+      { id: 4, value: 5, type: '+' },
+      { id: 0, value: 1, type: '-' },
+      { id: 1, value: 1, type: '-' },
+      { id: 2, value: 2, type: '-' },
+      { id: 3, value: 2, type: '-' },
+      { id: 4, value: 5, type: '-' },
+    ],
+    quotes: {
+      panel: '"Meesa not be understandin\' the rules too good."'
+    }
+  },
+  c3po: {
+    name: 'c3po',
+    displayName: 'C-3PO',
+    skillLevel: 3,
+    prize: {
+      credits: 100,
+      cards: [
+        { value: 2, type: plusMinusSymbol },
+        { value: 3, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: 'Stands at 16',
+        standAt: 16
+      },
+      handCards: {
+        description: 'Plays hand cards sparingly'
+      },
+      tie: {
+        description: 'Rarely attempts to break a tie',
+        chanceToAccept: 8
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: '+' },
+      { id: 1, value: 2, type: '+' },
+      { id: 2, value: 3, type: '+' },
+      { id: 3, value: 1, type: '+' },
+      { id: 4, value: 2, type: '+' },
+      { id: 5, value: 3, type: '+' },
+      { id: 6, value: 1, type: '+' },
+      { id: 7, value: 2, type: '-' },
+      { id: 8, value: 3, type: '-' },
+      { id: 9, value: 1, type: '-' }
+    ],
+    quotes: {
+      panel: '"Please go easy on me. I\'ve just had my logic units calibrated."'
+    }
+  },
+  lakSivrak: {
+    name: 'lakSivrak',
+    displayName: 'Lak Sivrak',
+    skillLevel: 4,
+    prize: {
+      credits: 200,
+      cards: [
+        { value: 3, type: plusMinusSymbol },
+        { value: 4, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: 'Stands at 17',
+        standAt: 17
+      },
+      handCards: {
+        description: 'Plays hand cards liberally'
+      },
+      tie: {
+        description: 'Sometimes attempts to break a tie',
+        chanceToAccept: 5
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: '+' },
+      { id: 1, value: 2, type: '+' },
+      { id: 2, value: 3, type: '+' },
+      { id: 3, value: 1, type: '+' },
+      { id: 4, value: 2, type: '+' },
+      { id: 5, value: 1, type: '-' },
+      { id: 6, value: 2, type: '-' },
+      { id: 7, value: 3, type: '-' },
+      { id: 8, value: 1, type: '-' },
+      { id: 9, value: 2, type: '-' }
+    ],
+    quotes: {
+      panel: '"Grraarragghhh. Grrrr. Raawwrr."'
+    }
+  },
+  ig88: {
+    name: 'ig88',
+    displayName: 'IG-88',
+    skillLevel: 6,
+    prize: {
+      credits: 400,
+      cards: [
+        { value: 4, type: plusMinusSymbol },
+        { value: 5, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: 'Stands at 17',
+        standAt: 17
+      },
+      handCards: {
+        description: 'Plays hand cards liberally'
+      },
+      tie: {
+        description: 'Usually attempts to break a tie',
+        chanceToAccept: 3
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: '+' },
+      { id: 1, value: 2, type: '+' },
+      { id: 2, value: 3, type: '+' },
+      { id: 3, value: 4, type: '+' },
+      { id: 4, value: 5, type: '+' },
+      { id: 5, value: 1, type: '-' },
+      { id: 6, value: 2, type: '-' },
+      { id: 7, value: 1, type: plusMinusSymbol },
+      { id: 8, value: 2, type: plusMinusSymbol },
+      { id: 9, value: 3, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"MISSION: DESTROY PLAYER SCORE"'
+    }
+  },
+  yoda: {
+    name: 'yoda',
+    displayName: 'Yoda',
+    skillLevel: 8,
+    prize: {
+      credits: 1000,
+      cards: [
+        { value: 4, type: plusMinusSymbol },
+        { value: 5, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: 'Stands at ???'
+      },
+      handCards: {
+        description: 'Plays hand cards strategically',
+        standAt: 18
+      },
+      tie: {
+        description: 'Will never accept a tie',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"Underestimated not, will I be. Beat you handily I will."'
+    }
+  },
+  theemperor: {
+    name: 'theemperor',
+    displayName: 'The Emperor',
+    skillLevel: 10,
+    prize: {
+      credits: 5000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"In time you will call me Master."'
+    }
+  }
+};
+class App extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       vsCPU: true,
+      CPUOpponent: 'jarjarbinks',
+      lastWinner: null,
+      lastFirstTurn: 'user',
       playerNames: {
         user: 'Player',
-        opponent: 'CPU'
+        opponent: 'Jar Jar Binks'
       },
       phase: 'splashScreen',
-      menuShowing: false,
       deck: [],
       cardSelection: [],
       idCount: 0,
@@ -89,11 +328,14 @@ class App extends React.Component {
         ambience: false,
         darkTheme: false,
         turnInterval: 300,
-        flashInterval: 180,
-        opponentMoveInterval: 1000,
+        flashInterval: 90,
+        opponentMoveInterval: 900,
       },
-      highScores: []
+      cardSizes: {}
+      // highScores: []
     };
+
+    this.highScores = [];
 
     // make the selection deck (12 dummy cards 1-6, plus and minus)
     let cardSelection = [];
@@ -106,7 +348,7 @@ class App extends React.Component {
         sign = '-';
       } else if (i >= 11) {
         value = i - 8;
-        sign = '±';
+        sign = plusMinusSymbol;
       }
       cardSelection.push({ id: i * 1111, value: value, type: sign });
     }
@@ -125,20 +367,29 @@ class App extends React.Component {
       deck[i - 1].value = currentValue;
       deck[i - 1].type = 'house';
     }
-    // make a random 10-card deck for opponent...
-    let opponentDeck = [];
-    let selectionCopy = Util.shuffle(cardSelection.slice());
-    for (let i = 0; i < 10; i++) {
-      let deckCard = selectionCopy[i];
-      let newCard = { id: i, value: deckCard.value, type: deckCard.type };
-      if (newCard.type === '±') {
-        newCard.type = '-';
-        newCard.value = Math.abs(newCard.value) * -1;
-      }
-      opponentDeck.push(newCard);
-    }
+
+
+    // // make a random 10-card deck for opponent...
+    // let opponentDeck = [];
+    // let selectionCopy = Util.shuffle(cardSelection.slice());
+    // for (let i = 0; i < 10; i++) {
+    //   let deckCard = selectionCopy[i];
+    //   let newCard = { id: i, value: deckCard.value, type: deckCard.type };
+    //   if (newCard.type === plusMinusSymbol) {
+    //     newCard.type = '-';
+    //     newCard.value = Math.abs(newCard.value) * -1;
+    //   }
+    //   opponentDeck.push(newCard);
+    // }
+    this.state.cardSizes = Util.getCardSizes();
+
+    this.characters = characters;
+
     // ...put them all in state
-    this.state.opponentDeck = opponentDeck;
+
+    // this.state.opponentDeck = opponentDeck;
+    // filled when user picks opponent
+
     this.state.idCount = 10; // these are the 10 opponent deck cards
     this.state.cardSelection = cardSelection;
     this.state.deck = this.shuffleDeck(deck);
@@ -148,6 +399,7 @@ class App extends React.Component {
     this.buttonBgColor = window.getComputedStyle(document.body).getPropertyValue('--button-bg-color');
 
     // are all of these necessary?
+    this.sizeElements = this.sizeElements.bind(this);
     this.playSound = this.playSound.bind(this);
     this.getHighScores = this.getHighScores.bind(this);
     this.incrementPlayerScore = this.incrementPlayerScore.bind(this);
@@ -157,11 +409,12 @@ class App extends React.Component {
     this.dealToPlayerGrid = this.dealToPlayerGrid.bind(this);
     this.handleToggleOption = this.handleToggleOption.bind(this);
     this.handleClickBack = this.handleClickBack.bind(this);
-    this.handleClickHeader = this.handleClickHeader.bind(this);
     this.handleClickStart = this.handleClickStart.bind(this);
     this.handleClickHow = this.handleClickHow.bind(this);
     this.handleClickOptions = this.handleClickOptions.bind(this);
     this.handleClickHallOfFame = this.handleClickHallOfFame.bind(this);
+    this.handleClickOpponentPanel = this.handleClickOpponentPanel.bind(this);
+    this.handleClickOpponentReady = this.handleClickOpponentReady.bind(this);
     this.handleClickPlay = this.handleClickPlay.bind(this);
     this.handleClickCard = this.handleClickCard.bind(this);
     this.handleClickEndTurn = this.handleClickEndTurn.bind(this);
@@ -180,14 +433,29 @@ class App extends React.Component {
     this.handleClickHamburger = this.handleClickHamburger.bind(this);
     this.resetBoard = this.resetBoard.bind(this);
     this.determineWinnerFromTotal = this.determineWinnerFromTotal.bind(this);
-    this.handleClickHamburgerOptions = this.handleClickHamburgerOptions.bind(this);
     this.handleClickHamburgerQuit = this.handleClickHamburgerQuit.bind(this);
+    this.handleFullscreenChange = this.handleFullscreenChange.bind(this);
   }
 
   componentDidMount() {
-    this.sizeElements();
     Util.checkCookie();
+    this.sizeElements();
     this.getHighScores();
+    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', this.handleFullscreenChange);
+  }
+
+  handleFullscreenChange() {
+
+    setTimeout(() => {
+      this.setState({
+        cardSizes: Util.getCardSizes()
+      });
+      this.sizeElements();
+      document.getElementById('container').style.opacity = 1;
+    }, 500);
   }
 
   getHighScores() {
@@ -196,9 +464,10 @@ class App extends React.Component {
       if (!response.data) {
         scoreArray = [];
       }
-      this.setState({
-        highScores: scoreArray
-      });
+      // this.setState({
+      //   highScores: scoreArray
+      // });
+      this.highScores = scoreArray;
     });
   }
 
@@ -236,19 +505,40 @@ class App extends React.Component {
     let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
     eval(funcName)(playerName);
   }
-
-  sizeElements() {
+  sizeElements(cardSizes = this.state.cardSizes) {
+    let cardSize = cardSizes.cardSize;
+    let miniCardSize = cardSizes.miniCardSize;
+    let mediumCardSize = cardSizes.mediumCardSize;
     document.getElementById('container').style.height = `${window.innerHeight}px`;
-    document.getElementById('user-hand').style.height = `${mediumCardSize.height * 1.1}px`;
-    document.getElementById('opponent-hand').style.height = `${miniCardSize.height * 1.1}px`;
-    Array.from(document.getElementsByClassName('turn-indicator')).map((el) => {
-      el.style.height = el.style.width = `${cardSize.height / 2.7}px`;
+    document.getElementById('jarjarbinks-select-button').classList.add('disabled-select-button');
+    let contWidth = document.getElementById('container').offsetWidth;
+    Array.from(document.getElementsByClassName('left-side')).map((portrait, i) => {
+      if (portrait.classList.contains('opponent-portrait')) {
+        portrait.style.height = Math.round(contWidth * (0.35) + 2) + 'px';
+        portrait.style.backgroundPositionX = ((-parseFloat(portrait.style.height) / 2 + 1) * i) + 'px';
+      } else {
+        portrait.style.minWidth = Math.round(contWidth * (0.35)) + 'px';
+        portrait.style.fontSize = (Math.round(contWidth * (0.35)) / 7) + 'px';
+      }
+    });
+    // Array.from(document.getElementsByClassName('turn-indicator')).map((el) => {
+    //   el.style.height = el.style.width = `${cardSize.height / 2.5}px`;
+    // });
+    Array.from(document.getElementsByClassName('player-area')).map((el) => {
+      el.style.minHeight = `${(cardSize.height * 2) + (Math.round(cardSize.height * 0.12))}px`;
     });
     Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
-      el.style.width = `${(cardSize.width * 4) + (cardSize.height * 0.42)}px`;
-      el.style.height = `${cardSize.height * 2.2}px`;
-      el.style.paddingTop = `${cardSize.height * 0.05}px`;
+      el.style.width = `${(cardSize.width * 4) + (parseInt(cardSizes.cardSize.margin) * 8)}px`;
+      el.style.height = `${(cardSize.height * 2) + (Math.round(cardSize.height * 0.03))}px`;
     });
+    if (document.getElementById('mini-portrait')) {
+      document.getElementById('mini-portrait').style.width = document.getElementById('mini-portrait').style.height = miniCardSize.height - 2 + 'px';
+      document.getElementById('user-portrait').style.width = document.getElementById('user-portrait').style.height = miniCardSize.height - 2 + 'px';
+      let opponentIndex = Object.keys(this.characters).indexOf(this.state.CPUOpponent);
+      document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (miniCardSize.height - 2) + 'px';
+    }
+    document.getElementById('user-hand').style.height = mediumCardSize.height + 'px';
+    document.getElementById('opponent-hand').style.height = miniCardSize.height + 'px';
   }
 
   playSound(sound) {
@@ -272,6 +562,9 @@ class App extends React.Component {
     let opponentDeckCopy = Util.shuffle(this.state.opponentDeck.slice());
     let newUserHand = [];
     let newOpponentHand = [];
+    if (!opponentDeckCopy.length) {
+      opponentDeckCopy = this.characters.jarjarbinks.deck;
+    }
     let newUserHandSlice = userDeckCopy.slice(0, 4);
     let newOpponentHandSlice = opponentDeckCopy.slice(0, 4);
     let userPlus = [];
@@ -310,10 +603,9 @@ class App extends React.Component {
       userHand: newUserHand,
       opponentHand: newOpponentHand
     });
-    console.warn('hands', newUserHand, newOpponentHand);
   }
 
-  dealToPlayerGrid(player, delay) {
+  dealToPlayerGrid(player, delay = 300) {
     let deckCopy = this.state.deck.slice();
     let newCard = Util.shuffle(deckCopy)[0];
     setTimeout(() => {
@@ -326,7 +618,7 @@ class App extends React.Component {
       this.setState({
         [`${player}Grid`]: newGridCards,
       });
-    }, delay);
+    }, this.state.options.turnInterval);
     return newCard.value;
   }
   handleToggleOption(event) {
@@ -369,6 +661,21 @@ class App extends React.Component {
         document.body.style.setProperty('--modal-shadow-color', 'black');
         optionsCopy.darkTheme = true;
       }
+      if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
+        // let container = document.getElementById('container');
+        // container.style.opacity = 0;
+        document.getElementById('container').style.opacity = 0.5;
+        setTimeout(() => {
+          Util.toggleFullScreen(this);
+        }, 150);
+        // setTimeout(() => {
+        //   let newCardSizes = Util.getCardSizes();
+        //   this.setState({
+        //     cardSizes: newCardSizes
+        //   });
+        //   this.sizeElements();
+        // }, 150);
+      }
 
     } else {
       el.classList.add('option-off');
@@ -384,7 +691,7 @@ class App extends React.Component {
       if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
         document.body.style.setProperty('--pulse-speed', '900ms');
         optionsCopy.turnInterval = 300;
-        optionsCopy.flashInterval = 180;
+        optionsCopy.flashInterval = 90;
         optionsCopy.opponentMoveInterval = 1000;
       }
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
@@ -398,18 +705,26 @@ class App extends React.Component {
         document.body.style.setProperty('--card-back-bg-color', 'grey');
         document.body.style.setProperty('--card-back-border-color', '#444');
         document.body.style.setProperty('--modal-shadow-color', 'rgb(46, 46, 46)');
-
         optionsCopy.darkTheme = false;
       }
+      if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
+        // let container = document.getElementById('container');
+        // container.style.opacity = 0;
+        document.getElementById('container').style.opacity = 0.5;
+        setTimeout(() => {
+          Util.toggleFullScreen(this);
+        }, 500);
+
+      }
     }
-    this.setState({
-      options: optionsCopy
-    });
-  }
-  handleClickHeader() {
-    this.setState({
-      phase: 'splashScreen'
-    });
+
+    // give it time to smoothly animate before setting state
+    setTimeout(() => {
+      this.setState({
+        options: optionsCopy
+      });
+    }, 200);
+
   }
   handleClickStart(event) {
     event.preventDefault();
@@ -420,22 +735,22 @@ class App extends React.Component {
     } else {
       this.evaluatePlayerName(playerName);
     }
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
-    document.getElementById('deck-select-footer').style.transform = 'translateY(0%)';
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
+    // document.getElementById('deck-select-footer').style.transform = 'translateY(0)';
     let namesCopy = this.state.playerNames;
     namesCopy.user = playerName;
     setTimeout(() => {
       this.setState({
         playerNames: namesCopy,
-        phase: 'selectingDeck'
+        phase: 'selectingOpponent'
       });
-    }, this.state.options.flashInterval);
+    }, 0);
   }
   handleClickSwitchSign(event) {
     event.preventDefault();
     let turnStatusCopy = Object.assign({}, this.state.turnStatus);
     let displaySign = turnStatusCopy.user.highlightedCard.element.children[0].innerHTML[0];
-    if (displaySign === '±' || displaySign === '-') {
+    if (displaySign === plusMinusSymbol || displaySign === '-') {
       turnStatusCopy.user.highlightedCard.obj.value = Math.abs(turnStatusCopy.user.highlightedCard.obj.value);
     } else if (displaySign === '+') {
       turnStatusCopy.user.highlightedCard.obj.value = Math.abs(turnStatusCopy.user.highlightedCard.obj.value) * -1;
@@ -449,28 +764,36 @@ class App extends React.Component {
       turnStatus: turnStatusCopy
     });
   }
-  handleClickPlay(event) {
+  handleClickOpponentReady(event) {
     event.preventDefault();
-    this.playSound('click');
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
-    this.getNewPlayerHands();
-    document.getElementById('deck-select-footer').style.transform = 'transform: translateY(100%)';
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     setTimeout(() => {
-      setTimeout(() => {
-        this.dealToPlayerGrid(this.state.turn);
-      }, this.state.options.turnInterval);
       this.setState({
-        phase: 'gameStarted'
+        phase: 'selectingDeck'
       });
     }, this.state.options.flashInterval);
   }
-  handleClickBack(event) {
+  handleClickPlay(event) {
+    this.playSound('click');
+    event.preventDefault();
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
+    this.getNewPlayerHands();
+    document.getElementById('deck-select-footer').style.transform = 'transform: translateY(100%)';
+    this.setState({
+      phase: 'gameStarted'
+    });
+    setTimeout(() => {
+      this.dealToPlayerGrid(this.state.turn);
+    }, this.state.options.turnInterval + this.state.options.flashInterval + 300);
+
+  }
+  handleClickBack(event, newPhase) {
     event.preventDefault();
     this.playSound('click');
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     setTimeout(() => {
       this.setState({
-        phase: 'splashScreen'
+        phase: newPhase
       });
     }, this.state.options.flashInterval);
   }
@@ -478,7 +801,7 @@ class App extends React.Component {
     this.playSound('click');
     // window.open('https://starwars.wikia.com/wiki/Pazaak/Legends', '_blank');
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     setTimeout(() => {
       this.setState({
         phase: 'showingInstructions'
@@ -486,9 +809,9 @@ class App extends React.Component {
     }, this.state.options.flashInterval);
   }
   handleClickOptions(event) {
-    event.preventDefault();
     this.playSound('click');
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    event.preventDefault();
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     setTimeout(() => {
       this.setState({
         phase: 'showingOptions'
@@ -498,7 +821,7 @@ class App extends React.Component {
   handleClickHallOfFame(event) {
     event.preventDefault();
     this.playSound('click');
-    Util.flash(event.target.id, 'color', 'rgb(255, 255, 163)', '#f00', this.state.options.flashInterval / 3);
+    Util.flash(event.target.id, 'color', 'rgb(255, 255, 163)', '#f00', this.state.options.flashInterval / 2);
     this.getHighScores();
     setTimeout(() => {
       this.setState({
@@ -508,7 +831,7 @@ class App extends React.Component {
   }
   handleClickEndTurn(event) {
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     this.playSound('click');
     let buttonText = document.getElementById('end-turn-button').innerHTML;
     if (buttonText === 'End Turn') {
@@ -547,7 +870,7 @@ class App extends React.Component {
     this.playSound('click');
     let buttonText = document.getElementById('stand-button').innerHTML;
     if (buttonText === 'Stand') {
-      Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+      Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
       let turnStatusCopy = Object.assign({}, this.state.turnStatus);
       turnStatusCopy.user.standing = true;
       this.setState({
@@ -569,9 +892,7 @@ class App extends React.Component {
   }
   handleClickCard(event, value, type) {
     event.preventDefault();
-
     // SELECTING DECK
-
     if (this.state.phase === 'selectingDeck') {
       if (event.target.id.toString().length > 8) {
         // it's a selection card, so put it in player deck
@@ -582,9 +903,11 @@ class App extends React.Component {
           if (deckCopy.length === 10) {
             document.getElementById('play-button').classList.remove('disabled-button');
           }
-          this.setState({
-            userDeck: deckCopy,
-            idCount: (this.state.idCount + 1)
+          this.setState(prevState => {
+            return {
+              userDeck: deckCopy,
+              idCount: prevState.idCount + 1
+            };
           });
         }
       } else {
@@ -606,7 +929,7 @@ class App extends React.Component {
 
     if (this.state.phase === 'gameStarted') {
       // highlight card and change footer buttons
-      if (!this.state.turnStatus.user.playedCards && this.state.userGrid.length < 9) {
+      if (!this.state.turnStatus.user.playedCard && this.state.userGrid.length < 9) {
         // no card played and room on grid for a card
         if (!event.target.classList.contains('highlighted-card')) {
           // card clicked is not highlighted
@@ -626,7 +949,7 @@ class App extends React.Component {
           document.getElementById('switch-sign-button').classList.remove('hidden-button');
           let cardObj = this.state.userHand[this.getCardIndexById(this.state.userHand, event.target.id)];
           // ... but only enable it if the card is a plus-minus
-          if (cardObj.type === '±') {
+          if (cardObj.type === plusMinusSymbol) {
             document.getElementById('switch-sign-button').classList.remove('disabled-button');
           } else {
             document.getElementById('switch-sign-button').classList.add('disabled-button');
@@ -656,7 +979,7 @@ class App extends React.Component {
       this.addCardtoGrid(player, cardObject.value, cardObject.type);
       this.changeCardTotal(player, this.state[`${player}Total`] + cardObject.value);
       let turnStatusCopy = Object.assign({}, this.state.turnStatus);
-      turnStatusCopy.user.playedCards = this.state.turnStatus[player].playedCards + 1;
+      turnStatusCopy.user.playedCard = true;
       turnStatusCopy.user.highlightedCard.element = null;
       turnStatusCopy.user.highlightedCard.obj = null;
       this.setState({
@@ -682,7 +1005,7 @@ class App extends React.Component {
   }
   addCardtoGrid(player, value, type) {
     let gridCopy = this.state[`${player}Grid`].slice();
-    if (type === '±') {
+    if (type === plusMinusSymbol) {
       if (value > 0) {
         value = `+${value.toString()}`;
       }
@@ -735,7 +1058,8 @@ class App extends React.Component {
       }
       this.setState({
         turn: null,
-        [`${winner}Wins`]: newWins
+        [`${winner}Wins`]: newWins,
+        lastWinner: winner
       });
       setTimeout(() => {
         document.getElementById('game-board').style.opacity = 0.3;
@@ -749,6 +1073,7 @@ class App extends React.Component {
       }
       this.setState({
         turn: null,
+        lastWinner: null
       });
       setTimeout(() => {
         document.getElementById('game-board').style.opacity = 0.3;
@@ -780,7 +1105,7 @@ class App extends React.Component {
   }
 
   determineWinnerFromTotal() {
-    console.error(`app.determineWinnerFromTotal is comparing userTotal ${this.state.userTotal} - opponentTotal ${this.state.opponentTotal}`);
+    console.warn(`app.determineWinnerFromTotal is comparing userTotal ${this.state.userTotal} - opponentTotal ${this.state.opponentTotal}`);
     let winner;
     if (this.state.userTotal > this.state.opponentTotal) {
       if (this.state.userTotal <= 20) {
@@ -829,32 +1154,40 @@ class App extends React.Component {
         }
       }
     } else {
-      // changing to opponent
-      if (this.state.userTotal > 20) {
-        // user clicked Stand with losing total
-        this.declareWinner('opponent', this.state.options.turnInterval);
-      } else {
-        if (!this.state.turnStatus.opponent.standing) {
-          let newTurn = this.swapTurn();
-          setTimeout(() => {
-            if (this.state[`${newTurn}Grid`].length < 9) {
-              this.dealToPlayerGrid(newTurn);
-            }
-            if (this.state.vsCPU) {
-              // this.makeOpponentMove();
-              AI.makeOpponentMove(this);
-            }
-          }, this.state.options.turnInterval);
+      if (this.state.vsCPU) {
+        // changing to CPU opponent
+        if (this.state.userTotal > 20) {
+          // user clicked Stand with losing total
+          if (this.state.vsCPU) {
+            // this.makeOpponentMove();
+            console.log('calling AI.makeOpponentMove when user STOOD with losing total');
+            AI.makeOpponentMove(this);
+          }
+          // this.declareWinner('opponent', this.state.options.turnInterval);
         } else {
-          this.determineWinnerFromTotal();
+          if (!this.state.turnStatus.opponent.standing) {
+            let newTurn = this.swapTurn();
+            setTimeout(() => {
+              if (this.state[`${newTurn}Grid`].length < 9) {
+                this.dealToPlayerGrid(newTurn);
+              }
+              if (this.state.vsCPU) {
+                // this.makeOpponentMove();
+                AI.makeOpponentMove(this);
+              }
+            }, this.state.options.turnInterval);
+          } else {
+            this.determineWinnerFromTotal();
+          }
         }
       }
     }
     let turnStatusCopy = Object.assign({}, this.state.turnStatus);
-    turnStatusCopy.user.playedCards = 0;
-    turnStatusCopy.opponent.playedCards = 0;
+    turnStatusCopy.user.playedCard = false;
+    turnStatusCopy.opponent.playedCard = false;
     this.setState({
-      turnStatus: turnStatusCopy
+      turnStatus: turnStatusCopy,
+      lastFirstTurn: newPlayer
     });
   }
   callResultModal(winner) {
@@ -896,7 +1229,7 @@ class App extends React.Component {
   }
   handleClickRandomize(event) {
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     let selectionCopy = Util.shuffle(this.state.cardSelection.slice());
     let userDeckCopy = [];
     for (let i = 0; i < 10; i++) {
@@ -904,16 +1237,19 @@ class App extends React.Component {
       let newCard = { id: this.state.idCount + (i + 1), value: deckCard.value, type: deckCard.type };
       userDeckCopy.push(newCard);
     }
-    this.setState({
-      userDeck: userDeckCopy,
-      idCount: (this.state.idCount + 11)
-    });
+    setTimeout(() => {
+      this.setState({
+        userDeck: userDeckCopy,
+        // idCount: (this.state.idCount + 11)  // is this necessary?
+      });
+    }, this.state.options.flashInterval);
+
     document.getElementById('play-button').classList.remove('disabled-button');
   }
   handleClickOKButton(event) {
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
-    document.getElementById('game-board').style.opacity = 1;
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
+
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
       this.getNewPlayerHands();
       this.setState({
@@ -921,50 +1257,109 @@ class App extends React.Component {
         opponentWins: 0,
       });
     }
-    this.setState({
-      userGrid: [],
-      opponentGrid: [],
-    });
+    let newTurn = this.state.lastWinner;
+    if (!newTurn) {
+      console.warn(`It was a tie! ${this.state.lastFirstTurn} had the last first turn...`);
+      newTurn = 'user';
+      if (this.state.lastFirstTurn === 'user') {
+        newTurn === 'opponent';
+      }
+      console.warn(`...so now the other player ${newTurn} has the new turn!`);
+    }
     setTimeout(() => {
-      this.setState({
-        turn: 'user'
-      });
       this.dismissResultModal();
-      this.resetBoard('user');
+      document.getElementById('game-board').style.opacity = 1;
+      this.resetBoard(newTurn);
+      this.setState({
+        userGrid: [],
+        opponentGrid: [],
+      });
       setTimeout(() => {
+        this.setState({
+          turn: newTurn,
+        });
         this.dealToPlayerGrid(this.state.turn);
+        if (this.state.vsCPU && newTurn === 'opponent') {
+          AI.makeOpponentMove(this);
+        }
       }, this.state.options.turnInterval);
     }, this.state.options.flashInterval);
   }
-  toggleHamburgerAppearance() {
+  toggleHamburgerAppearance(position) {
     let topBar = document.getElementById('top-hamburger-bar');
     let bottomBar = document.getElementById('bottom-hamburger-bar');
-    if (this.state.menuShowing) {
-      topBar.style.transform = 'none';
-      bottomBar.style.transform = 'none';
+    let middleBar = document.getElementById('middle-hamburger-bar');
+    let middleBar2 = document.getElementById('middle-hamburger-bar-2');
+    if (position === 'hamburger') {
+      middleBar.style.transform = middleBar2.style.transform = 'none';
+      topBar.style.opacity = bottomBar.style.opacity = 1;
+      setTimeout(() => {
+        topBar.style.transform = bottomBar.style.transform = 'translateY(0)';
+      }, 150);
     } else {
-      topBar.style.transform = 'rotate(29deg) scaleX(0.675) translateX(55%) translateY(-215%)';
-      bottomBar.style.transform = 'rotate(-29deg) scaleX(0.675) translateX(55%) translateY(215%)';
+      topBar.style.transform = 'translateY(2.5vmax)';
+      bottomBar.style.transform = 'translateY(-2.5vmax)';
+      setTimeout(() => {
+        topBar.style.opacity = bottomBar.style.opacity = 0;
+        middleBar.style.transform = 'rotate(45deg) scaleX(1.1)';
+        middleBar2.style.transform = 'rotate(-45deg) scaleX(1.1)';
+      }, 150);
     }
   }
   handleClickHamburger() {
-    this.toggleHamburgerAppearance();
-    if (!this.state.menuShowing) {
+    if (!document.getElementById('hamburger-menu').classList.contains('hamburger-on')) {
+      this.toggleHamburgerAppearance('close');
       document.getElementById('hamburger-menu').classList.add('hamburger-on');
     } else {
+      this.toggleHamburgerAppearance('hamburger');
       document.getElementById('hamburger-menu').classList.remove('hamburger-on');
     }
-    this.setState({
-      menuShowing: !this.state.menuShowing
+  }
+
+  handleClickOpponentPanel(event) {
+    let eventId = event.target.id;
+    Util.flash(eventId, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
+    let opponentName = eventId.split('-')[0];
+    let opponentSelectButton = document.getElementById(`${opponentName}-select-button`);
+    document.getElementById(`${opponentName}-panel`).style.backgroundColor = 'var(--option-on-color)';
+    opponentSelectButton.classList.add('disabled-select-button');
+    // opponentSelectButton.innerHTML = 'Selected'
+    Array.from(document.getElementById('opponent-select-area').children).map((panel, i) => {
+      if (panel.id.split('-')[0] !== opponentName) {
+        let panelButton = document.getElementById(`${panel.id.split('-')[0]}-select-button`);
+        panel.style.backgroundColor = 'var(--trans-blue-bg-color)';
+        panelButton.classList.remove('disabled-select-button');
+      }
     });
+    // delay setting state until bg changed / flash finished!
+    // for responsiveness!
+    let opponentIndex = Object.keys(characters).indexOf(event.target.id.split('-')[0]);
+    setTimeout(() => {
+      document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (this.state.cardSizes.miniCardSize.height - 2) + 'px';
+      let namesCopy = Object.assign({}, this.state.playerNames);
+      namesCopy.opponent = characters[opponentName].displayName;
+      let opponentDeckCopy = Util.shuffle(characters[opponentName].deck);
+      this.setState({
+        CPUOpponent: opponentName,
+        playerNames: namesCopy,
+        opponentDeck: opponentDeckCopy
+      });
+    }, this.state.options.flashInterval * 2);
+    event.preventDefault();
   }
   resetBoard(newTurn, total) {
     document.getElementById('user-total').classList.remove('red-total');
     document.getElementById('user-total').classList.remove('green-total');
     document.getElementById('opponent-total').classList.remove('red-total');
     document.getElementById('opponent-total').classList.remove('green-total');
-    document.getElementById('end-turn-button').classList.remove('disabled-button');
-    document.getElementById('stand-button').classList.remove('disabled-button');
+    if (newTurn === 'user') {
+      document.getElementById('end-turn-button').classList.remove('disabled-button');
+      document.getElementById('stand-button').classList.remove('disabled-button');
+    } else {
+      document.getElementById('end-turn-button').classList.add('disabled-button');
+      document.getElementById('stand-button').classList.add('disabled-button');
+    }
+
     // this.getNewPlayerHands();
     this.setState({
       userGrid: [],
@@ -999,54 +1394,52 @@ class App extends React.Component {
         phase: 'splashScreen',
         userWins: 0,
         opponentWins: 0,
+        lastFirstTurn: 'user',
+        lastWinner: null
         // must disable button if this is reset
         // userDeck: []
       });
     }
   }
-  handleClickHamburgerOptions(event) {
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
-
-  }
   handleClickHamburgerQuit(event) {
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 3);
-    this.setState({
-      menuShowing: false
-    });
-    this.toggleHamburgerAppearance();
+    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
+
+    document.getElementById('hamburger-menu').classList.remove('hamburger-on');
+    this.resetBoard('user', true);
     setTimeout(() => {
-      this.resetBoard('user', true);
-      document.getElementById('hamburger-menu').classList.remove('hamburger-on');
-    }, this.state.options.flashInterval);
+      this.toggleHamburgerAppearance('hamburger');
+    }, 400);
   }
   render() {
-    let roundOver = (this.state.userWins === 3 || this.state.opponentWins === 3);
+
     // default styles are hidden...
-    let footerStyle = { pointerEvents: 'none', opacity: 0, position: 'absolute', bottom: '-3rem' };
+    // - maybe keep these in state?
+    // - or use routing?
+    let cardSize = this.state.cardSizes.cardSize;
+    let mediumCardSize = this.state.cardSizes.mediumCardSize;
+    let miniCardSize = this.state.cardSizes.miniCardSize;
+    let microCardSize = this.state.cardSizes.microCardSize;
+
+    let footerStyle = { pointerEvents: 'none', opacity: 1, position: 'absolute', bottom: '-10vmax' };
     let gameBoardStyle = { display: 'none' };
     let introStyle = { display: 'none' };
     let instructionsStyle = { display: 'none' };
     let optionsStyle = { display: 'none' };
     let hallOfFameStyle = { display: 'none' };
+    let opponentSelectStyle = { display: 'none' };
     let deckSelectStyle = { display: 'none' };
-    // but shown if proper state.phase
-    if (this.state.phase === 'gameStarted') {
-      gameBoardStyle = { display: 'flex' };
-      footerStyle = { pointerEvents: 'all', opacity: 1, position: 'relative', bottom: '0' };
-    } else if (this.state.phase === 'selectingDeck') {
-      deckSelectStyle = { display: 'flex' };
-    } else if (this.state.phase === 'showingOptions') {
-      optionsStyle = { display: 'flex' };
-    } else if (this.state.phase === 'showingHallOfFame') {
-      hallOfFameStyle = { display: 'flex' };
-    } else if (this.state.phase === 'showingInstructions') {
-      instructionsStyle = { display: 'flex' };
-    } else if (this.state.phase === 'splashScreen') {
-      introStyle = { display: 'flex' };
+    switch (this.state.phase) {
+    case 'splashScreen': introStyle = { display: 'flex' }; break;
+    case 'selectingOpponent': opponentSelectStyle = { display: 'flex' }; break;
+    case 'showingOptions': optionsStyle = { display: 'flex' }; break;
+    case 'selectingDeck': deckSelectStyle = { display: 'flex' }; break;
+    case 'showingHallOfFame': hallOfFameStyle = { display: 'flex' }; break;
+    case 'showingInstructions': instructionsStyle = { display: 'flex' }; break;
+    case 'gameStarted': gameBoardStyle.display = 'flex', footerStyle = { pointerEvents: 'all', opacity: 1, position: 'relative', bottom: '0' }; break;
     }
     return (
       <div id='container'>
-        <Header onClickHeader={this.handleClickHeader} />
+        <Header />
         <IntroScreen style={introStyle}
           onClickStart={this.handleClickStart}
           onClickHow={this.handleClickHow}
@@ -1059,7 +1452,8 @@ class App extends React.Component {
           onToggleOption={this.handleToggleOption}
           onClickBack={this.handleClickBack} />
         <HallOfFameScreen style={hallOfFameStyle}
-          highScores={this.state.highScores}
+          // highScores={this.state.highScores}
+          highScores={this.highScores}
           onClickBack={this.handleClickBack} />
         <DeckSelectionScreen style={deckSelectStyle}
           cardSelection={this.state.cardSelection}
@@ -1067,9 +1461,17 @@ class App extends React.Component {
           onClickRandomize={this.handleClickRandomize}
           onClickPlay={this.handleClickPlay}
           onClickCard={this.handleClickCard}
+          onClickBack={this.handleClickBack}
           cardSize={cardSize}
           mediumCardSize={mediumCardSize} />
+        <OpponentSelectScreen style={opponentSelectStyle}
+          characters={characters}
+          cardSize={microCardSize}
+          onClickPanel={this.handleClickOpponentPanel}
+          onClickOpponentReady={this.handleClickOpponentReady}
+          onClickBack={this.handleClickBack} />
         <GameBoard style={gameBoardStyle}
+          playerNames={this.state.playerNames}
           hands={{ user: this.state.userHand, opponent: this.state.opponentHand }}
           grids={{ user: this.state.userGrid, opponent: this.state.opponentGrid }}
           totals={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
@@ -1080,20 +1482,20 @@ class App extends React.Component {
           mediumCardSize={mediumCardSize}
           miniCardSize={miniCardSize}
           onClickCard={this.handleClickCard} />
-        <Footer style={footerStyle}
+        <ControlFooter style={footerStyle}
           onClickEndTurn={this.handleClickEndTurn}
           onClickStand={this.handleClickStand}
           onClickHamburger={this.handleClickHamburger}
           onClickSwitchSign={this.handleClickSwitchSign}
         />
-        <HamburgerMenu onClickHamburgerOptions={this.handleClickHamburgerOptions}
+        <HamburgerMenu
           onClickHamburgerQuit={this.handleClickHamburgerQuit}
           onToggleOption={this.handleToggleOption} />
         <ResultModal onClickOKButton={this.handleClickOKButton}
           titleText={this.state.resultMessage.title}
           playerNames={this.state.playerNames}
           winner={this.state.resultMessage.winner}
-          roundOver={roundOver}
+          roundOver={(this.state.userWins === 3 || this.state.opponentWins === 3)}
           finalScores={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
           buttonText={this.state.resultMessage.buttonText} />
       </div>
