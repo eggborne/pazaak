@@ -2,62 +2,79 @@ import style from '../css/styles.css';
 import React from 'react';
 import PropTypes from 'prop-types';
 
+
 function CardBack(props) {
   let cardHeight = props.size.height;
+  let cardBorderSize = props.size.borderSize;
+  let arrowBorderSize = props.size.arrowBorderSize;
+  let cardRadius = props.size.borderRadius;
+  let bandRadius = props.size.bandRadius;
+  let cardMargin = props.size.margin;
+  let bubbleSize = props.size.bubbleSize;
+  let backBubbleSize = props.size.backBubbleSize;
   return (
     <div className='card'>
       <style jsx>{`
         .card {
           width: ${props.size.width}px;
-          height: ${props.size.height}px;
-          margin-left: ${cardHeight * 0.04}px;
-          margin-right: ${cardHeight * 0.04}px;
+          height: ${cardHeight}px;
+          margin-left: ${cardMargin};
+          margin-right: ${cardMargin};
+          border-radius: ${cardRadius};
+          border-width: ${cardBorderSize};
+          
         }
         .inner-band {
           background-color: var(--card-back-bg-color);
           border-color: var(--card-back-border-color);
+          border-radius: ${bandRadius};
+        }
+        .inner-band:nth-child(4) {
+          border-radius: ${bandRadius} ${bandRadius} 0 0;
         }
         .corner-bubble, .back-bubble {
           background-color: var(--card-back-color);
           border-color: var(--card-back-border-color);
         }
         .corner-bubble {
-          width: ${cardHeight * 0.16}px;
-          height: ${cardHeight * 0.16}px;
+          border: ${cardBorderSize} solid black;
+          width: ${bubbleSize};
+          height: ${bubbleSize};
         }
         .back-bubble {
-          width: ${cardHeight * 0.18}px;
-          height: ${cardHeight * 0.18}px;
+          width: ${backBubbleSize};
+          height: ${backBubbleSize};
         }
         .back-bubble {
           border-bottom: 1px solid black;
         }
         .number-badge {
           background-color: var(--card-back-color);
-          border: 1px solid black;
+          // background-color: pink;
+          border: ${cardBorderSize} solid black;
           border-top: none;
           border-bottom: none;
+          // border: 0;
           top: 27%;
         }
-        .band-arrow-up, .band-arrow-down {
-          border-left: ${cardHeight * 0.07}px solid transparent;
-          border-right: ${cardHeight * 0.07}px solid transparent;
+        .back-badge {
+          border-radius: ${bandRadius};
+          width: 65%;
+          height: 27%;
+          // box-sizing: content-box;
         }
-        .band-arrow-up-bg, .band-arrow-down-bg {
-          border-left: ${cardHeight * 0.1}px solid transparent;
-          border-right: ${cardHeight * 0.1}px solid transparent;
+        .band-arrow-up, .band-arrow-down {
+          border-left: ${arrowBorderSize} solid transparent;
+          border-right: ${arrowBorderSize} solid transparent;
         }
         .band-arrow-up {
-          border-bottom: ${cardHeight * 0.07}px solid var(--card-back-color);
-        }
-        .band-arrow-up-bg {
-          border-bottom: ${cardHeight * 0.1}px solid var(--card-back-color);
+          border-bottom: ${arrowBorderSize} solid var(--card-back-color);
         }
         .band-arrow-down {
-          border-top: ${cardHeight * 0.07}px solid var(--card-back-color);
+          border-top: ${arrowBorderSize} solid var(--card-back-color);
         }
         .band-arrow-down-bg {
-          border-top: ${cardHeight * 0.1}px solid var(--card-back-color);
+          border-top: ${arrowBorderSize} solid var(--card-back-color);
         }
         .inner-band:nth-child(2) {
           border-bottom: none;
@@ -67,11 +84,8 @@ function CardBack(props) {
           border-top: none;
           border-radius: 0 0 12% 12%;
         }
-        .inner-band:nth-child(4) {
-          border-bottom: 1px solid var(--card-back-border-color);
-        }
         .inner-band:nth-child(5) {
-          height: 15%;
+          height: 18%;
           position: absolute;
           border-top: none;
           border-bottom: none;
@@ -79,14 +93,12 @@ function CardBack(props) {
           top: 20%;
         }
       `}</style>
-      <div className='number-badge'></div>
+      <div className='number-badge back-badge'></div>
       <div className='inner-band'>
         <div className='corner-bubble'></div>
-        <div className='band-arrow-up-bg'></div>
         <div className='band-arrow-up'></div>
       </div>
       <div className='inner-band'>
-        <div className='band-arrow-down-bg'></div>
         <div className='band-arrow-down'></div>
       </div>
       <div className='inner-band'>
