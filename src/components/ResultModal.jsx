@@ -30,7 +30,7 @@ function ResultModal(props) {
           {props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span><br />{props.playerNames.opponent}: <span style={opponentScoreStyle}>{props.finalScores.opponent}</span>
         </div>
       </div>
-      <button onClick={(event) => props.onClickOKButton(event)} id='ok-button'>{props.buttonText}</button>
+      <button onClick={props.onClickOKButton} id='ok-button'>{props.buttonText}</button>
     </div>
   );
 }
