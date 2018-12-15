@@ -9,7 +9,6 @@ function CardBack(props) {
   let arrowBorderSize = props.size.arrowBorderSize;
   let cardRadius = props.size.borderRadius;
   let bandRadius = props.size.bandRadius;
-  let cardMargin = props.size.margin;
   let bubbleSize = props.size.bubbleSize;
   let backBubbleSize = props.size.backBubbleSize;
   return (
@@ -18,11 +17,8 @@ function CardBack(props) {
         .card {
           width: ${props.size.width}px;
           height: ${cardHeight}px;
-          margin-left: ${cardMargin};
-          margin-right: ${cardMargin};
           border-radius: ${cardRadius};
           border-width: ${cardBorderSize};
-          
         }
         .inner-band {
           background-color: var(--card-back-bg-color);
