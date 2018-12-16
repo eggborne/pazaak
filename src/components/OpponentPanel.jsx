@@ -6,6 +6,62 @@ function OpponentPanel(props) {
   let skillArray = Array.apply(null, Array(10)).map(function () { });
   return (
     <div id={`${props.character.name}-panel`} className='opponent-select-entry'>
+      <style jsx>{`
+        .opponent-select-entry {
+          box-sizing: border-box;
+          position: relative;
+          margin-bottom: 0.5vh;
+          margin-left: 0;
+          border: 1px groove #333;
+          display: flex;
+          align-items: stretch;
+          justify-content: flex-end;
+          border-radius: 0.5rem;
+          background-color: var(--trans-blue-bg-color);
+          transform: scale(0.96);
+          transition: all 300ms ease, border-radius 600ms ease;
+        }
+        .opponent-select-entry:nth-child(2n) {
+          background-color: var(--trans-red-bg-color);
+        }
+        .panel-selected {
+          background-color: var(--option-on-color) !important;
+          transform: scaleX(1) !important;
+          border-radius: 0 !important;
+        }
+        .opponent-select-entry:nth-last-child(1) {
+          // transform-origin: bottom;
+          margin-bottom: 0;
+        }
+        .select-button {
+          height: 10vmax;
+          font-size: 1.5rem;
+          padding: 0.5rem 1rem 0.5rem 1rem;
+          transition: all 300ms ease;
+        }
+        .select-button::before {
+          content: "Select";
+        }
+        .disabled-select-button::before {
+          content: "Selected";
+          font-size: 0.9em;
+        }
+        .disabled-select-button {
+          border-color: #555 !important;
+          background-color: #333 !important;
+          color: #666 !important;
+          pointer-events: none !important;
+          opacity: 0.9;
+        }
+        .select-button::before {
+          content: "Select";
+        }
+        .disabled-select-button::before {
+          content: "Selected";
+          font-size: 0.9em;
+        }
+      `} 
+      </style>
       <div className='left-opponent-panel'>
         <div className='opponent-portrait left-side'>
           <div className='portrait-label'>{props.character.displayName}</div>
