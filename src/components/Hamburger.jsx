@@ -33,7 +33,7 @@ function Hamburger(props) {
         }
         #middle-hamburger-bar-2 {
           position: absolute;
-          // width: 7vmax;
+          width: 7vmax;
         }
       `}
       </style>
