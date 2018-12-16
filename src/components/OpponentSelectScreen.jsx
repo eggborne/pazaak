@@ -11,7 +11,32 @@ function OpponentSelectScreen(props) {
   
   return (
     <div style={props.style} id='opponent-select-screen'>
-      <div id='opponent-select-title'>
+      <style jsx>{`
+        #opponent-select-screen {
+          font-size: 1.5rem;
+          font-family: 'Nova Square';
+          display: flex;
+          flex-direction: column;
+          // flex-grow: 1;
+          justify-content: space-between;
+          align-items: center;
+          overflow-y: scroll;
+        }
+        #opponent-select-title {
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          border-bottom: 1px solid black;
+        }
+        #opponent-select-area {
+          overflow-y: scroll;
+          margin-bottom: 10.25vmax;
+        }
+        .pre-footer {
+          border-top: 1px solid black;
+        }
+      `}</style>
+      <div className='pre-header' id='opponent-select-title'>
         <div className='shadowed-text'>Choose Your Opponent</div>
       </div>
       <div id='opponent-select-area' className='shadowed-text'>
@@ -23,7 +48,7 @@ function OpponentSelectScreen(props) {
             onClickPanel={props.onClickPanel} />
         )}
       </div>
-      <div id='opponent-select-footer'>
+      <div className='pre-footer' id='opponent-select-footer'>
         <button id='opponent-select-back-button' onClick={(event) => props.onClickBack(event, 'splashScreen')} className='footer-back-button shadowed-text'>{'<'}</button>
         <button className='ready-button' onClick={props.onClickOpponentReady} id='opponent-ready-button'>Ready!</button>
       </div>
