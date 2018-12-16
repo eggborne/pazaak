@@ -3,20 +3,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Card from './Card';
 import CardBack from './CardBack';
+import MoveIndicator from './MoveIndicator';
 
 function GameBoard(props) {
-  let ninthCards = {
-    user: [],
-    opponent: []
-  };
-  if (props.grids.user.length === 9) {
-    let ninthCard = props.grids.user[8];
-    ninthCards.user.push(ninthCard);
-  }
-  if (props.grids.opponent.length === 9) {
-    let ninthCard = props.grids.opponent[8];
-    ninthCards.opponent.push(ninthCard);
-  }
   let userWins = ['', '', ''];
   let opponentWins = ['', '', ''];
   if (props.wins.user === 1) {
@@ -25,7 +14,6 @@ function GameBoard(props) {
   if (props.wins.user === 2) {
     userWins[0] = userWins[1] = 'win-symbol-lighted';
   }
-
   if (props.wins.opponent === 1) {
     opponentWins[0] = 'win-symbol-lighted';
   }
@@ -70,59 +58,133 @@ function GameBoard(props) {
   props.grids.user.map((card, i) => {
     userGrid.push(<Card key={i} size={props.cardSize} value={card.value} type={card.type} />);
   });
-  let gridWidth = props.cardSize.width + (parseFloat(props.cardSize.borderSize) * 2);
-  let gridHeight = props.cardSize.height + (parseFloat(props.cardSize.borderSize) * 2);
+  let gridWidth = props.cardSize.width + (parseFloat(props.cardSize.borderSize) * 4);
+  let gridHeight = props.cardSize.height + (parseFloat(props.cardSize.borderSize) * 3);
   let handCardSize = props.mediumCardSize;
-  if (props.cardSize.width * 6 > window.innerWidth) {
+  let cardsPerWidth = window.innerWidth / handCardSize.width;
+  if (cardsPerWidth < 6.8) {
     handCardSize = props.miniCardSize;
   }
+  let opponentHand = [];
+  let userHand = [];
+  props.hands.opponent.map((card, i) => {
+    opponentHand.push(<CardBack key={i} size={handCardSize} />);
+  });
+  props.hands.user.map((card, i) => {
+    userHand.push(<Card key={i} id={card.id} size={handCardSize} value={card.value} type={card.type}
+      onClickCard={props.onClickCard} />);
+  });
+  let handGridwidth = handCardSize.width;
+  let handGridHeight = handCardSize.height;
   return (
     <div style={props.style} id='game-board'>
       <style jsx>{`
+        #game-board {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          transition: opacity 400ms ease;
+          flex-grow: 1;
+        }
+        .player-area {
+          display: inline-flex;
+          align-items: center;
+          justify-content: space-around;
+          box-sizing: border-box;
+        }
+        #user-area, #user-hand {
+          background-color: var(--trans-blue-bg-color);
+        }
+        #opponent-area, #opponent-hand {
+          background-color: var(--trans-red-bg-color);
+        }
         .deal-grid {
           box-sizing: border-box;
           display: grid;
-          grid-template-columns: ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px auto;
+          grid-template-columns: ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px;
           grid-template-rows: ${gridHeight}px ${gridHeight}px;
           align-self: center;
           grid-column-gap: 1vw;
-          grid-row-gap: 1vh;
+          align-items: center;
+          grid-row-gap: 1vw;
           margin-top: 1vh;
           margin-bottom: 1vh;
           margin-left: auto;
           margin-right: auto;
         }
+        .player-cards {
+          display: grid;
+          grid-template-columns: ${handGridwidth}px ${handGridwidth}px ${handGridwidth}px ${(handGridwidth)}px;
+          grid-template-rows: ${handGridHeight}px;
+          grid-column-gap: 0.5vw;
+
+        }
+        .player-hand-area {
+          box-sizing: border-box;
+          width: 100%;
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          grid-template-rows: 100%;
+          justify-items: center;
+          align-self: center;
+          align-items: center;
+          flex-grow: 1;
+          grid-column-gap: 1vw;
+        }
+        .player-hand-area > div:nth-child(1) {
+          justify-self: right;
+        }
+        .player-cards > div {
+          align-self: center;
+          position: relative;
+          border: ${props.cardSize.borderSize} inset #999;
+          border-radius: ${handCardSize.borderRadius};
+          background-color: var(--card-spot-bg-color);
+          height: 100%;
+          box-sizing: border-box;
+        }
         .deal-grid > div {
-          border-radius: ${props.cardSize.borderRadius} !important;
-          background-color: rgb(105, 115, 128);
+          border: ${handCardSize.borderSize} inset var(--card-spot-border-color);
+          border-radius: ${parseFloat(props.cardSize.borderRadius)+2}px !important;
+          background-color: var(--card-spot-bg-color);
           height: ${gridHeight}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
         }
         .deal-grid .stats-area {
           background-color: transparent;
-        }
-        .stats-area {
-          margin-left: 6vw;
+          border: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          width: 100%;
         }
         .ninth-card {
           width: ${gridWidth}px;
         }
         .total-display {
+          postition: absolute;
+          box-sizing: border-box;
           font-family: 'Nova Square';
-          width: 3.5rem;
-          font-size: 1.75rem;
-          border-radius: 0.75rem;
+          font-size: ${props.cardSize.height / 4}px;
+          border-radius: ${props.cardSize.height / 4}px;
           background-color: black;
-          padding: 0.35rem;
+          padding: ${props.cardSize.width / 16}px;
           display: flex;
           align-items: center;
           justify-content: center;
+          width: 90%;
         }
         .total-outline {
           width: 100%;
-          border-radius: 0.5rem;
+          padding-top: ${props.cardSize.margin};
+          padding-bottom: ${props.cardSize.margin};
+          border-radius: ${props.cardSize.width / 3}px;
           background-color: transparent;
-          border: 2px solid #933500;
-          padding: 0.1rem;
+          border: ${props.cardSize.width / 32}px solid #933500;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -140,17 +202,19 @@ function GameBoard(props) {
           border-color: green !important;
         }
         .turn-indicator-area {
-          background: green;
-          height: 100%;
-          width: 100%;
+          width: ${handCardSize.height}px;
+          height: ${handCardSize.height}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          justify-self: left;
         }
         .turn-indicator {
-          width: 5vmax;
-          height: 5vmax;
+          width: ${props.cardSize.width / 1.35}px;
+          height: ${props.cardSize.width / 1.35}px;
           border-radius: 50%;
           background-color: gray;
           border: 1px solid black;
-          align-self: center;
           transition: all 500ms ease;
         }
         .turn-lighted {
@@ -171,46 +235,67 @@ function GameBoard(props) {
           }
         }
         .win-symbol-area {
+          box-sizing: border-box;
           display: inline-flex;
-          justify-content: space-around;
+          justify-content: space-between;
           align-items: center;
-          width: 100%;
-          margin-top: 0.5rem;
+          width: 90%;
+          margin-top: ${gridWidth * 0.2}px;
+          justify-self: center;
         }
         .win-symbol-bg {
-          /* box-sizing: border-box; */
-          border-radius: 50%;
-          background-color: rgb(163, 163, 163);
-          width: 1rem;
-          height: 1rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 0.1rem solid black;
-        }
-        .win-symbol {
           box-sizing: border-box;
           border-radius: 50%;
           background-color: rgb(163, 163, 163);
-          border: 0.1rem solid #222;
-          width: 0.8rem;
-          height: 0.8rem;
+          width: ${props.cardSize.height / 5}px;
+          height: ${props.cardSize.height / 5}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: ${props.cardSize.borderSize} solid black;
+        }
+        .win-symbol {
+          border-radius: 50%;
+          background-color: rgb(163, 163, 163);
+          border: ${props.miniCardSize.borderSize} solid #222;
+          width: ${props.cardSize.height / 10}px;
+          height: ${props.cardSize.height / 10}px;
         }
         .win-symbol-lighted {
           background-color: orange;
         }
+        #user-portrait {
+          background-image: url('https://pazaak.online/assets/images/playerportrait.jpg');
+        }
+        .mini-portrait-label {
+          box-sizing: border-box;
+          padding: 0.1rem 0.25rem;
+          font-size: 0.8rem;
+          font-family: 'Nova Square';
+          width: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          box-sizing: border-box;
+          border-radius: 0 0 0.25rem 0.25rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
       `}
       </style>
+      <MoveIndicator message='End Turn' />
       <div id='opponent-hand' className='player-hand-area'>
         <div className='opponent-portrait' id='mini-portrait'>
           <div className='mini-portrait-label shadowed-text'>{props.playerNames.opponent}</div>
         </div>
         <div id='opponent-cards' className='player-cards'>
-          {props.hands.opponent.map((card, i) =>
-            <CardBack key={i} size={handCardSize} />
-          )}
+          <div>{opponentHand[0]}</div>
+          <div>{opponentHand[1]}</div>
+          <div>{opponentHand[2]}</div>
+          <div>{opponentHand[3]}</div>
         </div>
+        <div className='turn-indicator-area'>
           <div id='opponent-turn-indicator' className={`turn-indicator ${opponentTurn}`}></div>
+        </div>
       </div>
       <div id='grids'>
         <div id='opponent-area' className='player-area'>
@@ -235,12 +320,9 @@ function GameBoard(props) {
             <div>{opponentGrid[5]}</div>
             <div>{opponentGrid[6]}</div>
             <div>{opponentGrid[7]}</div>
-            <div className='ninth-card' id='opponent-ninth-card'>
-
-            </div>
+            <div className='ninth-card'>{opponentGrid[8]}</div>
           </div>
         </div>
-
         <div id='user-area' className='player-area'>
           <div id='user-grid' className='deal-grid'>
             <div>{userGrid[0]}</div>
@@ -263,9 +345,7 @@ function GameBoard(props) {
             <div>{userGrid[5]}</div>
             <div>{userGrid[6]}</div>
             <div>{userGrid[7]}</div>
-            <div className='ninth-card' id='opponent-ninth-card'>
-
-            </div>
+            <div className='ninth-card'>{userGrid[8]}</div>
           </div>
 
         </div>
@@ -275,12 +355,14 @@ function GameBoard(props) {
           <div className='mini-portrait-label shadowed-text'>{props.playerNames.user}</div>
         </div>
         <div id='user-cards' className='player-cards'>
-          {props.hands.user.map((card, i) =>
-            <Card key={i} id={card.id} size={handCardSize} value={card.value} type={card.type}
-              onClickCard={props.onClickCard} />
-          )}
+          <div>{userHand[0]}</div>
+          <div>{userHand[1]}</div>
+          <div>{userHand[2]}</div>
+          <div>{userHand[3]}</div>
         </div>
+        <div className='turn-indicator-area'>
           <div id='user-turn-indicator' className={`turn-indicator ${userTurn}`}></div>
+        </div>
       </div>
     </div>
   );
