@@ -21,6 +21,7 @@ export function makeOpponentMove(app) {
    * 
    */
   setTimeout(() => {
+    let stood = false;
     let extraDelay = 150;
     /**
      * Done whether user is standing or not
@@ -48,9 +49,11 @@ export function makeOpponentMove(app) {
       // safe to draw!
       safeToDraw = true;
       console.warn(`CPU decided it's safe to draw at total ${app.state.opponentTotal}, with minus potential of ${highestMinusValue}`);
+      
     } else {
       safeToDraw = false;
       console.warn(`CPU decided it's UNSAFE to draw at total ${app.state.opponentTotal}, with minus potential of ${highestMinusValue}`);
+      
     }
 
     /**
@@ -66,6 +69,7 @@ export function makeOpponentMove(app) {
         console.warn(`USER TOTAL ${app.state.userTotal} is over 20 or less than opponent total ${app.state.opponentTotal}! standing and returning`);
         console.error('CPU STAND');
         standCPU(app);
+        stood = true;
         setTimeout(() => {
           app.determineWinnerFromTotal();
         }, (app.state.options.turnInterval * 2));
@@ -159,6 +163,7 @@ export function makeOpponentMove(app) {
                 console.warn(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore} (under 20 and beats/ties ${app.state.userTotal}), so CPU is playing it!`);
                 if (potentialScore >= standAt) {
                   standCPU(app);
+                  stood = true;
                 }
                 break;
               } else {
@@ -228,7 +233,7 @@ export function makeOpponentMove(app) {
         // is 20
         console.error('CPU STANDING at exactly 20!');
         standCPU(app);
-
+        stood = true;
       }
       // ...then, if did not reach a stand state, End Turn
       app.changeTurn('user');
@@ -238,6 +243,7 @@ export function makeOpponentMove(app) {
 
       if (app.state.opponentTotal >= standAt && app.state.opponentTotal < 20) {
         standCPU(app);
+        stood = true;
         console.error('CPU immediately STANDS after initial draw!');
       } else if (app.state.opponentTotal < 20) {
 
@@ -252,6 +258,7 @@ export function makeOpponentMove(app) {
                 let cardToPlay = card;
                 app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
                 standCPU(app);
+                stood = true;
                 console.warn(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore}, so CPU is playing it and STANDING!`);
                 console.error('CPU STANDS after playing a hand card!');
                 break;
@@ -282,6 +289,7 @@ export function makeOpponentMove(app) {
               console.warn(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore}, so CPU is playing it!`);
               if (potentialScore >= standAt) {
                 standCPU(app);
+                stood = true;
               }
               break;
             } else {
@@ -297,8 +305,14 @@ export function makeOpponentMove(app) {
         // is 20
         console.error('TOTAL IS EXACTLY 20! Standing.');
         standCPU(app);
+        stood = true;
       }
       console.error('CPU TURN OVER');
+      if (stood) {
+        app.callMoveIndicator('Stand');
+      } else {
+        app.callMoveIndicator('End Turn');
+      }
       //must delay or app.state.opponentTotal is wrong in changeTurn()!
       console.error(`Switching turns with delay ${extraDelay}`);
       setTimeout(() => {
@@ -314,4 +328,5 @@ function standCPU(app) {
   app.setState({
     turnStatus: turnStatusCopy
   });
+  // app.callMoveIndicator('Stand');
 }
