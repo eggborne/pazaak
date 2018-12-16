@@ -6,7 +6,7 @@ import IntroScreen from './IntroScreen';
 import InstructionsScreen from './InstructionsScreen';
 import OptionsScreen from './OptionsScreen';
 import HallOfFameScreen from './HallOfFameScreen';
-import DeckSelectionScreen from './DeckSelectScreen';
+import DeckSelectScreen from './DeckSelectScreen';
 import GameBoard from './GameBoard';
 import HamburgerMenu from './HamburgerMenu';
 import ResultModal from './ResultModal';
@@ -275,7 +275,26 @@ class App extends React.PureComponent {
       },
       phase: 'splashScreen',
       deck: [],
-      cardSelection: [],
+      cardSelection: [
+        { id: 1111, value: 1, type: '+' },
+        { id: 2222, value: 1, type: '+' },
+        { id: 3333, value: 2, type: '+' },
+        { id: 4444, value: 2, type: '+' },
+        { id: 5555, value: 3, type: '+' },
+        { id: 6666, value: 3, type: '+' },
+        { id: 7777, value: 1, type: '-' },
+        { id: 8888, value: 1, type: '-' },
+        { id: 9999, value: 2, type: '-' },
+        { id: 1112, value: 2, type: '-' },
+        { id: 1113, value: 3, type: '-' },
+        { id: 1114, value: 3, type: '-' },
+        { id: 1115, value: 1, type: plusMinusSymbol },
+        { id: 1115, value: 2, type: plusMinusSymbol },
+        { id: 1116, value: 3, type: plusMinusSymbol },
+        { id: 1117, value: 4, type: plusMinusSymbol },
+        { id: 1118, value: 5, type: plusMinusSymbol },
+        { id: 1119, value: 6, type: plusMinusSymbol }
+      ],
       idCount: 0,
       userDeck: [],
       opponentDeck: [],
@@ -338,20 +357,20 @@ class App extends React.PureComponent {
     this.highScores = [];
 
     // make the selection deck (12 dummy cards 1-6, plus and minus)
-    let cardSelection = [];
-    for (let i = 1; i <= 12; i++) {
-      let value = i;
-      let sign = '+';
-      if (i > 6 && i < 11) {
-        value -= 6;
-        value *= -1;
-        sign = '-';
-      } else if (i >= 11) {
-        value = i - 8;
-        sign = plusMinusSymbol;
-      }
-      cardSelection.push({ id: i * 1111, value: value, type: sign });
-    }
+    // let cardSelection = [];
+    // for (let i = 1; i <= 12; i++) {
+    //   let value = i;
+    //   let sign = '+';
+    //   if (i > 6 && i < 11) {
+    //     value -= 6;
+    //     value *= -1;
+    //     sign = '-';
+    //   } else if (i >= 11) {
+    //     value = i - 8;
+    //     sign = plusMinusSymbol;
+    //   }
+    //   cardSelection.push({ id: i * 1111, value: value, type: sign });
+    // }
     // make a deck of 40, 4 each of value 1-10...
     let deck = [];
     for (let i = 1; i <= 40; i++) {
@@ -390,8 +409,8 @@ class App extends React.PureComponent {
     // this.state.opponentDeck = opponentDeck;
     // filled when user picks opponent
 
+    // this.state.cardSelection = cardSelection;
     this.state.idCount = 10; // these are the 10 opponent deck cards
-    this.state.cardSelection = cardSelection;
     this.state.deck = this.shuffleDeck(deck);
 
     // get these for easy reference when calling Util.flash()
@@ -439,8 +458,11 @@ class App extends React.PureComponent {
 
   componentDidMount() {
     Util.checkCookie();
-    this.sizeElements();
+    // this.sizeElements();
+    Util.sizeElements(this);
     this.getHighScores();
+    document.getElementById('jarjarbinks-select-button').classList.add('disabled-select-button');
+    document.getElementById('jarjarbinks-panel').classList.add('panel-selected');
     document.getElementById('container').addEventListener('fullscreenchange', this.handleFullscreenChange);
     document.getElementById('container').addEventListener('mozfullscreenchange', this.handleFullscreenChange);
     document.getElementById('container').addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
@@ -506,29 +528,32 @@ class App extends React.PureComponent {
     eval(funcName)(playerName);
   }
   sizeElements(cardSizes = this.state.cardSizes) {
-    let cardSize = cardSizes.cardSize;
     let miniCardSize = cardSizes.miniCardSize;
-    let mediumCardSize = cardSizes.mediumCardSize;
     document.getElementById('container').style.height = `${window.innerHeight}px`;
-    document.getElementById('jarjarbinks-select-button').classList.add('disabled-select-button');
     let contWidth = document.getElementById('container').offsetWidth;
     Array.from(document.getElementsByClassName('left-side')).map((portrait, i) => {
       if (portrait.classList.contains('opponent-portrait')) {
         portrait.style.height = Math.round(contWidth * (0.35) + 2) + 'px';
-        portrait.style.backgroundPositionX = ((-parseFloat(portrait.style.height) / 2 + 1) * i) + 'px';
+        // portrait.style.backgroundPositionX = ((-parseFloat(portrait.style.height) / 2 + 1) * i) + 'px';
+        portrait.style.backgroundPositionX = (i * (-parseFloat(portrait.style.height) / 2)) + 'px';
       } else {
         portrait.style.minWidth = Math.round(contWidth * (0.35)) + 'px';
         portrait.style.fontSize = (Math.round(contWidth * (0.35)) / 7) + 'px';
       }
     });
-    Array.from(document.getElementsByClassName('player-area')).map((el) => {
-      el.style.minHeight = `${(cardSize.height * 2) + (Math.round(cardSize.height * 0.12))}px`;
-    });
+    if (document.getElementById('user-grid').offsetWidth >= window.innerWidth) {
+      console.warn('larger', document.getElementsByClassName('deal-grid')[0].offsetWidth, window.innerWidth);
+      Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
+        el.style.width = `${window.innerWidth}px`;
+        el.style.borderColor = 'green';
+      });
+    }
+
     if (document.getElementById('mini-portrait')) {
       document.getElementById('mini-portrait').style.width = document.getElementById('mini-portrait').style.height = miniCardSize.height - 2 + 'px';
       document.getElementById('user-portrait').style.width = document.getElementById('user-portrait').style.height = miniCardSize.height - 2 + 'px';
       let opponentIndex = Object.keys(this.characters).indexOf(this.state.CPUOpponent);
-      document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (miniCardSize.height - 2) + 'px';
+      document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (miniCardSize.height) + 'px';
     }
   }
 
@@ -641,14 +666,7 @@ class App extends React.PureComponent {
       }
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
         document.body.style.setProperty('--main-bg-color', '#050505');
-        document.body.style.setProperty('--main-text-color', '#999');
-        document.body.style.setProperty('--card-bg-color', '#333');
-        document.body.style.setProperty('--house-card-color', '#330');
-        document.body.style.setProperty('--plus-card-color', '#003');
-        document.body.style.setProperty('--minus-card-color', '#300');
-        document.body.style.setProperty('--card-back-color', '#555');
-        document.body.style.setProperty('--card-back-bg-color', '#333');
-        document.body.style.setProperty('--card-back-border-color', '#222');
+        document.body.style.setProperty('--button-bg-color', '#333');      
         document.body.style.setProperty('--modal-shadow-color', 'black');
         optionsCopy.darkTheme = true;
       }
@@ -660,7 +678,8 @@ class App extends React.PureComponent {
           this.setState({
             cardSizes: newSizes
           });
-          this.sizeElements(newSizes);
+          // this.sizeElements();
+          Util.sizeElements(this);
           setTimeout(() => {
             document.getElementById('container').style.opacity = 1;
           }, 250);
@@ -705,7 +724,8 @@ class App extends React.PureComponent {
           this.setState({
             cardSizes: newSizes
           });
-          this.sizeElements(newSizes);
+          // this.sizeElements();
+          Util.sizeElements(this);
           setTimeout(() => {
             document.getElementById('container').style.opacity = 1;
           }, 250);
@@ -891,26 +911,31 @@ class App extends React.PureComponent {
     if (this.state.phase === 'selectingDeck') {
       if (event.target.id.toString().length > 8) {
         // it's a selection card, so put it in player deck
-        if (this.state.userDeck.length < 10) {
-          let deckCopy = this.state.userDeck.slice();
-          let newCard = { id: this.state.idCount, value: value, type: type };
-          deckCopy.push(newCard);
-          if (deckCopy.length === 10) {
-            document.getElementById('play-button').classList.remove('disabled-button');
+        if (this.state.userDeck.length < 10) {          
+          if (!this.arrayContainsCardWithId(this.state.userDeck, event.target.id)) {
+            let deckCopy = this.state.userDeck.slice();
+            let newCard = { id: this.state.idCount, value: value, type: type, baseId: event.target.id };
+            deckCopy.push(newCard);
+            if (deckCopy.length === 10) {
+              document.getElementById('play-button').classList.remove('disabled-button');
+            }
+            event.target.style.opacity = 0.1;
+            this.setState(prevState => {
+              return {
+                userDeck: deckCopy,
+                idCount: prevState.idCount + 1
+              };
+            });
           }
-          this.setState(prevState => {
-            return {
-              userDeck: deckCopy,
-              idCount: prevState.idCount + 1
-            };
-          });
         }
       } else {
         // it's already in the player deck, so take it out
         let clickedCardId = event.target.id;
         let deckCopy = this.state.userDeck.slice();
-        let indextoRemove = this.getCardIndexById(deckCopy, clickedCardId);
-        deckCopy.splice(indextoRemove, 1);
+        let indexToRemove = this.getCardIndexById(deckCopy, clickedCardId);
+        let baseId = deckCopy[indexToRemove].baseId;
+        document.getElementById(baseId).style.opacity = 1;
+        deckCopy.splice(indexToRemove, 1);
         if (deckCopy.length === 9) {
           document.getElementById('play-button').classList.add('disabled-button');
         }
@@ -967,6 +992,15 @@ class App extends React.PureComponent {
         }
       }
     }
+  }
+  arrayContainsCardWithId(arr, id) {
+    let contains = false;
+    arr.map((card, i) => {
+      if (card.baseId === id) {
+        contains = true;
+      }
+    });
+    return contains;
   }
   playHandCard(player, cardObject, delay) {
     setTimeout(() => {
@@ -1227,17 +1261,20 @@ class App extends React.PureComponent {
     Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     let selectionCopy = Util.shuffle(this.state.cardSelection.slice());
     let userDeckCopy = [];
+    Array.from(document.getElementById('deck-selection-grid').children).map((card, i) => {
+      if (card.children[0]) {
+        card.children[0].style.opacity = 1;
+      }
+    });
     for (let i = 0; i < 10; i++) {
       let deckCard = selectionCopy[i];
-      let newCard = { id: this.state.idCount + (i + 1), value: deckCard.value, type: deckCard.type };
+      let newCard = { id: this.state.idCount + (i + 1), value: deckCard.value, type: deckCard.type, baseId: `card-${deckCard.id}` };
       userDeckCopy.push(newCard);
+      document.getElementById(newCard.baseId).style.opacity = 0.1;
     }
-    setTimeout(() => {
-      this.setState({
-        userDeck: userDeckCopy,
-        // idCount: (this.state.idCount + 11)  // is this necessary?
-      });
-    }, this.state.options.flashInterval);
+    this.setState({
+      userDeck: userDeckCopy,
+    });
 
     document.getElementById('play-button').classList.remove('disabled-button');
   }
@@ -1311,19 +1348,18 @@ class App extends React.PureComponent {
     let eventId = event.target.id;
     Util.flash(eventId, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     let opponentName = eventId.split('-')[0];
+    let opponentPanel = document.getElementById(`${opponentName}-panel`);
     let opponentSelectButton = document.getElementById(`${opponentName}-select-button`);
-    document.getElementById(`${opponentName}-panel`).style.backgroundColor = 'var(--option-on-color)';
+    opponentPanel.classList.add('panel-selected');
     opponentSelectButton.classList.add('disabled-select-button');
-    // opponentSelectButton.innerHTML = 'Selected'
     Array.from(document.getElementById('opponent-select-area').children).map((panel, i) => {
       if (panel.id.split('-')[0] !== opponentName) {
         let panelButton = document.getElementById(`${panel.id.split('-')[0]}-select-button`);
-        panel.style.backgroundColor = 'var(--trans-blue-bg-color)';
+        panel.classList.remove('panel-selected');
         panelButton.classList.remove('disabled-select-button');
       }
     });
     // delay setting state until bg changed / flash finished!
-    // for responsiveness!
     let opponentIndex = Object.keys(characters).indexOf(event.target.id.split('-')[0]);
     setTimeout(() => {
       document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (this.state.cardSizes.miniCardSize.height - 2) + 'px';
@@ -1394,12 +1430,38 @@ class App extends React.PureComponent {
   }
   handleClickHamburgerQuit(event) {
     Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
-
     document.getElementById('hamburger-menu').classList.remove('hamburger-on');
     this.resetBoard('user', true);
     setTimeout(() => {
       this.toggleHamburgerAppearance('hamburger');
     }, 400);
+  }
+  callMoveIndicator(message) {
+    let indicator = document.getElementById('move-indicator');
+    if (message === 'Stand') {
+      indicator.style.backgroundColor = 'rgba(89, 107, 7, 0.5)';
+    } else {
+      indicator.style.backgroundColor = 'rgba(107, 7, 7, 0.5)';
+    }
+    indicator.style.opacity = 1;
+    setTimeout(() => {
+      indicator.style.fontSize = '11vw';
+      let indicatorMessage = document.getElementById('move-message');
+      indicatorMessage.innerHTML = message;
+      setTimeout(() => {
+        indicator.style.fontSize = '9vw';
+        setTimeout(() => {
+          indicator.style.fontSize = '8vw';
+          setTimeout(() => {
+            indicator.style.fontSize = '9vw';
+          }, 50);
+        }, 100);
+      }, 200);
+      setTimeout(() => {
+        indicator.style.opacity = 0;
+        indicatorMessage.innerHTML = '';
+      }, 600);
+    }, 100);
   }
   render() {
 
@@ -1446,15 +1508,14 @@ class App extends React.PureComponent {
           // highScores={this.state.highScores}
           highScores={this.highScores}
           onClickBack={this.handleClickBack} />
-        <DeckSelectionScreen style={deckSelectStyle}
+        <DeckSelectScreen style={deckSelectStyle}
           cardSelection={this.state.cardSelection}
           userDeck={this.state.userDeck}
           onClickRandomize={this.handleClickRandomize}
           onClickPlay={this.handleClickPlay}
           onClickCard={this.handleClickCard}
           onClickBack={this.handleClickBack}
-          cardSize={cardSize}
-          mediumCardSize={mediumCardSize} />
+          cardSizes={this.state.cardSizes} />
         <OpponentSelectScreen style={opponentSelectStyle}
           characters={characters}
           cardSize={microCardSize}
