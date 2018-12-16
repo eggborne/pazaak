@@ -13,8 +13,8 @@ function Footer() {
           bottom: 0;
           font-family: sans-serif;
           /* height: 3rem; */
-          min-height: 8vmax;
-          max-height: 8vmax;
+          min-height: 6vmax;
+          max-height: 6vmax;
           min-width: 320px;
           background-color: var(--red-bg-color);
           display: inline-flex;
