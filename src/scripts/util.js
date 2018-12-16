@@ -59,10 +59,15 @@ export function getCardSizes() {
   let cardHeight = Math.round((window.innerHeight / 6) * 0.775);
   // let cardHeight = Math.round((window.innerHeight / 6) * 0.85);
   // cardSize.width = Math.round(cardHeight / 1.55);
-  cardSize.width = (cardHeight / 1.55);
-  if ((window.innerWidth / cardHeight) < 3.5) {
-    cardHeight = Math.round((window.innerHeight / 6) * 0.83);
-    cardSize.width = (cardHeight / 1.68);
+  cardSize.width = Math.round(cardHeight / 1.55);
+  let cardsPerWidth = window.innerWidth / cardSize.width;
+  if (cardsPerWidth < 6) {
+    console.warn('cardSize too wide!');
+    let marg = window.innerWidth * 0.005;
+    let maxWidth = (window.innerWidth / 5) - (marg * 5);
+    cardSize.width = Math.round(maxWidth);
+  } else {
+    console.warn('width okay with cardsPerWidth', cardsPerWidth);
   }
   cardSize.height = cardHeight;
   mediumCardSize.width = Math.round(cardSize.width * 0.85);
@@ -92,6 +97,36 @@ export function getCardSizes() {
   cardsObj.microCardSize = cardSizes[3];
   return cardsObj;
 }
+
+export function sizeElements(app, cardSizes = app.state.cardSizes) {
+  let miniCardSize = cardSizes.miniCardSize;
+  document.getElementById('container').style.height = `${window.innerHeight}px`;
+  let contWidth = document.getElementById('container').offsetWidth;
+  if (document.getElementById('user-grid').offsetWidth >= window.innerWidth) {
+    console.warn('user-grid offsetWidth > window.innerWidth', document.getElementsByClassName('deal-grid')[0].offsetWidth, window.innerWidth);
+    Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
+      el.style.width = `${window.innerWidth}px`;
+      el.style.borderColor = 'green';
+    });
+  }
+  Array.from(document.getElementsByClassName('left-side')).map((portrait, i) => {
+    if (portrait.classList.contains('opponent-portrait')) {
+      portrait.style.height = Math.round(contWidth * (0.35) + 2) + 'px';
+      // portrait.style.backgroundPositionX = ((-parseFloat(portrait.style.height) / 2 + 1) * i) + 'px';
+      portrait.style.backgroundPositionX = (i * (-parseFloat(portrait.style.height) / 2)) + 'px';
+    } else {
+      portrait.style.minWidth = Math.round(contWidth * (0.35)) + 'px';
+      portrait.style.fontSize = (Math.round(contWidth * (0.35)) / 7) + 'px';
+    }
+  });
+  if (document.getElementById('mini-portrait')) {
+    document.getElementById('mini-portrait').style.width = document.getElementById('mini-portrait').style.height = miniCardSize.height - 2 + 'px';
+    document.getElementById('user-portrait').style.width = document.getElementById('user-portrait').style.height = miniCardSize.height - 2 + 'px';
+    let opponentIndex = Object.keys(app.characters).indexOf(app.state.CPUOpponent);
+    document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (miniCardSize.height) + 'px';
+  }
+}
+
 function fullScreenCall() {
   var root = document.body;
   return root.requestFullscreen || root.webkitRequestFullscreen || root.mozRequestFullScreen || root.msRequestFullscreen;
