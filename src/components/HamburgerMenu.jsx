@@ -6,10 +6,13 @@ function HamburgerMenu(props) {
     <div id='hamburger-menu'>
       <style jsx>{`
         #hamburger-menu {
-          position: absolute;
+          position: fixed;
           width: 60vmin;
           background-color: rgba(0, 0, 0, 0.85);
-          right: -60vw;
+          // right: -60vw;
+          transform: translateX(100%);
+          right: 0;
+          // opacity: 0;
           bottom: 10vmax;
           font-size: 4vw;
           font-family: 'Nova Square';
@@ -18,10 +21,10 @@ function HamburgerMenu(props) {
           align-items: stretch;
           justify-content: space-between;
           flex-direction: column;
-          transition: right 400ms ease;
+          transition: transform 200ms ease;
           padding: 1rem;
           box-sizing: border-box;
-          z-index: 20;
+          z-index: 3;
         }
         #hamburger-options-area {
           display: flex;
@@ -53,7 +56,8 @@ function HamburgerMenu(props) {
           padding: 1rem;
         }
         .hamburger-on {
-          right: 0 !important;
+          transform: none !important;
+          opacity: 1 !important;
         }
       `}</style>
       <div id='hamburger-options-area'>
