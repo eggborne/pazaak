@@ -16,7 +16,16 @@ let DB = require('../scripts/db');
 let AI = require('../scripts/ai');
 
 let plusMinusSymbol = '±';
+let portraitMode = window.innerWidth < window.innerHeight;
+let initialSize = {
+  width: window.innerWidth,
+  height: window.innerHeight
+};
 
+let portraitSources = {
+  user: document.getElementById('avatar-sheet').src,
+  opponent: document.getElementById('opponent-sheet').src
+}
 let characters = {
   jarjarbinks: {
     name: 'jarjarbinks',
@@ -89,9 +98,9 @@ let characters = {
       { id: 4, value: 2, type: '+' },
       { id: 5, value: 3, type: '+' },
       { id: 6, value: 1, type: '+' },
-      { id: 7, value: 2, type: '-' },
-      { id: 8, value: 3, type: '-' },
-      { id: 9, value: 1, type: '-' }
+      { id: 7, value: -2, type: '-' },
+      { id: 8, value: -3, type: '-' },
+      { id: 9, value: -1, type: '-' }
     ],
     quotes: {
       panel: '"Please go easy on me. I\'ve just had my logic units calibrated."'
@@ -128,10 +137,10 @@ let characters = {
       { id: 3, value: 1, type: '+' },
       { id: 4, value: 2, type: '+' },
       { id: 5, value: 1, type: '-' },
-      { id: 6, value: 2, type: '-' },
-      { id: 7, value: 3, type: '-' },
-      { id: 8, value: 1, type: '-' },
-      { id: 9, value: 2, type: '-' }
+      { id: 6, value: -2, type: '-' },
+      { id: 7, value: -3, type: '-' },
+      { id: 8, value: -1, type: '-' },
+      { id: 9, value: -2, type: '-' }
     ],
     quotes: {
       panel: '"Grraarragghhh. Grrrr. Raawwrr."'
@@ -151,7 +160,7 @@ let characters = {
     strategy: {
       stand: {
         description: 'Stands at 17',
-        standAt: 17
+        standAt: 20
       },
       handCards: {
         description: 'Plays hand cards liberally'
@@ -167,8 +176,8 @@ let characters = {
       { id: 2, value: 3, type: '+' },
       { id: 3, value: 4, type: '+' },
       { id: 4, value: 5, type: '+' },
-      { id: 5, value: 1, type: '-' },
-      { id: 6, value: 2, type: '-' },
+      { id: 5, value: -1, type: '-' },
+      { id: 6, value: -2, type: '-' },
       { id: 7, value: 1, type: plusMinusSymbol },
       { id: 8, value: 2, type: plusMinusSymbol },
       { id: 9, value: 3, type: plusMinusSymbol }
@@ -261,6 +270,7 @@ let characters = {
     }
   }
 };
+let opponentNames = Object.keys(characters);
 class App extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -282,12 +292,12 @@ class App extends React.PureComponent {
         { id: 4444, value: 2, type: '+' },
         { id: 5555, value: 3, type: '+' },
         { id: 6666, value: 3, type: '+' },
-        { id: 7777, value: 1, type: '-' },
-        { id: 8888, value: 1, type: '-' },
-        { id: 9999, value: 2, type: '-' },
-        { id: 1112, value: 2, type: '-' },
-        { id: 1113, value: 3, type: '-' },
-        { id: 1114, value: 3, type: '-' },
+        { id: 7777, value: -1, type: '-' },
+        { id: 8888, value: -1, type: '-' },
+        { id: 9999, value: -2, type: '-' },
+        { id: 1112, value: -2, type: '-' },
+        { id: 1113, value: -3, type: '-' },
+        { id: 1114, value: -3, type: '-' },
         { id: 1115, value: 1, type: plusMinusSymbol },
         { id: 1115, value: 2, type: plusMinusSymbol },
         { id: 1116, value: 3, type: plusMinusSymbol },
@@ -309,6 +319,7 @@ class App extends React.PureComponent {
       turn: 'user',
       userStatus: {
         loggedInAs: '',
+        avatarIndex: 0,
         totalSetWins: 0,
         totalRoundWins: 0,
         totalSetsPlayed: 0,
@@ -348,9 +359,13 @@ class App extends React.PureComponent {
         darkTheme: false,
         turnInterval: 300,
         flashInterval: 90,
-        opponentMoveInterval: 900,
+        opponentMoveWaitTime: 1600,
+        moveIndicatorTime: 900,
+        dealWaitTime: 600,
       },
-      cardSizes: {}
+      cardSizes: {},
+      inputHasFocus: true,
+      keyboardShowing: false
       // highScores: []
     };
 
@@ -387,7 +402,6 @@ class App extends React.PureComponent {
       deck[i - 1].type = 'house';
     }
 
-
     // // make a random 10-card deck for opponent...
     // let opponentDeck = [];
     // let selectionCopy = Util.shuffle(cardSelection.slice());
@@ -409,16 +423,10 @@ class App extends React.PureComponent {
     // this.state.opponentDeck = opponentDeck;
     // filled when user picks opponent
 
-    // this.state.cardSelection = cardSelection;
     this.state.idCount = 10; // these are the 10 opponent deck cards
     this.state.deck = this.shuffleDeck(deck);
 
-    // get these for easy reference when calling Util.flash()
-    this.buttonTextColor = window.getComputedStyle(document.body).getPropertyValue('--button-text-color');
-    this.buttonBgColor = window.getComputedStyle(document.body).getPropertyValue('--button-bg-color');
-
     // are all of these necessary?
-    this.sizeElements = this.sizeElements.bind(this);
     this.playSound = this.playSound.bind(this);
     this.getHighScores = this.getHighScores.bind(this);
     this.incrementPlayerScore = this.incrementPlayerScore.bind(this);
@@ -427,6 +435,7 @@ class App extends React.PureComponent {
     this.getNewPlayerHands = this.getNewPlayerHands.bind(this);
     this.dealToPlayerGrid = this.dealToPlayerGrid.bind(this);
     this.handleToggleOption = this.handleToggleOption.bind(this);
+    this.handleClickAvatar = this.handleClickAvatar.bind(this);
     this.handleClickBack = this.handleClickBack.bind(this);
     this.handleClickStart = this.handleClickStart.bind(this);
     this.handleClickHow = this.handleClickHow.bind(this);
@@ -454,32 +463,131 @@ class App extends React.PureComponent {
     this.determineWinnerFromTotal = this.determineWinnerFromTotal.bind(this);
     this.handleClickHamburgerQuit = this.handleClickHamburgerQuit.bind(this);
     this.handleFullscreenChange = this.handleFullscreenChange.bind(this);
+    this.handleNameInputFocus = this.handleNameInputFocus.bind(this);
+    this.handleNameInputUnfocus = this.handleNameInputUnfocus.bind(this);
+    this.handleResize = this.handleResize.bind(this);
   }
 
   componentDidMount() {
+    console.error('APP MOUNT -------------------------------------------------- APP MOUNT')
     Util.checkCookie();
-    // this.sizeElements();
-    Util.sizeElements(this);
+    Util.sizeElements(this, true);
     this.getHighScores();
     document.getElementById('jarjarbinks-select-button').classList.add('disabled-select-button');
     document.getElementById('jarjarbinks-panel').classList.add('panel-selected');
-    document.getElementById('container').addEventListener('fullscreenchange', this.handleFullscreenChange);
-    document.getElementById('container').addEventListener('mozfullscreenchange', this.handleFullscreenChange);
-    document.getElementById('container').addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
-    document.getElementById('container').addEventListener('msfullscreenchange', this.handleFullscreenChange);
+    // document.getElementById('avatar-thumb-0').classList.add('selected-avatar');
+    
+    window.addEventListener('fullscreenchange', this.handleFullscreenChange);
+    window.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    window.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    window.addEventListener('msfullscreenchange', this.handleFullscreenChange);
+    window.addEventListener('resize', this.handleResize);
+  }
+
+  handleNameInputFocus() {
+    this.setState({
+      inputHasFocus: true
+    });
+  }
+  handleNameInputUnfocus() {
+    if (portraitMode) {
+      document.getElementById('footer').classList.remove('display-none');
+      Array.from(document.getElementsByClassName('intro-button')).map((button, i) => {
+        if (i > 0) {
+          button.classList.remove('display-none');
+        }
+      });
+    }
+    this.setState({
+      inputHasFocus: false,
+      keyboardShowing: false
+    });
+    document.getElementById('start-button').classList.remove('keyboard-showing-start-button')
+
   }
 
   handleFullscreenChange() {
-    document.getElementById('container').style.opacity = 1;
-    // setTimeout(() => {
-    //   let newSizes = Util.getCardSizes();
-    //   this.setState({
-    //     cardSizes: newSizes
-    //   });
-    //   this.sizeElements(newSizes);
-    // }, 500);
+    document.getElementById('full-screen-toggle').classList.add('disabled-button');
+    document.getElementById('hamburger-full-screen-toggle').classList.add('disabled-button');
+    setTimeout(() => {
+      let newSizes = Util.getCardSizes();
+      let isFull = Util.isFullScreen() !== undefined;
+      let cardHeightDiff = newSizes.cardSize.height - this.state.cardSizes.cardSize.height;
+      let fullHeightDiff = initialSize.height - window.innerHeight;
+      let readyToResizeContents = (isFull && fullHeightDiff < 0 && cardHeightDiff) || (!isFull && fullHeightDiff > 0 && cardHeightDiff);
+      console.error(`Util.isFullScreen() ${isFull}`);
+      console.error(` heightDiff is ${cardHeightDiff}`);
+      console.error(` fullHeightDiff is ${fullHeightDiff}`);
+      initialSize = { width: window.innerWidth, height: window.innerHeight };
+      if (readyToResizeContents) {
+        console.warn('sizing that bitch ------------------> first try')
+        newSizes = Util.getCardSizes();
+        this.setState({
+          cardSizes: newSizes
+        });
+        Util.sizeElements(this, false, newSizes);
+        // document.getElementById('container').style.background = 'blue';
+      } else {
+        // try again in another 500ms
+
+        setTimeout(() => {
+          newSizes = Util.getCardSizes();
+          isFull = Util.isFullScreen() !== undefined;
+          cardHeightDiff = newSizes.cardSize.height - this.state.cardSizes.cardSize.height;
+          fullHeightDiff = initialSize.height - window.innerHeight;
+          readyToResizeContents = (isFull && fullHeightDiff < 0 && cardHeightDiff) || (!isFull && fullHeightDiff > 0 && cardHeightDiff);
+          initialSize = { width: window.innerWidth, height: window.innerHeight };
+          if (readyToResizeContents) {
+            console.warn('sizing that bitch ------------------> second try')
+            newSizes = Util.getCardSizes();
+            this.setState({
+              cardSizes: newSizes
+            });
+            Util.sizeElements(this, false, newSizes);
+            document.getElementById('container').style.background = 'red';
+          } else {
+            console.error('Second try did not work. Trying 1000ms later......');
+            setTimeout(() => {
+              console.error('LAST TRY --------------------------------> ');
+              newSizes = Util.getCardSizes();
+              this.setState({
+                cardSizes: newSizes
+              });
+              Util.sizeElements(this, false, newSizes);
+              initialSize = { width: window.innerWidth, height: window.innerHeight };
+              document.getElementById('container').style.background = 'orange';
+            }, 1000);
+          }
+        }, 500);
+      }
+    }, 200);
+    setTimeout(() => {
+      document.getElementById('full-screen-toggle').classList.remove('disabled-button');
+      document.getElementById('hamburger-full-screen-toggle').classList.remove('disabled-button');
+      document.getElementById('container').style.background = 'var(--main-bg-color)';
+    }, 1700);
   }
 
+  handleResize() {
+    let newSize = { width: window.innerWidth, height: window.innerHeight };
+    if (portraitMode) {
+      if (newSize.width > newSize.height || (initialSize.height / newSize.height) > 1.5) {
+        // changed from portrait to lanscape!
+        if (this.state.inputHasFocus) {
+          // keyboard showing!
+          document.getElementById('footer').classList.add('display-none');
+          Array.from(document.getElementsByClassName('intro-button')).map((button, i) => {
+            if (i > 0) {
+              button.classList.add('display-none');
+            }
+          });
+          this.setState({
+            keyboardShowing: true
+          })
+        }
+      }
+    }
+  }
   getHighScores() {
     DB.getScores().then((response) => {
       let scoreArray = response.data;
@@ -526,35 +634,6 @@ class App extends React.PureComponent {
   incrementPlayerScore(playerName, type) {
     let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
     eval(funcName)(playerName);
-  }
-  sizeElements(cardSizes = this.state.cardSizes) {
-    let miniCardSize = cardSizes.miniCardSize;
-    document.getElementById('container').style.height = `${window.innerHeight}px`;
-    let contWidth = document.getElementById('container').offsetWidth;
-    Array.from(document.getElementsByClassName('left-side')).map((portrait, i) => {
-      if (portrait.classList.contains('opponent-portrait')) {
-        portrait.style.height = Math.round(contWidth * (0.35) + 2) + 'px';
-        // portrait.style.backgroundPositionX = ((-parseFloat(portrait.style.height) / 2 + 1) * i) + 'px';
-        portrait.style.backgroundPositionX = (i * (-parseFloat(portrait.style.height) / 2)) + 'px';
-      } else {
-        portrait.style.minWidth = Math.round(contWidth * (0.35)) + 'px';
-        portrait.style.fontSize = (Math.round(contWidth * (0.35)) / 7) + 'px';
-      }
-    });
-    if (document.getElementById('user-grid').offsetWidth >= window.innerWidth) {
-      console.warn('larger', document.getElementsByClassName('deal-grid')[0].offsetWidth, window.innerWidth);
-      Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
-        el.style.width = `${window.innerWidth}px`;
-        el.style.borderColor = 'green';
-      });
-    }
-
-    if (document.getElementById('mini-portrait')) {
-      document.getElementById('mini-portrait').style.width = document.getElementById('mini-portrait').style.height = miniCardSize.height - 2 + 'px';
-      document.getElementById('user-portrait').style.width = document.getElementById('user-portrait').style.height = miniCardSize.height - 2 + 'px';
-      let opponentIndex = Object.keys(this.characters).indexOf(this.state.CPUOpponent);
-      document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (miniCardSize.height) + 'px';
-    }
   }
 
   playSound(sound) {
@@ -619,27 +698,28 @@ class App extends React.PureComponent {
       userHand: newUserHand,
       opponentHand: newOpponentHand
     });
+    console.error('HANDS.', [newUserHand, newOpponentHand]);
   }
 
-  dealToPlayerGrid(player, delay = 300) {
+  dealToPlayerGrid(player) {
+    this.playSound('draw');
+    console.warn(`DEALING to ${player}`);
     let deckCopy = this.state.deck.slice();
     let newCard = Util.shuffle(deckCopy)[0];
-    setTimeout(() => {
-      let newGridCards = this.state[`${player}Grid`].slice();
-      newGridCards.push(newCard);
-      let newTotal = 0;
-      newTotal += this.state[`${player}Total`] + newCard.value;
-      this.changeCardTotal(player, newTotal);
-      this.playSound('draw');
-      this.setState({
-        [`${player}Grid`]: newGridCards,
-      });
-    }, this.state.options.turnInterval);
+    let newGridCards = this.state[`${player}Grid`].slice();
+    newGridCards.push(newCard);
+    let newTotal = 0;
+    newTotal += this.state[`${player}Total`] + newCard.value;
+    this.changeCardTotal(player, newTotal);
+    this.setState({
+      [`${player}Grid`]: newGridCards,
+    });
     return newCard.value;
   }
   handleToggleOption(event) {
+    let changeState = true;
     let el = event.target;
-    let el2;
+    let el2; // the corresponding button in the other option menu
     let eventId = event.target.id;
     if (eventId.slice(0, 3) === 'ham') {
       el2 = document.getElementById(eventId.slice(10, eventId.length));
@@ -659,31 +739,28 @@ class App extends React.PureComponent {
         optionsCopy.ambience = true;
       }
       if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
-        document.body.style.setProperty('--pulse-speed', '400ms');
-        optionsCopy.turnInterval = 90;
-        optionsCopy.flashInterval = 3;
-        optionsCopy.opponentMoveInterval = 100;
+        document.body.style.setProperty('--pulse-speed', '500ms');
+        optionsCopy.turnInterval = 200;
+        optionsCopy.opponentMoveWaitTime = 300;
       }
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
         document.body.style.setProperty('--main-bg-color', '#050505');
-        document.body.style.setProperty('--button-bg-color', '#333');      
-        document.body.style.setProperty('--modal-shadow-color', 'black');
-        optionsCopy.darkTheme = true;
+        document.body.style.setProperty('--main-text-color', '#dfdfff');
+        document.body.style.setProperty('--name-input-color', '#112');
+        document.body.style.setProperty('--name-input-text-color', '#aaa');
+        document.body.style.setProperty('--button-bg-color', '#060606');
+        document.body.style.setProperty('--special-button-text-color', '#529e4b');
+        document.body.style.setProperty('--button-text-color', '#995');
+        document.body.style.setProperty('--card-spot-bg-color', 'rgba(0, 0, 0, 0.125)');
+        document.body.style.setProperty('--card-spot-border-color', 'rgba(100, 100, 100, 0.25)');
+        document.body.style.setProperty('--red-bg-color', '#340000');
+        document.body.style.setProperty('--dark-red-border-color', '#180000');
+        changeState = false;
+        // optionsCopy.darkTheme = true;
       }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
-        Util.toggleFullScreen(this);
-        document.getElementById('container').style.opacity = 0.3;
-        setTimeout(() => {
-          let newSizes = Util.getCardSizes();
-          this.setState({
-            cardSizes: newSizes
-          });
-          // this.sizeElements();
-          Util.sizeElements(this);
-          setTimeout(() => {
-            document.getElementById('container').style.opacity = 1;
-          }, 250);
-        }, 500);
+        Util.toggleFullScreen();
+        changeState = false;
       }
 
     } else {
@@ -699,59 +776,48 @@ class App extends React.PureComponent {
       }
       if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
         document.body.style.setProperty('--pulse-speed', '900ms');
-        optionsCopy.turnInterval = 300;
-        optionsCopy.flashInterval = 90;
-        optionsCopy.opponentMoveInterval = 1000;
+        optionsCopy.turnInterval = 800;
+        optionsCopy.opponentMoveWaitTime = 1600;
       }
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
         document.body.style.setProperty('--main-bg-color', 'rgb(107, 121, 138)');
         document.body.style.setProperty('--main-text-color', 'rgb(255, 247, 213)');
-        document.body.style.setProperty('--card-bg-color', '#ccc');
-        document.body.style.setProperty('--house-card-color', '#D3D300');
-        document.body.style.setProperty('--plus-card-color', '#0C00B2');
-        document.body.style.setProperty('--minus-card-color', '#A70003');
-        document.body.style.setProperty('--card-back-color', '#ccc');
-        document.body.style.setProperty('--card-back-bg-color', 'grey');
-        document.body.style.setProperty('--card-back-border-color', '#444');
-        document.body.style.setProperty('--modal-shadow-color', 'rgb(46, 46, 46)');
+        document.body.style.setProperty('--name-input-color', '#ccc');
+        document.body.style.setProperty('--name-input-text-color', 'black');
+        document.body.style.setProperty('--button-bg-color', 'black');
+        document.body.style.setProperty('--special-button-text-color', '#ffffa3');
+        document.body.style.setProperty('--button-text-color', '#5CB3FF');
+        document.body.style.setProperty('--card-spot-bg-color', 'rgba(0, 0, 0, 0.05)');
+        document.body.style.setProperty('--card-spot-border-color', '#999');
+        document.body.style.setProperty('--red-bg-color', '#560000');
+        document.body.style.setProperty('--dark-red-border-color', '#380000');
         optionsCopy.darkTheme = false;
       }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
-        Util.toggleFullScreen(this);
-        document.getElementById('container').style.opacity = 0.3;
-        setTimeout(() => {
-          let newSizes = Util.getCardSizes();
-          this.setState({
-            cardSizes: newSizes
-          });
-          // this.sizeElements();
-          Util.sizeElements(this);
-          setTimeout(() => {
-            document.getElementById('container').style.opacity = 1;
-          }, 250);
-        }, 500);
+        Util.toggleFullScreen();
+        changeState = false;
       }
     }
 
     // give it time to smoothly animate before setting state
-    setTimeout(() => {
-      this.setState({
-        options: optionsCopy
-      });
-    }, 200);
+    if (changeState) {
+      setTimeout(() => {
+        this.setState({
+          options: optionsCopy
+        });
+      }, 200);
+    }
 
   }
   handleClickStart(event) {
     event.preventDefault();
-    this.playSound('click');
+    // this.playSound('click');
     let playerName = document.getElementById('player-name-input').value;
     if (!playerName.length) {
       playerName = 'Player';
     } else {
       this.evaluatePlayerName(playerName);
     }
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
-    // document.getElementById('deck-select-footer').style.transform = 'translateY(0)';
     let namesCopy = this.state.playerNames;
     namesCopy.user = playerName;
     setTimeout(() => {
@@ -781,31 +847,23 @@ class App extends React.PureComponent {
   }
   handleClickOpponentReady(event) {
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
-    setTimeout(() => {
-      this.setState({
-        phase: 'selectingDeck'
-      });
-    }, this.state.options.flashInterval);
+    this.setState({
+      phase: 'selectingDeck'
+    });
   }
   handleClickPlay(event) {
-    this.playSound('click');
+    // this.playSound('click');
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     this.getNewPlayerHands();
     document.getElementById('deck-select-footer').style.transform = 'transform: translateY(100%)';
     this.setState({
       phase: 'gameStarted'
     });
-    setTimeout(() => {
-      this.dealToPlayerGrid(this.state.turn);
-    }, this.state.options.turnInterval + this.state.options.flashInterval + 300);
-
+    this.dealToPlayerGrid(this.state.turn);
   }
   handleClickBack(event, newPhase) {
+    // this.playSound('click');
     event.preventDefault();
-    this.playSound('click');
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     setTimeout(() => {
       this.setState({
         phase: newPhase
@@ -813,10 +871,9 @@ class App extends React.PureComponent {
     }, this.state.options.flashInterval);
   }
   handleClickHow(event) {
-    this.playSound('click');
+    // this.playSound('click');
     // window.open('https://starwars.wikia.com/wiki/Pazaak/Legends', '_blank');
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     setTimeout(() => {
       this.setState({
         phase: 'showingInstructions'
@@ -824,9 +881,8 @@ class App extends React.PureComponent {
     }, this.state.options.flashInterval);
   }
   handleClickOptions(event) {
-    this.playSound('click');
+    // this.playSound('click');
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     setTimeout(() => {
       this.setState({
         phase: 'showingOptions'
@@ -835,8 +891,7 @@ class App extends React.PureComponent {
   }
   handleClickHallOfFame(event) {
     event.preventDefault();
-    this.playSound('click');
-    Util.flash(event.target.id, 'color', 'rgb(255, 255, 163)', '#f00', this.state.options.flashInterval / 2);
+    // this.playSound('click');
     this.getHighScores();
     setTimeout(() => {
       this.setState({
@@ -845,13 +900,15 @@ class App extends React.PureComponent {
     }, this.state.options.flashInterval);
   }
   handleClickEndTurn(event) {
+    // this.playSound('click');
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
-    this.playSound('click');
     let buttonText = document.getElementById('end-turn-button').innerHTML;
+    this.callMoveIndicator('user', buttonText, this.state.options.moveIndicatorTime);
     if (buttonText === 'End Turn') {
       if (!this.state.turnStatus.opponent.standing) {
-        this.changeTurn('opponent');
+        setTimeout(() => {
+          this.changeTurn('opponent');
+        }, this.state.options.moveIndicatorTime);
       }
     } else if (buttonText === 'Draw') {
       // can continuously draw cards, or play ONE hand card
@@ -882,28 +939,26 @@ class App extends React.PureComponent {
   }
   handleClickStand(event) {
     event.preventDefault();
-    this.playSound('click');
+    // this.playSound('click');
     let buttonText = document.getElementById('stand-button').innerHTML;
+    let turnStatusCopy = Object.assign({}, this.state.turnStatus);
     if (buttonText === 'Stand') {
-      Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
-      let turnStatusCopy = Object.assign({}, this.state.turnStatus);
       turnStatusCopy.user.standing = true;
-      this.setState({
-        turnStatus: turnStatusCopy
-      });
-      this.changeTurn('opponent');
+      setTimeout(() => {
+        this.changeTurn('opponent');
+      }, this.state.options.moveIndicatorTime);
     } else if (buttonText === 'Cancel') {
       this.state.turnStatus.user.highlightedCard.element.classList.remove('highlighted-card');
-      let turnStatusCopy = Object.assign({}, this.state.turnStatus);
       turnStatusCopy.user.highlightedCard.element = null;
       turnStatusCopy.user.highlightedCard.obj = null;
-      this.setState({
-        turnStatus: turnStatusCopy
-      });
       document.getElementById('switch-sign-button').classList.add('hidden-button');
       document.getElementById('end-turn-button').innerHTML = 'End Turn';
       document.getElementById('stand-button').innerHTML = 'Stand';
     }
+    this.setState({
+      turnStatus: turnStatusCopy
+    });
+    this.callMoveIndicator('user', 'Stand', this.state.options.moveIndicatorTime);
   }
   handleClickCard(event, value, type) {
     event.preventDefault();
@@ -911,12 +966,13 @@ class App extends React.PureComponent {
     if (this.state.phase === 'selectingDeck') {
       if (event.target.id.toString().length > 8) {
         // it's a selection card, so put it in player deck
-        if (this.state.userDeck.length < 10) {          
+        if (this.state.userDeck.length < 10) {
           if (!this.arrayContainsCardWithId(this.state.userDeck, event.target.id)) {
             let deckCopy = this.state.userDeck.slice();
             let newCard = { id: this.state.idCount, value: value, type: type, baseId: event.target.id };
             deckCopy.push(newCard);
             if (deckCopy.length === 10) {
+              document.getElementById('play-button').classList.add('throbbing');
               document.getElementById('play-button').classList.remove('disabled-button');
             }
             event.target.style.opacity = 0.1;
@@ -937,6 +993,7 @@ class App extends React.PureComponent {
         document.getElementById(baseId).style.opacity = 1;
         deckCopy.splice(indexToRemove, 1);
         if (deckCopy.length === 9) {
+          document.getElementById('play-button').classList.remove('throbbing');
           document.getElementById('play-button').classList.add('disabled-button');
         }
         this.setState({
@@ -948,6 +1005,7 @@ class App extends React.PureComponent {
     // GAME STARTED
 
     if (this.state.phase === 'gameStarted') {
+      console.log('nigga has value type', value, type)
       // highlight card and change footer buttons
       if (!this.state.turnStatus.user.playedCard && this.state.userGrid.length < 9) {
         // no card played and room on grid for a card
@@ -1002,11 +1060,12 @@ class App extends React.PureComponent {
     });
     return contains;
   }
-  playHandCard(player, cardObject, delay) {
+  playHandCard(player, cardObject) {
+    console.log('playing card', cardObject)
+    this.removeCardFromHand(player, cardObject.id);
+    this.addCardtoGrid(player, cardObject.value, cardObject.type);
+    this.changeCardTotal(player, this.state[`${player}Total`] + cardObject.value);
     setTimeout(() => {
-      this.removeCardFromHand(player, cardObject.id);
-      this.addCardtoGrid(player, cardObject.value, cardObject.type);
-      this.changeCardTotal(player, this.state[`${player}Total`] + cardObject.value);
       let turnStatusCopy = Object.assign({}, this.state.turnStatus);
       turnStatusCopy.user.playedCard = true;
       turnStatusCopy.user.highlightedCard.element = null;
@@ -1021,7 +1080,7 @@ class App extends React.PureComponent {
         document.getElementById('end-turn-button').innerHTML = 'Draw';
       }
       document.getElementById('stand-button').innerHTML = 'Stand';
-    }, delay);
+    }, this.state.options.moveIndicatorTime);
   }
 
   removeCardFromHand(player, cardId) {
@@ -1033,6 +1092,7 @@ class App extends React.PureComponent {
     });
   }
   addCardtoGrid(player, value, type) {
+    console.log('taking in card value type', value, type)
     let gridCopy = this.state[`${player}Grid`].slice();
     if (type === plusMinusSymbol) {
       if (value > 0) {
@@ -1040,6 +1100,8 @@ class App extends React.PureComponent {
       }
     }
     let newCard = { value: value, type: type };
+    console.log('pushing card value type', newCard.value, newCard.type)
+
     gridCopy.push(newCard);
     this.setState({
       [`${player}Grid`]: gridCopy
@@ -1129,7 +1191,7 @@ class App extends React.PureComponent {
     this.setState({
       turn: newTurn
     });
-    this.playSound('turn');
+    // this.playSound('turn');
     return newTurn;
   }
 
@@ -1155,17 +1217,19 @@ class App extends React.PureComponent {
     }
   }
   changeTurn(newPlayer) {
+    this.playSound('turn');
+    console.log('changing turn with turn interval', this.state.options.turnInterval);
     if (newPlayer === 'user') {
       if (this.state.turnStatus.opponent.standing) {
         // see if opponent has losing score
         if (this.state.opponentTotal > 20 || this.state.turnStatus.user.standing) {
           this.declareWinner('user', this.state.options.turnInterval);
         } else {
-          this.playSound('click');
+          // // this.playSound('click');
           let newTurn = this.swapTurn();
           setTimeout(() => {
             this.dealToPlayerGrid(newTurn);
-          }, this.state.options.turnInterval);
+          }, this.state.options.dealWaitTime);
         }
       } else {
         // see if opponent has losing score
@@ -1173,13 +1237,11 @@ class App extends React.PureComponent {
           this.declareWinner('user', this.state.options.turnInterval);
         } else {
           // if not, deal card to user
-          this.playSound('click');
+          // // this.playSound('click');
+          let newTurn = this.swapTurn();
           setTimeout(() => {
-            let newTurn = this.swapTurn();
-            setTimeout(() => {
-              this.dealToPlayerGrid(newTurn);
-            }, this.state.options.turnInterval);
-          }, this.state.options.turnInterval);
+            this.dealToPlayerGrid(newTurn);
+          }, this.state.options.dealWaitTime);
         }
       }
     } else {
@@ -1196,15 +1258,16 @@ class App extends React.PureComponent {
         } else {
           if (!this.state.turnStatus.opponent.standing) {
             let newTurn = this.swapTurn();
-            setTimeout(() => {
-              if (this.state[`${newTurn}Grid`].length < 9) {
+            if (this.state[`${newTurn}Grid`].length < 9) {
+
+              setTimeout(() => {
                 this.dealToPlayerGrid(newTurn);
-              }
-              if (this.state.vsCPU) {
-                // this.makeOpponentMove();
-                AI.makeOpponentMove(this);
-              }
-            }, this.state.options.turnInterval);
+              }, this.state.options.dealWaitTime);
+            }
+            if (this.state.vsCPU) {
+              // this.makeOpponentMove();
+              AI.makeOpponentMove(this);
+            }
           } else {
             this.determineWinnerFromTotal();
           }
@@ -1256,9 +1319,19 @@ class App extends React.PureComponent {
     let modal = document.getElementById('result-modal');
     modal.classList.remove('onscreen');
   }
+  handleClickAvatar(event) {
+    document.getElementsByClassName('selected-avatar')[0].classList.remove('selected-avatar');
+    event.target.classList.add('selected-avatar');
+    let userStatusCopy = Object.assign({}, this.state.userStatus);
+    userStatusCopy.avatarIndex = parseInt(event.target.id.split('-')[2])
+    setTimeout(() => {
+      this.setState({
+        userStatus: userStatusCopy
+      });
+    }, 200)
+  }
   handleClickRandomize(event) {
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     let selectionCopy = Util.shuffle(this.state.cardSelection.slice());
     let userDeckCopy = [];
     Array.from(document.getElementById('deck-selection-grid').children).map((card, i) => {
@@ -1275,13 +1348,11 @@ class App extends React.PureComponent {
     this.setState({
       userDeck: userDeckCopy,
     });
-
+    document.getElementById('play-button').classList.add('throbbing');
     document.getElementById('play-button').classList.remove('disabled-button');
   }
   handleClickOKButton(event) {
     event.preventDefault();
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
-
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
       this.getNewPlayerHands();
       this.setState({
@@ -1291,22 +1362,21 @@ class App extends React.PureComponent {
     }
     let newTurn = this.state.lastWinner;
     if (!newTurn) {
-      console.warn(`It was a tie! ${this.state.lastFirstTurn} had the last first turn...`);
       newTurn = 'user';
       if (this.state.lastFirstTurn === 'user') {
         newTurn === 'opponent';
       }
-      console.warn(`...so now the other player ${newTurn} has the new turn!`);
     }
+    this.dismissResultModal();
     setTimeout(() => {
-      this.dismissResultModal();
       document.getElementById('game-board').style.opacity = 1;
       this.resetBoard(newTurn);
-      this.setState({
-        userGrid: [],
-        opponentGrid: [],
-      });
+
       setTimeout(() => {
+        this.setState({
+          userGrid: [],
+          opponentGrid: [],
+        });
         this.setState({
           turn: newTurn,
         });
@@ -1315,7 +1385,7 @@ class App extends React.PureComponent {
           AI.makeOpponentMove(this);
         }
       }, this.state.options.turnInterval);
-    }, this.state.options.flashInterval);
+    }, this.state.options.turnInterval);
   }
   toggleHamburgerAppearance(position) {
     let topBar = document.getElementById('top-hamburger-bar');
@@ -1323,15 +1393,24 @@ class App extends React.PureComponent {
     let middleBar = document.getElementById('middle-hamburger-bar');
     let middleBar2 = document.getElementById('middle-hamburger-bar-2');
     if (position === 'hamburger') {
+      // un-rotate middle bars to flat
       middleBar.style.transform = middleBar2.style.transform = 'none';
-      topBar.style.opacity = bottomBar.style.opacity = 1;
-      topBar.style.transform = bottomBar.style.transform = 'translateY(0)';
+
+      setTimeout(() => {
+        topBar.style.opacity = bottomBar.style.opacity = 1;
+        // un-collapse top and bottom bars from middle
+        topBar.style.transform = bottomBar.style.transform = 'translateY(0%)';
+      }, 150);
     } else {
-      topBar.style.transform = 'translateY(2.5vmax)';
-      bottomBar.style.transform = 'translateY(-2.5vmax)';
-      topBar.style.opacity = bottomBar.style.opacity = 0;
-      middleBar.style.transform = 'rotate(45deg) scaleX(1.1)';
-      middleBar2.style.transform = 'rotate(-45deg) scaleX(1.1)';
+      // collapse top and bottom bards to middle
+      topBar.style.transform = 'translateY(225%)';
+      bottomBar.style.transform = 'translateY(-225%)';
+      setTimeout(() => {
+        topBar.style.opacity = bottomBar.style.opacity = 0;
+        // rotate middle bars to an X shape
+        middleBar.style.transform = 'rotate(45deg) scaleX(1.1)';
+        middleBar2.style.transform = 'rotate(-45deg) scaleX(1.1)';
+      }, 150);
     }
   }
   handleClickHamburger() {
@@ -1346,7 +1425,6 @@ class App extends React.PureComponent {
 
   handleClickOpponentPanel(event) {
     let eventId = event.target.id;
-    Util.flash(eventId, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     let opponentName = eventId.split('-')[0];
     let opponentPanel = document.getElementById(`${opponentName}-panel`);
     let opponentSelectButton = document.getElementById(`${opponentName}-select-button`);
@@ -1360,9 +1438,9 @@ class App extends React.PureComponent {
       }
     });
     // delay setting state until bg changed / flash finished!
-    let opponentIndex = Object.keys(characters).indexOf(event.target.id.split('-')[0]);
+    // let opponentIndex = Object.keys(characters).indexOf(event.target.id.split('-')[0]);
     setTimeout(() => {
-      document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (this.state.cardSizes.miniCardSize.height - 2) + 'px';
+      // document.getElementById('mini-opponent-portrait').style.backgroundPositionX = -opponentIndex * (this.state.cardSizes.miniCardSize.height - 2) + 'px';
       let namesCopy = Object.assign({}, this.state.playerNames);
       namesCopy.opponent = characters[opponentName].displayName;
       let opponentDeckCopy = Util.shuffle(characters[opponentName].deck);
@@ -1429,39 +1507,41 @@ class App extends React.PureComponent {
     }
   }
   handleClickHamburgerQuit(event) {
-    Util.flash(event.target.id, 'color', this.buttonTextColor, '#f00', this.state.options.flashInterval / 2);
     document.getElementById('hamburger-menu').classList.remove('hamburger-on');
     this.resetBoard('user', true);
     setTimeout(() => {
       this.toggleHamburgerAppearance('hamburger');
     }, 400);
   }
-  callMoveIndicator(message) {
+  callMoveIndicator(player, message, duration) {
+    this.playSound('click');
     let indicator = document.getElementById('move-indicator');
-    if (message === 'Stand') {
-      indicator.style.backgroundColor = 'rgba(89, 107, 7, 0.5)';
+    if (message === 'End Turn') {
+      indicator.style.backgroundColor = 'var(--green-move-color)';
+    } else if (message === 'Stand' || message === 'Draw') {
+      indicator.style.backgroundColor = 'var(--yellow-move-color)';
     } else {
-      indicator.style.backgroundColor = 'rgba(107, 7, 7, 0.5)';
+      indicator.style.backgroundColor = 'var(--red-move-color)';
+    }
+    if (message === 'Draw') {
+      duration = Math.round(duration / 3);
+    }
+    document.getElementById('move-message').innerHTML = message;
+    indicator.style.height = (document.getElementById('user-area').offsetHeight + document.getElementById('user-hand').offsetHeight) + 'px';
+    if (player === 'user') {
+      indicator.style.top = Math.round(window.innerHeight / 20) + (document.getElementById('user-area').offsetHeight + document.getElementById('user-hand').offsetHeight) + 'px';
+    } else {
+      indicator.style.top = Math.round(window.innerHeight / 20) + 'px';
     }
     indicator.style.opacity = 1;
+    indicator.style.transform = 'scaleX(1.1)';
     setTimeout(() => {
-      indicator.style.fontSize = '11vw';
-      let indicatorMessage = document.getElementById('move-message');
-      indicatorMessage.innerHTML = message;
-      setTimeout(() => {
-        indicator.style.fontSize = '9vw';
-        setTimeout(() => {
-          indicator.style.fontSize = '8vw';
-          setTimeout(() => {
-            indicator.style.fontSize = '9vw';
-          }, 50);
-        }, 100);
-      }, 200);
+      indicator.style.transform = 'scaleX(1)';
       setTimeout(() => {
         indicator.style.opacity = 0;
-        indicatorMessage.innerHTML = '';
-      }, 600);
-    }, 100);
+      }, duration - 200);
+    }, 200);
+
   }
   render() {
 
@@ -1472,7 +1552,10 @@ class App extends React.PureComponent {
     let mediumCardSize = this.state.cardSizes.mediumCardSize;
     let miniCardSize = this.state.cardSizes.miniCardSize;
     let microCardSize = this.state.cardSizes.microCardSize;
-
+    let portraitSize = {
+      width: Math.round(cardSize.height / 2) + 'px',
+      height: Math.round(cardSize.width / 2) + 'px'
+    };
     let footerStyle = { pointerEvents: 'none', opacity: 1, position: 'absolute', bottom: '-10vmax' };
     let gameBoardStyle = { display: 'none' };
     let introStyle = { display: 'none' };
@@ -1482,7 +1565,15 @@ class App extends React.PureComponent {
     let opponentSelectStyle = { display: 'none' };
     let deckSelectStyle = { display: 'none' };
     switch (this.state.phase) {
-      case 'splashScreen': introStyle = { display: 'flex' }; break;
+      case 'splashScreen': {
+        if (this.state.inputHasFocus && this.state.keyboardShowing) {
+          document.getElementById('start-button').classList.add('keyboard-showing-start-button')
+          introStyle = { display: 'block !important', position: 'fixed', top: '0px', height: '100%' }
+        } else {
+          introStyle = { display: 'flex' };
+        }
+        break;
+      };
       case 'selectingOpponent': opponentSelectStyle = { display: 'flex' }; break;
       case 'showingOptions': optionsStyle = { display: 'flex' }; break;
       case 'selectingDeck': deckSelectStyle = { display: 'flex' }; break;
@@ -1494,10 +1585,16 @@ class App extends React.PureComponent {
       <div id='container'>
         <Header />
         <IntroScreen style={introStyle}
+          avatarIndex={this.state.userStatus.avatarIndex}
+          cardSize={cardSize}
+          avatarSource={portraitSources.user}
+          onClickAvatar={this.handleClickAvatar}
           onClickStart={this.handleClickStart}
           onClickHow={this.handleClickHow}
           onClickOptions={this.handleClickOptions}
           onClickHallOfFame={this.handleClickHallOfFame}
+          onFocusNameInput={this.handleNameInputFocus}
+          onUnfocusNameInput={this.handleNameInputUnfocus}
         />
         <InstructionsScreen style={instructionsStyle}
           onClickBack={this.handleClickBack} />
@@ -1524,6 +1621,10 @@ class App extends React.PureComponent {
           onClickBack={this.handleClickBack} />
         <GameBoard style={gameBoardStyle}
           playerNames={this.state.playerNames}
+          opponentNames={Object.keys(characters)}
+          CPUOpponent={this.state.CPUOpponent}
+          portraitSources={portraitSources}
+          avatarIndex={this.state.userStatus.avatarIndex}
           hands={{ user: this.state.userHand, opponent: this.state.opponentHand }}
           grids={{ user: this.state.userGrid, opponent: this.state.opponentGrid }}
           totals={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
