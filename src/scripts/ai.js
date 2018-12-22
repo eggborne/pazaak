@@ -1,6 +1,15 @@
-import {randomInt} from './util'; 
+import { randomInt } from './util';
+const plusMinusSymbol = '±';
 export function makeOpponentMove(app) {
+
   /**
+   * WORKING:
+   * user stands, ai draws until over 20
+   * 
+   * 
+   * 
+   * 
+   * 
    * Stands at 17
    * - only if userTotal < 17
    * 
@@ -20,9 +29,11 @@ export function makeOpponentMove(app) {
    * 
    * 
    */
+
   setTimeout(() => {
     let stood = false;
-    let extraDelay = 150;
+    let newTotal;
+    let extraDelay = 0;
     /**
      * Done whether user is standing or not
      * 
@@ -49,11 +60,11 @@ export function makeOpponentMove(app) {
       // safe to draw!
       safeToDraw = true;
       console.warn(`CPU decided it's safe to draw at total ${app.state.opponentTotal}, with minus potential of ${highestMinusValue}`);
-      
+
     } else {
       safeToDraw = false;
       console.warn(`CPU decided it's UNSAFE to draw at total ${app.state.opponentTotal}, with minus potential of ${highestMinusValue}`);
-      
+
     }
 
     /**
@@ -62,33 +73,24 @@ export function makeOpponentMove(app) {
 
     if (app.state.turnStatus.user.standing) {
 
-      // USER STANDING
-      console.warn('Player stood! Beginning CPU standoff sequence...........................................................');
+      // USER STANDING ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+      console.warn('Player stood! Beginning CPU standoff sequence........ totals', app.state.userTotal, app.state.opponentTotal);
 
       if (app.state.userTotal > 20 || app.state.userTotal < app.state.opponentTotal) {
-        console.warn(`USER TOTAL ${app.state.userTotal} is over 20 or less than opponent total ${app.state.opponentTotal}! standing and returning`);
+        // cpu already wins, just needs to stand
+        if (app.state.userTotal > 20) {
+          console.warn('userTotal > 20!')
+        } else if (app.state.userTotal < app.state.opponentTotal) {
+          console.warn('app.state.userTotal < app.state.opponentTotal')
+        }
         console.error('CPU STAND');
         standCPU(app);
         stood = true;
-        setTimeout(() => {
-          app.determineWinnerFromTotal();
-        }, (app.state.options.turnInterval * 2));
-        return;
-      }
+      } else if (app.state.opponentTotal < 20) {
+        // see if a card can beat or tie user total
 
-      if (app.state.opponentTotal <= 20 && app.state.opponentTotal > app.state.userTotal) {
-        console.warn('CPU already beats userTotal at beginning of turn!');
-        console.error('CPU STAND');
-        setTimeout(() => {
-          app.determineWinnerFromTotal();
-        }, (app.state.options.turnInterval * 2));
-        return;
-      }
-
-      // see if a card can beat or tie user total
-
-      if (app.state.opponentTotal < 20) {
-        let newTotal;
+       
         let addedValueTally = 0;
         console.warn('opponentTotal < 20');
         let dealInterval = app.state.options.turnInterval * 2;
@@ -96,7 +98,7 @@ export function makeOpponentMove(app) {
         for (let i = 0; i < app.state.opponentHand.length; i++) {
           let card = app.state.opponentHand[i];
           let totalComparison;
-          if (app.state.opponentHand[i].type === '+') {
+          if (app.state.opponentHand[i].type === '+' || app.state.opponentHand[i].type === plusMinusSymbol) {
             let potentialScore = app.state.opponentTotal + card.value;
             if (acceptTie) {
               totalComparison = potentialScore >= app.state.userTotal;
@@ -105,6 +107,8 @@ export function makeOpponentMove(app) {
             }
             if (totalComparison && potentialScore <= 20 && !app.state.turnStatus.opponent.playedCard) {
               app.playHandCard('opponent', { id: card.id, value: card.value, type: card.type });
+              app.callMoveIndicator('opponent', 'Play Card', app.state.options.moveIndicatorTime / 2)
+              extraDelay += app.state.options.moveIndicatorTime;
               console.warn(`PLAYING #card-${card.id} (${card.value} ${card.type}) for winning total ${potentialScore}!`);
               newTotal = potentialScore;
               break;
@@ -127,22 +131,24 @@ export function makeOpponentMove(app) {
             extraDelay = i * 500;
             console.warn(`drawing card ${i} with delay ${(i * 500)}`);
             console.warn(`Right before dealing opponentTotal is ${app.state.opponentTotal}`);
+            app.callMoveIndicator('opponent', 'Draw', app.state.options.moveIndicatorTime / 2);
+            extraDelay += app.state.options.moveIndicatorTime;
             let newCardValue = app.dealToPlayerGrid('opponent', extraDelay);
-            addedValueTally += newCardValue;
-            console.log(`increasing addedValueTally to ${addedValueTally}`);
+            // addedValueTally += newCardValue;
+            // console.log(`increasing addedValueTally to ${addedValueTally}`);
             console.error('CPU DRAW CARD');
-            console.warn(`Right after dealing opponentTotal+newCardValue is ${app.state.opponentTotal + addedValueTally}`);
-            newTotal = app.state.opponentTotal + addedValueTally;
-            if ((app.state.opponentTotal + addedValueTally) >= app.state.userTotal) {
+            console.warn(`Right after dealing opponentTotal+newCardValue is ${app.state.opponentTotal + newCardValue}`);
+            newTotal = app.state.opponentTotal + newCardValue;
+            if ((app.state.opponentTotal + newCardValue) >= app.state.userTotal) {
               console.error(`REACHED APPROPRIATE TOTAL! Set newTotal to ${newTotal} and breaking`);
               break;
             }
           }
-          newTotal = app.state.opponentTotal + addedValueTally;
+          // newTotal = app.state.opponentTotal + addedValueTally;
         }
 
         console.warn(`Done drawing cards. newTotal is ${newTotal}`);
-        
+
         if (newTotal > 20) {
           console.warn('BROKE 20!! Must see if hand cards can reduce total!');
 
@@ -150,7 +156,7 @@ export function makeOpponentMove(app) {
           for (let i = 0; i < app.state.opponentHand.length; i++) {
             let card = app.state.opponentHand[i];
             let totalComparison;
-            if (app.state.opponentHand[i].type === '-') {
+            if (app.state.opponentHand[i].type === '-' || app.state.opponentHand[i].type === plusMinusSymbol) {
               let potentialScore = newTotal + card.value;
               if (acceptTie) {
                 totalComparison = potentialScore >= app.state.userTotal;
@@ -159,7 +165,9 @@ export function makeOpponentMove(app) {
               }
               if (totalComparison && potentialScore <= 20) {
                 let cardToPlay = card;
-                app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type }, app.state.options.dealInterval);
+                app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
+                app.callMoveIndicator('opponent', 'Play Card', app.state.options.moveIndicatorTime / 2)
+                extraDelay += app.state.options.moveIndicatorTime;
                 console.warn(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore} (under 20 and beats/ties ${app.state.userTotal}), so CPU is playing it!`);
                 if (potentialScore >= standAt) {
                   standCPU(app);
@@ -174,37 +182,42 @@ export function makeOpponentMove(app) {
             }
           }
           ///////////////////
+
           console.warn('Afer hand check for minuses, total is', app.state.opponentTotal);
-        } else if (newTotal < 20){
+        } else if (newTotal < 20) {
           console.warn('Didn\'t break 20. No need to check hand cards for minuses.');
         } else {
           console.warn('Reached EXACTLY 20!');
         }
-        
+
         // compare scores and declare a winner
-        console.warn(`Determining winner with delay ${dealInterval + extraDelay}`);
-        setTimeout(() => {
-          app.determineWinnerFromTotal();
-        }, (dealInterval + extraDelay));
-        return;
+        // console.warn(`Determining winner with delay ${dealInterval + extraDelay}`);
+        // setTimeout(() => {
+        //   app.determineWinnerFromTotal();
+        // }, (dealInterval + extraDelay));
+        // return;
       } else if (app.state.opponentTotal > 20) {
-        console.warn('CPU total > 20 when user standing');
+        console.warn('CPU total > 20  and user <= 20 when user standing!');
         let newTotal;
         let totalComparison;
+        console.log('Checking minus cards to try to get <= 20...')
         // see if minus cards can get total below 20
         for (let i = 0; i < app.state.opponentHand.length; i++) {
-          if (app.state.opponentHand[i].type === '-') {
+          if (app.state.opponentHand[i].type === '-' || app.state.opponentHand[i].type === plusMinusSymbol) {
             let card = app.state.opponentHand[i];
             let potentialScore = app.state.opponentTotal + card.value;
             if (potentialScore <= 20) {
+              console.log('found a good one! playing hand card', cardToPlay)
               let cardToPlay = card;
               app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
+              app.callMoveIndicator('opponent', 'Play Card', app.state.options.moveIndicatorTime / 2)
+              extraDelay += app.state.options.moveIndicatorTime;
               newTotal = potentialScore;
             }
           }
         }
-
-        console.warn(`CPU played a card to get total to ${newTotal}`);
+        console.log('checked cards, now total is', newTotal);
+        console.log('Accept tie?', acceptTie);
         if (acceptTie) {
           totalComparison = newTotal < app.state.userTotal;
         } else {
@@ -212,66 +225,97 @@ export function makeOpponentMove(app) {
           // will draw again after a tie
         }
         if (totalComparison) {
-          console.warn('Under 20, but still too low to win! Draw a card?');
+          console.warn('Under 20, but still too low to win! Drawing a card');
 
           app.dealToPlayerGrid('opponent');
           console.error('CPU DRAW CARD');
+          app.callMoveIndicator('opponent', 'Draw', app.state.options.moveIndicatorTime / 2);
+          extraDelay += app.state.options.moveIndicatorTime;
           console.warn(`After dealing but before a delay, opponentTotal is ${app.state.opponentTotal}`);
 
           setTimeout(() => {
             console.warn(`After a delay, opponentTotal is ${app.state.opponentTotal}`);
           }, app.state.options.dealInterval);
         } else {
-          console.warn('That was enough to win! Ending turn.');
+          if (acceptTie) {
+            console.warn('That was enough to win or tie! Ending turn.');
+          } else {
+            console.warn('That was enough to win! Ending turn.');
+          }
         }
 
-        setTimeout(() => {
-          app.determineWinnerFromTotal();
-        }, (app.state.options.turnInterval * 2));
-        return;
+        // setTimeout(() => {
+        //   app.determineWinnerFromTotal();
+        // }, (app.state.options.turnInterval * 2));
+        // return;
       } else {
         // is 20
         console.error('CPU STANDING at exactly 20!');
         standCPU(app);
         stood = true;
       }
-      // ...then, if did not reach a stand state, End Turn
-      app.changeTurn('user');
+      console.error('after operations, newTotal and stood =', newTotal, stood)
     } else {
 
-      // USER STILL IN PLAY
+      // USER STILL IN PLAY ///////////////////////////////////////////////////////////////////////////////////////////////
 
       if (app.state.opponentTotal >= standAt && app.state.opponentTotal < 20) {
         standCPU(app);
         stood = true;
-        console.error('CPU immediately STANDS after initial draw!');
+        console.error('CPU is over stand limit and immediately STANDS after initial draw!');
       } else if (app.state.opponentTotal < 20) {
 
         // UNDER 20
         if (!safeToDraw) {
           // CHECK HAND PLUSES
+          console.warn('Because UNSAFE TO DRAW, checking hand pluses');
           for (let i = 0; i < app.state.opponentHand.length; i++) {
             let card = app.state.opponentHand[i];
-            if (app.state.opponentHand[i].type === '+') {
+            console.log(`${app.state.playerNames.opponent} is considering card ${card.id} value ${card.value} type ${card.type}...`)
+            if (app.state.opponentHand[i].type === '+' || app.state.opponentHand[i].type === plusMinusSymbol) {
               let potentialScore = app.state.opponentTotal + card.value;
               if (!app.state.turnStatus.opponent.playedCard && potentialScore >= standAt && potentialScore <= 20) {
                 let cardToPlay = card;
                 app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
+                app.callMoveIndicator('opponent', 'Play Card', app.state.options.moveIndicatorTime / 2)
+                extraDelay += app.state.options.moveIndicatorTime;
                 standCPU(app);
                 stood = true;
-                console.warn(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore}, so CPU is playing it and STANDING!`);
+                console.log(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore}, so CPU is playing it and STANDING!`);
                 console.error('CPU STANDS after playing a hand card!');
                 break;
               } else {
                 console.log(`CPU looked at card ${i} (#card-${card.id} ${card.value} ${card.type}), but potentialScore ${potentialScore} is too low!`);
               }
             } else if (card) {
-              console.warn(`CPU looked at card ${i} (#card-${card.id} ${card.value} ${card.type}), but it can't help because it's a ${card.type} type!`);
+              console.log(`CPU looked at card ${i} (#card-${card.id} ${card.value} ${card.type}), but it can't help because it's a ${card.type} type!`);
             }
           }
           ///////////////////
-
         } else {
+          console.warn('SAFE TO DRAW: checking hand pluses for stand+ score...');
+          for (let i = 0; i < app.state.opponentHand.length; i++) {
+            let card = app.state.opponentHand[i];
+            console.log(`Considering card ${card.id} value ${card.value} type ${card.type}...`)
+            if (app.state.opponentHand[i].type === '+' || app.state.opponentHand[i].type === plusMinusSymbol) {
+              let potentialScore = app.state.opponentTotal + card.value;
+              if (!app.state.turnStatus.opponent.playedCard && potentialScore >= standAt && potentialScore <= 20) {
+                let cardToPlay = card;
+                app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
+                app.callMoveIndicator('opponent', 'Play Card', app.state.options.moveIndicatorTime / 2)
+                extraDelay += app.state.options.moveIndicatorTime;
+                standCPU(app);
+                stood = true;
+                console.log(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore}, so CPU is playing it and STANDING!`);
+                console.error('CPU STANDS after playing a hand card!');
+                break;
+              } else {
+                console.log(`CPU looked at card ${i} (#card-${card.id} ${card.value} ${card.type}), but potentialScore ${potentialScore} is too low!`);
+              }
+            } else if (card) {
+              console.log(`CPU looked at card ${i} (#card-${card.id} ${card.value} ${card.type}), but it can't help because it's a ${card.type} type!`);
+            }
+          }
           console.warn(`CPU total ${app.state.opponentTotal} low enough that it's safe to end turn and draw, rather than use a hand card.`);
         }
       } else if (app.state.opponentTotal > 20) {
@@ -281,12 +325,14 @@ export function makeOpponentMove(app) {
         // CHECK HAND MINUSES
         for (let i = 0; i < app.state.opponentHand.length; i++) {
           let card = app.state.opponentHand[i];
-          if (app.state.opponentHand[i].type === '-') {
+          if (app.state.opponentHand[i].type === '-' || app.state.opponentHand[i].type === plusMinusSymbol) {
             let potentialScore = app.state.opponentTotal + card.value;
             if (potentialScore <= 20) {
               let cardToPlay = card;
               app.playHandCard('opponent', { id: cardToPlay.id, value: cardToPlay.value, type: cardToPlay.type });
               console.warn(`Card ${i} (#card-${card.id} ${card.value} ${card.type}) makes ${potentialScore}, so CPU is playing it!`);
+              app.callMoveIndicator('opponent', 'Play Card', app.state.options.moveIndicatorTime / 2)
+              extraDelay += app.state.options.moveIndicatorTime;
               if (potentialScore >= standAt) {
                 standCPU(app);
                 stood = true;
@@ -307,19 +353,57 @@ export function makeOpponentMove(app) {
         standCPU(app);
         stood = true;
       }
-      console.error('CPU TURN OVER');
-      if (stood) {
-        app.callMoveIndicator('Stand');
-      } else {
-        app.callMoveIndicator('End Turn');
-      }
-      //must delay or app.state.opponentTotal is wrong in changeTurn()!
-      console.error(`Switching turns with delay ${extraDelay}`);
-      setTimeout(() => {
-        app.changeTurn('user');
-      }, 150 + extraDelay);
+      // console.error('CPU TURN OVER');
+      // setTimeout(() => {
+      //   if (stood) {
+      //     app.callMoveIndicator('opponent', 'Stand', app.state.options.moveIndicatorTime);
+      //   } else {
+      //     app.callMoveIndicator('opponent', 'End Turn', app.state.options.moveIndicatorTime);
+      //   }
+      // }, extraDelay);
+      // //must delay or app.state.opponentTotal is wrong in changeTurn()!
+      // console.log('changing turns with delay', app.state.options.moveIndicatorTime + extraDelay)
+      // setTimeout(() => {
+      //   app.changeTurn('user');
+      // }, app.state.options.moveIndicatorTime + extraDelay);
     }
-  }, app.state.options.opponentMoveInterval);
+
+    console.error('CPU TURN OVER');
+    setTimeout(() => {
+      if (stood) {
+        app.callMoveIndicator('opponent', 'Stand', app.state.options.moveIndicatorTime);
+      } else {
+        app.callMoveIndicator('opponent', 'End Turn', app.state.options.moveIndicatorTime);
+      }
+    }, extraDelay);
+    //must delay or app.state.opponentTotal is wrong in changeTurn()!
+    if (stood) {
+      if (app.state.turnStatus.user.standing) {
+        console.error('BOTH STANDING! detemining winner...')
+        // both standing
+        setTimeout(() => {
+          app.determineWinnerFromTotal();
+        }, (app.state.options.turnInterval + extraDelay));
+      } else {
+        console.error('ONLY CPU STANDING!')
+        console.log('changing turns with delay', app.state.options.moveIndicatorTime + extraDelay)
+        setTimeout(() => {
+          app.changeTurn('user');
+        }, app.state.options.moveIndicatorTime + extraDelay);
+      }
+    } else {
+      console.error('CPU ENDED TURN!');
+      if (app.state.turnStatus.user.standing) {
+        console.error('CPU ENDED TURN WHILE USER STANDING??');
+      } else {
+        console.log('BOTH PLAYERS STILL IN PLAY. CHANGING TURNS')
+        setTimeout(() => {
+          app.changeTurn('user');
+        }, app.state.options.moveIndicatorTime + extraDelay);
+      }
+    }
+    
+  }, app.state.options.opponentMoveWaitTime);
 }
 
 function standCPU(app) {
@@ -328,5 +412,4 @@ function standCPU(app) {
   app.setState({
     turnStatus: turnStatusCopy
   });
-  // app.callMoveIndicator('Stand');
 }
