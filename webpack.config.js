@@ -63,7 +63,7 @@ module.exports = {
       favicon: './src/assets/images/favicon.png',
       filename: resolve(__dirname, "dist", "index.html"),
       meta: {
-        'viewport': 'width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no',
+        'viewport': 'width=device-width, height=device-height, initial-scale=1, minimum-scale=1, user-scalable=no, user-scalable=0',
         'mobile-web-app-capable': 'yes',
         'theme-color': '#560000'
       }
