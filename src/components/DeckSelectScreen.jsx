@@ -10,6 +10,8 @@ function DeckSelectionScreen(props) {
   let chooseStyle = { transition: 'all 300ms ease' };
   let chooseText = 'Ready to play!';
   let cardPlural = 's';
+  let buttonDisabled = 'disabled-button';
+  let throbbing = '';
   if (cardsLeft === 1) {
     cardPlural = '';
   }
@@ -17,6 +19,8 @@ function DeckSelectionScreen(props) {
     cardsLeft = 1;
     cardPlural = '';
     chooseStyle.color = 'green';
+    buttonDisabled = '';
+    throbbing = 'throbbing'
   } else {
     chooseText = `choose ${cardsLeft} card${cardPlural}`;
   }
@@ -77,6 +81,18 @@ function DeckSelectionScreen(props) {
           grid-column-gap: 0.75vh;
         }
         #preview-deck-grid  > div, #deck-selection-grid  > div {
+          display: flex;
+          box-sizing: border-box;
+          justify-content: center;
+          align-items: center;
+          background-color: var(--card-spot-bg-color) !important;
+        }
+        #deck-selection-grid  > div {
+          border: ${selectionCardSize.borderSize} inset var(--card-spot-border-color);
+          border-radius: ${parseInt(selectionCardSize.borderRadius)+2}px !important;
+          background-color: var(--card-spot-bg-color) !important
+        }
+        #preview-deck-grid  > div {
           border: ${selectedCardSize.borderSize} inset var(--card-spot-border-color);
           border-radius: ${parseInt(selectedCardSize.borderRadius)+2}px !important;
           background-color: var(--card-spot-bg-color) !important;
@@ -89,6 +105,17 @@ function DeckSelectionScreen(props) {
           flex-grow: 1;
           justify-content: flex-start;
           align-items: center;
+        }
+        .throbbing {
+          animation: throb 1000ms infinite;
+        }
+        @keyframes throb {
+          0% {
+            transform: scale(1)
+          }
+          50% {
+            transform: scale(1.05);
+          }
         }
       `}
       </style>
@@ -115,7 +142,7 @@ function DeckSelectionScreen(props) {
       <div className='pre-footer' id='deck-select-footer'>
         <div>
           <button id='deck-select-back-button' onClick={(event) => props.onClickBack(event, 'selectingOpponent')} className='footer-back-button shadowed-text'>{'<'}</button>
-          <button className='ready-button disabled-button' onClick={props.onClickPlay} id='play-button'>Ready!</button>
+          <button className={`ready-button ${buttonDisabled} ${throbbing}`} onClick={props.onClickPlay} id='deck-ready-button'>Start!</button>
         </div>
       </div>
     </div>
