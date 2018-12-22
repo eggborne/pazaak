@@ -8,7 +8,6 @@ function OpponentSelectScreen(props) {
   Object.entries(props.characters).map((entry, i) => {
     characterArray[i] = entry[0];
   });
-  
   return (
     <div style={props.style} id='opponent-select-screen'>
       <style jsx>{`
@@ -35,6 +34,17 @@ function OpponentSelectScreen(props) {
         .pre-footer {
           border-top: 1px solid black;
         }
+        #opponent-ready-button {
+          animation: throb 1000ms infinite;
+        }
+        @keyframes throb {
+          0% {
+            transform: scale(1)
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
       `}</style>
       <div className='pre-header' id='opponent-select-title'>
         <div className='shadowed-text'>Choose Your Opponent</div>
@@ -42,6 +52,7 @@ function OpponentSelectScreen(props) {
       <div id='opponent-select-area' className='shadowed-text'>
         {characterArray.map((character, i) =>
           <OpponentPanel key={i}
+            selected={(props.opponentSelected === character)}
             cardSize={props.cardSize}
             index={i}
             character={props.characters[character]}
@@ -58,6 +69,7 @@ function OpponentSelectScreen(props) {
 OpponentSelectScreen.propTypes = {
   style: PropTypes.object,
   characters: PropTypes.object,
+  opponentSelected: PropTypes.string,
   cardSize: PropTypes.object,
   onClickOpponentReady: PropTypes.func,
   onClickPanel: PropTypes.func,
