@@ -1,20 +1,3 @@
-export function flash(elementId, property, origColor, flashColor, interval) {
-  interval = Math.round(interval);
-  let el = document.getElementById(elementId);
-  el.style.pointerEvents = 'none';
-  el.style[property] = flashColor;
-  setTimeout(() => {
-    el.style[property] = origColor;
-    el.style.pointerEvents = 'all';
-    // setTimeout(() => {
-    //   el.style[property] = flashColor;
-    //   // setTimeout(() => {
-    //   //   el.style[property] = origColor;
-    //   //   el.style.pointerEvents = 'all';
-    //   // }, interval);
-    // }, interval);
-  }, interval);
-}
 export function shuffle(arr) {
   arr.sort(() => Math.random() - 0.5);
   return arr;
@@ -52,12 +35,15 @@ export const checkCookie = () => {
 };
 
 export function getCardSizes() {
+  let startTime = window.performance.now();
   let cardSize = {};
   let mediumCardSize = {};
   let miniCardSize = {};
   let microCardSize = {};
-  let cardHeight = Math.round((window.innerHeight / 6) * 0.775);
-  // let cardHeight = Math.round((window.innerHeight / 6) * 0.85);
+  let actualHeight;
+  actualHeight = window.innerHeight;
+  // let cardHeight = Math.round((window.innerHeight / 6) * 0.775);
+  let cardHeight = Math.round((actualHeight / 6) * 0.805);
   // cardSize.width = Math.round(cardHeight / 1.55);
   cardSize.width = Math.round(cardHeight / 1.55);
   let cardsPerWidth = window.innerWidth / cardSize.width;
@@ -95,38 +81,27 @@ export function getCardSizes() {
   cardsObj.mediumCardSize = cardSizes[1];
   cardsObj.miniCardSize = cardSizes[2];
   cardsObj.microCardSize = cardSizes[3];
+  let endTime = window.performance.now();
+  console.warn('sized cards in', (endTime - startTime));
   return cardsObj;
 }
 
-export function sizeElements(app, cardSizes = app.state.cardSizes) {
-  let miniCardSize = cardSizes.miniCardSize;
-  document.getElementById('container').style.height = `${window.innerHeight}px`;
-  let contWidth = document.getElementById('container').offsetWidth;
-  if (document.getElementById('user-grid').offsetWidth >= window.innerWidth) {
-    console.warn('user-grid offsetWidth > window.innerWidth', document.getElementsByClassName('deal-grid')[0].offsetWidth, window.innerWidth);
-    Array.from(document.getElementsByClassName('deal-grid')).map((el) => {
-      el.style.width = `${window.innerWidth}px`;
-      el.style.borderColor = 'green';
+export function sizeElements(app, initialStart, cardSizes = app.state.cardSizes) {
+  console.error('SIZING ELEMENTS');
+  let startTime = window.performance.now();
+  if (initialStart) {
+    // size button text
+    Array.from(document.getElementsByClassName('intro-button')).map((button) => {
+      let buttonTextLength = button.children[0].innerHTML.length;
+      let fontSize = (button.offsetWidth / (buttonTextLength)) + 'px';
+      button.style.fontSize = fontSize;
+      button.style.height = (window.innerHeight / 10) + 'px';
     });
   }
-  Array.from(document.getElementsByClassName('left-side')).map((portrait, i) => {
-    if (portrait.classList.contains('opponent-portrait')) {
-      portrait.style.height = Math.round(contWidth * (0.35) + 2) + 'px';
-      // portrait.style.backgroundPositionX = ((-parseFloat(portrait.style.height) / 2 + 1) * i) + 'px';
-      portrait.style.backgroundPositionX = (i * (-parseFloat(portrait.style.height) / 2)) + 'px';
-    } else {
-      portrait.style.minWidth = Math.round(contWidth * (0.35)) + 'px';
-      portrait.style.fontSize = (Math.round(contWidth * (0.35)) / 7) + 'px';
-    }
-  });
-  if (document.getElementById('mini-portrait')) {
-    document.getElementById('mini-portrait').style.width = document.getElementById('mini-portrait').style.height = miniCardSize.height - 2 + 'px';
-    document.getElementById('user-portrait').style.width = document.getElementById('user-portrait').style.height = miniCardSize.height - 2 + 'px';
-    let opponentIndex = Object.keys(app.characters).indexOf(app.state.CPUOpponent);
-    document.getElementById('mini-portrait').style.backgroundPositionX = -opponentIndex * (miniCardSize.height) + 'px';
-  }
+  document.getElementById('container').style.height = `${window.innerHeight}px`;
+  let endTime = window.performance.now();
+  console.warn('sized elements in', (endTime - startTime));
 }
-
 function fullScreenCall() {
   var root = document.body;
   return root.requestFullscreen || root.webkitRequestFullscreen || root.mozRequestFullScreen || root.msRequestFullscreen;
@@ -134,7 +109,7 @@ function fullScreenCall() {
 function exitFullScreenCall() {
   return document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
 }
-function isFullScreen() {
+export function isFullScreen() {
   return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 }
 export function toggleFullScreen() {
