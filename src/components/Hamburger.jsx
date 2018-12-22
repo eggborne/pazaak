@@ -15,22 +15,19 @@ function Hamburger(props) {
           background-color: var(--button-bg-color);
           border: solid var(--button-border-color);
           cursor: pointer;
-          border-radius: 0.5rem;
+          border-radius: 0.25rem;
           border-width: 0.25rem;
+          transition: transform 30ms ease-in-out;
         }
+
         .hamburger-bar {
           width: 7vmax;
           height: 1.1vmax;
-          background-color: rgb(59, 107, 150);
-          transition: all 200ms ease;
+          background-color: var(--button-text-color);
+          transition: transform 150ms ease;
           border-radius: 0.1rem;
         }
-        #top-hamburger-bar {
-          transform-origin: 50% 50%;
-        }
-        #bottom-hamburger-bar {
-          transform-origin: 50% 50%;
-        }
+       
         #middle-hamburger-bar-2 {
           position: absolute;
           width: 7vmax;
