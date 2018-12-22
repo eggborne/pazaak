@@ -4,10 +4,14 @@ import PropTypes from 'prop-types';
 class Card extends React.PureComponent {
   constructor(props) {
     super(props);
+    this.clickAction = this.props.onClickCard;
+    if (!props.onClickCard) {
+      this.clickAction = () => null;
+    }
     this.handleClick = this.handleClick.bind(this);
   }
   handleClick(event) {
-    this.props.onClickCard(event, this.props.value, this.props.type);
+    this.clickAction(event, this.props.value, this.props.type);
   }
   render() {
     let color;
@@ -33,7 +37,6 @@ class Card extends React.PureComponent {
     let cardRadius = this.props.size.borderRadius;
     let bandRadius = this.props.size.bandRadius;
     let badgeRadius = this.props.size.badgeRadius;
-    let cardMargin = this.props.size.margin;
     let bubbleSize = this.props.size.bubbleSize;
     let fontSize = this.props.size.fontSize;
     return (
