@@ -80,7 +80,7 @@ function GameBoard(props) {
   let handGridwidth = handCardSize.width + (parseFloat(handCardSize.borderSize) * 3);
   let handGridHeight = handCardSize.height + (parseFloat(handCardSize.borderSize) * 3);
   let portraitSize = Math.round(parseInt(handCardSize.height * 0.9));
-  // console.warn('GameBoard pre-return took', (window.performance.now() - startTime));
+  console.warn('GameBoard pre-return took', (window.performance.now() - startTime));
   return (
     <div style={props.style} id='game-board'>
       <style jsx>{`
