@@ -4,8 +4,11 @@ import PropTypes from 'prop-types';
 import Card from './Card';
 import CardBack from './CardBack';
 import MoveIndicator from './MoveIndicator';
+import PlayerPortrait from './PlayerPortrait';
 
 function GameBoard(props) {
+  let startTime = window.performance.now();
+  let spriteIndex = props.opponentNames.indexOf(props.CPUOpponent);
   let userWins = ['', '', ''];
   let opponentWins = ['', '', ''];
   if (props.wins.user === 1) {
@@ -58,7 +61,7 @@ function GameBoard(props) {
   props.grids.user.map((card, i) => {
     userGrid.push(<Card key={i} size={props.cardSize} value={card.value} type={card.type} />);
   });
-  let gridWidth = props.cardSize.width + (parseFloat(props.cardSize.borderSize) * 4);
+  let gridWidth = props.cardSize.width + (parseFloat(props.cardSize.borderSize) * 3);
   let gridHeight = props.cardSize.height + (parseFloat(props.cardSize.borderSize) * 3);
   let handCardSize = props.mediumCardSize;
   let cardsPerWidth = window.innerWidth / handCardSize.width;
@@ -74,8 +77,10 @@ function GameBoard(props) {
     userHand.push(<Card key={i} id={card.id} size={handCardSize} value={card.value} type={card.type}
       onClickCard={props.onClickCard} />);
   });
-  let handGridwidth = handCardSize.width;
-  let handGridHeight = handCardSize.height;
+  let handGridwidth = handCardSize.width + (parseFloat(handCardSize.borderSize) * 3);
+  let handGridHeight = handCardSize.height + (parseFloat(handCardSize.borderSize) * 3);
+  let portraitSize = Math.round(parseInt(handCardSize.height * 0.9));
+  // console.warn('GameBoard pre-return took', (window.performance.now() - startTime));
   return (
     <div style={props.style} id='game-board'>
       <style jsx>{`
@@ -103,14 +108,11 @@ function GameBoard(props) {
           display: grid;
           grid-template-columns: ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px;
           grid-template-rows: ${gridHeight}px ${gridHeight}px;
-          align-self: center;
+          justify-items: center;
           grid-column-gap: 1vw;
-          align-items: center;
-          grid-row-gap: 1vw;
+          grid-row-gap: 0.5vh;
           margin-top: 1vh;
           margin-bottom: 1vh;
-          margin-left: auto;
-          margin-right: auto;
         }
         .player-cards {
           display: grid;
@@ -135,23 +137,29 @@ function GameBoard(props) {
           justify-self: right;
         }
         .player-cards > div {
-          align-self: center;
+          align-items: center;
+          justify-items: center;
           position: relative;
-          border: ${props.cardSize.borderSize} inset #999;
-          border-radius: ${handCardSize.borderRadius};
+          border: ${handCardSize.borderSize} inset var(--card-spot-border-color);
+          border-radius: ${parseFloat(handCardSize.borderRadius) + 2}px !important;
           background-color: var(--card-spot-bg-color);
-          height: 100%;
+          display: flex;
           box-sizing: border-box;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
         }
         .deal-grid > div {
-          border: ${handCardSize.borderSize} inset var(--card-spot-border-color);
-          border-radius: ${parseFloat(props.cardSize.borderRadius)+2}px !important;
+          border: ${props.cardSize.borderSize} inset var(--card-spot-border-color);
+          border-radius: ${parseFloat(props.cardSize.borderRadius) + 2}px !important;
           background-color: var(--card-spot-bg-color);
-          height: ${gridHeight}px;
           display: flex;
-          align-items: center;
-          justify-content: center;
           box-sizing: border-box;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
         }
         .deal-grid .stats-area {
           background-color: transparent;
@@ -264,29 +272,11 @@ function GameBoard(props) {
         .win-symbol-lighted {
           background-color: orange;
         }
-        #user-portrait {
-          background-image: url('https://pazaak.online/assets/images/playerportrait.jpg');
-        }
-        .mini-portrait-label {
-          box-sizing: border-box;
-          padding: 0.1rem 0.25rem;
-          font-size: 0.8rem;
-          font-family: 'Nova Square';
-          width: 100%;
-          background-color: rgba(0, 0, 0, 0.5);
-          box-sizing: border-box;
-          border-radius: 0 0 0.25rem 0.25rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
       `}
       </style>
-      <MoveIndicator message='End Turn' />
+      <MoveIndicator />
       <div id='opponent-hand' className='player-hand-area'>
-        <div className='opponent-portrait' id='mini-portrait'>
-          <div className='mini-portrait-label shadowed-text'>{props.playerNames.opponent}</div>
-        </div>
+        < PlayerPortrait size={portraitSize} source={props.portraitSources.opponent} spriteIndex={spriteIndex} displayName={props.playerNames.opponent} type={'mini'} />
         <div id='opponent-cards' className='player-cards'>
           <div>{opponentHand[0]}</div>
           <div>{opponentHand[1]}</div>
@@ -351,9 +341,7 @@ function GameBoard(props) {
         </div>
       </div>
       <div id='user-hand' className='player-hand-area'>
-        <div className='opponent-portrait' id='user-portrait'>
-          <div className='mini-portrait-label shadowed-text'>{props.playerNames.user}</div>
-        </div>
+        < PlayerPortrait size={portraitSize} source={props.portraitSources.user} spriteIndex={props.avatarIndex} displayName={props.playerNames.user} type={'mini'} />
         <div id='user-cards' className='player-cards'>
           <div>{userHand[0]}</div>
           <div>{userHand[1]}</div>
@@ -376,10 +364,14 @@ GameBoard.propTypes = {
   turn: PropTypes.string,
   turnStatus: PropTypes.object,
   playerNames: PropTypes.object,
+  portraitSources: PropTypes.object,
   cardSize: PropTypes.object,
   mediumCardSize: PropTypes.object,
   miniCardSize: PropTypes.object,
   onClickCard: PropTypes.func,
+  opponentNames: PropTypes.array,
+  CPUOpponent: PropTypes.string,
+  avatarIndex: PropTypes.number
 };
 
 export default GameBoard;
