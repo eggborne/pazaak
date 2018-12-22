@@ -1,11 +1,18 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import PlayerPortrait from './PlayerPortrait';
 
 function OpponentPanel(props) {
+  let extraClasses = ['', ''];
+  if (props.selected) {
+    extraClasses[0] = 'panel-selected';
+    extraClasses[1] = 'disabled-select-button';
+  }
   let skillArray = Array.apply(null, Array(10)).map(function () { });
+  let source = 'https://pazaak.online/assets/images/opponentssheet.jpg';
   return (
-    <div id={`${props.character.name}-panel`} className='opponent-select-entry'>
+    <div id={`${props.character.name}-panel`} className={`opponent-select-entry ${extraClasses[0]}`}>
       <style jsx>{`
         .opponent-select-entry {
           box-sizing: border-box;
@@ -19,7 +26,7 @@ function OpponentPanel(props) {
           border-radius: 0.5rem;
           background-color: var(--trans-blue-bg-color);
           transform: scale(0.96);
-          transition: all 300ms ease, border-radius 600ms ease;
+          transition: transform 300ms ease, background-color 50ms ease;
         }
         .opponent-select-entry:nth-child(2n) {
           background-color: var(--trans-red-bg-color);
@@ -44,12 +51,12 @@ function OpponentPanel(props) {
         }
         .disabled-select-button::before {
           content: "Selected";
-          font-size: 0.9em;
+          font-size: 0.8em !important;
         }
         .disabled-select-button {
-          border-color: #555 !important;
-          background-color: #333 !important;
-          color: #666 !important;
+          border-color: #050 !important;
+          background-color: #010 !important;
+          // color: #4f4 !important;
           pointer-events: none !important;
           opacity: 0.9;
         }
@@ -60,14 +67,16 @@ function OpponentPanel(props) {
           content: "Selected";
           font-size: 0.9em;
         }
+        .left-side {
+          min-width: 35vw;
+          font-size: 5vw;
+        }
       `} 
       </style>
       <div className='left-opponent-panel'>
-        <div className='opponent-portrait left-side'>
-          <div className='portrait-label'>{props.character.displayName}</div>
-        </div>
+        <PlayerPortrait size={window.innerWidth * 0.35} source={source} spriteIndex={props.index} displayName={props.character.displayName} />
         <div className='opponent-quote'>{props.character.quotes.panel}</div>
-        <button onClick={props.onClickPanel} id={`${props.character.name}-select-button`} className={'select-button left-side'}></button>
+        <button onClick={props.onClickPanel} id={`${props.character.name}-select-button`} className={`select-button left-side ${extraClasses[1]}`}></button>
       </div>
       <div className='opponent-description'>
         <div className='opponent-stats-grid'>
@@ -142,6 +151,7 @@ function OpponentPanel(props) {
   );
 }
 OpponentPanel.propTypes = {
+  selected: PropTypes.bool,
   cardSize: PropTypes.object,
   index: PropTypes.number,
   character: PropTypes.object,
