@@ -26,11 +26,6 @@ function OptionsScreen(props) {
   }
   return (
     <div style={props.style} id='options-screen'>
-      <style jsx>{`
-        .option-off {
-          background-color: blue;
-        }
-      `}</style>
       <div className='options-instructions-title shadowed-text'>Options</div>
       <div id='options' className='shadowed-text'>
         <div id='options-grid'>
