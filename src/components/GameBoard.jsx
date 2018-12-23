@@ -80,7 +80,7 @@ function GameBoard(props) {
   let handGridwidth = handCardSize.width + (parseFloat(handCardSize.borderSize) * 3);
   let handGridHeight = handCardSize.height + (parseFloat(handCardSize.borderSize) * 3);
   let portraitSize = Math.round(parseInt(handCardSize.height * 0.9));
-  console.warn('GameBoard pre-return took', (window.performance.now() - startTime));
+  // console.warn('GameBoard pre-return took', (window.performance.now() - startTime));
   return (
     <div style={props.style} id='game-board'>
       <style jsx>{`
@@ -96,6 +96,7 @@ function GameBoard(props) {
           align-items: center;
           justify-content: space-around;
           box-sizing: border-box;
+          flex-grow: 1;
         }
         #user-area, #user-hand {
           background-color: var(--trans-blue-bg-color);
@@ -118,27 +119,32 @@ function GameBoard(props) {
           display: grid;
           grid-template-columns: ${handGridwidth}px ${handGridwidth}px ${handGridwidth}px ${(handGridwidth)}px;
           grid-template-rows: ${handGridHeight}px;
-          grid-column-gap: 0.5vw;
-
+          align-self: center;
+          justify-content: center;
         }
-        .player-hand-area {
+        {/* .player-hand-area {
           box-sizing: border-box;
           width: 100%;
           display: grid;
           grid-template-columns: 1fr auto 1fr;
-          grid-template-rows: 100%;
           justify-items: center;
           align-self: center;
           align-items: center;
           flex-grow: 1;
-          grid-column-gap: 1vw;
+          background: green;
+        } */}
+        .player-hand-area {
+          box-sizing: border-box;
+          width: 100%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-grow: 2;
         }
         .player-hand-area > div:nth-child(1) {
-          justify-self: right;
+          
         }
         .player-cards > div {
-          align-items: center;
-          justify-items: center;
           position: relative;
           border: ${handCardSize.borderSize} inset var(--card-spot-border-color);
           border-radius: ${parseFloat(handCardSize.borderRadius) + 2}px !important;
@@ -209,13 +215,20 @@ function GameBoard(props) {
           color: green !important;
           border-color: green !important;
         }
+        .player-portrait-area {
+          width: ${handCardSize.height}px;
+          height: ${handCardSize.height}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 1vw;
+        }
         .turn-indicator-area {
           width: ${handCardSize.height}px;
           height: ${handCardSize.height}px;
           display: flex;
           align-items: center;
           justify-content: center;
-          justify-self: left;
         }
         .turn-indicator {
           width: ${props.cardSize.width / 1.35}px;
@@ -276,7 +289,9 @@ function GameBoard(props) {
       </style>
       <MoveIndicator />
       <div id='opponent-hand' className='player-hand-area'>
-        < PlayerPortrait size={portraitSize} source={props.portraitSources.opponent} spriteIndex={spriteIndex} displayName={props.playerNames.opponent} type={'mini'} />
+        <div className='player-portrait-area'>
+          <PlayerPortrait size={portraitSize} source={props.portraitSources.opponent} spriteIndex={spriteIndex} displayName={props.playerNames.opponent} type={'mini'} />
+        </div>
         <div id='opponent-cards' className='player-cards'>
           <div>{opponentHand[0]}</div>
           <div>{opponentHand[1]}</div>
@@ -341,7 +356,9 @@ function GameBoard(props) {
         </div>
       </div>
       <div id='user-hand' className='player-hand-area'>
-        < PlayerPortrait size={portraitSize} source={props.portraitSources.user} spriteIndex={props.avatarIndex} displayName={props.playerNames.user} type={'mini'} />
+        <div className='player-portrait-area'>
+          <PlayerPortrait size={portraitSize} source={props.portraitSources.user} spriteIndex={props.avatarIndex} displayName={props.playerNames.user} type={'mini'} />
+        </div>
         <div id='user-cards' className='player-cards'>
           <div>{userHand[0]}</div>
           <div>{userHand[1]}</div>
