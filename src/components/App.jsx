@@ -20,6 +20,10 @@ let initialSize = {
   width: window.innerWidth,
   height: window.innerHeight
 };
+let portraitMode = false;
+if (window.innerWidth < window.innerHeight) {
+  portraitMode = true;
+}
 let portraitSources = {
   user: 'https://pazaak.online/assets/images/avatarsheet.jpg',
   opponent: 'https://pazaak.online/assets/images/opponentssheet.jpg'
@@ -197,14 +201,15 @@ class App extends React.PureComponent {
     window.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('msfullscreenchange', this.handleFullscreenChange);
-    document.getElementById('player-name-input').onfocus = () => {
-      document.getElementById('intro-screen').style.justifyContent = 'flex-start';
-      document.getElementById('intro-screen').style.marginTop = '4rem';
-    }
-    document.getElementById('player-name-input').onblur = () => {
-      document.getElementById('intro-screen').style.justifyContent = 'center';
-      document.getElementById('intro-screen').style.marginTop = '0';
-
+    if (portraitMode) {
+      document.getElementById('player-name-input').onfocus = () => {
+        document.getElementById('intro-screen').style.justifyContent = 'flex-start';
+        document.getElementById('intro-screen').style.marginTop = '4rem';
+      }
+      document.getElementById('player-name-input').onblur = () => {
+        document.getElementById('intro-screen').style.justifyContent = 'center';
+        document.getElementById('intro-screen').style.marginTop = '0';
+      }
     }
 
     let endTime = window.performance.now();
