@@ -674,11 +674,16 @@ li:before {
   align-items: center;
   justify-content: center;
   line-height: 2.5rem;
-  /* transform: translateY(-95vw); */
-  /* opacity: 0; */
+  transform: translateY(-95vw);
+  opacity: 0;
   transition: transform 200ms ease, opacity 300ms ease;
   padding: 2vh;
   pointer-events: none;
+  box-shadow:
+  -2px -2px 0 #000,  
+   2px -2px 0 #000,
+   -2px 2px 0 #000,
+    1px 1px 2px #000;
 }
 .onscreen {
   transform: none !important;
