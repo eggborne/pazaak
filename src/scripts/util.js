@@ -48,14 +48,18 @@ export function getCardSizes() {
   cardSize.width = Math.round(cardHeight / 1.55);
   let cardsPerWidth = window.innerWidth / cardSize.width;
   if (cardsPerWidth < 6) {
-    console.warn('cardSize too wide!');
+    console.warn('cardSize too wide at', cardSize.width);
     let marg = window.innerWidth * 0.005;
     let maxWidth = (window.innerWidth / 5) - (marg * 5);
     cardSize.width = Math.round(maxWidth);
+    console.warn('changed width to', cardSize.width);
+    cardSize.height = cardHeight;
+    // cardSize.height = (cardSize.width * 1.55);
+    // console.warn(' height changed to', cardSize.height)
   } else {
-    console.warn('width okay with cardsPerWidth', cardsPerWidth);
+    console.warn('width okay with cardsPerWidth', cardSize.width);
+    cardSize.height = cardHeight;
   }
-  cardSize.height = cardHeight;
   mediumCardSize.width = Math.round(cardSize.width * 0.85);
   mediumCardSize.height = Math.round(cardSize.height * 0.85);
   miniCardSize.width = Math.round(cardSize.width * 0.75);
