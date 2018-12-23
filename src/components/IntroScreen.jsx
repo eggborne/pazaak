@@ -40,32 +40,29 @@ class IntroScreen extends React.PureComponent {
           display: flex;
           flex-direction: column;
           width: 66vw;
+          background-color: rgba(0, 0, 0, 0.1);
+          border-radius: 0.5rem 0.5rem 0 0;
         }
         .intro-button {
-          margin-bottom: 2vh;
           flex-grow: 1;
           display: flex;
           justify-content: center;
           align-items: center;
-          min-width: 66vw;
-          max-width: 66vw;
+          min-width: 64vw;
           max-height: 12vh;
           border-radius: 0.5rem;
+          margin-top: 1vh;
+          margin-bottom: 1vh;
         }
         .small-intro-button {
-          min-width: 33vw;
-          max-width: 33vw;
-          margin: 0;
+          min-width: 34vw;
+          max-width: 34vw;
         }
         #small-button-area {
-          height: 9vh;
           width: 72vw;
           display: inline-flex;
-          align-items: stretch;
           justify-content: space-between;
-          margin-top: 1rem;
-          margin-bottom: 1rem;
-
+          margin-top: 1vh;
         }
         .input-label {
           color: var(--main-text-color);
@@ -74,9 +71,6 @@ class IntroScreen extends React.PureComponent {
           padding: 0.5rem;
           background-color: rgba(0, 0, 0, 0.2);
           border-radius: 0.5rem 0.5rem 0 0;
-        }
-        #avatar-label {
-          border-radius: 0;
         }
         form {
           display: flex;
@@ -95,14 +89,14 @@ class IntroScreen extends React.PureComponent {
           -moz-user-select: text;     /* Firefox all */
           -ms-user-select: text;      /* IE 10+ */
           user-select: text;
-          width: 100%;
+          margin: 1rem;
         }
         #avatar-area {
           box-sizing: border-box;
-          padding: 1rem;
+          padding: 0;
           width:  ${avatarPlusBorderSize * 3.5}px;
-          min-width: 72vw;
-          max-width: 95vw;
+          min-width: 50vw;
+          max-width: 72vw;
           background-color: rgba(0, 0, 0, 0.2);
           border-radius: 0.5rem;
           display: flex;
@@ -110,9 +104,7 @@ class IntroScreen extends React.PureComponent {
         }
         #avatar-select-area {
           height: ${avatarPlusBorderSize}px;
-        }
-        #avatar-select-grid {
-          height: 100%;
+          margin: 1vh;
         }
         #avatar-row {
           width: 100%;
@@ -130,7 +122,7 @@ class IntroScreen extends React.PureComponent {
           background-repeat: no-repeat;
           opacity: 0.5;
           border-radius: 0.5rem;
-          transform: scale(0.8);
+          transform: scale(0.85);
           -webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
           filter: grayscale(100%);
           min-width: ${avatarPlusBorderSize}px;
@@ -148,14 +140,12 @@ class IntroScreen extends React.PureComponent {
           pointer-events: none;
         }
         #start-button {
-          min-height: 15vh;
-          margin-top: 1vh;
-          margin-bottom: 0;
-          align-self: center;
+          min-height: 14vh;
+          margin: 0 1rem 1rem 1rem;          
         }
         #hall-of-fame-button {
+          min-width: 72vw;
           color: var(--special-button-text-color);
-          margin-bottom: 0;
         }
         #start-button > div {
           animation: throb 1000ms infinite;
@@ -173,14 +163,13 @@ class IntroScreen extends React.PureComponent {
         }
       `}</style>
         <form id='intro-form' onSubmit={this.props.onClickStart}>
+
           <div className='input-area'>
-            <div className='input-label'>
-              Enter name
+            <div className='input-label'>Enter name</div>
             <input name='player-name' id='player-name-input' placeholder='Player'></input>
-            </div>
-            <div id='avatar-label' className='input-label'>Select avatar</div>
           </div>
           <div id='avatar-area'>
+            <div id='avatar-label' className='input-label'>Select avatar</div>
             <div id='avatar-select-area'>
               <span id='avatar-row'>
                 &nbsp;
