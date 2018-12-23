@@ -1,14 +1,11 @@
 import { randomInt } from './util';
 const plusMinusSymbol = '±';
+
 export function makeOpponentMove(app) {
 
   /**
    * WORKING:
    * user stands, ai draws until over 20
-   * 
-   * 
-   * 
-   * 
    * 
    * Stands at 17
    * - only if userTotal < 17
@@ -34,39 +31,15 @@ export function makeOpponentMove(app) {
     let stood = false;
     let newTotal;
     let extraDelay = 0;
+    let acceptTie = randomInt(0, 10) < app.characters[app.state.CPUOpponent].strategy.tie.chanceToBreak;
+    let standAt = app.characters[app.state.CPUOpponent].strategy.stand.standAt;
     /**
      * Done whether user is standing or not
      * 
      * Establishes highestMinusValue and safeToDraw
      */
-    let highestMinusValue = 0;
-    let safeToDraw = true;
-    let acceptTie = randomInt(0, 10) < app.characters[app.state.CPUOpponent].strategy.tie.chanceToBreak;
-    let standAt = app.characters[app.state.CPUOpponent].strategy.stand.standAt;
-    // console.warn(`acceptTie: ${acceptTie}, standAt: ${standAt}`);
-    for (let i = 0; i < app.state.opponentHand.length; i++) {
-      let card = app.state.opponentHand[i];
-      // console.log(`checking hand card ${i}: #card-${card.id} ${card.value} ${card.type}`);
-      if (card.type === '-' || card.type === '±') {
-        if (Math.abs(card.value) > highestMinusValue) {
-          highestMinusValue = Math.abs(card.value);
-        }
-      }
-    }
-    console.log('highest value minus card is', highestMinusValue);
-
     // decide if it's safe to draw, with the minus card in mind
-    if ((app.state.opponentTotal - highestMinusValue) <= 14) {
-      // safe to draw!
-      safeToDraw = true;
-      console.warn(`CPU decided it's safe to draw at total ${app.state.opponentTotal}, with minus potential of ${highestMinusValue}`);
-
-    } else {
-      safeToDraw = false;
-      console.warn(`CPU decided it's UNSAFE to draw at total ${app.state.opponentTotal}, with minus potential of ${highestMinusValue}`);
-
-    }
-
+    let safeToDraw = isSafeToDraw(app, getHighestMinusValue(app));
     /**
      * 
      */
@@ -75,7 +48,7 @@ export function makeOpponentMove(app) {
 
       // USER STANDING ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-      console.warn('Player stood! Beginning CPU standoff sequence........ totals', app.state.userTotal, app.state.opponentTotal);
+      console.warn('Player standing! Beginning CPU standoff sequence........ totals', app.state.userTotal, app.state.opponentTotal);
 
       if (app.state.userTotal > 20 || app.state.userTotal < app.state.opponentTotal) {
         // cpu already wins, just needs to stand
@@ -379,7 +352,7 @@ export function makeOpponentMove(app) {
     //must delay or app.state.opponentTotal is wrong in changeTurn()!
     if (stood) {
       if (app.state.turnStatus.user.standing) {
-        console.error('BOTH STANDING! detemining winner...')
+        console.error('BOTH STANDING! determining winner...')
         // both standing
         setTimeout(() => {
           app.determineWinnerFromTotal();
@@ -392,7 +365,7 @@ export function makeOpponentMove(app) {
         }, app.state.options.moveIndicatorTime + extraDelay);
       }
     } else {
-      console.error('CPU ENDED TURN!');
+      console.error('CPU ENDED TURN! stood', stood);
       if (app.state.turnStatus.user.standing) {
         console.error('CPU ENDED TURN WHILE USER STANDING??');
       } else {
@@ -406,7 +379,35 @@ export function makeOpponentMove(app) {
   }, app.state.options.opponentMoveWaitTime);
 }
 
+function getHighestMinusValue(app) {
+  // returns value only
+  let highest = 0;
+  for (let i = 0; i < app.state.opponentHand.length; i++) {
+    let card = app.state.opponentHand[i];
+    console.log(`checking hand card ${i}: #card-${card.id} ${card.value} ${card.type}`);
+    if (card.type === '-' || card.type === plusMinusSymbol) {
+      if (Math.abs(card.value) > highest) {
+        highest = Math.abs(card.value);
+      }
+    }
+  }
+  return highest;
+}
+function isSafeToDraw(app, highestMinusValue) {
+  // returns boolean
+  let safe = false;
+  if ((app.state.opponentTotal - highestMinusValue) <= 14) {
+    // safe to draw!
+    safe = true;
+    console.warn(`CPU decided it's safe to draw at total ${app.state.opponentTotal}, with minus potential of ${highestMinusValue}`);
+  } else {
+    console.warn(`CPU decided it's UNSAFE to draw at total ${app.state.opponentTotal}, with minus potential of ${highestMinusValue}`);
+  }
+  return safe;
+}
+
 function standCPU(app) {
+  console.warn('calling standCPU')
   let turnStatusCopy = Object.assign({}, app.state.turnStatus);
   turnStatusCopy.opponent.standing = true;
   app.setState({
