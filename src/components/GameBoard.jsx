@@ -8,7 +8,7 @@ import PlayerPortrait from './PlayerPortrait';
 
 function GameBoard(props) {
   let startTime = window.performance.now();
-  let spriteIndex = props.opponentNames.indexOf(props.CPUOpponent);
+  let opponentSpriteIndex = props.opponentNames.indexOf(props.CPUOpponent);
   let userWins = ['', '', ''];
   let opponentWins = ['', '', ''];
   if (props.wins.user === 1) {
@@ -77,10 +77,9 @@ function GameBoard(props) {
     userHand.push(<Card key={i} id={card.id} size={handCardSize} value={card.value} type={card.type}
       onClickCard={props.onClickCard} />);
   });
-  let handGridwidth = handCardSize.width + (parseFloat(handCardSize.borderSize) * 3);
-  let handGridHeight = handCardSize.height + (parseFloat(handCardSize.borderSize) * 3);
+  let handGridwidth = handCardSize.width + Math.round(parseFloat(handCardSize.borderSize) * 3);
+  let handGridHeight = handCardSize.height + Math.round(parseFloat(handCardSize.borderSize) * 3);
   let portraitSize = Math.round(parseInt(handCardSize.height * 0.9));
-  // console.warn('GameBoard pre-return took', (window.performance.now() - startTime));
   return (
     <div style={props.style} id='game-board'>
       <style jsx>{`
@@ -90,13 +89,22 @@ function GameBoard(props) {
           justify-content: space-between;
           transition: opacity 400ms ease;
           flex-grow: 1;
+          background: transparent;
         }
         .player-area {
           display: inline-flex;
-          align-items: center;
+          align-items: flex-end;
           justify-content: space-around;
           box-sizing: border-box;
-          flex-grow: 1;
+          flex-grow: 2;
+        }
+        .player-hand-area {
+          box-sizing: border-box;
+          width: 100%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-grow: 0;
         }
         #user-area, #user-hand {
           background-color: var(--trans-blue-bg-color);
@@ -104,43 +112,33 @@ function GameBoard(props) {
         #opponent-area, #opponent-hand {
           background-color: var(--trans-red-bg-color);
         }
+        #opponent-area {
+          border-bottom: ${gridWidth*0.025}px outset rgba(0, 0, 0, 0.2);
+        }
+        #user-area {
+          border-top: ${gridWidth*0.025}px outset rgba(0, 0, 0, 0.15);
+        }
+        #opponent-area {
+          border-bottom: ${gridWidth*0.02}px solid #555;
+        }
+        #user-area {
+          border-top: ${gridWidth*0.02}px solid #444;
+        }
         .deal-grid {
           box-sizing: border-box;
           display: grid;
           grid-template-columns: ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px;
           grid-template-rows: ${gridHeight}px ${gridHeight}px;
-          justify-items: center;
           grid-column-gap: 1vw;
           grid-row-gap: 0.5vh;
-          margin-top: 1vh;
-          margin-bottom: 1vh;
+          align-self: center;
         }
         .player-cards {
           display: grid;
           grid-template-columns: ${handGridwidth}px ${handGridwidth}px ${handGridwidth}px ${(handGridwidth)}px;
           grid-template-rows: ${handGridHeight}px;
-          align-self: center;
-          justify-content: center;
         }
-        {/* .player-hand-area {
-          box-sizing: border-box;
-          width: 100%;
-          display: grid;
-          grid-template-columns: 1fr auto 1fr;
-          justify-items: center;
-          align-self: center;
-          align-items: center;
-          flex-grow: 1;
-          background: green;
-        } */}
-        .player-hand-area {
-          box-sizing: border-box;
-          width: 100%;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          flex-grow: 2;
-        }
+        
         .player-hand-area > div:nth-child(1) {
           
         }
@@ -290,7 +288,7 @@ function GameBoard(props) {
       <MoveIndicator />
       <div id='opponent-hand' className='player-hand-area'>
         <div className='player-portrait-area'>
-          <PlayerPortrait size={portraitSize} source={props.portraitSources.opponent} spriteIndex={spriteIndex} displayName={props.playerNames.opponent} type={'mini'} />
+          <PlayerPortrait size={portraitSize} source={props.portraitSources.opponent} spriteIndex={opponentSpriteIndex} displayName={props.playerNames.opponent} type={'mini'} />
         </div>
         <div id='opponent-cards' className='player-cards'>
           <div>{opponentHand[0]}</div>
@@ -302,59 +300,60 @@ function GameBoard(props) {
           <div id='opponent-turn-indicator' className={`turn-indicator ${opponentTurn}`}></div>
         </div>
       </div>
-      <div id='grids'>
-        <div id='opponent-area' className='player-area'>
-          <div id='opponent-grid' className='deal-grid'>
-            <div>{opponentGrid[0]}</div>
-            <div>{opponentGrid[1]}</div>
-            <div>{opponentGrid[2]}</div>
-            <div>{opponentGrid[3]}</div>
-            <div className='stats-area'>
-              <div className='total-display'>
-                <div id='opponent-total-outline' className='total-outline'>
-                  <div id='opponent-total'>{props.totals.opponent}</div>
-                </div>
-              </div>
-              <div className='win-symbol-area'>
-                <div className={`win-symbol-bg ${opponentWins[0]}`}><div className={`win-symbol ${opponentWins[0]}`}></div></div>
-                <div className={`win-symbol-bg ${opponentWins[1]}`}><div className={`win-symbol ${opponentWins[1]}`}></div></div>
-                <div className={`win-symbol-bg ${opponentWins[2]}`}><div className={`win-symbol ${opponentWins[2]}`}></div></div>
+      {/* <div id='grids'> */}
+        
+      <div id='opponent-area' className='player-area'>
+        <div id='opponent-grid' className='deal-grid'>
+          <div>{opponentGrid[0]}</div>
+          <div>{opponentGrid[1]}</div>
+          <div>{opponentGrid[2]}</div>
+          <div>{opponentGrid[3]}</div>
+          <div className='stats-area'>
+            <div className='total-display'>
+              <div id='opponent-total-outline' className='total-outline'>
+                <div id='opponent-total'>{props.totals.opponent}</div>
               </div>
             </div>
-            <div>{opponentGrid[4]}</div>
-            <div>{opponentGrid[5]}</div>
-            <div>{opponentGrid[6]}</div>
-            <div>{opponentGrid[7]}</div>
-            <div className='ninth-card'>{opponentGrid[8]}</div>
-          </div>
-        </div>
-        <div id='user-area' className='player-area'>
-          <div id='user-grid' className='deal-grid'>
-            <div>{userGrid[0]}</div>
-            <div>{userGrid[1]}</div>
-            <div>{userGrid[2]}</div>
-            <div>{userGrid[3]}</div>
-            <div className='stats-area'>
-              <div className='total-display'>
-                <div id='user-total-outline' className='total-outline'>
-                  <div id='user-total'>{props.totals.user}</div>
-                </div>
-              </div>
-              <div className='win-symbol-area'>
-                <div className={`win-symbol-bg ${userWins[0]}`}><div className={`win-symbol ${userWins[0]}`}></div></div>
-                <div className={`win-symbol-bg ${userWins[1]}`}><div className={`win-symbol ${userWins[1]}`}></div></div>
-                <div className={`win-symbol-bg ${userWins[2]}`}><div className={`win-symbol ${userWins[2]}`}></div></div>
-              </div>
+            <div className='win-symbol-area'>
+              <div className={`win-symbol-bg ${opponentWins[0]}`}><div className={`win-symbol ${opponentWins[0]}`}></div></div>
+              <div className={`win-symbol-bg ${opponentWins[1]}`}><div className={`win-symbol ${opponentWins[1]}`}></div></div>
+              <div className={`win-symbol-bg ${opponentWins[2]}`}><div className={`win-symbol ${opponentWins[2]}`}></div></div>
             </div>
-            <div>{userGrid[4]}</div>
-            <div>{userGrid[5]}</div>
-            <div>{userGrid[6]}</div>
-            <div>{userGrid[7]}</div>
-            <div className='ninth-card'>{userGrid[8]}</div>
           </div>
-
+          <div>{opponentGrid[4]}</div>
+          <div>{opponentGrid[5]}</div>
+          <div>{opponentGrid[6]}</div>
+          <div>{opponentGrid[7]}</div>
+          <div className='ninth-card'>{opponentGrid[8]}</div>
         </div>
       </div>
+      <div id='user-area' className='player-area'>
+        <div id='user-grid' className='deal-grid'>
+          <div>{userGrid[0]}</div>
+          <div>{userGrid[1]}</div>
+          <div>{userGrid[2]}</div>
+          <div>{userGrid[3]}</div>
+          <div className='stats-area'>
+            <div className='total-display'>
+              <div id='user-total-outline' className='total-outline'>
+                <div id='user-total'>{props.totals.user}</div>
+              </div>
+            </div>
+            <div className='win-symbol-area'>
+              <div className={`win-symbol-bg ${userWins[0]}`}><div className={`win-symbol ${userWins[0]}`}></div></div>
+              <div className={`win-symbol-bg ${userWins[1]}`}><div className={`win-symbol ${userWins[1]}`}></div></div>
+              <div className={`win-symbol-bg ${userWins[2]}`}><div className={`win-symbol ${userWins[2]}`}></div></div>
+            </div>
+          </div>
+          <div>{userGrid[4]}</div>
+          <div>{userGrid[5]}</div>
+          <div>{userGrid[6]}</div>
+          <div>{userGrid[7]}</div>
+          <div className='ninth-card'>{userGrid[8]}</div>
+        </div>
+      </div>
+
+      {/* </div> */}
       <div id='user-hand' className='player-hand-area'>
         <div className='player-portrait-area'>
           <PlayerPortrait size={portraitSize} source={props.portraitSources.user} spriteIndex={props.avatarIndex} displayName={props.playerNames.user} type={'mini'} />
