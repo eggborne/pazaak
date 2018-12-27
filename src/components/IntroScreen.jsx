@@ -19,22 +19,31 @@ class IntroScreen extends React.PureComponent {
 
   render() {
     let avatarSize = this.state.avatarSize;
+    let avatarSource = this.props.userAvatarSource;
     let avatarBorderSize = this.state.avatarBorderSize;
     let avatarPlusBorderSize = avatarSize + avatarBorderSize;
     return (
       <div style={this.props.style} id='intro-screen'>
         <style jsx>{`
         #intro-screen {
-          position: absolute;
+          //position: absolute;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
           flex-grow: 1;
           opacity: 0;
           width: 100%;
-          height: 100%;
-          transition: opacity 800ms ease; 
+          //height: 100%;
+          
+          transition: opacity 800ms ease;
+        }
+        #intro-screen-body {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          flex-grow: 2;
+          justify-content: center;
         }
         .input-area {
           display: flex;
@@ -49,6 +58,7 @@ class IntroScreen extends React.PureComponent {
           justify-content: center;
           align-items: center;
           min-width: 64vw;
+          min-height: 12vh;
           max-height: 12vh;
           border-radius: 0.5rem;
           margin-top: 1vh;
@@ -57,6 +67,8 @@ class IntroScreen extends React.PureComponent {
         .small-intro-button {
           min-width: 34vw;
           max-width: 34vw;
+          min-height: 9vh;
+          max-height: 9vh;
         }
         #small-button-area {
           width: 72vw;
@@ -111,15 +123,16 @@ class IntroScreen extends React.PureComponent {
           display: flex;
           justify-content: flex-start;
           overflow-x: scroll;
-          vertical-align: middle;
+          //vertical-align: middle;
         }
         .shadowed-box {
           box-shadow: 0 0 ${avatarBorderSize + 2}px ${avatarBorderSize}px #333;
         }
         .avatar-thumb {
-          background-image: url(https://pazaak.online/assets/images/avatarsheet.jpg);
+          background-image: url(${avatarSource});
           background-size: cover;
           background-repeat: no-repeat;
+          background-position-y: center;
           opacity: 0.5;
           border-radius: 0.5rem;
           transform: scale(0.85);
@@ -140,8 +153,11 @@ class IntroScreen extends React.PureComponent {
           pointer-events: none;
         }
         #start-button {
-          min-height: 14vh;
-          margin: 0 1rem 1rem 1rem;          
+          min-width: 68vw;
+          max-width: 68vw;
+          min-height: 12vh;
+          margin: 0 1rem 1rem 1rem;
+          align-self: center;      
         }
         #hall-of-fame-button {
           min-width: 72vw;
@@ -149,6 +165,10 @@ class IntroScreen extends React.PureComponent {
         }
         #start-button > div {
           animation: throb 1000ms infinite;
+        }
+        .user-avatar-area {
+          min-width: 0;
+          max-width: 100%;
         }
         .keyboard-showing-start-button {
           max-height: 20vh;
@@ -161,36 +181,43 @@ class IntroScreen extends React.PureComponent {
             transform: scale(0.95);
           }
         }
+        @media (orientation: portrait) {
+          #avatar-area {
+            min-width: 90vw;
+            max-width: 90vw;
+          }
+        }
       `}</style>
-        <form id='intro-form' onSubmit={this.props.onClickStart}>
-
-          <div className='input-area'>
-            <div className='input-label'>Enter name</div>
-            <input name='player-name' id='player-name-input' placeholder='Player'></input>
-          </div>
-          <div id='avatar-area'>
-            <div id='avatar-label' className='input-label'>Select avatar</div>
-            <div id='avatar-select-area'>
-              <span id='avatar-row'>
-                &nbsp;
-                {[1, 2, 3, 4, 5, 6].map((xPos, i) => {
-                  let selected;
-                  if (i === this.props.avatarIndex) {
-                    selected = 'selected-avatar';
-                  }
-                  return <div style={{ backgroundPositionX: `${(-i * (avatarSize + avatarBorderSize))}px` }} onClick={this.handleAvatarClick} key={i} id={`avatar-thumb-${i}`} className={`avatar-thumb shadowed-box ${selected}`}></div>;
-                })}
-                &nbsp;
-            </span>
+        <div id='intro-screen-body'>
+          <form onSubmit={(event) => event.preventDefault()} action='https://www.eggborne.com/scripts/upload.php' method='post' id='avatar-form' encType='multipart/form-data'>
+            <div className='input-area'>
+              <div className='input-label'>Enter name</div>
+              <input name='player-name' id='player-name-input' placeholder='Player'></input>
             </div>
-            <button type='submit' className='intro-button' id='start-button'><div className='button-label'>Play!</div></button>
+            <div id='avatar-area'>
+              <div id='avatar-label' className='input-label'>Select avatar</div>
+              <div id='avatar-select-area'>
+                <span id='avatar-row'>
+                  &nbsp;
+                  {[0, 1, 2, 3, 4, 5].map((xPos, i) => {
+                    let selected = '';
+                    if (this.props.userAvatarIndex === i) {
+                      selected = 'selected-avatar';
+                    }
+                    return <div style={{ backgroundPositionX: `${(-i * (avatarSize + avatarBorderSize))}px` }} onClick={this.handleAvatarClick} key={i} id={`avatar-thumb-${i}`} className={`avatar-thumb shadowed-box ${selected}`}></div>;
+                  })}
+                  &nbsp;
+                </span>
+              </div>
+              <button onClick={this.props.onClickStart} className='intro-button' id='start-button'><div className='button-label'>Play!</div></button>
+            </div>
+          </form>
+          <div id='small-button-area'>
+            <button onClick={this.props.onClickOptions} className='intro-button small-intro-button' id='options-button'><div className='button-label'>Options</div></button>
+            <button onClick={this.props.onClickHow} className='intro-button small-intro-button' id='how-button'><div className='button-label'>How to Play</div></button>
           </div>
-        </form>
-        <div id='small-button-area'>
-          <button onClick={this.props.onClickOptions} className='intro-button small-intro-button' id='options-button'><div className='button-label'>Options</div></button>
-          <button onClick={this.props.onClickHow} className='intro-button small-intro-button' id='how-button'><div className='button-label'>How to Play</div></button>
+          <button onClick={this.props.onClickHallOfFame} className='intro-button' id='hall-of-fame-button'><div className='button-label'>Hall of Fame</div></button>
         </div>
-        <button onClick={this.props.onClickHallOfFame} className='intro-button' id='hall-of-fame-button'><div className='button-label'>Hall of Fame</div></button>
         <Footer />
       </div >
     );
@@ -200,14 +227,15 @@ IntroScreen.propTypes = {
   style: PropTypes.object,
   cardSize: PropTypes.object,
   avatars: PropTypes.array,
-  avatarIndex: PropTypes.number,
+  userAvatarSource: PropTypes.string,
+  userAvatarIndex: PropTypes.number,
   onClickAvatar: PropTypes.func,
   onClickStart: PropTypes.func,
   onClickHow: PropTypes.func,
   onClickOptions: PropTypes.func,
   onClickHallOfFame: PropTypes.func,
   onUnfocusNameInput: PropTypes.func,
-  onFocusNameInput: PropTypes.func
+  onFocusNameInput: PropTypes.func,
 };
 
 export default IntroScreen;
