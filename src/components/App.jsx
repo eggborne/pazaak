@@ -1,7 +1,6 @@
 import React from 'react';
 import Header from './Header';
 import ControlFooter from './ControlFooter';
-
 import IntroScreen from './IntroScreen';
 import InstructionsScreen from './InstructionsScreen';
 import OptionsScreen from './OptionsScreen';
@@ -11,6 +10,7 @@ import GameBoard from './GameBoard';
 import HamburgerMenu from './HamburgerMenu';
 import ResultModal from './ResultModal';
 import OpponentSelectScreen from './OpponentSelectScreen';
+import UserInfoPanel from './UserInfoPanel';
 let Util = require('../scripts/util');
 let DB = require('../scripts/db');
 let AI = require('../scripts/ai');
@@ -23,10 +23,6 @@ let initialSize = {
 let portraitMode = false;
 if (window.innerWidth < window.innerHeight) {
   portraitMode = true;
-}
-let portraitSources = {
-  user: 'https://pazaak.online/assets/images/avatarsheet.jpg',
-  opponent: 'https://pazaak.online/assets/images/opponentssheet.jpg'
 }
 const plusMinusSymbol = '±';
 
@@ -80,7 +76,11 @@ class App extends React.PureComponent {
       turn: 'user',
       userStatus: {
         loggedInAs: '',
-        avatarIndex: 0,
+        cookieId: -1,
+        initialValues: {
+          avatarIndex: 0
+        },
+        avatarIndex: 0, // if -1, custom
         totalSetWins: 0,
         totalRoundWins: 0,
         totalSetsPlayed: 0,
@@ -90,6 +90,10 @@ class App extends React.PureComponent {
         grid: { user: [], opponent: [] },
         total: { user: [], opponent: [] },
         wins: { user: [], opponent: [] },
+      },
+      portraitSources: {
+        user: 'https://pazaak.online/assets/images/avatarsheet.jpg',
+        opponent: 'https://pazaak.online/assets/images/opponentssheet.jpg'
       },
       turnStatus: {
         user: {
@@ -189,33 +193,40 @@ class App extends React.PureComponent {
     this.determineWinnerFromTotal = this.determineWinnerFromTotal.bind(this);
     this.handleClickHamburgerQuit = this.handleClickHamburgerQuit.bind(this);
     this.handleFullscreenChange = this.handleFullscreenChange.bind(this);
+    this.handleClickUserInfo = this.handleClickUserInfo.bind(this);
+    this.handleClickLogOut = this.handleClickLogOut.bind(this);
+    this.handleClickSignIn = this.handleClickSignIn.bind(this);
   }
 
   componentDidMount() {
     let startTime = window.performance.now();
-    Util.checkCookie();
+    Util.checkCookie(this);
     Util.sizeElements(this, true);
     this.getHighScores();
-
     window.addEventListener('fullscreenchange', this.handleFullscreenChange);
     window.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('msfullscreenchange', this.handleFullscreenChange);
     if (portraitMode) {
-      document.getElementById('player-name-input').onfocus = () => {
-        document.getElementById('intro-screen').style.justifyContent = 'flex-start';
-        document.getElementById('intro-screen').style.marginTop = '4rem';
-      }
-      document.getElementById('player-name-input').onblur = () => {
-        document.getElementById('intro-screen').style.justifyContent = 'center';
-        document.getElementById('intro-screen').style.marginTop = '0';
-      }
+      // document.getElementById('player-name-input').onfocus = () => {
+      //   document.getElementById('intro-screen').style.justifyContent = 'flex-start';
+      //   document.getElementById('intro-screen').style.marginTop = '4rem';
+      // };
+      // document.getElementById('player-name-input').onblur = () => {
+      //   document.getElementById('intro-screen').style.justifyContent = 'center';
+      //   document.getElementById('intro-screen').style.marginTop = '0';
+      // };
     }
-
-    let endTime = window.performance.now();
-    console.error('componentDidMount activities done in', (endTime - startTime));
+    // let newDefeated = ['The Emperor', 'Jar Jar Binks'];
+    // DB.updateCPUDefeated('Donkey Schlong', JSON.stringify(newDefeated)).then((response) => {
+    //   DB.getScores().then((response) => {
+    //     console.log(JSON.parse(response.data[0].cpuDefeated));
+    //   })
+    // });
+    console.warn('App.componentDidMount activities done in', (window.performance.now() - startTime));
 
   }
+ 
   handleFullscreenChange() {
     setTimeout(() => {
       let newSizes = Util.getCardSizes();
@@ -225,12 +236,11 @@ class App extends React.PureComponent {
       let readyToResizeContents = (isFull && fullHeightDiff < 0 && cardHeightDiff) || (!isFull && fullHeightDiff > 0 && cardHeightDiff);
       initialSize = { width: window.innerWidth, height: window.innerHeight };
       if (readyToResizeContents) {
-        newSizes = Util.getCardSizes();
         this.setState({
           cardSizes: newSizes
         }, () => {
           Util.sizeElements(this);
-          document.getElementById('container').style.backgroundColor = 'green';
+          //document.getElementById('container').style.backgroundColor = 'green';
         });
       } else {
         // try again in another 500ms
@@ -272,38 +282,16 @@ class App extends React.PureComponent {
 
   getHighScores() {
     DB.getScores().then((response) => {
-      let scoreArray = response.data;
+      let playerScoreArray = response.data;
       if (!response.data) {
-        scoreArray = [];
-      }
-      this.setState({
-        highScores: scoreArray
-      });
-      // this.highScores = scoreArray;
-    });
-  }
-
-  evaluatePlayerName(playerName) {
-    /**
-     * Loads player data into this.state.userStatus from database if found
-     * OR:
-     * - sets a new cookie for user
-     * - saves the new player name in DB
-     */
-    DB.getScoresForPlayer(playerName).then((response) => {
-      let userStatusCopy = Object.assign({}, this.state.userStatus);
-      if (response.data) {
-        let playerObj = response.data[0];
-        userStatusCopy.loggedInAs = playerObj.playerName;
-        userStatusCopy.totalSetWins = playerObj.setWins;
-        userStatusCopy.totalRoundWins = playerObj.roundWins;
+        playerScoreArray = [];
       } else {
-        userStatusCopy.loggedInAs = playerName;
-        Util.setCookie('username', playerName, 365);
-        DB.saveUser(playerName);
+        playerScoreArray.map((playerScore, i) => {
+          playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated);
+        });
       }
       this.setState({
-        userStatus: userStatusCopy
+        highScores: playerScoreArray
       });
     });
   }
@@ -397,6 +385,37 @@ class App extends React.PureComponent {
     });
     return newCard.value;
   }
+  handleClickLogOut() {
+    // setting time limit to 0 destroys it?
+    Util.setCookie('username', `${this.state.userStatus.loggedInAs}-${this.state.userStatus.cookieId}`, 0);
+    console.error('Cookie destroyed!');
+    let userStatusCopy = Object.assign({}, this.state.userStatus);
+    userStatusCopy = {
+      loggedInAs: '',
+      cookieId: -1,
+      initialValues: {
+        avatarIndex: 0
+      },
+      avatarIndex: 0, // if -1, custom
+      totalSetWins: 0,
+      totalRoundWins: 0,
+      totalSetsPlayed: 0,
+      totalRoundsPlayed: 0
+    };
+    this.setState({
+      userStatus: userStatusCopy,
+      phase: 'splashScreen'
+    }, () => {
+      this.handleClickUserInfo();
+    });
+  }
+  handleClickSignIn() {
+    this.setState({
+      phase: 'splashScreen'
+    }, () => {
+      this.handleClickUserInfo();
+    });
+  }
   handleToggleOption(event) {
     let changeState = true;
     let el = event.target;
@@ -472,23 +491,108 @@ class App extends React.PureComponent {
       });
     }
   }
+
+  evaluatePlayerName(enteredName, uniqueId) {
+    DB.getDataForPlayer(enteredName).then((response) => {
+      let userStatusCopy = Object.assign({}, this.state.userStatus);
+      if (response.data) {
+        let playerIndex = 0;
+        if (uniqueId) {
+          // we're checking a cookie
+          response.data.map((entry, i) => {
+            if (entry.id === uniqueId) {
+              playerIndex = i;
+            }
+          });
+        } else {
+          // it's a user-entered name
+
+        }
+        let playerObj = response.data[playerIndex];
+        console.error(`Logging in player as ${playerObj.playerName}, highlighting avatar ${playerObj.avatarIndex} and scrolling into view.`);
+        userStatusCopy.loggedInAs = playerObj.playerName;
+
+        if (playerObj.avatarIndex) {
+          userStatusCopy.avatarIndex = parseInt(playerObj.avatarIndex);
+          if (userStatusCopy.avatarIndex > 0) {
+            setTimeout(() => {
+              document.getElementById(`avatar-thumb-${playerObj.avatarIndex}`).scrollIntoView({behavior: 'smooth', inline: 'center'});
+              // document.getElementById('avatar-row').scrollBy(this.state.cardSizes.cardSize.height, 0, 'smooth');
+
+            }, 200);
+          }
+        } else {
+          userStatusCopy.avatarIndex = 0;
+        }
+        console.warn('Setting state.userStatus.initialValues.avatarIndex to', userStatusCopy.avatarIndex);
+        userStatusCopy.initialValues.avatarIndex = userStatusCopy.avatarIndex;
+        this.setState({
+          userStatus: userStatusCopy
+        });
+      } else {
+        console.error(`No entry in DB for ${enteredName}.`);
+        DB.saveUser(enteredName, this.state.userStatus.avatarIndex).then((response) => {
+          DB.getUserId(enteredName).then((response) => {
+            let uniqueId = response.data[0].id;
+            console.error(`Setting new cookie for ${enteredName}-${uniqueId}`);
+            Util.setCookie('username', `${enteredName}-${uniqueId}`, 365);
+            userStatusCopy.loggedInAs = enteredName;
+            userStatusCopy.cookieId = parseInt(uniqueId);
+            this.setState({
+              userStatus: userStatusCopy
+            });
+          });
+
+        });
+      }
+
+    });
+  }
+
+  handleClickUserInfo() {
+    let userPanel = document.getElementById('user-info-panel');
+    if (userPanel.classList.contains('user-info-panel-off')) {
+      userPanel.classList.remove('user-info-panel-off');
+      document.getElementById('header').classList.add('no-bottom-border');
+    } else {
+      userPanel.classList.add('user-info-panel-off');
+      setTimeout(() => {
+        document.getElementById('header').classList.remove('no-bottom-border');
+      }, 350);
+    }
+  }
+
   handleClickStart(event) {
     event.preventDefault();
     // this.playSound('click');
-    let playerName = document.getElementById('player-name-input').value;
-    if (!playerName.length) {
-      playerName = 'Player';
+    let enteredName = document.getElementById('player-name-input').value;
+    if (!enteredName.length) {
+      enteredName = 'Player';
     } else {
-      this.evaluatePlayerName(playerName);
+      if (!this.state.userStatus.loggedInAs) {
+        // no entry in DB
+        this.evaluatePlayerName(enteredName);
+
+      } else {
+        console.error('Clicked Start while logged in as', this.state.userStatus.loggedInAs);
+        if (enteredName !== this.state.userStatus.loggedInAs) {
+          console.error('ENTERED DIFFERENT NAME!', enteredName);
+          this.evaluatePlayerName(enteredName);
+
+        }
+        if (this.state.userStatus.avatarIndex !== this.state.userStatus.initialValues.avatarIndex) {
+          console.error('CHANGED AVATAR!', this.state.userStatus.avatarIndex);
+          DB.saveUserAvatarIndex(this.state.userStatus.loggedInAs, this.state.userStatus.avatarIndex);
+        }
+      }
+
     }
     let namesCopy = this.state.playerNames;
-    namesCopy.user = playerName;
-    setTimeout(() => {
-      this.setState({
-        playerNames: namesCopy,
-        phase: 'selectingOpponent'
-      });
-    }, 0);
+    namesCopy.user = enteredName;
+    this.setState({
+      playerNames: namesCopy,
+      phase: 'selectingOpponent'
+    });
   }
   handleClickSwitchSign(event) {
     event.preventDefault();
@@ -524,7 +628,7 @@ class App extends React.PureComponent {
     });
     setTimeout(() => {
       this.dealToPlayerGrid(this.state.turn);
-    }, this.state.options.turnInterval)
+    }, this.state.options.turnInterval);
   }
   handleClickBack(event, newPhase) {
     // this.playSound('click');
@@ -635,7 +739,7 @@ class App extends React.PureComponent {
           if (!this.arrayContainsCardWithId(this.state.userDeck, event.target.id)) {
             let deckCopy = this.state.userDeck.slice();
             let newCard = { id: this.state.idCount, value: value, type: type, baseId: event.target.id };
-            deckCopy.push(newCard);     
+            deckCopy.push(newCard);
             event.target.style.opacity = 0.1;
             this.setState(prevState => {
               return {
@@ -718,7 +822,6 @@ class App extends React.PureComponent {
     return contains;
   }
   playHandCard(player, cardObject) {
-    console.log('playing card', cardObject)
     this.removeCardFromHand(player, cardObject.id);
     this.addCardtoGrid(player, cardObject.value, cardObject.type);
     this.changeCardTotal(player, this.state[`${player}Total`] + cardObject.value);
@@ -784,7 +887,7 @@ class App extends React.PureComponent {
     return match;
   }
   declareWinner(winner) {
-    console.error('declareWinner()')
+    console.error('declareWinner()');
 
     if (winner !== 'TIE') {
       let newWins = this.state[`${winner}Wins`] + 1;
@@ -803,13 +906,11 @@ class App extends React.PureComponent {
           }
         }
       }
-      console.warn('SETTING WINS TO', winner, newWins)
       this.setState({
         turn: null,
         [`${winner}Wins`]: newWins,
         lastWinner: winner
       }, () => {
-        console.log('aet state and now calling modal')
         this.callResultModal(winner);
         document.getElementById('game-board').style.opacity = 0.3;
       });
@@ -852,7 +953,7 @@ class App extends React.PureComponent {
   }
 
   determineWinnerFromTotal() {
-    console.error('determineWinnerFromTotal()')
+    console.error('determineWinnerFromTotal()');
 
     console.warn(`app.determineWinnerFromTotal is comparing userTotal ${this.state.userTotal} - opponentTotal ${this.state.opponentTotal}`);
     let winner;
@@ -875,7 +976,7 @@ class App extends React.PureComponent {
     }
   }
   changeTurn(newPlayer) {
-    console.error('changeTurn()', newPlayer)
+    console.error('changeTurn()', newPlayer);
     this.playSound('turn');
     if (newPlayer === 'user') {
       if (this.state.turnStatus.opponent.standing) {
@@ -900,16 +1001,16 @@ class App extends React.PureComponent {
             console.warn('opponent under 20');
             if (this.state.userTotal > 20) {
               console.warn('user is over 20! Opponent wins!');
-              this.declareWinner('opponent')
+              this.declareWinner('opponent');
             } else {
-              console.warn('Both players have stood and are <= 20! Comparing scores to determine winner.')
+              console.warn('Both players have stood and are <= 20! Comparing scores to determine winner.');
               this.determineWinnerFromTotal();
             }
           }
         } else {
-          console.error('OPPONENT STANDING, USER STILL IN PLAY!')
+          console.error('OPPONENT STANDING, USER STILL IN PLAY!');
           // OPPONENT STANDING, USER STILL IN PLAY
-          console.warn('swapping turns and dealing card to user after delay', this.state.options.dealWaitTime)
+          console.warn('swapping turns and dealing card to user after delay', this.state.options.dealWaitTime);
           // this.playSound('click');
           let newTurn = this.swapTurn();
           setTimeout(() => {
@@ -920,7 +1021,7 @@ class App extends React.PureComponent {
       } else {
         // OPPONENT IN PLAY
 
-        console.error('OPPONENT STILL IN PLAY')
+        console.error('OPPONENT STILL IN PLAY');
         // see if opponent has losing score
         if (this.state.opponentTotal > 20) {
           console.warn('opponent over 20!');
@@ -978,7 +1079,6 @@ class App extends React.PureComponent {
     });
   }
   callResultModal(winner) {
-    console.error('callResultModal()')
     let bgColor = 'var(--red-bg-color)';
     let title;
     let winnerDisplay = winner;
@@ -1003,16 +1103,12 @@ class App extends React.PureComponent {
     let modal = document.getElementById('result-modal');
     modal.style.backgroundColor = bgColor;
     modal.classList.add('modal-on');
-    let stateTime = window.performance.now();
     this.setState({
       resultMessage: {
         title: title,
         winner: winnerDisplay,
         buttonText: buttonText
       },
-    }, () => {
-      let cbTime = window.performance.now();
-      console.warn('state took', (cbTime - stateTime));
     });
   }
   dismissResultModal() {
@@ -1020,15 +1116,15 @@ class App extends React.PureComponent {
     modal.classList.remove('modal-on');
   }
   handleClickAvatar(event) {
-    document.getElementsByClassName('selected-avatar')[0].classList.remove('selected-avatar');
+    if (document.getElementsByClassName('selected-avatar')[0]) {
+      document.getElementsByClassName('selected-avatar')[0].classList.remove('selected-avatar');
+    }
     event.target.classList.add('selected-avatar');
     let userStatusCopy = Object.assign({}, this.state.userStatus);
-    userStatusCopy.avatarIndex = parseInt(event.target.id.split('-')[2])
-    setTimeout(() => {
-      this.setState({
-        userStatus: userStatusCopy
-      });
-    }, 200)
+    userStatusCopy.avatarIndex = parseInt(event.target.id.split('-')[2]);
+    this.setState({
+      userStatus: userStatusCopy
+    });
   }
   handleClickRandomize(event) {
     event.preventDefault();
@@ -1282,12 +1378,23 @@ class App extends React.PureComponent {
     }
     let endTime = window.performance.now();
     // console.warn('App pre-return activites took', (endTime - startTime));
+    
     return (
       <div id='container'>
-        <Header />
-        <IntroScreen style={introStyle}
-          avatarIndex={this.state.userStatus.avatarIndex}
+        <Header
           cardSize={this.state.cardSizes.cardSize}
+          playerName={this.state.userStatus.loggedInAs}
+          uniqueId={this.state.userStatus.cookieId}
+          portraitSource={this.state.portraitSources.user}
+          avatarIndex={this.state.userStatus.avatarIndex}
+          onClickInfoArea={this.handleClickUserInfo}
+          userStatus={this.state.userStatus}
+          onClickSignIn={this.handleClickSignIn}
+          onClickLogOut={this.handleClickLogOut} />
+        <IntroScreen style={introStyle}
+          cardSize={this.state.cardSizes.cardSize}
+          userAvatarSource={this.state.portraitSources.user}
+          userAvatarIndex={this.state.userStatus.avatarIndex}
           onClickAvatar={this.handleClickAvatar}
           onClickStart={this.handleClickStart}
           onClickHow={this.handleClickHow}
@@ -1309,6 +1416,7 @@ class App extends React.PureComponent {
         {phase === 'showingHallOfFame' &&
           <HallOfFameScreen style={hallOfFameStyle}
             highScores={this.state.highScores}
+            userStatus={this.state.userStatus}
             onClickBack={this.handleClickBack} />
         }
         {phase === 'selectingDeck' &&
@@ -1323,7 +1431,7 @@ class App extends React.PureComponent {
         }
         {(phase === 'selectingOpponent') &&
           <OpponentSelectScreen style={opponentSelectStyle}
-            characters={ this.characters}
+            characters={this.characters}
             opponentSelected={this.state.CPUOpponent}
             cardSize={microCardSize}
             onClickPanel={this.handleClickOpponentPanel}
@@ -1335,7 +1443,7 @@ class App extends React.PureComponent {
           playerNames={this.state.playerNames}
           opponentNames={Object.keys(this.characters)}
           CPUOpponent={this.state.CPUOpponent}
-          portraitSources={portraitSources}
+          portraitSources={this.state.portraitSources}
           avatarIndex={this.state.userStatus.avatarIndex}
           hands={{ user: this.state.userHand, opponent: this.state.opponentHand }}
           grids={{ user: this.state.userGrid, opponent: this.state.opponentGrid }}
@@ -1354,22 +1462,26 @@ class App extends React.PureComponent {
           onClickHamburger={this.handleClickHamburger}
           onClickSwitchSign={this.handleClickSwitchSign}
         />
+        <UserInfoPanel playerObj={this.state.userStatus}
+          cardSize={this.state.cardSizes.cardSize}
+          portraitSource={this.state.portraitSources.user}
+          onClickSignIn={this.handleClickSignIn}
+          onClickLogOut={this.handleClickLogOut} />
         {phase === 'gameStarted' &&
-          <div>
-            <HamburgerMenu
-              currentOptions={this.state.options}
-              onClickHamburgerQuit={this.handleClickHamburgerQuit}
-              onToggleOption={this.handleToggleOption} />
 
-            <ResultModal onClickOKButton={this.handleClickOKButton}
-              titleText={this.state.resultMessage.title}
-              playerNames={this.state.playerNames}
-              winner={this.state.resultMessage.winner}
-              roundOver={(this.state.userWins === 3 || this.state.opponentWins === 3)}
-              finalScores={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
-              buttonText={this.state.resultMessage.buttonText} />
-          </div>
+          <HamburgerMenu
+            currentOptions={this.state.options}
+            onClickHamburgerQuit={this.handleClickHamburgerQuit}
+            onToggleOption={this.handleToggleOption} />
+
         }
+        <ResultModal onClickOKButton={this.handleClickOKButton}
+          titleText={this.state.resultMessage.title}
+          playerNames={this.state.playerNames}
+          winner={this.state.resultMessage.winner}
+          roundOver={(this.state.userWins === 3 || this.state.opponentWins === 3)}
+          finalScores={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
+          buttonText={this.state.resultMessage.buttonText} />
       </div>
     );
   }
