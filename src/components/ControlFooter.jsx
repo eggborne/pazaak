@@ -23,6 +23,10 @@ function Footer(props) {
           align-items: stretch;
           position: absolute;
           bottom: -10vmax;
+          border: 0.5vw solid var(--dark-red-bg-color);
+          border-left: 0;
+          border-right: 0;
+          border-bottom: 0;
           transition: all 300ms ease;
         }
         #control-footer-button-area {
@@ -34,6 +38,18 @@ function Footer(props) {
         .control-footer-on {
           position: relative !important;
           bottom: 0 !important;
+        }
+        .move-button {
+          width: 49%;
+          font-size: 3vmax;
+          transition: background 200ms ease;
+        }
+        #stand-button {
+          margin-right: 1%;
+        }
+        #switch-sign-button {
+          width: 20%;
+          font-size: 1rem;
         }
       `}</style>
       <div id='control-footer-button-area'>
