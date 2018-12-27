@@ -12,16 +12,16 @@ function OpponentSelectScreen(props) {
     <div style={props.style} id='opponent-select-screen'>
       <style jsx>{`
         #opponent-select-screen {
-          font-size: 1.5rem;
+          font-size: 1.25rem;
           font-family: 'Nova Square';
           display: flex;
           flex-direction: column;
-          // flex-grow: 1;
           justify-content: space-between;
           align-items: center;
           overflow-y: scroll;
         }
         #opponent-select-title {
+          box-sizing: border-box;
           align-items: center;
           justify-content: center;
           width: 100%;
@@ -29,12 +29,13 @@ function OpponentSelectScreen(props) {
         }
         #opponent-select-area {
           overflow-y: scroll;
-          margin-bottom: 10.25vmax;
+          flex-grow: 1;
         }
         .pre-footer {
           border-top: 1px solid black;
         }
         #opponent-ready-button {
+          min-width: 8rem;
           animation: throb 1000ms infinite;
         }
         @keyframes throb {
@@ -49,6 +50,7 @@ function OpponentSelectScreen(props) {
       <div className='pre-header' id='opponent-select-title'>
         <div className='shadowed-text'>Choose Your Opponent</div>
       </div>
+
       <div id='opponent-select-area' className='shadowed-text'>
         {characterArray.map((character, i) =>
           <OpponentPanel key={i}
@@ -59,9 +61,10 @@ function OpponentSelectScreen(props) {
             onClickPanel={props.onClickPanel} />
         )}
       </div>
+
       <div className='pre-footer' id='opponent-select-footer'>
         <button id='opponent-select-back-button' onClick={(event) => props.onClickBack(event, 'splashScreen')} className='footer-back-button shadowed-text'>{'<'}</button>
-        <button className='ready-button' onClick={props.onClickOpponentReady} id='opponent-ready-button'>Ready!</button>
+        <button className='ready-button' onClick={props.onClickOpponentReady} id='opponent-ready-button'>OK</button>
       </div>
     </div>
   );
