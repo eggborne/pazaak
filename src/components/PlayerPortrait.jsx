@@ -2,27 +2,37 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function PlayerPortrait(props) {
-  let extraClass = 'left-side'
+  let sheetWidth = props.size * 6;
+  let portraitSize = Math.floor(props.size);
+  let extraClass = 'left-side';
+  let displayLabel = '';
   if (props.type === 'mini') {
     extraClass = '';
   }
+  if (!props.displayName) {
+    displayLabel = 'display-none';
+  }
   let backgroundPositionX = -props.spriteIndex * (props.size);
+  let userPortrait = '';
+  if (props.spriteIndex === -1) { // custom avatar
+    backgroundPositionX = 0;
+  }
   return (
-    <div className={`player-portrait ${extraClass}`}>
+    <div className={`player-portrait ${extraClass} ${userPortrait}`}>
       <style jsx>{`
         .player-portrait {
           position: relative;
-          border-radius: 0.5rem;
+          border-radius: ${props.size/10}px;
           border: 1px solid black;
           display: flex;
           align-items: flex-end;
           background-image: url(${props.source});
-          background-size: cover;
+          background-size: ${sheetWidth}px ${portraitSize}px;
           background-repeat: no-repeat;
-          width: ${props.size}px;
-          max-width: ${props.size}px;
-          height: ${props.size}px;
+          width: ${portraitSize}px;
+          height: ${portraitSize}px;
           background-position-x: ${backgroundPositionX}px;
+          background-position-y: center;
         }
         .player-portrait-label {
           font-family: 'Nova Square';
@@ -51,12 +61,13 @@ function PlayerPortrait(props) {
         }
       `}
       </style>
-      <div className='player-portrait-label'>{props.displayName}</div>
+      <div className={`player-portrait-label ${displayLabel}`}>{props.displayName}</div>
     </div>
   );
 }
 PlayerPortrait.propTypes = {
   size: PropTypes.number,
+  type: PropTypes.string,
   source: PropTypes.string,
   spriteIndex: PropTypes.number,
   displayName: PropTypes.string,
