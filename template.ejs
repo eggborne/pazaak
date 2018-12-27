@@ -4,21 +4,17 @@
     <meta charset="utf-8">
     <title><%= htmlWebpackPlugin.options.title %></title>
     <link onload='console.warn("fonts loaded")' href="https://fonts.googleapis.com/css?family=Bungee|Nova+Square" rel="stylesheet">
-
-  </head>
-  <body onload='
+    <body onload='
     document.getElementById("header").style.transform = "none";
     document.getElementById("footer").style.transform = "none";
     document.getElementById("intro-screen").style.opacity = 1;
-    document.getElementById("header").classList.add("shadowed-text");
+    document.getElementById("header").style.color = "var(--main-text-color)";
     setTimeout(()=>{
-      document.getElementById("header").style.letterSpacing = "0.2rem";
-      document.getElementById("footer-contents").style.transform = "scale(1.1)";
+      document.getElementById("footer-contents").style.transform = "scale(1.05)";
         setTimeout(()=>{
-        document.getElementById("header").style.letterSpacing = "0.05rem";
-        document.getElementById("header").style.color = "var(--main-text-color)";
-        document.getElementById("footer").style.transform = "none";
-        document.getElementById("footer-contents").style.transform = "scale(1)";
+        document.getElementById("footer-contents").style.transform = "scale(1)";        
+        document.getElementById("user-info-panel").style.display = "block";        
+        document.getElementById("user-info-panel").style.transition = "all 400ms ease";        
       },400);
     },400)
     '>
