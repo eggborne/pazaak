@@ -20,7 +20,7 @@ function DeckSelectionScreen(props) {
     cardPlural = '';
     chooseStyle.color = 'green';
     buttonDisabled = '';
-    throbbing = 'throbbing'
+    throbbing = 'throbbing';
   } else {
     chooseText = `choose ${cardsLeft} card${cardPlural}`;
   }
@@ -39,6 +39,16 @@ function DeckSelectionScreen(props) {
   return (
     <div style={props.style} id='deck-select-screen'>
       <style jsx>{`
+        #deck-select-screen {
+          font-size: 1.5rem;
+          font-family: 'Nova Square';
+          display: flex;
+          flex-direction: column;
+          flex-grow: 1;
+          justify-content: flex-start;
+          justify-content: space-between;
+          align-items: center;
+        }
         #deck-selection-grid {
           display: grid;
           grid-template-columns: ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px;
@@ -63,12 +73,13 @@ function DeckSelectionScreen(props) {
         #deck-select-title > div:nth-child(1) {
           padding-left: 1rem;
         }
+        #deck-selection-area {
+          
+        } 
         #preview-deck-area {
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: space-around;
-          margin-top: 2vh;
         }
         #preview-deck-title {
           margin-bottom: 1.5vh;
@@ -77,8 +88,8 @@ function DeckSelectionScreen(props) {
           display: grid;
           grid-template-columns: ${previewGridWidth}px ${previewGridWidth}px ${previewGridWidth}px ${previewGridWidth}px ${previewGridWidth}px;
           grid-template-rows: ${previewGridHeight}px ${previewGridHeight}px;
-          grid-row-gap: 0.75vh;
-          grid-column-gap: 0.75vh;
+          grid-row-gap: ${previewGridHeight/12}px;
+          grid-column-gap: ${previewGridHeight/12}px;
         }
         #preview-deck-grid  > div, #deck-selection-grid  > div {
           display: flex;
@@ -97,15 +108,15 @@ function DeckSelectionScreen(props) {
           border-radius: ${parseInt(selectedCardSize.borderRadius)+2}px !important;
           background-color: var(--card-spot-bg-color) !important;
         }
-        #deck-select-screen {
-          font-size: 1.5rem;
-          font-family: 'Nova Square';
-          display: flex;
-          flex-direction: column;
-          flex-grow: 1;
-          justify-content: flex-start;
-          align-items: center;
+        #randomize-button {
+          width: 80%;
+          height: 65%;
+          border-radius: 0.75rem;
+          font-size: 2vh;
+          background-color: rgba(51, 82, 5, 0.5) !important;
+          border-color: rgba(51, 51, 0, 0.75) !important;
         }
+
         .throbbing {
           animation: throb 1000ms infinite;
         }
@@ -138,12 +149,10 @@ function DeckSelectionScreen(props) {
           })}
         </div>
       </div>
-      <div id='randomize-area'><button onClick={props.onClickRandomize} className='shadowed-text' id='randomize-button'>Randomize</button></div>
       <div className='pre-footer' id='deck-select-footer'>
-        <div>
-          <button id='deck-select-back-button' onClick={(event) => props.onClickBack(event, 'selectingOpponent')} className='footer-back-button shadowed-text'>{'<'}</button>
-          <button className={`ready-button ${buttonDisabled} ${throbbing}`} onClick={props.onClickPlay} id='deck-ready-button'>Start!</button>
-        </div>
+        <button id='deck-select-back-button' onClick={(event) => props.onClickBack(event, 'selectingOpponent')} className='footer-back-button shadowed-text'>{'<'}</button>
+        <button className={`ready-button ${buttonDisabled} ${throbbing}`} onClick={props.onClickPlay} id='deck-ready-button'>Start!</button>
+        <button onClick={props.onClickRandomize} className='shadowed-text' id='randomize-button'>Random</button>
       </div>
     </div>
   );
