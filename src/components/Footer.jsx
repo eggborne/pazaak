@@ -7,12 +7,10 @@ function Footer() {
     <div id='footer'>
       <style jsx>{`
         #footer {
-          position: fixed;
           box-sizing: border-box;
           width: 100vw;
           bottom: 0;
           font-family: sans-serif;
-          /* height: 3rem; */
           min-height: 6vh;
           max-height: 6vh;
           min-width: 320px;
@@ -20,15 +18,16 @@ function Footer() {
           display: inline-flex;
           align-items: center;
           font-size: 1.5vmax;
+          border: 0.5vw solid rgba(0, 0, 0, 0.2);
           transform: translateY(100%);
-          transition: all 300ms;
+          transition: all 600ms;
         }
         #footer-contents {
           display: inline-flex;
           align-items: center;
           justify-content: space-around;
           width: 100%;
-          transition: all 300ms;
+          transition: all 400ms;
         }
         #footer-contents > div {
           text-align: center;
