@@ -39,7 +39,7 @@ function HamburgerMenu(props) {
           border: 0.5vw solid var(--dark-red-bg-color);
           border-bottom: 0;
           border-radius: 0.5rem 0 0 0;
-          z-index: 1;
+          z-index: 30;
           transform: translateX(100%);
           transition: transform 300ms ease;
         }
@@ -92,10 +92,10 @@ function HamburgerMenu(props) {
           margin-bottom: 0;
         }
         .hamburger-on {
-          transform: translateX(0%) !important;
+          transform: translateX(0) !important;
         }
       `}</style>
-        <div className='shadowed-text' id='hamburger-options-grid'>
+      <div className='shadowed-text' id='hamburger-options-grid'>
         <div className='mini-option-label'> Sound FX </div>
         <div onClick={props.onToggleOption} id='hamburger-sound-fx-toggle' className={`mini-option-toggle ${soundOption}`}></div>
         <div className='mini-option-label'>Ambience </div>
