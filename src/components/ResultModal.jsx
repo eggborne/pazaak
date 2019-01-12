@@ -1,4 +1,3 @@
-// import style from '../css/styles.css';
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -7,7 +6,7 @@ function ResultModal(props) {
   let opponentScoreStyle = { color: 'white' };
   let winnerStyle = { display: 'none' };
   let scoresStyle = { display: 'block' };
-  if (!props.roundOver) {
+  if (!props.matchOver) {
     if (props.winner === 'user') {
       userScoreStyle = { color: 'green' };
       opponentScoreStyle = { color: 'red' };
@@ -39,7 +38,7 @@ ResultModal.propTypes = {
   titleText: PropTypes.string,
   playerNames: PropTypes.object,
   winner: PropTypes.string,
-  roundOver: PropTypes.bool,
+  matchOver: PropTypes.bool,
   finalScores: PropTypes.object,
   buttonText: PropTypes.string,
   onClickOKButton: PropTypes.func
