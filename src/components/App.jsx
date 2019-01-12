@@ -9,8 +9,10 @@ import DeckSelectScreen from './DeckSelectScreen';
 import GameBoard from './GameBoard';
 import HamburgerMenu from './HamburgerMenu';
 import ResultModal from './ResultModal';
+import ConfirmModal from './ConfirmModal';
+import UserInfoModal from './UserInfoModal';
 import OpponentSelectScreen from './OpponentSelectScreen';
-import UserInfoPanel from './UserInfoPanel';
+import HeaderMenu from './HeaderMenu';
 let Util = require('../scripts/util');
 let DB = require('../scripts/db');
 let AI = require('../scripts/ai');
@@ -34,10 +36,11 @@ class App extends React.PureComponent {
     this.state = {
       vsCPU: true,
       CPUOpponent: 'jarjarbinks',
+      humanOpponent: {},
       lastWinner: null,
       lastFirstTurn: 'user',
       playerNames: {
-        user: 'Player',
+        user: 'Guest',
         opponent: 'Jar Jar Binks'
       },
       phase: 'splashScreen',
@@ -75,25 +78,54 @@ class App extends React.PureComponent {
       opponentWins: 0,
       turn: 'user',
       userStatus: {
+        phase: 'splashScreen',
         loggedInAs: '',
-        cookieId: -1,
+        cookieId: undefined, // id DB.id
         initialValues: {
-          avatarIndex: 0
+          avatarIndex: 0,
         },
-        avatarIndex: 0, // if -1, custom
-        totalSetWins: 0,
-        totalRoundWins: 0,
-        totalSetsPlayed: 0,
-        totalRoundsPlayed: 0,
-        deck: { user: [], opponent: [] },
-        hand: { user: [], opponent: [] },
-        grid: { user: [], opponent: [] },
-        total: { user: [], opponent: [] },
-        wins: { user: [], opponent: [] },
+        avatarIndex: 0,
+        setWins: 0,
+        totalSets: 0,
+        matchWins: 0,
+        totalMatches: 0,
+        credits: 5633,
+        cpuDefeated: [],
+        messages: [],
+        unreadMessages: 0
       },
       portraitSources: {
-        user: 'https://pazaak.online/assets/images/avatarsheet.jpg',
-        opponent: 'https://pazaak.online/assets/images/opponentssheet.jpg'
+        // user: 'https://pazaak.online/assets/images/avatarsheet.jpg',
+        // opponent: 'https://pazaak.online/assets/images/opponentsheet.jpg'
+        user: document.getElementById('avatar-sheet').src,
+        opponent: document.getElementById('opponent-sheet').src
+      },
+      userData: {
+        id: 0,
+        playerName: '',
+        setWins: 0,
+        totalSets: 0,
+        matchWins: 0,
+        totalMatches: 0,
+        usersDefeated: 0,
+        usersFought: 0,
+        credits: 5633,
+        cpuDefeated: [],
+        messages: [],
+        avatarIndex: 0,
+        phase: 'splashScreen',
+        loggedInAs: '',
+        cookieId: undefined, // id DB.id
+        initialValues: {
+          avatarIndex: 0,
+        },
+      },
+      currentChat: {
+        chatId: undefined,
+        partnerId: '',
+        messages: [
+
+        ]
       },
       turnStatus: {
         user: {
@@ -116,7 +148,29 @@ class App extends React.PureComponent {
       resultMessage: {
         title: 'Winner',
         winner: '',
-        buttonText: 'Next Round'
+        buttonText: 'Next Match'
+      },
+      confirmMessage: {
+        showing: false,
+        titleText: '',
+        bodyText: '',
+        buttonText: {
+          confirm: '',
+          cancel: ''
+        }
+      },
+      selectedUser: {
+        // userRecord goes here
+        // i.e. looking at stats, chatting with, playing against?
+        playerName: '',
+        phase: 'splashScreen',
+        avatarIndex: 0,
+        setWins: 0,
+        totalSets: 0,
+        matchWins: 0,
+        totalMatches: 0,
+        credits: 9000,
+        cpuDefeated: []
       },
       options: {
         sound: false,
@@ -128,10 +182,18 @@ class App extends React.PureComponent {
         moveIndicatorTime: 900,
         dealWaitTime: 600,
       },
+      chatShowing: false,
       cardSizes: Util.getCardSizes(),
       inputHasFocus: true,
       keyboardShowing: false,
-      highScores: this.getHighScores()
+      highScores: this.getPlayerRecords().then((response) => {
+        console.log('initial getplayerrec', response);
+        Util.checkCookie(this);
+      }).catch((reason) => {
+        console.error('getPlayerRecords failed because', reason);
+      }),
+      highScores: [],
+      usersHere: []
     };
 
     // this.highScores = [];
@@ -158,9 +220,12 @@ class App extends React.PureComponent {
 
     // are all of these necessary?
     this.playSound = this.playSound.bind(this);
-    this.getHighScores = this.getHighScores.bind(this);
+    this.performDataRefresh = this.performDataRefresh.bind(this);
+    this.createNewGuest = this.createNewGuest.bind(this);
     this.incrementPlayerScore = this.incrementPlayerScore.bind(this);
+    this.applyStateOptions = this.applyStateOptions.bind(this);
     this.evaluatePlayerName = this.evaluatePlayerName.bind(this);
+    this.analyzeEnteredName = this.analyzeEnteredName.bind(this);
     this.shuffleDeck = this.shuffleDeck.bind(this);
     this.getNewPlayerHands = this.getNewPlayerHands.bind(this);
     this.dealToPlayerGrid = this.dealToPlayerGrid.bind(this);
@@ -187,46 +252,225 @@ class App extends React.PureComponent {
     this.callResultModal = this.callResultModal.bind(this);
     this.dismissResultModal = this.dismissResultModal.bind(this);
     this.handleClickRandomize = this.handleClickRandomize.bind(this);
+    this.callConfirmModal = this.callConfirmModal.bind(this);
+    this.dismissConfirmModal = this.dismissConfirmModal.bind(this);
+    this.callUserInfoModal = this.callUserInfoModal.bind(this);
+    this.dismissUserInfoModal = this.dismissUserInfoModal.bind(this);
+    this.handleClickRandomize = this.handleClickRandomize.bind(this);
     this.handleClickOKButton = this.handleClickOKButton.bind(this);
     this.handleClickHamburger = this.handleClickHamburger.bind(this);
     this.resetBoard = this.resetBoard.bind(this);
     this.determineWinnerFromTotal = this.determineWinnerFromTotal.bind(this);
     this.handleClickHamburgerQuit = this.handleClickHamburgerQuit.bind(this);
     this.handleFullscreenChange = this.handleFullscreenChange.bind(this);
-    this.handleClickUserInfo = this.handleClickUserInfo.bind(this);
+    this.handleClickAccountInfo = this.handleClickAccountInfo.bind(this);
+    this.handleClickMessages = this.handleClickMessages.bind(this);
     this.handleClickLogOut = this.handleClickLogOut.bind(this);
     this.handleClickSignIn = this.handleClickSignIn.bind(this);
+    this.handleClickMoreInfo = this.handleClickMoreInfo.bind(this);
+    this.handleClickSendMessage = this.handleClickSendMessage.bind(this);
+    this.handleClickRequestMatch = this.handleClickRequestMatch.bind(this);
+    this.handleClickConfirmButton = this.handleClickConfirmButton.bind(this);
+    this.handleClickCancelButton = this.handleClickCancelButton.bind(this);
+    this.handleClickCloseButton = this.handleClickCloseButton.bind(this);
+    this.handleSubmitChatMessage = this.handleSubmitChatMessage.bind(this);
+    this.updateChatLog = this.updateChatLog.bind(this);
+    this.checkForNewMessages = this.checkForNewMessages.bind(this);
   }
 
   componentDidMount() {
     let startTime = window.performance.now();
-    Util.checkCookie(this);
+    //Util.checkCookie(this);
     Util.sizeElements(this, true);
-    this.getHighScores();
+    window.addEventListener('resize', () => {
+      Util.sizeElements(this, true);
+    });
     window.addEventListener('fullscreenchange', this.handleFullscreenChange);
     window.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('msfullscreenchange', this.handleFullscreenChange);
-    if (portraitMode) {
-      // document.getElementById('player-name-input').onfocus = () => {
-      //   document.getElementById('intro-screen').style.justifyContent = 'flex-start';
-      //   document.getElementById('intro-screen').style.marginTop = '4rem';
-      // };
-      // document.getElementById('player-name-input').onblur = () => {
-      //   document.getElementById('intro-screen').style.justifyContent = 'center';
-      //   document.getElementById('intro-screen').style.marginTop = '0';
-      // };
-    }
-    // let newDefeated = ['The Emperor', 'Jar Jar Binks'];
-    // DB.updateCPUDefeated('Donkey Schlong', JSON.stringify(newDefeated)).then((response) => {
-    //   DB.getScores().then((response) => {
-    //     console.log(JSON.parse(response.data[0].cpuDefeated));
-    //   })
-    // });
+    this.upperPingLimit = 18000;
+    this.pingFrequency = 3000;
+    this.expiredCheckFrequency = 1;
+    this.pingCounter = 0;
+    this.pingTimer = setInterval(() => {
+      if (this.state.userStatus.cookieId) {
+        // this.getPlayerData(this.performDataRefresh());
+        if (this.pingCounter % 1 === 0) {
+          this.getPlayerRecords().then((response) => {
+            this.performDataRefresh().then(() => {
+              this.pingCounter++;
+            });
+          });
+        } else {
+          this.performDataRefresh().then(() => {
+            this.pingCounter++;
+          });
+        }
+      } else {
+        console.error('NO COOKIE/loggedInAs ID WHEN RUNNING PING TIMER');
+        //this.getUserAmount();
+      }
+    }, this.pingFrequency);
+
+
+
     console.warn('App.componentDidMount activities done in', (window.performance.now() - startTime));
+  }
+  getLocalPlayerObjById(userId) {
+    for (let i = 0; i < this.state.highScores.length; i++) {
+      let recordObj = this.state.highScores[i];
+      if (recordObj.id === userId) {
+        return Object.assign({}, recordObj);
+      }
+    }
+  }
+
+  checkForNewMessages() {
+    return new Promise((resolve, reject) => {
+      DB.checkForMessages(this.state.userStatus.cookieId).then((response) => {
+        console.warn('checkForMessages got', response);
+        let messageArray = response.data;
+        let unreadArray = [];
+        messageArray.map((messageObj, i) => {
+          console.error('MESSAGE OBJ', messageObj);
+          let messagesArray = JSON.parse(messageObj.messages);
+          console.log('messagesArray is', messagesArray);
+          messagesArray.map((message, i) => {
+            if (message.unread) {
+              console.error('iojfoidhsf pishing asjkldaslkdjas', message);
+              unreadArray.push(message);
+            }
+          });
+        });
+        resolve(unreadArray);
+      });
+    });
 
   }
- 
+
+  startChatInstance(recipientId) {
+    let recipientRecordObj = this.getLocalPlayerObjById(recipientId);
+    console.log('recipientRecordObj', recipientRecordObj);
+    DB.startNewChat(this.state.userStatus.cookieId, recipientId).then((response) => {
+      let chatId = response.data;
+      this.setState({
+        currentChat: {
+          chatId: chatId,
+          partnerId: recipientId,
+          messages: []
+        }
+      }, () => {
+        console.log('currentChat', this.state.currentChat);
+      });
+    });
+  }
+
+  handleSubmitChatMessage(event) {
+    event.preventDefault();
+    let newMessage = document.getElementById('chat-message-input').value;
+    document.getElementById('chat-message-input').value = '';
+    console.error('clicked send chat!', newMessage);
+    let chatCopy = Object.assign({}, this.state.currentChat);
+    let newMessageObject = {
+      unread: true,
+      sender: this.state.userStatus.loggedInAs,
+      bodyText: newMessage
+    };
+
+    chatCopy.messages.push(newMessageObject);
+
+    console.warn('UPDATED CHAT obj to', chatCopy);
+
+    this.setState({
+      currentChat: chatCopy
+    }, () => {
+
+      DB.sendMessage(this.state.currentChat.chatId, chatCopy.messages);
+    });
+
+  }
+
+  getNiceTimeFromSeconds(sessionLengthInSeconds) {
+    let sessionMinutes = Math.ceil(sessionLengthInSeconds / 60);
+    let output = `${sessionMinutes} mins`;
+    let minutePlural = 's';
+    if (sessionMinutes === 1) {
+      minutePlural = '';
+    }
+    if (sessionMinutes >= 60) {
+      let wholeHours = Math.floor(sessionMinutes / 60);
+      let remainder = (sessionMinutes % 60);
+      let hourPlural = 's';
+      if (wholeHours === 1) {
+        hourPlural = '';
+      }
+      output = `${wholeHours} hour${hourPlural} ${remainder} min${minutePlural}`;
+    }
+    return output;
+  }
+  performDataRefresh() {
+    return new Promise((resolve, reject) => {
+      DB.handshake(this.state.userStatus, this.state.phase, this.state.CPUOpponent).then((timeNow) => {
+        let currentTime = new Date(timeNow.data[0]['NOW()']);
+        DB.getActiveUsers(this).then((response) => {
+          if (response.data) {
+            let usersArray = response.data.slice();
+            if (this.pingCounter % this.expiredCheckFrequency === 0) {
+              console.error('CHECKING OTHER PLAYERS for ping', this.pingCounter);
+              usersArray.map((userObj, i) => {
+                if (userObj.userId !== this.state.userStatus.cookieId) {
+                  // update session time/pings for other players
+                  let pingTime = new Date(userObj.lastPing);
+                  let sessionStartTime = new Date(userObj.sessionStart);
+                  let sinceLastPing = currentTime - pingTime;
+                  let sessionLength = (currentTime / 1000) - (sessionStartTime / 1000);
+                  let sessionDisplay = this.getNiceTimeFromSeconds(sessionLength);
+                  if (document.getElementById(`session-display-${userObj.userId}`)) {
+                    document.getElementById(`ping-display-${userObj.userId}`).innerHTML = sinceLastPing;
+                    document.getElementById(`session-display-${userObj.userId}`).innerHTML = sessionDisplay;
+                    // color the ping text according to how high
+                    let textColor = 'var(--main-text-color)';
+                    if (sinceLastPing > this.upperPingLimit * 0.75) {
+                      textColor = 'red';
+                    } else if (sinceLastPing > this.upperPingLimit / 2) {
+                      textColor = 'yellow';
+                    }
+                    document.getElementById(`ping-display-${userObj.userId}`).style.color = textColor;
+                    if (sinceLastPing > this.upperPingLimit) {
+                      console.error(`${userObj.userName} too old at ${sinceLastPing}! Removing.`);
+                      DB.removeActiveUser(userObj.userId).then((response) => {
+                        usersArray.map((user, i) => {
+                          if (user.userId == userObj.userId) {
+                            usersArray.splice(i, 1);
+                            i--;
+                          }
+                        });
+                        this.setState({
+                          usersHere: usersArray
+                        });
+                      });
+                      // return;
+                    }
+                  }
+                }
+              });
+              resolve(usersArray);
+            } else {
+              console.error('NOT ------- CHECKING OTHER PLAYERS for ping', this.pingCounter);
+              resolve(usersArray);
+            }
+
+            this.setState({
+              usersHere: usersArray
+            });
+          } else {
+            console.error('No active users in DB.');
+          }
+        });
+      });
+    });
+  }
   handleFullscreenChange() {
     setTimeout(() => {
       let newSizes = Util.getCardSizes();
@@ -279,19 +523,60 @@ class App extends React.PureComponent {
       document.getElementById('container').style.backgroundColor = 'var(--main-bg-color)';
     }, 3000);
   }
-
-  getHighScores() {
+  getPlayerData(callback) {
     DB.getScores().then((response) => {
       let playerScoreArray = response.data;
       if (!response.data) {
         playerScoreArray = [];
       } else {
-        playerScoreArray.map((playerScore, i) => {
-          playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated);
-        });
+        // playerScoreArray.map((playerScore, i) => {
+        //   playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated);
+        //   playerScore.avatarIndex = parseInt(playerScore.avatarIndex);
+        // });
       }
       this.setState({
         highScores: playerScoreArray
+      }, () => {
+        console.log('getplayerData called', response);
+        callback;
+      });
+    });
+  }
+  getUserAmount() {
+    DB.getScores().then((response) => {
+      let playerScoreArray = response.data;
+      if (!response.data) {
+        playerScoreArray = [];
+      } else {
+
+      }
+      this.setState({
+
+      }, () => {
+
+      });
+    });
+  }
+
+  getPlayerRecords() {
+    return new Promise((resolve, reject) => {
+      DB.getScores().then((response) => {
+        let playerRecordArray = response.data.slice();
+        if (!response.data) {
+          playerRecordArray = [];
+          reject('No records.');
+        } else {
+          playerRecordArray.map((playerScore, i) => {
+            playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated);
+            playerScore.preferences = JSON.parse(playerScore.preferences);
+            playerScore.messages = JSON.parse(playerScore.messages);
+          });
+        }
+        this.setState({
+          highScores: playerRecordArray,
+        }, () => {
+          resolve(playerRecordArray);
+        });
       });
     });
   }
@@ -386,42 +671,102 @@ class App extends React.PureComponent {
     return newCard.value;
   }
   handleClickLogOut() {
-    // setting time limit to 0 destroys it?
-    Util.setCookie('username', `${this.state.userStatus.loggedInAs}-${this.state.userStatus.cookieId}`, 0);
-    console.error('Cookie destroyed!');
-    let userStatusCopy = Object.assign({}, this.state.userStatus);
-    userStatusCopy = {
-      loggedInAs: '',
-      cookieId: -1,
-      initialValues: {
-        avatarIndex: 0
-      },
-      avatarIndex: 0, // if -1, custom
-      totalSetWins: 0,
-      totalRoundWins: 0,
-      totalSetsPlayed: 0,
-      totalRoundsPlayed: 0
-    };
-    this.setState({
-      userStatus: userStatusCopy,
-      phase: 'splashScreen'
-    }, () => {
-      this.handleClickUserInfo();
-    });
+    this.callConfirmModal(
+      'Log out?',
+      `This will log you out permanently, deleting all cookies associated with ${this.state.userStatus.loggedInAs}.`,
+      { confirm: 'Do it', cancel: 'Never mind' },
+      () => {
+        DB.removeActiveUser(this.state.userStatus.cookieId).then((response) => {
+          let usersArray = this.state.usersHere.slice();
+          for (let i = 0; i < usersArray.length; i++) {
+            let user = usersArray[i];
+            if (user.userId == this.state.userStatus.cookieId) {
+              usersArray.splice(i, 1);
+              break;
+            }
+          }
+          console.error('VBBOORESJSDFDKSF BROKE CORRECTYLY!!!! ___________________________________________________________________________________________________________________________');
+          this.setState({
+            usersHere: usersArray
+          });
+        });
+        // setting time limit to 0 destroys cookie
+        Util.setCookie('username', `${this.state.userStatus.loggedInAs}||${this.state.userStatus.cookieId}`, 0);
+        console.error('Cookie destroyed!');
+        let userStatusCopy = Object.assign({}, this.state.userStatus);
+        document.getElementById('player-name-input').disabled = false;
+        document.getElementById('player-name-input').style.backgroundColor = 'white';
+        document.getElementById('player-name-input').value = '';
+        document.getElementById('remember-checkbox').disabled = false;
+        document.getElementById('remember-checkbox').checked = true;
+        document.getElementById('remember-check-area').classList.remove('remembered');
+        userStatusCopy = {
+          loggedInAs: '',
+          cookieId: -1,
+          initialValues: {
+            avatarIndex: 0
+          },
+          avatarIndex: 0, // if -1, custom
+          totalSetWins: 0,
+          matchWins: 0,
+          totalSetsPlayed: 0,
+          matchesPlayed: 0
+        };
+        let defaultOptions = {
+          sound: false,
+          ambience: false,
+          darkTheme: false,
+          turnInterval: 300,
+          flashInterval: 90,
+          opponentMoveWaitTime: 1600,
+          moveIndicatorTime: 900,
+          dealWaitTime: 600,
+        };
+        this.setState({
+          userStatus: userStatusCopy,
+          options: defaultOptions,
+          phase: 'splashScreen'
+        }, () => {
+          this.dismissConfirmModal();
+          this.applyStateOptions('off');
+          // roll up header menu
+          let userPanel = document.getElementById('user-info-panel');
+          let settingsIcon = document.getElementById('user-account-icon');
+          let cornerArea0 = document.getElementById('corner-area-0');
+          cornerArea0.style.backgroundColor = 'transparent';
+          cornerArea0.style.border = '0';
+          settingsIcon.classList.remove('corner-button-on');
+          userPanel.classList.add('user-info-panel-off');
+          setTimeout(() => {
+            document.getElementById('header').classList.remove('no-bottom-border');
+          }, 350);
+
+        });
+      }
+    );
   }
   handleClickSignIn() {
     this.setState({
       phase: 'splashScreen'
     }, () => {
-      this.handleClickUserInfo();
+      this.handleClickAccountInfo();
     });
   }
-  handleToggleOption(event) {
+  handleToggleOption(event, forceDirection) {
     let changeState = true;
-    let el = event.target;
-    let eventId = event.target.id;
+    let el;
+    let eventId;
+    if (!forceDirection) {
+      el = event.target;
+      eventId = event.target.id;
+    } else {
+      // 1st arg is el id
+      console.log(`handleToggleOption w/ ${forceDirection} trying document.getElementById(${event})`);
+      eventId = event;
+      el = document.getElementById(eventId);
+    }
     let optionsCopy = Object.assign({}, this.state.options);
-    if (el.classList.contains('option-off')) {
+    if ((forceDirection === 'on') || (!forceDirection && el.classList.contains('option-off'))) {
       if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = true;
       }
@@ -436,7 +781,6 @@ class App extends React.PureComponent {
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
         document.body.style.setProperty('--main-bg-color', '#050505');
         document.body.style.setProperty('--main-text-color', '#dfdfff');
-        document.body.style.setProperty('--name-input-color', '#112');
         document.body.style.setProperty('--name-input-text-color', '#aaa');
         document.body.style.setProperty('--button-bg-color', '#060606');
         document.body.style.setProperty('--special-button-text-color', '#529e4b');
@@ -452,8 +796,8 @@ class App extends React.PureComponent {
         Util.toggleFullScreen();
         changeState = false;
       }
-
-    } else {
+    }
+    if ((forceDirection === 'off') || (!forceDirection && el.classList.contains('option-on'))) {
       if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = false;
       }
@@ -468,7 +812,6 @@ class App extends React.PureComponent {
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
         document.body.style.setProperty('--main-bg-color', 'rgb(107, 121, 138)');
         document.body.style.setProperty('--main-text-color', 'rgb(255, 247, 213)');
-        document.body.style.setProperty('--name-input-color', '#ccc');
         document.body.style.setProperty('--name-input-text-color', 'black');
         document.body.style.setProperty('--button-bg-color', 'black');
         document.body.style.setProperty('--special-button-text-color', '#ffffa3');
@@ -488,110 +831,545 @@ class App extends React.PureComponent {
     if (changeState) {
       this.setState({
         options: optionsCopy
+      }, () => {
+        if (this.state.userStatus.cookieId && this.state.userStatus.loggedInAs) {
+          let optionsString = JSON.stringify(optionsCopy);
+          DB.updatePreferences(this.state.userStatus.cookieId, optionsString);
+        }
       });
     }
   }
 
-  evaluatePlayerName(enteredName, uniqueId) {
-    DB.getDataForPlayer(enteredName).then((response) => {
-      let userStatusCopy = Object.assign({}, this.state.userStatus);
-      if (response.data) {
-        let playerIndex = 0;
-        if (uniqueId) {
-          // we're checking a cookie
-          response.data.map((entry, i) => {
-            if (entry.id === uniqueId) {
-              playerIndex = i;
-            }
-          });
-        } else {
-          // it's a user-entered name
-
+  applyStateOptions(forceDirection) {
+    let optionsCopy = Object.assign({}, this.state.options);
+    let optionsArray = Object.keys(optionsCopy);
+    optionsArray.map((option, i) => {
+      if (i < 3) {
+        let eventId;
+        if (option === 'sound') {
+          eventId = 'sound-fx-toggle';
         }
-        let playerObj = response.data[playerIndex];
-        console.error(`Logging in player as ${playerObj.playerName}, highlighting avatar ${playerObj.avatarIndex} and scrolling into view.`);
-        userStatusCopy.loggedInAs = playerObj.playerName;
-
-        if (playerObj.avatarIndex) {
-          userStatusCopy.avatarIndex = parseInt(playerObj.avatarIndex);
-          if (userStatusCopy.avatarIndex > 0) {
-            setTimeout(() => {
-              document.getElementById(`avatar-thumb-${playerObj.avatarIndex}`).scrollIntoView({behavior: 'smooth', inline: 'center'});
-              // document.getElementById('avatar-row').scrollBy(this.state.cardSizes.cardSize.height, 0, 'smooth');
-
-            }, 200);
+        if (option === 'ambience') {
+          eventId = 'ambience-toggle';
+        }
+        if (option === 'darkTheme') {
+          eventId = 'dark-theme-toggle';
+        }
+        if (forceDirection === 'on') {
+          if (optionsCopy[option]) {
+            this.handleToggleOption(eventId, forceDirection);
+            // this.setOption(optionName, position);
           }
         } else {
-          userStatusCopy.avatarIndex = 0;
+          if (!optionsCopy[option]) {
+            this.handleToggleOption(eventId, forceDirection);
+          }
         }
-        console.warn('Setting state.userStatus.initialValues.avatarIndex to', userStatusCopy.avatarIndex);
-        userStatusCopy.initialValues.avatarIndex = userStatusCopy.avatarIndex;
-        this.setState({
-          userStatus: userStatusCopy
-        });
-      } else {
-        console.error(`No entry in DB for ${enteredName}.`);
-        DB.saveUser(enteredName, this.state.userStatus.avatarIndex).then((response) => {
-          DB.getUserId(enteredName).then((response) => {
-            let uniqueId = response.data[0].id;
-            console.error(`Setting new cookie for ${enteredName}-${uniqueId}`);
-            Util.setCookie('username', `${enteredName}-${uniqueId}`, 365);
-            userStatusCopy.loggedInAs = enteredName;
-            userStatusCopy.cookieId = parseInt(uniqueId);
-            this.setState({
-              userStatus: userStatusCopy
-            });
-          });
-
-        });
       }
-
     });
   }
 
-  handleClickUserInfo() {
+  createNewGuest() {
+    let promise = new Promise((resolve, reject) => {
+      let optionsString = JSON.stringify(this.state.options);
+      // DB.saveUser('Guest', this.state.userStatus.avatarIndex, optionsString).then((response) => {
+      DB.saveUser('Guest', this.state.userStatus.avatarIndex, optionsString).then((response) => {
+        DB.getUserId('Guest').then((response) => {
+          console.error('response.data[0] for Guest?', response.data[0].id);
+          let guestId = parseInt(response.data[0].id);
+          console.error('type guestId', guestId, typeof guestId);
+          DB.updateUserName(guestId, `Guest-${guestId}`).then((response) => {
+            console.error('updateUserName to Guest?', `Guest-${response.data[0].id}`, response);
+            resolve(`Guest-${guestId}`);
+          });
+        });
+      });
+    });
+    return promise;
+  }
+
+  analyzeEnteredName(enteredName) {
+    let validId = this.state.userStatus.id;
+    console.error('validId?', validId);
+    if (validId) {
+      DB.getRecordForUserId(validId).then((response) => {
+        if (response.data) {
+          let nameFound = response.data.playerName;
+          console.error('FOUND A RECORD WITH ID and NAME', validId, nameFound);
+          console.error('Matches enteredName?', enteredName);
+          if (nameFound === enteredName) {
+            console.error('SSSUUUUCCCEEEESSSSS --------------------->>>');
+            let userDataCopy = Object.assign({}, response.data);
+            console.error('THE DATA |||', userDataCopy);
+            this.setState({
+              userData: userDataCopy
+            }, () => {
+              // add to active users...
+              resolve('ended with userData', userDataCopy);
+            });
+          } else {
+            reject('record with ID had wrong name', nameFound);
+          }
+        } else {
+
+        }
+      });
+    }
+  }
+
+  evaluatePlayerName(enteredName) {
+    let uniqueId = this.state.userStatus.cookieId;
+    let userStatusCopy = Object.assign({}, this.state.userStatus);
+    if (this.state.userStatus.loggedInAs) {
+      // cookie was recognized and player logged in
+
+
+    }
+    if (uniqueId) {
+      // DB.getRecordForUserId(uniqueId).then((response) => {
+      //   console.log('resp', response);
+      // })
+      DB.getDataForPlayer(enteredName).then((response) => {
+        if (response.data) {
+          console.warn('On evaluatePlayerName after getDataForPlayer, response.data (at least one matching name) is FOUND', response.data);
+          // NAME IN DB
+          let playerIndex;
+          console.warn('response.data found and this.state.userStatus.cookieId EXISTS!', uniqueId);
+          console.warn('comparing', parseInt(response.data[0].id), parseInt(uniqueId));
+          if (parseInt(response.data[0].id) === parseInt(uniqueId)) {
+            console.warn('MATCH FOUND IN DB FOR COOKIE ID! Setting playerIndex to 0.');
+            playerIndex = 0;
+          }
+          if (playerIndex === undefined) {
+            console.error('USERNAME TAKEN, and no match found in DB for username/id combination (so you is not him!)');
+          } else {
+            let playerObj = Object.assign({}, response.data[playerIndex]);
+            console.error('GOT playerObj', playerObj);
+
+            playerObj.preferences = JSON.parse(playerObj.preferences);
+            playerObj.cpuDefeated = JSON.parse(playerObj.cpuDefeated);
+            playerObj.messages = JSON.parse(playerObj.messages);
+            console.error('AFTER', playerObj);
+            console.error(`Cookie recognized! Logging in player as ${playerObj.playerName}, recording into state.userStatus, highlighting avatar ${playerObj.avatarIndex} and scrolling into view.`);
+            playerObj.loggedInAs = playerObj.playerName;
+            playerObj.cookieId = playerObj.id;
+            setTimeout(() => {
+              document.getElementById(`avatar-thumb-${playerObj.avatarIndex}`).scrollIntoView({ inline: 'center' });
+            }, 50);
+            //playerObj.initialValues.avatarIndex = playerObj.avatarIndex;
+            this.setState({
+              userStatus: playerObj,
+              options: playerObj.preferences
+            }, () => {
+              console.error('calling applyStateOptions(on) post-cookie found and matched.');
+              this.applyStateOptions('on');
+            });
+            // let newOptions = JSON.parse(playerObj.preferences);
+            // console.error('RECEIVED options', newOptions);
+            // this.setState({
+            //   userStatus: userStatusCopy,
+            //   options: newOptions
+            // }, () => {
+            //   console.error('calling applyStateOptions(on) post-cookie found and matched.');
+            //   this.applyStateOptions('on');
+            // });
+          }
+        } else {
+          console.error(`evaluatePlayerName (NEEDED?) No entry in DB for ${enteredName}.`);
+          let optionsString = JSON.stringify(this.state.options);
+          console.error('saving w options string', optionsString);
+          DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
+            DB.getUserId(enteredName).then((response) => {
+              let uniqueId = response.data[0].id;
+              console.error(`Setting new cookie for ${enteredName} with id ${uniqueId}`);
+              console.error(`Cookie = ${enteredName}||${uniqueId}`);
+              Util.setCookie('username', `${enteredName}||${uniqueId}`, 365);
+              userStatusCopy.loggedInAs = enteredName;
+              userStatusCopy.cookieId = parseInt(uniqueId);
+              this.setState({
+                userStatus: userStatusCopy
+              }, () => {
+
+              });
+            });
+          });
+        }
+      });
+    } else {
+      console.error('called evaluatePlayerName without a state.userStatus.cookieId.>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+
+      console.error('calling DB.saveUser()', enteredName, this.state.userStatus.avatarIndex);
+      let optionsString = JSON.stringify(this.state.options);
+      console.error('saving w options string', optionsString);
+      DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
+        DB.getUserId(enteredName).then((response) => {
+          let uniqueId = response.data[0].id;
+          console.error('--------------------------------');
+          console.error('new user record id is', uniqueId);
+          console.error('--------------------------------');
+          if (enteredName !== 'Guest') {
+            console.error('Name is not Guest. Setting cookieId to', uniqueId);
+            Util.setCookie('username', `${enteredName}||${uniqueId}`, 365);
+          } else {
+            console.error('Name is Guest. NOT setting cookie');
+          }
+          userStatusCopy.loggedInAs = enteredName;
+          console.error(`setting loggedInAs: ${enteredName}`);
+          userStatusCopy.cookieId = parseInt(uniqueId);
+          console.error(`setting cookieId: ${parseInt(uniqueId)}`);
+          console.error(`setting phase: ${this.state.phase}`);
+          this.setState({
+            userStatus: userStatusCopy
+          }, () => {
+            console.error('calling evaluatePlayerName a second time');
+            this.evaluatePlayerName(enteredName);
+          });
+        });
+      });
+    }
+
+  }
+  handleClickAccountInfo() {
+    if (this.state.userStatus.loggedInAs) {
+      let userPanel = document.getElementById('user-info-panel');
+      let settingsIcon = document.getElementById('user-account-icon');
+      let cornerArea0 = document.getElementById('corner-area-0');
+      if (userPanel.classList.contains('user-info-panel-off')) {
+        cornerArea0.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+        cornerArea0.style.border = '0.5vw solid rgba(0, 0, 0, 0.2)';
+        settingsIcon.classList.add('corner-button-on');
+        userPanel.classList.remove('user-info-panel-off');
+        document.getElementById('header').classList.add('no-bottom-border');
+      } else {
+        cornerArea0.style.backgroundColor = 'transparent';
+        cornerArea0.style.border = '0';
+        settingsIcon.classList.remove('corner-button-on');
+        userPanel.classList.add('user-info-panel-off');
+        setTimeout(() => {
+          document.getElementById('header').classList.remove('no-bottom-border');
+        }, 350);
+      }
+    } else {
+      let nameInputField = document.getElementById('player-name-input');
+      let checkBoxArea = document.getElementById('remember-check-area');
+      document.getElementById('remember-checkbox').checked = true;
+      document.getElementById('remember-checkbox').disabled = false;
+      nameInputField.classList.add('bouncing');
+      checkBoxArea.classList.add('bouncing-inverted');
+      setTimeout(() => {
+        nameInputField.classList.remove('bouncing');
+        checkBoxArea.classList.remove('bouncing-inverted');
+      }, 600);
+    }
+  }
+  handleClickMessages() {
+    console.log('CLICKED MESSAGES');
+    this.updateChatLog();
+    let messageContainer = document.getElementById('user-message-icon-container');
+    let cornerArea1 = document.getElementById('corner-area-1');
+    if (!messageContainer.classList.contains('messages-button-on')) {
+      messageContainer.classList.add('messages-button-on');
+      cornerArea1.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+      cornerArea1.style.border = '0.5vw solid rgba(0, 0, 0, 0.2)';
+    } else {
+      cornerArea1.style.backgroundColor = 'transparent';
+      cornerArea1.style.border = '0';
+      messageContainer.classList.remove('messages-button-on');
+    }
     let userPanel = document.getElementById('user-info-panel');
     if (userPanel.classList.contains('user-info-panel-off')) {
       userPanel.classList.remove('user-info-panel-off');
       document.getElementById('header').classList.add('no-bottom-border');
+      this.setState({
+        chatShowing: true
+      });
     } else {
       userPanel.classList.add('user-info-panel-off');
+
       setTimeout(() => {
         document.getElementById('header').classList.remove('no-bottom-border');
+        this.setState({
+          chatShowing: false
+        });
       }, 350);
     }
   }
-
+  updateChatLog() {
+    console.log('getting log for chatId', this.state.currentChat.chatId);
+    DB.getChatMessages(this.state.currentChat.chatId).then((response) => {
+      console.log('got chat response', response);
+      let chatMessageArray = JSON.parse(response.data);
+      console.log('converted?', chatMessageArray);
+      let chatCopy = Object.assign({}, this.state.currentChat);
+      chatCopy.messages = chatMessageArray;
+      this.setState({
+        currentChat: chatCopy
+      });
+    });
+  }
   handleClickStart(event) {
     event.preventDefault();
     // this.playSound('click');
     let enteredName = document.getElementById('player-name-input').value;
+    let namesCopy = Object.assign({}, this.state.playerNames);
+    let userStatusCopy = Object.assign({}, this.state.userStatus);
+    let newPhase = this.state.phase;
     if (!enteredName.length) {
-      enteredName = 'Player';
-    } else {
-      if (!this.state.userStatus.loggedInAs) {
-        // no entry in DB
-        this.evaluatePlayerName(enteredName);
 
-      } else {
-        console.error('Clicked Start while logged in as', this.state.userStatus.loggedInAs);
-        if (enteredName !== this.state.userStatus.loggedInAs) {
-          console.error('ENTERED DIFFERENT NAME!', enteredName);
-          this.evaluatePlayerName(enteredName);
+      console.error('NO NAME ENTERED. USING GUEST-XXX');
 
-        }
-        if (this.state.userStatus.avatarIndex !== this.state.userStatus.initialValues.avatarIndex) {
-          console.error('CHANGED AVATAR!', this.state.userStatus.avatarIndex);
-          DB.saveUserAvatarIndex(this.state.userStatus.loggedInAs, this.state.userStatus.avatarIndex);
-        }
-      }
-
+      enteredName = document.getElementById('player-name-input').placeholder;
+      this.createNewGuest().then((response) => {
+        enteredName = response;
+        let guestId = parseInt(response.split('-')[1]);
+        userStatusCopy.cookieId = guestId;
+        DB.addActiveUser(enteredName, guestId).then((response) => {
+          console.error('added new active', enteredName, response);
+          DB.getActiveUsers(this).then((response) => {
+            let newArray = response.data;
+            console.warn('immediately after adding new active user, getActiveUsers returned', newArray);
+            this.setState({
+              userStatus: userStatusCopy,
+              usersHere: newArray,
+              phase: 'selectingOpponent'
+            });
+            //return;
+          });
+        });
+      });
+      return;
     }
-    let namesCopy = this.state.playerNames;
-    namesCopy.user = enteredName;
+    // loggedInAs means cookie was found AND name was found in DB with cookie ID!
+    if (!this.state.userStatus.loggedInAs) {
+      // had no cookie at load
+      console.error('Clicked Start while !loggedInAs - enteredName is', enteredName);
+      userStatusCopy.loggedInAs = enteredName;
+
+      // make sure it's not too short or too long
+      let nameLength = enteredName.length;
+      let nameTooShort = false;
+      let nameTooLong = false;
+      let inputErrorText = '';
+      if (nameLength < 3) {
+        nameTooShort = true;
+        inputErrorText = 'NAME TOO SHORT!';
+      } else if (nameLength > 24) {
+        nameTooLong = true;
+        inputErrorText = 'NAME TOO LONG!';
+      }
+      DB.getScores().then((response) => {
+        // make sure it's not taken
+        let nameTaken = false;
+        let scoresArray = response.data;
+        if (scoresArray) {
+          scoresArray.map((scoreObj, i) => {
+            if (scoreObj.playerName === enteredName) {
+              inputErrorText = 'NAME TAKEN';
+              nameTaken = true;
+            }
+          });
+        }
+        if (nameTaken || nameTooLong || nameTooShort) {
+          let yPosition = document.getElementById('player-name-input').offsetTop;
+          let inputHeight = document.getElementById('player-name-input').offsetHeight;
+          console.log('placing error text at', yPosition);
+          document.getElementById('name-input-message').style.top = (yPosition + (inputHeight / 2)) + 'px';
+          document.getElementById('name-input-message').innerHTML = inputErrorText;
+          document.getElementById('name-input-message').classList.add('slid-on');
+          setTimeout(() => {
+            document.getElementById('name-input-message').classList.remove('slid-on');
+          }, 2000);
+          document.getElementById('player-name-input').value = '';
+        } else {
+          namesCopy.user = enteredName;
+          let optionsString = JSON.stringify(this.state.options);
+          DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
+            DB.getUserId(enteredName).then((response) => {
+              Util.setCookie('username', `${enteredName}||${response.data[0].id}`, 365);
+              console.error(`SAVED ${enteredName} with ID ${response.data[0].id}`);
+              let uniqueId = response.data[0].id;
+              userStatusCopy.cookieId = parseInt(uniqueId);
+              this.setState({
+                userStatus: userStatusCopy,
+                playerNames: namesCopy
+              }, () => {
+                this.evaluatePlayerName(enteredName);
+                this.setState({
+                  phase: 'selectingOpponent'
+                }, () => {
+                  // check if it's already in the DB...
+                  console.error('post- setState phase: selectingOpponent');
+                  DB.getActiveUsers(this).then((response) => {
+                    if (response.data) {
+                      let usersArray = response.data;
+                      let alreadyThere = false;
+                      usersArray.map((userObj, i) => {
+                        if (parseInt(userObj.userId) > 0 && parseInt(userObj.userId) === this.state.userStatus.cookieId) {
+                          console.error(`ALREADY IN ACTIVE! Found ${userObj.userId} in DB, which matches cookieId ${this.state.userStatus.cookieId}`);
+                          alreadyThere = true;
+                        }
+                      });
+                      // add it if it isn't
+                      if (!alreadyThere) {
+                        DB.addActiveUser(enteredName, userStatusCopy.cookieId).then((response) => {
+                          console.error('added new active', enteredName, response);
+                          DB.getActiveUsers(this).then((response) => {
+                            let newArray = response.data;
+                            console.warn('immediately after adding new active user, getActiveUsers returned', newArray);
+                            this.setState({
+                              usersHere: newArray
+                            });
+                            //return;
+                          });
+                        });
+                      } else {
+                        // don't add
+                        console.error('NOT ADDING NEW ACTIVE USER!');
+                        this.setState({
+                          usersHere: usersArray
+                        });
+                      }
+                      let activeUsersCopy = this.state.usersHere.slice();
+                      console.error('/////////////////////// 980 block //////////////////////////////////');
+                      activeUsersCopy.map((userObj, i) => {
+                        this.state.highScores.map((userScore, p) => {
+                          if (parseInt(userObj.userId) == parseInt(userScore.id)) {
+                            userObj.avatarIndex = parseInt(userScore.avatarIndex);
+                          }
+                        });
+                      });
+                      this.setState({
+                        usersHere: activeUsersCopy
+                      });
+
+                      //     // prune for expired
+                      //     // let now = Date.now();
+                      //     // usersArray.map((userObj, i) => {
+                      //     //   let sinceLast = now - userObj.lastPing;
+                      //     //   if (sinceLast > 10000) {
+                      //     //     console.error(`${userObj.userName} last ping was ${sinceLast} ago! Too old!`);
+                      //     //   } else {
+                      //     //     console.warn(`${userObj.userName} last ping was OK, ${sinceLast} ago!`);
+                      //     //   }
+                      //     // })
+                    } else {
+                      let status = this.state.userStatus;
+                      console.warn('PLAYER NOT IN (EMPTY) ACTIVE USERS DB! userStatus is', status);
+                      DB.addActiveUser(enteredName, userStatusCopy.cookieId).then((response) => {
+                        console.warn('added new active', enteredName, response);
+                        DB.getActiveUsers(this).then((response) => {
+                          let newArray = response.data;
+                          console.warn('Immediately after adding new active user, updating entire state.usersHere obj with', newArray);
+                          this.setState({
+                            usersHere: newArray
+                          });
+                          //return;
+                        });
+                      });
+                    }
+                  });
+                });
+              });
+            });
+          });
+        }
+      });
+      //console.warn('calling evaluatePlayerName');
+      //this.evaluatePlayerName(enteredName, true);
+      return;
+    } else {
+      // had cookie and matched in DB
+      console.error('Clicked Start while logged in as', this.state.userStatus.loggedInAs);
+      if (enteredName !== this.state.userStatus.loggedInAs) {
+        console.error('ENTERED DIFFERENT NAME! re-calling with new enteredName(?)', enteredName);
+        this.evaluatePlayerName(enteredName);
+      }
+      // if (this.state.userStatus.avatarIndex !== this.state.userStatus.initialValues.avatarIndex) {
+      //   console.error('CHANGED AVATAR! calling DB.saveUserAvatarIndex', this.state.userStatus.avatarIndex);
+      //   DB.saveUserAvatarIndex(this.state.userStatus.loggedInAs, this.state.userStatus.avatarIndex);
+      // }
+      namesCopy.user = enteredName;
+    }
     this.setState({
+      userStatus: userStatusCopy,
       playerNames: namesCopy,
       phase: 'selectingOpponent'
+    }, () => {
+      // check if it's already in the DB...
+      DB.getActiveUsers(this).then((response) => {
+        if (response.data) {
+          let usersArray = response.data;
+          let alreadyThere = false;
+          usersArray.map((userObj, i) => {
+            if (parseInt(userObj.userId) > 0 && parseInt(userObj.userId) === this.state.userStatus.cookieId) {
+              console.error(`ALREADY IN ACTIVE! Found ${parseInt(userObj.userId)} in DB, which matches cookieId ${this.state.userStatus.cookieId}`);
+              alreadyThere = true;
+            }
+          });
+          // add it if it isn't
+          if (!alreadyThere) {
+            let status = this.state.userStatus;
+            console.warn('PLAYER NOT IN ACTIVE USERS DB! userStatus is', status);
+            DB.addActiveUser(enteredName, userStatusCopy.cookieId).then((response) => {
+              console.error('added new active', enteredName, response);
+              DB.getActiveUsers(this).then((response) => {
+                let newArray = response.data;
+                console.warn('immediately after adding new active user, getActiveUsers returned', newArray);
+                this.setState({
+                  usersHere: newArray
+                });
+                //return;
+              });
+            });
+          } else {
+            // don't add
+            console.error('NOT ADDING NEW ACTIVE USER!');
+            this.setState({
+              usersHere: usersArray
+            });
+          }
+          let activeUsersCopy = this.state.usersHere.slice();
+          console.error('/////////////////////// 1103 block //////////////////////////////////');
+          activeUsersCopy.map((userObj, i) => {
+            this.state.highScores.map((userScore, p) => {
+              if (parseInt(userObj.userId) == parseInt(userScore.id)) {
+                userObj.avatarIndex = parseInt(userScore.avatarIndex);
+              }
+            });
+          });
+          this.setState({
+            usersHere: activeUsersCopy
+          });
+
+          //     // prune for expired
+          //     // let now = Date.now();
+          //     // usersArray.map((userObj, i) => {
+          //     //   let sinceLast = now - userObj.lastPing;
+          //     //   if (sinceLast > 10000) {
+          //     //     console.error(`${userObj.userName} last ping was ${sinceLast} ago! Too old!`);
+          //     //   } else {
+          //     //     console.warn(`${userObj.userName} last ping was OK, ${sinceLast} ago!`);
+          //     //   }
+          //     // })
+
+
+        } else {
+          let status = this.state.userStatus;
+          console.warn('PLAYER NOT IN (EMPTY) ACTIVE USERS DB! userStatus is', status);
+          DB.addActiveUser(enteredName, userStatusCopy.cookieId).then((response) => {
+            console.error('added new active', enteredName, response);
+            DB.getActiveUsers(this).then((response) => {
+              let newArray = response.data;
+              console.warn('immediately after adding new active user, getActiveUsers returned', newArray);
+              this.setState({
+                usersHere: newArray
+              });
+              //return;
+            });
+          });
+        }
+      });
+
     });
   }
   handleClickSwitchSign(event) {
@@ -661,7 +1439,6 @@ class App extends React.PureComponent {
   handleClickHallOfFame(event) {
     event.preventDefault();
     // this.playSound('click');
-    this.getHighScores();
     setTimeout(() => {
       this.setState({
         phase: 'showingHallOfFame'
@@ -891,18 +1668,18 @@ class App extends React.PureComponent {
 
     if (winner !== 'TIE') {
       let newWins = this.state[`${winner}Wins`] + 1;
-      if (this.state.playerNames.user !== 'Player' && this.state.userStatus.loggedInAs) {
+      if (this.state.playerNames.user !== 'Guest' && this.state.userStatus.loggedInAs) {
         let playerName = this.state.userStatus.loggedInAs;
         this.incrementPlayerTotalGames(playerName, 'sets');
         if (winner === 'user') {
           this.incrementPlayerScore(playerName, 'setWins');
           if (newWins === 3) {
-            this.incrementPlayerScore(playerName, 'roundWins');
-            this.incrementPlayerTotalGames(playerName, 'rounds');
+            this.incrementPlayerScore(playerName, 'matchWins');
+            this.incrementPlayerTotalGames(playerName, 'matches');
           }
         } else {
           if (newWins === 3) {
-            this.incrementPlayerTotalGames(playerName, 'rounds');
+            this.incrementPlayerTotalGames(playerName, 'matches');
           }
         }
       }
@@ -916,7 +1693,7 @@ class App extends React.PureComponent {
       });
     } else {
       // TIE
-      if (this.state.playerNames.user !== 'Player' && this.state.userStatus.loggedInAs) {
+      if (this.state.playerNames.user !== 'Guest' && this.state.userStatus.loggedInAs) {
         let playerName = this.state.userStatus.loggedInAs;
         this.incrementPlayerTotalGames(playerName, 'sets');
       }
@@ -924,8 +1701,8 @@ class App extends React.PureComponent {
         turn: null,
         lastWinner: null
       }, () => {
-        document.getElementById('game-board').style.opacity = 0.3;
         this.callResultModal('tie');
+        document.getElementById('game-board').style.opacity = 0.3;
       });
     }
 
@@ -1096,9 +1873,9 @@ class App extends React.PureComponent {
     }
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
       bgColor = 'var(--house-card-color)';
-      title = 'ROUND\nWINNER';
+      title = 'MATCH\nWINNER';
       winnerDisplay = this.state.playerNames[winner];
-      buttonText = 'New Round';
+      buttonText = 'New Match';
     }
     let modal = document.getElementById('result-modal');
     modal.style.backgroundColor = bgColor;
@@ -1115,13 +1892,58 @@ class App extends React.PureComponent {
     let modal = document.getElementById('result-modal');
     modal.classList.remove('modal-on');
   }
+  callConfirmModal(titleText, bodyText, buttonText, confirmAction, noCancel) {
+    this.setState({
+      confirmMessage: {
+        showing: true,
+        titleText: titleText,
+        bodyText: bodyText,
+        buttonText: buttonText
+      }
+    }, () => {
+      document.getElementById('confirm-ok-button').addEventListener('click', confirmAction);
+      if (noCancel) {
+        document.getElementById('confirm-cancel-button').style.display = 'none';
+      }
+    });
+  }
+  dismissConfirmModal() {
+    document.getElementById('confirm-modal').classList.remove('confirm-modal-showing');
+    this.setState({
+      confirmMessage: {
+        showing: false,
+        titleText: '',
+        bodyText: '',
+        buttonText: {}
+      }
+    });
+  }
+  callUserInfoModal(selectedUserId) {
+    this.setState({
+      confirmMessage: {
+        showing: true,
+        titleText: titleText,
+        bodyText: bodyText,
+        buttonText: buttonText
+      }
+    }, () => {
+      document.getElementById('confirm-ok-button').addEventListener('click', confirmAction);
+    });
+  }
+  dismissUserInfoModal() {
+    document.getElementById('user-info-modal').classList.remove('user-info-modal-showing');
+    this.setState({
+      selectedUser: {}
+    });
+  }
   handleClickAvatar(event) {
     if (document.getElementsByClassName('selected-avatar')[0]) {
       document.getElementsByClassName('selected-avatar')[0].classList.remove('selected-avatar');
     }
     event.target.classList.add('selected-avatar');
     let userStatusCopy = Object.assign({}, this.state.userStatus);
-    userStatusCopy.avatarIndex = parseInt(event.target.id.split('-')[2]);
+    let columnNumber = parseInt(event.target.id.split('-')[2]);
+    userStatusCopy.avatarIndex = columnNumber;
     this.setState({
       userStatus: userStatusCopy
     });
@@ -1220,15 +2042,19 @@ class App extends React.PureComponent {
   handleClickOpponentPanel(event) {
     let eventId = event.target.id;
     let opponentName = eventId.split('-')[0];
+    console.warn('clicked panel opponentName', opponentName);
     let opponentPanel = document.getElementById(`${opponentName}-panel`);
     let opponentSelectButton = document.getElementById(`${opponentName}-select-button`);
     opponentPanel.classList.add('panel-selected');
     opponentSelectButton.classList.add('disabled-select-button');
     Array.from(document.getElementById('opponent-select-area').children).map((panel, i) => {
-      if (panel.id.split('-')[0] !== opponentName) {
+      console.log('checking panel', panel.id);
+      if (panel && panel.id.split('-')[0] !== opponentName) {
         let panelButton = document.getElementById(`${panel.id.split('-')[0]}-select-button`);
         panel.classList.remove('panel-selected');
-        panelButton.classList.remove('disabled-select-button');
+        if (panelButton) {
+          panelButton.classList.remove('disabled-select-button');
+        }
       }
     });
     // delay setting state until bg changed / flash finished!
@@ -1239,12 +2065,52 @@ class App extends React.PureComponent {
       namesCopy.opponent = this.characters[opponentName].displayName;
       let opponentDeckCopy = Util.shuffle(this.characters[opponentName].deck);
       this.setState({
+        vsCPU: true,
         CPUOpponent: opponentName,
         playerNames: namesCopy,
         opponentDeck: opponentDeckCopy
       });
-    }, this.state.options.flashInterval * 2);
+    }, this.state.options.flashInterval * 5);
     event.preventDefault();
+  }
+
+  handleClickMoreInfo(event) {
+    event.preventDefault();
+    console.log('clicked', event.target.id);
+    let splitId = event.target.id.split('-');
+    let id = parseInt(splitId[splitId.length - 1]);
+    if (id === this.state.userStatus.cookieId) {
+      this.handleClickAccountInfo();
+    }
+
+  }
+  handleClickSendMessage(event) {
+    event.preventDefault();
+    let clickedId = parseInt(event.target.id.split('-')[3]);
+    console.log('clicked', clickedId);
+    this.startChatInstance(clickedId);
+  }
+  handleClickRequestMatch(event) {
+    event.preventDefault();
+    console.log('clicked', event.target.id);
+    DB.createNewOpenMatch(this.state.userStatus.cookieId).then((response) => {
+      console.log('created match?', response);
+    });
+  }
+  handleClickConfirmButton(event) {
+    event.preventDefault();
+    console.log('clicked', event.target.id);
+
+  }
+  handleClickCancelButton(event) {
+    event.preventDefault();
+    this.dismissConfirmModal();
+    console.log('clicked', event.target.id);
+  }
+  handleClickCloseButton(event) {
+    event.preventDefault();
+    this.dismissUserInfoModal();
+    console.log('clicked', event.target.id);
   }
   resetBoard(newTurn, total) {
     document.getElementById('user-total').classList.remove('red-total');
@@ -1351,6 +2217,7 @@ class App extends React.PureComponent {
     // let footerStyle = { pointerEvents: 'none', opacity: 1, position: 'absolute', bottom: '-10vmax' };
     let gameBoardStyle = { display: 'none' };
     let introStyle = { display: 'none' };
+    // let introStyle = { display: 'flex' };
     let instructionsStyle = { display: 'none' };
     let optionsStyle = { display: 'none' };
     let hallOfFameStyle = { display: 'none' };
@@ -1376,9 +2243,12 @@ class App extends React.PureComponent {
         gameBoardStyle.display = 'flex';
       // footerStyle = { pointerEvents: 'all', opacity: 1, position: 'relative', bottom: '0' }; break;
     }
+    let headerMenuMode = 'userInfo';
+    if (this.state.chatShowing) {
+      headerMenuMode = 'chat';
+    }
     let endTime = window.performance.now();
     // console.warn('App pre-return activites took', (endTime - startTime));
-    
     return (
       <div id='container'>
         <Header
@@ -1387,10 +2257,13 @@ class App extends React.PureComponent {
           uniqueId={this.state.userStatus.cookieId}
           portraitSource={this.state.portraitSources.user}
           avatarIndex={this.state.userStatus.avatarIndex}
-          onClickInfoArea={this.handleClickUserInfo}
+          onClickAccountArea={this.handleClickAccountInfo}
+          onClickMessageArea={this.handleClickMessages}
           userStatus={this.state.userStatus}
           onClickSignIn={this.handleClickSignIn}
-          onClickLogOut={this.handleClickLogOut} />
+          onClickLogOut={this.handleClickLogOut}
+          usersHere={this.state.usersHere} />
+        {/* {phase === 'splashScreen' && */}
         <IntroScreen style={introStyle}
           cardSize={this.state.cardSizes.cardSize}
           userAvatarSource={this.state.portraitSources.user}
@@ -1402,17 +2275,19 @@ class App extends React.PureComponent {
           onClickHallOfFame={this.handleClickHallOfFame}
           onFocusNameInput={this.handleNameInputFocus}
           onUnfocusNameInput={this.handleNameInputUnfocus}
+          userStatus={this.state.userStatus}
         />
+        {/* } */}
         {phase === 'showingInstructions' &&
           <InstructionsScreen style={instructionsStyle}
             onClickBack={this.handleClickBack} />
         }
-        {phase === 'showingOptions' &&
-          <OptionsScreen style={optionsStyle}
-            currentOptions={this.state.options}
-            onToggleOption={this.handleToggleOption}
-            onClickBack={this.handleClickBack} />
-        }
+        {/* {phase === 'splashScreen' || phase === 'showingOptions' && */}
+        <OptionsScreen style={optionsStyle}
+          currentOptions={this.state.options}
+          onToggleOption={this.handleToggleOption}
+          onClickBack={this.handleClickBack} />
+        {/* } */}
         {phase === 'showingHallOfFame' &&
           <HallOfFameScreen style={hallOfFameStyle}
             highScores={this.state.highScores}
@@ -1429,16 +2304,22 @@ class App extends React.PureComponent {
             onClickBack={this.handleClickBack}
             cardSizes={this.state.cardSizes} />
         }
-        {(phase === 'selectingOpponent') &&
+        {phase === 'selectingOpponent' &&
           <OpponentSelectScreen style={opponentSelectStyle}
+            userStatus={this.state.userStatus}
+            userId={this.state.userStatus.cookieId}
+            highScores={this.state.highScores}
             characters={this.characters}
             opponentSelected={this.state.CPUOpponent}
             cardSize={microCardSize}
             onClickPanel={this.handleClickOpponentPanel}
             onClickOpponentReady={this.handleClickOpponentReady}
-            onClickBack={this.handleClickBack} />
+            onClickBack={this.handleClickBack}
+            usersHere={this.state.usersHere}
+            onClickMoreInfo={this.handleClickMoreInfo}
+            onClickSendMessage={this.handleClickSendMessage}
+            onClickRequestMatch={this.handleClickRequestMatch} />
         }
-
         <GameBoard style={gameBoardStyle}
           playerNames={this.state.playerNames}
           opponentNames={Object.keys(this.characters)}
@@ -1456,32 +2337,58 @@ class App extends React.PureComponent {
           miniCardSize={miniCardSize}
           onClickCard={this.handleClickCard} />
         <ControlFooter
-          showing={this.state.phase === 'gameStarted'}
+          showing={phase === 'gameStarted'}
           onClickEndTurn={this.handleClickEndTurn}
           onClickStand={this.handleClickStand}
           onClickHamburger={this.handleClickHamburger}
           onClickSwitchSign={this.handleClickSwitchSign}
         />
-        <UserInfoPanel playerObj={this.state.userStatus}
+        {/* {this.state.userStatus.loggedInAs && */}
+        <HeaderMenu mode={headerMenuMode}
+          playerObject={this.state.userStatus}
+          chatObject={this.state.currentChat}
           cardSize={this.state.cardSizes.cardSize}
           portraitSource={this.state.portraitSources.user}
           onClickSignIn={this.handleClickSignIn}
-          onClickLogOut={this.handleClickLogOut} />
+          onClickLogOut={this.handleClickLogOut}
+          onSubmitChatMessage={this.handleSubmitChatMessage}
+          characters={this.characters} />
+        {/* } */}
         {phase === 'gameStarted' &&
-
           <HamburgerMenu
             currentOptions={this.state.options}
             onClickHamburgerQuit={this.handleClickHamburgerQuit}
             onToggleOption={this.handleToggleOption} />
-
+        }
+        {this.state.confirmMessage.showing &&
+          <ConfirmModal showing={this.state.confirmMessage.showing}
+            messageData={this.state.confirmMessage}
+            titleText={this.state.confirmMessage.titleText}
+            bodyText={this.state.confirmMessage.bodyText}
+            buttonText={this.state.confirmMessage.buttonText}
+            onClickConfirmButton={this.handleClickConfirmButton}
+            onClickCancelButton={this.handleClickCancelButton}
+          />
+        }
+        {this.state.selectedUser.playerName &&
+          <UserInfoModal showing={this.state.selectedUser.playerName}
+            playerObj={this.state.selectedUser}
+            cardSize={this.state.cardSizes.cardSize}
+            portraitSource={this.state.portraitSources.user}
+            onClickCloseButton={this.handleClickCloseButton}
+            onClickLogOut={this.handleClickLogOut}
+            onClickSignIn={this.handleClickSignIn}
+          />
         }
         <ResultModal onClickOKButton={this.handleClickOKButton}
           titleText={this.state.resultMessage.title}
           playerNames={this.state.playerNames}
           winner={this.state.resultMessage.winner}
-          roundOver={(this.state.userWins === 3 || this.state.opponentWins === 3)}
+          matchOver={(this.state.userWins === 3 || this.state.opponentWins === 3)}
           finalScores={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
           buttonText={this.state.resultMessage.buttonText} />
+
+
       </div>
     );
   }
