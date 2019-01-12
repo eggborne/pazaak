@@ -10,22 +10,67 @@ function OptionsScreen(props) {
   let darkThemeOption = 'option-off';
   let fullScreenOption = 'option-off';
   if (props.currentOptions.sound) {
-    soundOption = 'option-on'
+    soundOption = 'option-on';
   }
   if (props.currentOptions.ambience) {
-    ambientOption = 'option-on'
+    ambientOption = 'option-on';
   }
-  if (props.currentOptions.opponentMoveWaitTime !== 1600) {
-    quickModeOption = 'option-on'
+  if (props.currentOptions.opponentMoveWaitTime === 300) {
+    quickModeOption = 'option-on';
   }
   if (props.currentOptions.darkTheme) {
-    darkThemeOption = 'option-on'
+    darkThemeOption = 'option-on';
   }
   if (Util.isFullScreen()) {
     fullScreenOption = 'option-on';
   }
   return (
     <div style={props.style} id='options-screen'>
+      <style jsx>{`
+        #options-screen {
+          background-color: var(--trans-blue-bg-color);
+          font-size: 2.75vh;
+          font-family: 'Bungee';
+          line-height: 100%;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        #options {
+          box-sizing: border-box;
+          padding: 15vw;
+          display: flex;
+          flex-grow: 1;
+          width: 100%;
+        }
+        #options-grid {
+          position: relative;
+          box-sizing: border-box;
+          display: grid;
+          width: 100vw;
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+          align-items: center;
+          flex-grow: 1;
+        }
+        .option-label {
+          width: 100%;
+        }
+        .option-toggle {
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid black;
+          background-color: var(--option-on-color);
+          font-size: 2rem;
+          border-radius: 0.25rem;
+          transition: background 200ms ease;
+          content: 'OFF';
+          justify-self: end;
+          width: 80%;
+          height: 80%;
+        }
+      `}</style>
       <div className='options-instructions-title shadowed-text'>Options</div>
       <div id='options' className='shadowed-text'>
         <div id='options-grid'>
