@@ -80,6 +80,8 @@ function GameBoard(props) {
   let handGridwidth = handCardSize.width + Math.round(parseFloat(handCardSize.borderSize) * 3);
   let handGridHeight = handCardSize.height + Math.round(parseFloat(handCardSize.borderSize) * 3);
   let portraitSize = Math.round(parseInt(handCardSize.height * 0.9));
+  let opponentPortraitIndex = props.opponentNames.indexOf(props.CPUOpponent);
+
   return (
     <div style={props.style} id='game-board'>
       <style jsx>{`
@@ -288,7 +290,7 @@ function GameBoard(props) {
       <MoveIndicator />
       <div id='opponent-hand' className='player-hand-area'>
         <div className='player-portrait-area'>
-          <PlayerPortrait size={portraitSize} source={props.portraitSources.opponent} spriteIndex={opponentSpriteIndex} displayName={props.playerNames.opponent} type={'mini'} />
+          <PlayerPortrait size={portraitSize} source={props.portraitSources.opponent} spriteIndex={opponentPortraitIndex} displayName={props.playerNames.opponent} type={'mini'} />
         </div>
         <div id='opponent-cards' className='player-cards'>
           <div>{opponentHand[0]}</div>
