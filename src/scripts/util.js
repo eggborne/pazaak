@@ -28,19 +28,45 @@ const getCookie = (cname) => {
 };
 export const checkCookie = (app) => {
   let response = getCookie('username');
+  let userStatusCopy = Object.assign({}, app.state.userStatus);
+  let playerName;
+  let uniqueId;
   if (response != '') {
-    let playerName = response.split('-')[0];
-    let uniqueId = response.split('-')[1];
-    let userStatusCopy = Object.assign({}, app.state.userStatus);
+    playerName = response.split('||')[0];
+    uniqueId = response.split('||')[1];
     userStatusCopy.cookieId = parseInt(uniqueId);
+    userStatusCopy.id = parseInt(uniqueId);
+    userStatusCopy.loggedInAs = playerName;
+    console.error(`Recognized user as ${response}. Filling ${playerName} in name input and disabling checkbox etc.`);
+    document.getElementById('player-name-input').value = playerName;
+
+    // document.getElementById('player-name-input').disabled = true;
+    // document.getElementById('player-name-input').style.backgroundColor = 'gray';
+    // document.getElementById('remember-checkbox').checked = true;
+    // // document.getElementById('remember-checkbox').disabled = true;
+    document.getElementById('remember-check-area').classList.add('remembered');
+
     app.setState({
       userStatus: userStatusCopy
+    }, () => {
+      app.evaluatePlayerName(playerName);
+      app.checkForNewMessages().then((response) => {
+        console.log('checkfornew got', response);
+        let userStatusCopy = Object.assign({}, app.state.userStatus);
+        userStatusCopy.messages = response;
+        userStatusCopy.unreadMessages = response.length;
+        app.setState({
+          userStatus: userStatusCopy,
+        });
+      });
     });
-    document.getElementById('player-name-input').value = playerName;
-    console.error(`Recognized user as ${response}. Filling name input and calling evaluatePlayerName()...`);
-    app.evaluatePlayerName(playerName, uniqueId);        
   } else {
-    console.error('No cookie found.');
+    console.error('No cookie found. Leaving state.userStatus.cookieId undefined.');
+    document.getElementById('player-name-input').disabled = false;
+    // document.getElementById('player-name-input').style.backgroundColor = 'white';
+    // // document.getElementById('remember-checkbox').disabled = true;
+    // document.getElementById('remember-checkbox').checked = false;
+    document.getElementById('remember-check-area').classList.remove('remembered');
   }
 };
 
@@ -99,7 +125,7 @@ export function getCardSizes() {
 
 export function sizeElements(app, initialStart) {
   if (initialStart) {
-  // size button text    
+    // size button text    
     Array.from(document.getElementsByClassName('intro-button')).map((button) => {
       let buttonTextLength = button.children[0].innerHTML.length;
       if (button.children[0].innerHTML === 'How to Play') {
