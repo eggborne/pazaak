@@ -29,10 +29,11 @@ body {
   --card-back-border-color: #444;
   --card-spot-border-color: #999;
   --card-spot-bg-color: rgba(0, 0, 0, 0.05);
-  --main-text-size: 5vw;
-  --header-text-size: 3vh;
+  --main-text-size: 1rem;
+  --header-text-size: 1.25rem;
   --header-height: 7vh;
   /* --header-height: 2rem; */
+  --intro-width: 72vw;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -45,6 +46,8 @@ body {
   height: 100%;
   min-width: 320px;
   background-color: black;
+  font-family: 'Nova Square';
+  /* font-display: auto; */
 }
 ::-webkit-scrollbar {
   width: 0rem;
@@ -53,12 +56,62 @@ body {
 .display-none {
   display: none !important;
 }
+.bigger {
+  font-size: 1.25em !important;
+  font-weight: bold !important;
+}
+.loading-message {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loading-text {
+  position: absolute;
+  z-index: 2;
+  animation: squeeze-x 2s infinite;
+}
+.loading-icon {
+  /* src: url(https://pazaak.online/assets/images/favicon.png); */
+  height: var(--header-height);
+  width: var(--header-height);
+  animation: spin-x 1s infinite;
+  z-index: 1;
+}
+.modal-title {
+  font-family: 'Bungee';
+}
+.modal-body {
+
+}
+@keyframes spin-x {
+  0% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes squeeze-x {
+  0% {
+    letter-spacing: 0;
+  }
+  50% {
+    letter-spacing: 1vw;
+  }
+  100% {
+    letter-spacing: 0;
+  }
+}
 a {
   color: var(--main-text-color);
 }
 button {
-  outline: 0;
   font-family: 'Bungee';
+  outline: 0;
   line-height: 100%;
   background-color: var(--button-bg-color);
   color: var(--button-text-color);
@@ -123,8 +176,8 @@ li:before {
   transition: background 300ms ease;
 }
 .options-instructions-title {
-  box-sizing: border-box;
   font-family: 'Bungee';
+  box-sizing: border-box;
   font-size: 2rem;
   line-height: 100%;
   width: 100vw;
@@ -147,6 +200,14 @@ li:before {
   /* for Firefox! */
   min-height: 0;
 }
+#instructions {
+  font-family: 'Nova Square';
+  box-sizing: border-box;
+  padding: 5vw;
+  padding-top: 1rem;
+  overflow-y: scroll;
+  margin: 0;
+}
 .option-footer {
   box-sizing: border-box;
   border-top: 1px solid black;
@@ -159,60 +220,8 @@ li:before {
   /* position: absolute; */
   bottom: 0;
 }
-#options-screen {
-  background-color: var(--trans-blue-bg-color);
-  font-size: 2.75vh;
-  line-height: 100%;
-}
-#options {
-  font-family: 'Bungee';
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-grow: 1;
-}
-#instructions {
-  box-sizing: border-box;
-  padding: 5vw;
-  padding-top: 1rem;
-  font-family: 'Nova Square';
-  overflow-y: scroll;
-  margin: 0;
-}
-
-#options-grid {
-  position: relative;
-  box-sizing: border-box;
-  width: 80%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
-  justify-items: stretch;
-  height: 50vh;
-  padding-bottom: 10vh;
-}
-
 .set-win-count {
   color: green;
-}
-.option-label {
-  /* justify-self: right; */
-  padding-right: 1.5rem;
-}
-.option-label, .option-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.option-toggle {
-  border: 1px solid black;
-  background-color: var(--option-on-color);
-  margin: 0.25rem;
-  font-size: 2rem;
-  border-radius: 0.25rem;
-  transition: background 200ms ease;
-  content: 'OFF';
 }
 .option-off {
   background-color: var(--option-off-color) !important;
@@ -261,12 +270,7 @@ li:before {
 .opponent-portrait {
   position: relative;
   /* box-sizing: border-box; */
-  border-radius: 0.5rem;
   border: 1px solid black;
-  display: flex;
-  align-items: flex-end;
-  background-image: url('https://pazaak.online/assets/images/opponentssheet.jpg');
-  background-size: cover;
   background-repeat: no-repeat;
 }
 .portrait-label {
@@ -280,30 +284,10 @@ li:before {
   align-items: center;
   justify-content: center;
 }
-.opponent-quote {
-  font-size: 0.9rem;
-  align-self: stretch;
-  padding: 0.5rem;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  border-radius: 0.35rem;
-  border: 0.35vw solid rgb(67, 78, 67);
-  background: rgba(0, 0, 0, 0.1);
-}
-.left-opponent-panel {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto;
-  align-items: center;
-  justify-items: stretch;
-  width: 37.5%;
-  min-width: 120px;
-  padding: 3vmin 2vmin;
-}
 .opponent-description {
   padding: 3vmin 2vmin;
   width: 65%;
-  font-size: 1rem;
+  font-size: 0.9rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -313,7 +297,7 @@ li:before {
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 0.5fr auto 1fr;
+  grid-template-rows: 0.25fr 0.5fr 0.5fr 1fr;
   align-self: center;
   width: 100%;
   height: 100%;
@@ -321,7 +305,7 @@ li:before {
 }
 .opponent-prize-label, .skill-label {
   padding: 0.25rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   align-self: center;
   background-color: rgba(0, 0, 0, 0.2);
   width: 100%;
@@ -482,8 +466,12 @@ li:before {
 .hidden-button {
   display: none;
 }
+.no-pointer {
+  pointer-events: none;
+}
 
 .card {
+  font-family: 'Nova Square';
   box-sizing: border-box;
   color: var(--card-back-color);
   background-color: var(--card-bg-color);
@@ -492,7 +480,6 @@ li:before {
   flex-direction: column;
   align-items: center;
   position: relative;
-  font-family: 'Nova Square';
   cursor: pointer;
   transition: all 150ms ease;
   transform-origin: bottom;
@@ -569,12 +556,12 @@ li:before {
 }
 
 #result-modal {
+  font-family: 'Bungee';
   box-sizing: border-box;
   position: fixed;
   margin-left: 12.5%;
   margin-left: 12.5%;
   width: 75%;
-  font-family: 'Bungee';
   color: var(--main-text-color);
   border-radius: 1.25rem;
   margin-top: 30vw;
