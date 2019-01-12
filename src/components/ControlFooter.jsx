@@ -4,8 +4,10 @@ import Hamburger from './Hamburger';
 
 function Footer(props) {
   let extraClass;
+  let display = 'none';
   if (props.showing) {
     extraClass = 'control-footer-on';
+    display = 'inline-flex';
   }
   return (
     <div id='control-footer' className={extraClass}>
@@ -18,7 +20,7 @@ function Footer(props) {
           min-height: 10vmax;
           max-height: 10vmax;
           background-color: var(--red-bg-color);
-          display: inline-flex;
+          display: ${display};          
           justify-content: space-between;
           align-items: stretch;
           position: absolute;
