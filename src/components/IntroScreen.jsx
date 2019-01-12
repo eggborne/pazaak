@@ -2,6 +2,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Footer from './Footer';
+import NameAvatarForm from './NameAvatarForm';
+import { sizeElements } from '../scripts/util';
 
 class IntroScreen extends React.PureComponent {
   constructor(props) {
@@ -13,8 +15,34 @@ class IntroScreen extends React.PureComponent {
     this.handleAvatarClick = this.handleAvatarClick.bind(this);
   }
 
+  componentDidMount() {
+    sizeElements(false, true);
+    // if (this.props.userStatus.loggedInAs) {
+    //   document.getElementById('player-name-input').value = this.props.userStatus.loggedInAs;
+    // }
+    // setTimeout(() => {
+    //   document.getElementById('intro-screen').style.opacity = 1;
+    //   document.getElementById('footer').style.transform = 'none';
+    // }, 5);
+  }
+
   handleAvatarClick(event) {
     return this.props.onClickAvatar(event);
+  }
+
+  handleInputChange() {
+    let checkbox = document.getElementById('remember-checkbox');
+    if (event.target.value.length < 3) {
+      if (!checkbox.disabled) {
+        checkbox.disabled = true;
+        checkbox.checked = false;
+      }
+    } else {
+      if (checkbox.disabled) {
+        checkbox.disabled = false;
+        checkbox.checked = true;
+      }
+    }
   }
 
   render() {
@@ -22,21 +50,24 @@ class IntroScreen extends React.PureComponent {
     let avatarSource = this.props.userAvatarSource;
     let avatarBorderSize = this.state.avatarBorderSize;
     let avatarPlusBorderSize = avatarSize + avatarBorderSize;
+    let remembered = '';
+    if (this.props.userStatus.cookieId) {
+      remembered = 'remembered';
+    }
     return (
       <div style={this.props.style} id='intro-screen'>
         <style jsx>{`
         #intro-screen {
-          //position: absolute;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: space-between;
           flex-grow: 1;
-          opacity: 0;
+          opacity: 0.1;
           width: 100%;
           //height: 100%;
-          
-          transition: opacity 800ms ease;
+          //height: 100%;
+          transition: opacity 300ms ease;
         }
         #intro-screen-body {
           display: flex;
@@ -44,14 +75,7 @@ class IntroScreen extends React.PureComponent {
           align-items: center;
           flex-grow: 2;
           justify-content: center;
-        }
-        .input-area {
-          display: flex;
-          flex-direction: column;
-          width: 66vw;
-          background-color: rgba(0, 0, 0, 0.1);
-          border-radius: 0.5rem 0.5rem 0 0;
-        }
+        }        
         .intro-button {
           flex-grow: 1;
           display: flex;
@@ -84,47 +108,6 @@ class IntroScreen extends React.PureComponent {
           background-color: rgba(0, 0, 0, 0.2);
           border-radius: 0.5rem 0.5rem 0 0;
         }
-        form {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-        #player-name-input {
-          font-family: 'Nova Square';
-          font-size: var(--main-text-size);
-          background-color: var(--name-input-color);
-          color: var(--name-input-text-color);
-          box-sizing: border-box;
-          padding: 0.5rem;
-          -webkit-user-select: text;  /* Chrome all / Safari all */
-          -moz-user-select: text;     /* Firefox all */
-          -ms-user-select: text;      /* IE 10+ */
-          user-select: text;
-          margin: 1rem;
-        }
-        #avatar-area {
-          box-sizing: border-box;
-          padding: 0;
-          width:  ${avatarPlusBorderSize * 3.5}px;
-          min-width: 50vw;
-          max-width: 72vw;
-          background-color: rgba(0, 0, 0, 0.2);
-          border-radius: 0.5rem;
-          display: flex;
-          flex-direction: column;
-        }
-        #avatar-select-area {
-          height: ${avatarPlusBorderSize}px;
-          margin: 1vh;
-        }
-        #avatar-row {
-          width: 100%;
-          display: flex;
-          justify-content: flex-start;
-          overflow-x: scroll;
-          //vertical-align: middle;
-        }
         .shadowed-box {
           box-shadow: 0 0 ${avatarBorderSize + 2}px ${avatarBorderSize}px #333;
         }
@@ -152,66 +135,19 @@ class IntroScreen extends React.PureComponent {
         .button-label {
           pointer-events: none;
         }
-        #start-button {
-          min-width: 68vw;
-          max-width: 68vw;
-          min-height: 12vh;
-          margin: 0 1rem 1rem 1rem;
-          align-self: center;      
-        }
         #hall-of-fame-button {
           min-width: 72vw;
           color: var(--special-button-text-color);
-        }
-        #start-button > div {
-          animation: throb 1000ms infinite;
-        }
-        .user-avatar-area {
-          min-width: 0;
-          max-width: 100%;
-        }
-        .keyboard-showing-start-button {
-          max-height: 20vh;
-        }
-        @keyframes throb {
-          0% {
-            transform: scale(1)
-          }
-          50% {
-            transform: scale(0.95);
-          }
-        }
-        @media (orientation: portrait) {
-          #avatar-area {
-            min-width: 90vw;
-            max-width: 90vw;
-          }
-        }
+        }        
       `}</style>
         <div id='intro-screen-body'>
-          <form onSubmit={(event) => event.preventDefault()} action='https://www.eggborne.com/scripts/upload.php' method='post' id='avatar-form' encType='multipart/form-data'>
-            <div className='input-area'>
-              <div className='input-label'>Enter name</div>
-              <input name='player-name' id='player-name-input' placeholder='Player'></input>
-            </div>
-            <div id='avatar-area'>
-              <div id='avatar-label' className='input-label'>Select avatar</div>
-              <div id='avatar-select-area'>
-                <span id='avatar-row'>
-                  &nbsp;
-                  {[0, 1, 2, 3, 4, 5].map((xPos, i) => {
-                    let selected = '';
-                    if (this.props.userAvatarIndex === i) {
-                      selected = 'selected-avatar';
-                    }
-                    return <div style={{ backgroundPositionX: `${(-i * (avatarSize + avatarBorderSize))}px` }} onClick={this.handleAvatarClick} key={i} id={`avatar-thumb-${i}`} className={`avatar-thumb shadowed-box ${selected}`}></div>;
-                  })}
-                  &nbsp;
-                </span>
-              </div>
-              <button onClick={this.props.onClickStart} className='intro-button' id='start-button'><div className='button-label'>Play!</div></button>
-            </div>
-          </form>
+          {/* <form onSubmit={(event) => event.preventDefault()} action='https://www.eggborne.com/scripts/upload.php' method='post' id='avatar-form' encType='multipart/form-data'> */}
+          <NameAvatarForm cardSize={this.props.cardSize}
+            userStatus={this.props.userStatus}
+            userAvatarSource={this.props.userAvatarSource}
+            userAvatarIndex={this.props.userStatus.avatarIndex}
+            onClickAvatar={this.props.onClickAvatar}
+            onClickStart={this.props.onClickStart} />
           <div id='small-button-area'>
             <button onClick={this.props.onClickOptions} className='intro-button small-intro-button' id='options-button'><div className='button-label'>Options</div></button>
             <button onClick={this.props.onClickHow} className='intro-button small-intro-button' id='how-button'><div className='button-label'>How to Play</div></button>
@@ -236,6 +172,7 @@ IntroScreen.propTypes = {
   onClickHallOfFame: PropTypes.func,
   onUnfocusNameInput: PropTypes.func,
   onFocusNameInput: PropTypes.func,
+  userStatus: PropTypes.object
 };
 
 export default IntroScreen;
