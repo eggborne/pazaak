@@ -4,32 +4,36 @@ import PropTypes from 'prop-types';
 function PlayingAsIndicator(props) {
   let displayName = props.playerName;
   let nameColor = 'var(--option-on-color)';
-  let nameSize = '1.2em';
-  // let displayId = 'inline-block';
-  let displayId = 'none';
   if (!props.playerName) {
-    displayName = 'Player';
+    displayName = 'Guest';
     nameColor = 'gray';
-    nameSize = '1em';
-    displayId = 'none';
   }
+  let nameSize = props.cardSize.height/8;
+  let nameLength = displayName.length;
+  let wordsInName = displayName.split(' ').length;
+  if (nameLength > 10 || wordsInName > 1) {
+    nameSize = props.cardSize.height/9;
+  }
+  
   return (
     <div id='playing-as-indicator'>
       <style jsx>{`
         #playing-as-indicator {
-          font-family: sans-serif;
           font-family: 'Nova Square';
           max-height: var(--header-height);
           display: flex;
-          justify-content: center;
+          justify-content: flex-end;
           align-items: center;
-          font-size: ${props.cardSize.height*0.12}px;
+          font-size: 0.55em;
           color: #bfb;
-          margin-right: 4%;
-          line-height: 1rem;
+          //margin-right: 4%;
+          line-height: 150%;
+          flex-grow: 1;
+          font-size: ${nameSize * 0.9}px;
+          
         }
         #playing-as-name {
-          font-size: ${nameSize};
+          font-size: ${nameSize}px;
           font-weight: 600;
           color: ${nameColor};
           text-shadow:
@@ -38,13 +42,8 @@ function PlayingAsIndicator(props) {
             -1px 1px 0 #000,
             1px 1px 0 #000;
         }
-        #id-display {
-          font-size: 0.9em;
-          color: #ddd;
-          display: ${displayId}
-        }
       `}</style>
-      <div>Playing as<br /><span id='playing-as-name'>{displayName}</span> <span id='id-display'>(id #{props.uniqueId})</span></div>
+      <div>Playing as<br /><span id='playing-as-name'>{displayName}</span></div>
     </div>
   );
 }
