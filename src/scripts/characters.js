@@ -3,7 +3,7 @@ export const characters = {
   jarjarbinks: {
     name: 'jarjarbinks',
     displayName: 'Jar Jar Binks',
-    skillLevel: 2,
+    skillLevel: 1,
     prize: {
       credits: 50,
       cards: [
@@ -42,7 +42,7 @@ export const characters = {
   c3po: {
     name: 'c3po',
     displayName: 'C-3PO',
-    skillLevel: 3,
+    skillLevel: 2,
     prize: {
       credits: 100,
       cards: [
@@ -79,9 +79,9 @@ export const characters = {
       panel: '"Please go easy on me. I\'ve just had my logic units calibrated."'
     }
   },
-  lakSivrak: {
-    name: 'lakSivrak',
-    displayName: 'Lak Sivrak',
+  porkins: {
+    name: 'porkins',
+    displayName: 'Porkins',
     skillLevel: 4,
     prize: {
       credits: 200,
@@ -116,13 +116,13 @@ export const characters = {
       { id: 9, value: -2, type: '-' }
     ],
     quotes: {
-      panel: '"Grraarragghhh. Grrrr. Raawwrr."'
+      panel: '"I can hold it. Give me more room to run."'
     }
   },
   ig88: {
     name: 'ig88',
     displayName: 'IG-88',
-    skillLevel: 6,
+    skillLevel: 5,
     prize: {
       credits: 400,
       cards: [
@@ -203,6 +203,174 @@ export const characters = {
   theemperor: {
     name: 'theemperor',
     displayName: 'The Emperor',
+    skillLevel: 8,
+    prize: {
+      credits: 2000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"In time you will call me Master."'
+    }
+  },
+  et: {
+    name: 'et',
+    displayName: 'E.T.',
+    skillLevel: 10,
+    prize: {
+      credits: 3000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"E.T. crush opponents."'
+    }
+  },
+  thet1000: {
+    name: 'thet1000',
+    displayName: 'The T-1000',
+    skillLevel: 9,
+    prize: {
+      credits: 3000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"Say... that\'s a nice deck."'
+    }
+  },
+  drchannard: {
+    name: 'drchannard',
+    displayName: 'Dr. Channard',
+    skillLevel: 9,
+    prize: {
+      credits: 3000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"And to think I hesitated."'
+    }
+  },
+  joecamel: {
+    name: 'joecamel',
+    displayName: 'Joe Camel',
     skillLevel: 10,
     prize: {
       credits: 5000,
@@ -239,7 +407,259 @@ export const characters = {
       { id: 9, value: 5, type: plusMinusSymbol }
     ],
     quotes: {
-      panel: '"In time you will call me Master."'
+      panel: '"Better be careful. I\'m the geniune article."'
+    }
+  },
+  caiaphas : {
+    name: 'caiaphas',
+    displayName: 'Caiaphas',
+    skillLevel: 10,
+    prize: {
+      credits: 8000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"Fools! You have no perception! The stakes we are gambling are frightenly high!"'
+    }
+  },
+  kuato: {
+    name: 'kuato',
+    displayName: 'Kuato',
+    skillLevel: 10,
+    prize: {
+      credits: 3000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"Start the reactor... failing that, deal up some cards!"'
+    }
+  },
+  blaine: {
+    name: 'blaine',
+    displayName: 'Blaine the Monorail',
+    skillLevel: 10,
+    prize: {
+      credits: 10000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"I WILL TIRE QUICKLY OF BESTING YOU REPEATEDLY IN THIS SIMPLE ANCIENT GAME."'
+    }
+  },
+  kingjaffejoffer: {
+    name: 'kingjaffejoffer',
+    displayName: 'King Jaffe Joffer',
+    skillLevel: 10,
+    prize: {
+      credits: 12000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"I wouldn\'t trade my supreme Pazaak skills for all the riches in Zamunda."'
+    }
+  },
+  chopchop: {
+    name: 'chopchop',
+    displayName: 'Chop Chop Master Onion',
+    skillLevel: 10,
+    prize: {
+      credits: 15000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"Stand, draw, it\'s all in the mind."'
+    }
+  },
+  numaster: {
+    name: 'numaster',
+    displayName: 'Nu Master',
+    skillLevel: 10,
+    prize: {
+      credits: 15000,
+      cards: [
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: plusMinusSymbol },
+      ]
+    },
+    strategy: {
+      stand: {
+        description: '???',
+        standAt: 20
+      },
+      handCards: {
+        description: '???'
+      },
+      tie: {
+        description: '???',
+        chanceToAccept: 0
+      }
+    },
+    deck: [
+      { id: 0, value: 1, type: plusMinusSymbol },
+      { id: 1, value: 2, type: plusMinusSymbol },
+      { id: 2, value: 3, type: plusMinusSymbol },
+      { id: 3, value: 4, type: plusMinusSymbol },
+      { id: 4, value: 5, type: plusMinusSymbol },
+      { id: 5, value: 1, type: plusMinusSymbol },
+      { id: 6, value: 2, type: plusMinusSymbol },
+      { id: 7, value: 3, type: plusMinusSymbol },
+      { id: 8, value: 4, type: plusMinusSymbol },
+      { id: 9, value: 5, type: plusMinusSymbol }
+    ],
+    quotes: {
+      panel: '"All life begins and ends with Nu. I know this to be true."'
     }
   }
 };
