@@ -12,6 +12,7 @@ module.exports = {
     minimizer: [
       new UglifyJsPlugin({
         test: /\.js(\?.*)?$/i,
+        parallel: true
       }),
     ]
   },
