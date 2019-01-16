@@ -31,24 +31,6 @@ module.exports = {
             'styled-jsx/babel'
           ]
         }
-      },
-      {
-        test: /\.(png|gif|jp(e*)g|svg)$/,
-        use: {
-          loader: 'url-loader',
-          options: {
-            name: 'images/[hash]-[name].[ext]'
-          }
-        }
-      },
-      {
-        test: /\.(wav)$/,
-        use: {
-          loader: 'file-loader',
-          options: {
-            name: 'sounds/[hash]-[name].[ext]'
-          }
-        }
       }
     ]
   },
