@@ -1,7 +1,7 @@
 DOSKEY lint=echo Linting... $T eslint src/** src/**/** $T echo Linted.
 DOSKEY lintfix=echo Linting (--fix) ... $T eslint src/** src/**/** --fix $T echo Linted!
 DOSKEY lintdry=echo Linting (--fix) ... $T eslint src/** src/**/** --fix-dry-run $T echo Linted!
-DOSKEY clr=rmdir dist /s
+DOSKEY clr=rmdir dist /s /q
 DOSKEY build=npm run build
 DOSKEY clink="C:\Users\COCKMA~1\Desktop\cmder\vendor\clink/clink_x64.exe" --cfgdir "C:\Users\COCKMA~1\Desktop\cmder\config" $*
 DOSKEY ;=Add aliases below here
