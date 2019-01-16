@@ -37,9 +37,9 @@ function UserCard(props) {
           max-height: 80vh;
           display: grid;
           box-sizing: border-box;
-          padding: 4vw 8vw 4vw 8vw;
+          padding: 1rem;
           grid-template-columns: 1fr auto;
-          grid-template-rows: 2fr 1fr 2fr 1fr 2fr auto auto;
+          grid-template-rows: 1.5fr 1fr 1fr 1.25fr;
           align-items: stretch;
           justify-content: center;
           border: 1px solid var(--dark-red-bg-color);
@@ -75,8 +75,8 @@ function UserCard(props) {
           color: var(--option-on-color);
         }
         #credits {
+          margin-top: 0.5rem;
           font-size: 1rem !important;
-          margin-bottom: 0.5rem;
           text-align: center;
         }
         #id-display {
@@ -88,7 +88,7 @@ function UserCard(props) {
         }
         #large-user-portrait {
           grid-row-start: 0;
-          grid-row-end: span 4;
+          grid-row-end: span 3;
         }
         #defeated-area {
           display: flex;
@@ -121,19 +121,13 @@ function UserCard(props) {
 
       </div>
       <div id='large-user-portrait'>
-        <div id='credits'>{props.playerObj.credits} credits</div>
         <PlayerPortrait size={portraitSize} source={props.portraitSources.user} spriteIndex={props.playerObj.avatarIndex} displayName={''} type={'mini'} />
-        <div id='id-display'>id #{props.playerObj.cookieId}</div>
+        <div id='credits'>{props.playerObj.credits} credits</div>
+        {/* <div id='id-display'>id #{props.playerObj.cookieId}</div> */}
       </div>
       <div>
-        VS. Humans
-      </div>
-      <div>
-        Matches won: {props.playerObj.usersDefeated}<br />
-        Matches played: {props.playerObj.usersFought}
-      </div>
-      <div>
-        VS. CPU
+        Sets won: {props.playerObj.setWins}<br />
+        Sets played: {props.playerObj.totalSets}
       </div>
       <div>
         Matches won: {props.playerObj.matchWins}<br />
@@ -143,9 +137,10 @@ function UserCard(props) {
         CPU Opponents Defeated
         <div id='defeated-list' >
           {defeatedArray.length > 0 && defeatedArray.map((opponent, i) => {
+            let opponentSpriteIndex = Object.keys(props.characters).indexOf(opponent);
             return (
               <div key={i}>
-                <PlayerPortrait size={portraitSize / 3.5} source={opponentSource} spriteIndex={i} displayName={''} type={'mini'} />
+                <PlayerPortrait size={portraitSize / 3.5} source={opponentSource} spriteIndex={opponentSpriteIndex} displayName={''} type={'mini'} />
               </div>);
           })}
           {defeatedArray.length === 0 && <div>None</div>}

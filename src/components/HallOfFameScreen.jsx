@@ -5,6 +5,7 @@ import HallOfFameEntry from './HallOfFameEntry';
 
 function HallOfFameScreen(props) {
   console.error('HOFS PROPS', props);
+  let timeNow = Math.round(parseInt(Date.now())/1000).toString();
   let scoresExist = props.highScores.length ? true : false;
   return (
     <div style={props.style} id='hall-of-fame-screen'>
@@ -36,7 +37,7 @@ function HallOfFameScreen(props) {
       <div id='high-score-area'>        
         <div className='shadowed-text' id='high-scores-list'>
           {scoresExist && props.highScores.map((entry, i) => {
-            return <HallOfFameEntry key={i} entry={entry} loggedInAs={props.userStatus.loggedInAs}/>;
+            return <HallOfFameEntry key={i} now={timeNow} entry={entry} loggedInAs={props.userStatus.loggedInAs} getNiceTimeFromSeconds={props.getNiceTimeFromSeconds} />;
           })}
           {!scoresExist && <div id='empty-list-message'>No records found :(</div>}
         </div>        
@@ -52,6 +53,7 @@ HallOfFameScreen.propTypes = {
   highScores: PropTypes.array,
   userStatus: PropTypes.object,
   onClickBack: PropTypes.func,
+  getNiceTimeFromSeconds: PropTypes.func
 };
 
 export default HallOfFameScreen;

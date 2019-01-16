@@ -38,6 +38,18 @@ export function updatePreferences(userId, optionsObj) {
     }
   });
 }
+export function updateLastLoginTime(userId) {
+  return axios({
+    method: 'post',
+    url: 'https://www.eggborne.com/scripts/pazaaksetlogintime.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    },
+    params: {
+      userId: userId,
+    }
+  });
+}
 export const getScores = () =>
   axios({
     method: 'get',

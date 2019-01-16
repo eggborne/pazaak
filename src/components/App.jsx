@@ -77,7 +77,8 @@ class App extends React.PureComponent {
       userStatus: {
         phase: 'splashScreen',
         loggedInAs: '',
-        cookieId: undefined, // id DB.id
+        lastLogin: undefined,
+        cookieId: undefined,
         initialValues: {
           avatarIndex: 0,
         },
@@ -242,6 +243,7 @@ class App extends React.PureComponent {
     this.handleClickConfirmButton = this.handleClickConfirmButton.bind(this);
     this.handleClickCancelButton = this.handleClickCancelButton.bind(this);
     this.handleClickCloseButton = this.handleClickCloseButton.bind(this);
+    this.getNiceTimeFromSeconds = this.getNiceTimeFromSeconds.bind(this);
   }
 
   componentDidMount() {
@@ -271,20 +273,42 @@ class App extends React.PureComponent {
   }
 
   getNiceTimeFromSeconds(sessionLengthInSeconds) {
+    let output;
     let sessionMinutes = Math.ceil(sessionLengthInSeconds / 60);
-    let output = `${sessionMinutes} mins`;
     let minutePlural = 's';
     if (sessionMinutes === 1) {
       minutePlural = '';
     }
     if (sessionMinutes >= 60) {
       let wholeHours = Math.floor(sessionMinutes / 60);
-      let remainder = (sessionMinutes % 60);
+      let minutes = (sessionMinutes % 60);
+      if (minutes === 1) {
+        minutePlural = '';
+      }
       let hourPlural = 's';
       if (wholeHours === 1) {
         hourPlural = '';
       }
-      output = `${wholeHours} hour${hourPlural} ${remainder} min${minutePlural}`;
+      if (wholeHours >= 24) {
+        let dayPlural = 's';        
+        let wholeDays = Math.floor(sessionMinutes / 60);
+        if (wholeDays === 1) {
+          dayPlural = '';
+        }
+        output = `${wholeDays} day${dayPlural}`;
+      } else {
+        if (minutes === 0) {
+          output =  `${wholeHours} hour${hourPlural}`;
+        } else {
+          output = `${wholeHours} hour${hourPlural} ${minutes} min${minutePlural}`;
+        }
+      }
+    } else {
+      if (sessionMinutes === 0) {
+        output = 'moments'
+      } else {
+        output = `${sessionMinutes} min${minutePlural}`;
+      }
     }
     return output;
   }
@@ -490,7 +514,7 @@ class App extends React.PureComponent {
   handleClickLogOut() {
     this.callConfirmModal(
       'Log out?',
-      `This will log you out permanently, deleting all cookies associated with ${this.state.userStatus.loggedInAs}.`,
+      `This will log you out permanently and delete all records of ${this.state.userStatus.loggedInAs}.`,
       { confirm: 'Do it', cancel: 'Never mind' },
       () => {
         // setting time limit to 0 destroys cookie
@@ -678,6 +702,7 @@ class App extends React.PureComponent {
         DB.getUserId('Guest').then((response) => {
           console.error('response.data[0] for Guest?', response.data[0].id);
           let guestId = parseInt(response.data[0].id);
+          DB.updateLastLoginTime(guestId);
           console.error('type guestId', guestId, typeof guestId);
           DB.updateUserName(guestId, `Guest-${guestId}`).then((response) => {
             console.error('updateUserName to Guest?', `Guest-${response.data[0].id}`, response);
@@ -774,32 +799,37 @@ class App extends React.PureComponent {
             // });
           }
         } else {
-          console.error(`evaluatePlayerName (NEEDED?) No entry in DB for ${enteredName}.`);
-          let optionsString = JSON.stringify(this.state.options);
-          console.error('saving w options string', optionsString);
-          DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
-            DB.getUserId(enteredName).then((response) => {
-              let uniqueId = response.data[0].id;
-              console.error(`Setting new cookie for ${enteredName} with id ${uniqueId}`);
-              console.error(`Cookie = ${enteredName}||${uniqueId}`);
-              Util.setCookie('username', `${enteredName}||${uniqueId}`, 365);
-              userStatusCopy.loggedInAs = enteredName;
-              userStatusCopy.cookieId = parseInt(uniqueId);
-              this.setState({
-                userStatus: userStatusCopy
-              }, () => {
 
-              });
-            });
-          });
+          // does this ever occur??
+
+          console.error(`at evaluatePlayerName (NEEDED?): No entry in DB for ${enteredName}.`);
+
+          // let optionsString = JSON.stringify(this.state.options);
+          // console.error('saving with options string', optionsString);
+          // DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
+          //   DB.getUserId(enteredName).then((response) => {
+          //     let uniqueId = response.data[0].id;
+          //     console.error(`Setting new cookie for ${enteredName} with id ${uniqueId}`);
+          //     console.error(`Cookie = ${enteredName}||${uniqueId}`);
+          //     Util.setCookie('username', `${enteredName}||${uniqueId}`, 365);
+          //     userStatusCopy.loggedInAs = enteredName;
+          //     userStatusCopy.cookieId = parseInt(uniqueId);
+          //     DB.updateLastLoginTime(userStatusCopy.cookieId);
+          //     this.setState({
+          //       userStatus: userStatusCopy
+          //     }, () => {
+
+          //     });
+          //   });
+          // });
         }
       });
     } else {
-      console.error('called evaluatePlayerName without a state.userStatus.cookieId.>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+      console.error('called evaluatePlayerName without a state.userStatus.cookieId. >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
 
       console.error('calling DB.saveUser()', enteredName, this.state.userStatus.avatarIndex);
       let optionsString = JSON.stringify(this.state.options);
-      console.error('saving w options string', optionsString);
+      console.error('saving with options string', optionsString);
       DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
         DB.getUserId(enteredName).then((response) => {
           let uniqueId = response.data[0].id;
@@ -830,7 +860,7 @@ class App extends React.PureComponent {
   }
   handleClickAccountInfo() {
     if (this.state.userStatus.loggedInAs) {
-      
+
       let userPanel = document.getElementById('user-info-panel');
       let settingsIcon = document.getElementById('user-account-icon');
       let cornerArea0 = document.getElementById('corner-area-0');
@@ -944,6 +974,7 @@ class App extends React.PureComponent {
                 console.error(`SAVED ${enteredName} with ID ${response.data[0].id}`);
                 let uniqueId = response.data[0].id;
                 userStatusCopy.cookieId = parseInt(uniqueId);
+                DB.updateLastLoginTime(userStatusCopy.cookieId);
                 this.setState({
                   userStatus: userStatusCopy,
                   playerNames: namesCopy
@@ -961,6 +992,7 @@ class App extends React.PureComponent {
 
         // had cookie and matched in DB
 
+        DB.updateLastLoginTime(userStatusCopy.cookieId);
         console.error('Clicked Start while logged in as', this.state.userStatus.loggedInAs);
         if (enteredName !== this.state.userStatus.loggedInAs) {
           console.error('ENTERED DIFFERENT NAME! re-calling with new enteredName(?)', enteredName);
@@ -977,9 +1009,9 @@ class App extends React.PureComponent {
             playerNames: namesCopy
           });
         }, this.state.options.flashInterval)
-       
+
       }
-      
+
     }
   }
   handleClickSwitchSign(event) {
@@ -1049,6 +1081,9 @@ class App extends React.PureComponent {
   handleClickHallOfFame(event) {
     event.preventDefault();
     // this.playSound('click');
+    this.setState({
+      highScores: this.getPlayerRecords()
+    })
     setTimeout(() => {
       this.setState({
         phase: 'showingHallOfFame'
@@ -1883,7 +1918,8 @@ class App extends React.PureComponent {
           <HallOfFameScreen style={hallOfFameStyle}
             highScores={this.state.highScores}
             userStatus={this.state.userStatus}
-            onClickBack={this.handleClickBack} />
+            onClickBack={this.handleClickBack}
+            getNiceTimeFromSeconds={this.getNiceTimeFromSeconds} />
         }
         {phase === 'selectingDeck' &&
           <DeckSelectScreen style={deckSelectStyle}
@@ -1896,7 +1932,7 @@ class App extends React.PureComponent {
             cardSizes={this.state.cardSizes} />
         }
         {phase === 'selectingOpponent' &&
-          <OpponentSelectScreen 
+          <OpponentSelectScreen
             portraitSources={this.state.portraitSources}
             userStatus={this.state.userStatus}
             characters={this.characters}

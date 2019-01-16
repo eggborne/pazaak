@@ -44,6 +44,7 @@ function HeaderMenu(props) {
       <UserCard playerObj={props.playerObject}
         cardSize={props.cardSize}
         portraitSources={props.portraitSources}
+        characters={props.characters}
         onClickCloseButton={props.onClickCloseButton}
         onClickLogOut={props.onClickLogOut}
         onClickSignIn={props.onClickSignIn} />
