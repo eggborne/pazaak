@@ -4,9 +4,7 @@ import PropTypes from 'prop-types';
 import CPUOpponentPanel from './CPUOpponentPanel';
 
 function OpponentSelectScreen(props) {
-  let userStatus = props.userStatus;
   let characterArray = [];
-  let loadingIconSource = 'https://pazaak.online/assets/images/loadingicon.png';
  
   Object.entries(props.characters).map((entry, i) => {
     characterArray[i] = entry[0];

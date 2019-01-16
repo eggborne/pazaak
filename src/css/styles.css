@@ -72,7 +72,6 @@ body {
   animation: squeeze-x 2s infinite;
 }
 .loading-icon {
-  /* src: url(https://pazaak.online/assets/images/favicon.png); */
   height: var(--header-height);
   width: var(--header-height);
   animation: spin-x 1s infinite;
