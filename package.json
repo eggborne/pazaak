@@ -42,13 +42,12 @@
     "url-loader": "^1.1.2",
     "webpack": "^4.26.1",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.10"
+    "webpack-dev-server": "^3.1.14"
   },
   "dependencies": {
     "axios": "^0.18.0",
     "babel-cli": "^6.26.0",
     "babel-preset-react-app": "^3.1.2",
-    "pixi.js": "^4.8.2",
     "prop-types": "^15.6.2",
     "react-hot-loader": "^4.3.12",
     "styled-jsx": "^3.1.0",
