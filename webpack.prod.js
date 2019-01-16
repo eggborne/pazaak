@@ -1,8 +1,14 @@
 const { resolve } = require('path');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  mode: "production",
+  mode: 'production',
+  optimization: {
+    splitChunks: {
+      chunks: 'all'
+    }
+  },
   entry: [
     resolve(__dirname, 'src', 'index.jsx')
   ],
@@ -22,28 +28,8 @@ module.exports = {
         options: {
           plugins: [
             'styled-jsx/babel',
-            ['transform-remove-console', { 'exclude': ['error', 'warn'] }]
+            'transform-remove-console'
           ]
-        }
-      },
-      {
-        test: /\.(png|gif|json|jp(e*)g|svg)$/,
-        use: {
-          loader: 'url-loader',
-          options: {
-            limit: 8000,
-            name: 'images/[hash]-[name].[ext]'
-          }
-        }
-      },
-      {
-        test: /\.(wav)$/,
-        use: {
-          loader: 'file-loader',
-          options: {
-            limit: 12000,
-            name: 'sounds/[hash]-[name].[ext]'
-          }
         }
       }
     ]
@@ -52,6 +38,7 @@ module.exports = {
   devtool: '',
 
   plugins: [
+    new BundleAnalyzerPlugin(),
     new HtmlWebpackPlugin({
       template: 'template.ejs',
       appMountId: 'react-app-root',
