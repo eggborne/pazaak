@@ -7,6 +7,7 @@ class CPUOpponentPanel extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      portraitSource: 'https://pazaak.online/assets/images/opponentsheet.jpg',
       portraitSize: window.innerWidth * 0.35,
       quoteTextSize: '1rem',
       nameFontSize: '1.2rem'
@@ -27,7 +28,7 @@ class CPUOpponentPanel extends React.PureComponent {
       extraClasses[1] = 'disabled-select-button';
     }
     let skillArray = Array.apply(null, Array(10)).map(function () { });
-    let source = document.getElementById('opponent-sheet').src;
+    let source = this.state.portraitSource;
     let quoteTextSize = this.state.quoteTextSize;
     let cardHeight = this.props.cardSize.height;
     let portraitSize = this.state.portraitSize;

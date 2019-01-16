@@ -2,36 +2,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import CPUOpponentPanel from './CPUOpponentPanel';
-import HumanOpponentPanel from './HumanOpponentPanel';
 
-const statuses = {
-  splashScreen: 'at title screen',
-  selectingOpponent: 'selecting opponent',
-  showingOptions: 'at options screen',
-  selectingDeck: 'selecting deck',
-  showingHallOfFame: 'at Hall of Fame',
-  showingInstructions: 'at How to Play',
-  gameStarted: 'playing'
-};
 function OpponentSelectScreen(props) {
   let userStatus = props.userStatus;
-  let usersHere = props.usersHere.slice();  
-  let highScores = props.highScores.slice();  
   let characterArray = [];
   let loadingIconSource = 'https://pazaak.online/assets/images/loadingicon.png';
-  let scoreObj = {};
-  highScores.map((recordObj, i) => {
-    usersHere.map((userObj, p) => {
-      if (recordObj.id === parseInt(userObj.userId)) {
-        userObj.highScoresIndex = i;
-      }
-    });
-  });
+ 
   Object.entries(props.characters).map((entry, i) => {
     characterArray[i] = entry[0];
   });
   return (
-    <div style={props.style} id='opponent-select-screen'>
+    <div id='opponent-select-screen'>
       <style jsx>{`
         #opponent-select-screen {
           font-size: 1.25rem;
@@ -52,10 +33,6 @@ function OpponentSelectScreen(props) {
         #opponent-select-area {
           overflow-y: scroll;
           flex-grow: 1;
-        }
-        #human-select-area {
-          padding: 2vw;
-          //display: none;
         }
         .opponent-type-label {
           font-size: 1em;
@@ -92,33 +69,10 @@ function OpponentSelectScreen(props) {
         <div className='shadowed-text'>Choose Your Opponent</div>
       </div>
       <div id='opponent-select-area' className='shadowed-text'>
-        <div id='human-select-area'>
-          <h3 className='opponent-type-label'>Actual humans</h3>
-          {usersHere.length === 0 && <div id='human-opponents-loading-message' className='loading-message'>
-            <div id='human-opponents-loading-text' className='loading-text'>LOADING</div>
-            <img src={loadingIconSource} id='human-opponents-loading-icon' className='loading-icon' />
-          </div>}
-          {usersHere.length === 1 && <div id='nobody-here-message'>Nobody else is here :(</div>}
-          {usersHere.map((userObj, i) => 
-            (parseInt(userObj.userId) !== props.userId) &&
-            <HumanOpponentPanel key={i}
-              characters={props.characters}
-              isSelf={false}
-              cardSize={props.cardSize}
-              userObject={userObj}
-              scoreObject={highScores[userObj.highScoresIndex]}
-              opponentSelected={userObj.opponent}
-              statuses={statuses}
-              onClickMoreInfo={props.onClickMoreInfo}
-              onClickSendMessage={props.onClickSendMessage}
-              onClickRequestMatch={props.onClickRequestMatch}
-            />
-          )}
-        </div>
-        <h3 className='opponent-type-label'>CPU Players</h3>
         {characterArray.map((character, i) =>
           <CPUOpponentPanel key={i}
             selected={(props.opponentSelected === character)}
+            portraitSource={props.portraitSources.opponent}
             cardSize={props.cardSize}
             index={i}
             character={props.characters[character]}
@@ -134,19 +88,14 @@ function OpponentSelectScreen(props) {
   );
 }
 OpponentSelectScreen.propTypes = {
-  style: PropTypes.object,
+  portraitSources: PropTypes.object,
   characters: PropTypes.object,
   userStatus: PropTypes.object,
-  highScores: PropTypes.array,
   opponentSelected: PropTypes.string,
   cardSize: PropTypes.object,
   onClickOpponentReady: PropTypes.func,
   onClickPanel: PropTypes.func,
   onClickBack: PropTypes.func,
-  usersHere: PropTypes.array,
-  userId: PropTypes.number,
-  onClickMoreInfo: PropTypes.func,
-  onClickRequestMatch: PropTypes.func
 };
 
 export default OpponentSelectScreen;

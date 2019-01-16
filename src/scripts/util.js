@@ -27,7 +27,9 @@ const getCookie = (cname) => {
   return '';
 };
 export const checkCookie = (app) => {
+  let startTime = window.performance.now();
   let response = getCookie('username');
+  console.warn('checked cookie in', window.performance.now()-startTime)
   let userStatusCopy = Object.assign({}, app.state.userStatus);
   let playerName;
   let uniqueId;
@@ -50,15 +52,6 @@ export const checkCookie = (app) => {
       userStatus: userStatusCopy
     }, () => {
       app.evaluatePlayerName(playerName);
-      app.checkForNewMessages().then((response) => {
-        console.log('checkfornew got', response);
-        let userStatusCopy = Object.assign({}, app.state.userStatus);
-        userStatusCopy.messages = response;
-        userStatusCopy.unreadMessages = response.length;
-        app.setState({
-          userStatus: userStatusCopy,
-        });
-      });
     });
   } else {
     console.error('No cookie found. Leaving state.userStatus.cookieId undefined.');
@@ -76,23 +69,15 @@ export function getCardSizes() {
   let mediumCardSize = {};
   let miniCardSize = {};
   let microCardSize = {};
-  let actualHeight = window.innerHeight;
   let cardHeight = Math.round((window.innerHeight / 6) * 0.775);
-  // let cardHeight = Math.round((actualHeight / 6) * 0.805);
-  // let cardHeight = Math.round((actualHeight / 6) * 0.8);
-  // cardSize.width = Math.round(cardHeight / 1.55);
   cardSize.width = Math.round(cardHeight / 1.55);
   let cardsPerWidth = window.innerWidth / cardSize.width;
   if (cardsPerWidth < 6) {
-    console.warn('cardSize too wide at', cardSize.width);
     let marg = window.innerWidth * 0.006;
     let maxWidth = (window.innerWidth / 5) - (marg * 5);
     cardSize.width = Math.round(maxWidth);
-    console.warn('changed width to', cardSize.width);
   }
   cardSize.height = cardHeight;
-  // mediumCardSize.width = Math.round(cardSize.width * 0.85);
-  // mediumCardSize.height = Math.round(cardSize.height * 0.85);
   mediumCardSize.width = Math.round(cardSize.width * 0.875);
   mediumCardSize.height = Math.round(cardSize.height * 0.875);
   miniCardSize.width = Math.round(cardSize.width * 0.75);

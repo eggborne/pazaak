@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import UserCard from './UserCard';
-import MessageCenter from './MessageCenter';
 
 function HeaderMenu(props) {
   let headerHeight = Math.floor(props.cardSize.height * 0.5);
@@ -42,30 +41,21 @@ function HeaderMenu(props) {
           transform: translateY(-100%) !important;
         }
       `}</style>
-      {props.mode === 'userInfo' &&
-        <UserCard playerObj={props.playerObject}
-          cardSize={props.cardSize}
-          portraitSource={props.portraitSource}
-          onClickCloseButton={props.onClickCloseButton}
-          onClickLogOut={props.onClickLogOut}
-          onClickSignIn={props.onClickSignIn} />
-      }
-      {props.mode === 'chat' &&
-        <MessageCenter chatObject={props.chatObject}
-          cardSize={props.cardSize}
-          onSubmitChatMessage={props.onSubmitChatMessage}
-          onClickCloseButton={props.onClickCloseButton} />
-      }
+      <UserCard playerObj={props.playerObject}
+        cardSize={props.cardSize}
+        portraitSources={props.portraitSources}
+        onClickCloseButton={props.onClickCloseButton}
+        onClickLogOut={props.onClickLogOut}
+        onClickSignIn={props.onClickSignIn} />
     </div>
   );
 }
 HeaderMenu.propTypes = {
   mode: PropTypes.string,
-  chatObj: PropTypes.object,
   playerObject: PropTypes.object,
   cardSize: PropTypes.object,
   characters: PropTypes.object,
-  portraitSource: PropTypes.string,
+  portraitSources: PropTypes.object,
   onClickCloseButton: PropTypes.func,
   onClickLogOut: PropTypes.func,
   onClickSignIn: PropTypes.func

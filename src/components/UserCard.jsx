@@ -20,7 +20,7 @@ function UserCard(props) {
   if (!defeatedArray) {
     defeatedArray = [];
   }
-  let opponentSource = document.getElementById('opponent-sheet').src;
+  let opponentSource = props.portraitSources.opponent;
   // if (props.playerObj.cpuDefeated.length > 2) {
   //   let trunc = props.playerObj.cpuDefeated.slice(2, -2);
   //   defeatedArray = trunc.toString().split('","');
@@ -122,7 +122,7 @@ function UserCard(props) {
       </div>
       <div id='large-user-portrait'>
         <div id='credits'>{props.playerObj.credits} credits</div>
-        <PlayerPortrait size={portraitSize} source={props.portraitSource} spriteIndex={props.playerObj.avatarIndex} displayName={''} type={'mini'} />
+        <PlayerPortrait size={portraitSize} source={props.portraitSources.user} spriteIndex={props.playerObj.avatarIndex} displayName={''} type={'mini'} />
         <div id='id-display'>id #{props.playerObj.cookieId}</div>
       </div>
       <div>
@@ -168,7 +168,7 @@ function UserCard(props) {
 UserCard.propTypes = {
   playerObj: PropTypes.object,
   cardSize: PropTypes.object,
-  portraitSource: PropTypes.string,
+  portraitSources: PropTypes.object,
   onClickLogOut: PropTypes.func,
   onClickSignIn: PropTypes.func,
   onClickCloseButton: PropTypes.func,

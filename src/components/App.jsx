@@ -10,7 +10,6 @@ import GameBoard from './GameBoard';
 import HamburgerMenu from './HamburgerMenu';
 import ResultModal from './ResultModal';
 import ConfirmModal from './ConfirmModal';
-import UserInfoModal from './UserInfoModal';
 import OpponentSelectScreen from './OpponentSelectScreen';
 import HeaderMenu from './HeaderMenu';
 let Util = require('../scripts/util');
@@ -31,12 +30,10 @@ const plusMinusSymbol = '±';
 class App extends React.PureComponent {
   constructor(props) {
     super(props);
-    // this.state.cardSizes = Util.getCardSizes();
     this.characters = characters.characters;
     this.state = {
       vsCPU: true,
       CPUOpponent: 'jarjarbinks',
-      humanOpponent: {},
       lastWinner: null,
       lastFirstTurn: 'user',
       playerNames: {
@@ -95,10 +92,8 @@ class App extends React.PureComponent {
         unreadMessages: 0
       },
       portraitSources: {
-        // user: 'https://pazaak.online/assets/images/avatarsheet.jpg',
-        // opponent: 'https://pazaak.online/assets/images/opponentsheet.jpg'
         user: document.getElementById('avatar-sheet').src,
-        opponent: document.getElementById('opponent-sheet').src
+        opponent: 'https://pazaak.online/assets/images/opponentsheet.jpg'
       },
       userData: {
         id: 0,
@@ -119,13 +114,6 @@ class App extends React.PureComponent {
         initialValues: {
           avatarIndex: 0,
         },
-      },
-      currentChat: {
-        chatId: undefined,
-        partnerId: '',
-        messages: [
-
-        ]
       },
       turnStatus: {
         user: {
@@ -159,19 +147,6 @@ class App extends React.PureComponent {
           cancel: ''
         }
       },
-      selectedUser: {
-        // userRecord goes here
-        // i.e. looking at stats, chatting with, playing against?
-        playerName: '',
-        phase: 'splashScreen',
-        avatarIndex: 0,
-        setWins: 0,
-        totalSets: 0,
-        matchWins: 0,
-        totalMatches: 0,
-        credits: 9000,
-        cpuDefeated: []
-      },
       options: {
         sound: false,
         ambience: false,
@@ -182,7 +157,6 @@ class App extends React.PureComponent {
         moveIndicatorTime: 900,
         dealWaitTime: 600,
       },
-      chatShowing: false,
       cardSizes: Util.getCardSizes(),
       inputHasFocus: true,
       keyboardShowing: false,
@@ -193,7 +167,6 @@ class App extends React.PureComponent {
         console.error('getPlayerRecords failed because', reason);
       }),
       highScores: [],
-      usersHere: []
     };
 
     // this.highScores = [];
@@ -220,7 +193,6 @@ class App extends React.PureComponent {
 
     // are all of these necessary?
     this.playSound = this.playSound.bind(this);
-    this.performDataRefresh = this.performDataRefresh.bind(this);
     this.createNewGuest = this.createNewGuest.bind(this);
     this.incrementPlayerScore = this.incrementPlayerScore.bind(this);
     this.applyStateOptions = this.applyStateOptions.bind(this);
@@ -264,18 +236,12 @@ class App extends React.PureComponent {
     this.handleClickHamburgerQuit = this.handleClickHamburgerQuit.bind(this);
     this.handleFullscreenChange = this.handleFullscreenChange.bind(this);
     this.handleClickAccountInfo = this.handleClickAccountInfo.bind(this);
-    this.handleClickMessages = this.handleClickMessages.bind(this);
     this.handleClickLogOut = this.handleClickLogOut.bind(this);
     this.handleClickSignIn = this.handleClickSignIn.bind(this);
     this.handleClickMoreInfo = this.handleClickMoreInfo.bind(this);
-    this.handleClickSendMessage = this.handleClickSendMessage.bind(this);
-    this.handleClickRequestMatch = this.handleClickRequestMatch.bind(this);
     this.handleClickConfirmButton = this.handleClickConfirmButton.bind(this);
     this.handleClickCancelButton = this.handleClickCancelButton.bind(this);
     this.handleClickCloseButton = this.handleClickCloseButton.bind(this);
-    this.handleSubmitChatMessage = this.handleSubmitChatMessage.bind(this);
-    this.updateChatLog = this.updateChatLog.bind(this);
-    this.checkForNewMessages = this.checkForNewMessages.bind(this);
   }
 
   componentDidMount() {
@@ -293,28 +259,6 @@ class App extends React.PureComponent {
     this.pingFrequency = 3000;
     this.expiredCheckFrequency = 1;
     this.pingCounter = 0;
-    this.pingTimer = setInterval(() => {
-      if (this.state.userStatus.cookieId) {
-        // this.getPlayerData(this.performDataRefresh());
-        if (this.pingCounter % 1 === 0) {
-          this.getPlayerRecords().then((response) => {
-            this.performDataRefresh().then(() => {
-              this.pingCounter++;
-            });
-          });
-        } else {
-          this.performDataRefresh().then(() => {
-            this.pingCounter++;
-          });
-        }
-      } else {
-        console.error('NO COOKIE/loggedInAs ID WHEN RUNNING PING TIMER');
-        //this.getUserAmount();
-      }
-    }, this.pingFrequency);
-
-
-
     console.warn('App.componentDidMount activities done in', (window.performance.now() - startTime));
   }
   getLocalPlayerObjById(userId) {
@@ -324,71 +268,6 @@ class App extends React.PureComponent {
         return Object.assign({}, recordObj);
       }
     }
-  }
-
-  checkForNewMessages() {
-    return new Promise((resolve, reject) => {
-      DB.checkForMessages(this.state.userStatus.cookieId).then((response) => {
-        console.warn('checkForMessages got', response);
-        let messageArray = response.data;
-        let unreadArray = [];
-        messageArray.map((messageObj, i) => {
-          console.error('MESSAGE OBJ', messageObj);
-          let messagesArray = JSON.parse(messageObj.messages);
-          console.log('messagesArray is', messagesArray);
-          messagesArray.map((message, i) => {
-            if (message.unread) {
-              console.error('iojfoidhsf pishing asjkldaslkdjas', message);
-              unreadArray.push(message);
-            }
-          });
-        });
-        resolve(unreadArray);
-      });
-    });
-
-  }
-
-  startChatInstance(recipientId) {
-    let recipientRecordObj = this.getLocalPlayerObjById(recipientId);
-    console.log('recipientRecordObj', recipientRecordObj);
-    DB.startNewChat(this.state.userStatus.cookieId, recipientId).then((response) => {
-      let chatId = response.data;
-      this.setState({
-        currentChat: {
-          chatId: chatId,
-          partnerId: recipientId,
-          messages: []
-        }
-      }, () => {
-        console.log('currentChat', this.state.currentChat);
-      });
-    });
-  }
-
-  handleSubmitChatMessage(event) {
-    event.preventDefault();
-    let newMessage = document.getElementById('chat-message-input').value;
-    document.getElementById('chat-message-input').value = '';
-    console.error('clicked send chat!', newMessage);
-    let chatCopy = Object.assign({}, this.state.currentChat);
-    let newMessageObject = {
-      unread: true,
-      sender: this.state.userStatus.loggedInAs,
-      bodyText: newMessage
-    };
-
-    chatCopy.messages.push(newMessageObject);
-
-    console.warn('UPDATED CHAT obj to', chatCopy);
-
-    this.setState({
-      currentChat: chatCopy
-    }, () => {
-
-      DB.sendMessage(this.state.currentChat.chatId, chatCopy.messages);
-    });
-
   }
 
   getNiceTimeFromSeconds(sessionLengthInSeconds) {
@@ -408,68 +287,6 @@ class App extends React.PureComponent {
       output = `${wholeHours} hour${hourPlural} ${remainder} min${minutePlural}`;
     }
     return output;
-  }
-  performDataRefresh() {
-    return new Promise((resolve, reject) => {
-      DB.handshake(this.state.userStatus, this.state.phase, this.state.CPUOpponent).then((timeNow) => {
-        let currentTime = new Date(timeNow.data[0]['NOW()']);
-        DB.getActiveUsers(this).then((response) => {
-          if (response.data) {
-            let usersArray = response.data.slice();
-            if (this.pingCounter % this.expiredCheckFrequency === 0) {
-              console.error('CHECKING OTHER PLAYERS for ping', this.pingCounter);
-              usersArray.map((userObj, i) => {
-                if (userObj.userId !== this.state.userStatus.cookieId) {
-                  // update session time/pings for other players
-                  let pingTime = new Date(userObj.lastPing);
-                  let sessionStartTime = new Date(userObj.sessionStart);
-                  let sinceLastPing = currentTime - pingTime;
-                  let sessionLength = (currentTime / 1000) - (sessionStartTime / 1000);
-                  let sessionDisplay = this.getNiceTimeFromSeconds(sessionLength);
-                  if (document.getElementById(`session-display-${userObj.userId}`)) {
-                    document.getElementById(`ping-display-${userObj.userId}`).innerHTML = sinceLastPing;
-                    document.getElementById(`session-display-${userObj.userId}`).innerHTML = sessionDisplay;
-                    // color the ping text according to how high
-                    let textColor = 'var(--main-text-color)';
-                    if (sinceLastPing > this.upperPingLimit * 0.75) {
-                      textColor = 'red';
-                    } else if (sinceLastPing > this.upperPingLimit / 2) {
-                      textColor = 'yellow';
-                    }
-                    document.getElementById(`ping-display-${userObj.userId}`).style.color = textColor;
-                    if (sinceLastPing > this.upperPingLimit) {
-                      console.error(`${userObj.userName} too old at ${sinceLastPing}! Removing.`);
-                      DB.removeActiveUser(userObj.userId).then((response) => {
-                        usersArray.map((user, i) => {
-                          if (user.userId == userObj.userId) {
-                            usersArray.splice(i, 1);
-                            i--;
-                          }
-                        });
-                        this.setState({
-                          usersHere: usersArray
-                        });
-                      });
-                      // return;
-                    }
-                  }
-                }
-              });
-              resolve(usersArray);
-            } else {
-              console.error('NOT ------- CHECKING OTHER PLAYERS for ping', this.pingCounter);
-              resolve(usersArray);
-            }
-
-            this.setState({
-              usersHere: usersArray
-            });
-          } else {
-            console.error('No active users in DB.');
-          }
-        });
-      });
-    });
   }
   handleFullscreenChange() {
     setTimeout(() => {
@@ -676,20 +493,6 @@ class App extends React.PureComponent {
       `This will log you out permanently, deleting all cookies associated with ${this.state.userStatus.loggedInAs}.`,
       { confirm: 'Do it', cancel: 'Never mind' },
       () => {
-        DB.removeActiveUser(this.state.userStatus.cookieId).then((response) => {
-          let usersArray = this.state.usersHere.slice();
-          for (let i = 0; i < usersArray.length; i++) {
-            let user = usersArray[i];
-            if (user.userId == this.state.userStatus.cookieId) {
-              usersArray.splice(i, 1);
-              break;
-            }
-          }
-          console.error('VBBOORESJSDFDKSF BROKE CORRECTYLY!!!! ___________________________________________________________________________________________________________________________');
-          this.setState({
-            usersHere: usersArray
-          });
-        });
         // setting time limit to 0 destroys cookie
         Util.setCookie('username', `${this.state.userStatus.loggedInAs}||${this.state.userStatus.cookieId}`, 0);
         console.error('Cookie destroyed!');
@@ -740,7 +543,6 @@ class App extends React.PureComponent {
           setTimeout(() => {
             document.getElementById('header').classList.remove('no-bottom-border');
           }, 350);
-
         });
       }
     );
@@ -872,7 +674,6 @@ class App extends React.PureComponent {
   createNewGuest() {
     let promise = new Promise((resolve, reject) => {
       let optionsString = JSON.stringify(this.state.options);
-      // DB.saveUser('Guest', this.state.userStatus.avatarIndex, optionsString).then((response) => {
       DB.saveUser('Guest', this.state.userStatus.avatarIndex, optionsString).then((response) => {
         DB.getUserId('Guest').then((response) => {
           console.error('response.data[0] for Guest?', response.data[0].id);
@@ -944,19 +745,17 @@ class App extends React.PureComponent {
             console.error('USERNAME TAKEN, and no match found in DB for username/id combination (so you is not him!)');
           } else {
             let playerObj = Object.assign({}, response.data[playerIndex]);
-            console.error('GOT playerObj', playerObj);
+            console.warn('GOT playerObj', playerObj);
 
             playerObj.preferences = JSON.parse(playerObj.preferences);
             playerObj.cpuDefeated = JSON.parse(playerObj.cpuDefeated);
-            playerObj.messages = JSON.parse(playerObj.messages);
-            console.error('AFTER', playerObj);
+            // playerObj.messages = JSON.parse(playerObj.messages);
+            console.warn('AFTER', playerObj);
             console.error(`Cookie recognized! Logging in player as ${playerObj.playerName}, recording into state.userStatus, highlighting avatar ${playerObj.avatarIndex} and scrolling into view.`);
             playerObj.loggedInAs = playerObj.playerName;
             playerObj.cookieId = playerObj.id;
-            setTimeout(() => {
-              document.getElementById(`avatar-thumb-${playerObj.avatarIndex}`).scrollIntoView({ inline: 'center' });
-            }, 50);
-            //playerObj.initialValues.avatarIndex = playerObj.avatarIndex;
+            document.getElementById(`avatar-thumb-${playerObj.avatarIndex}`).scrollIntoView({ inline: 'center' });
+            // playerObj.initialValues.avatarIndex = playerObj.avatarIndex;
             this.setState({
               userStatus: playerObj,
               options: playerObj.preferences
@@ -1031,6 +830,7 @@ class App extends React.PureComponent {
   }
   handleClickAccountInfo() {
     if (this.state.userStatus.loggedInAs) {
+      
       let userPanel = document.getElementById('user-info-panel');
       let settingsIcon = document.getElementById('user-account-icon');
       let cornerArea0 = document.getElementById('corner-area-0');
@@ -1062,315 +862,125 @@ class App extends React.PureComponent {
       }, 600);
     }
   }
-  handleClickMessages() {
-    console.log('CLICKED MESSAGES');
-    this.updateChatLog();
-    let messageContainer = document.getElementById('user-message-icon-container');
-    let cornerArea1 = document.getElementById('corner-area-1');
-    if (!messageContainer.classList.contains('messages-button-on')) {
-      messageContainer.classList.add('messages-button-on');
-      cornerArea1.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
-      cornerArea1.style.border = '0.5vw solid rgba(0, 0, 0, 0.2)';
-    } else {
-      cornerArea1.style.backgroundColor = 'transparent';
-      cornerArea1.style.border = '0';
-      messageContainer.classList.remove('messages-button-on');
-    }
-    let userPanel = document.getElementById('user-info-panel');
-    if (userPanel.classList.contains('user-info-panel-off')) {
-      userPanel.classList.remove('user-info-panel-off');
-      document.getElementById('header').classList.add('no-bottom-border');
-      this.setState({
-        chatShowing: true
-      });
-    } else {
-      userPanel.classList.add('user-info-panel-off');
-
-      setTimeout(() => {
-        document.getElementById('header').classList.remove('no-bottom-border');
-        this.setState({
-          chatShowing: false
-        });
-      }, 350);
-    }
-  }
-  updateChatLog() {
-    console.log('getting log for chatId', this.state.currentChat.chatId);
-    DB.getChatMessages(this.state.currentChat.chatId).then((response) => {
-      console.log('got chat response', response);
-      let chatMessageArray = JSON.parse(response.data);
-      console.log('converted?', chatMessageArray);
-      let chatCopy = Object.assign({}, this.state.currentChat);
-      chatCopy.messages = chatMessageArray;
-      this.setState({
-        currentChat: chatCopy
-      });
-    });
-  }
   handleClickStart(event) {
     event.preventDefault();
     // this.playSound('click');
     let enteredName = document.getElementById('player-name-input').value;
     let namesCopy = Object.assign({}, this.state.playerNames);
     let userStatusCopy = Object.assign({}, this.state.userStatus);
-    let newPhase = this.state.phase;
+
     if (!enteredName.length) {
-
+      // playing as Guest
       console.error('NO NAME ENTERED. USING GUEST-XXX');
-
-      enteredName = document.getElementById('player-name-input').placeholder;
+      // enteredName = document.getElementById('player-name-input').placeholder;
       this.createNewGuest().then((response) => {
         enteredName = response;
         let guestId = parseInt(response.split('-')[1]);
         userStatusCopy.cookieId = guestId;
-        DB.addActiveUser(enteredName, guestId).then((response) => {
-          console.error('added new active', enteredName, response);
-          DB.getActiveUsers(this).then((response) => {
-            let newArray = response.data;
-            console.warn('immediately after adding new active user, getActiveUsers returned', newArray);
-            this.setState({
-              userStatus: userStatusCopy,
-              usersHere: newArray,
-              phase: 'selectingOpponent'
-            });
-            //return;
-          });
+        this.setState({
+          userStatus: userStatusCopy,
+          phase: 'selectingOpponent'
         });
       });
-      return;
-    }
-    // loggedInAs means cookie was found AND name was found in DB with cookie ID!
-    if (!this.state.userStatus.loggedInAs) {
-      // had no cookie at load
-      console.error('Clicked Start while !loggedInAs - enteredName is', enteredName);
-      userStatusCopy.loggedInAs = enteredName;
+    } else {
 
-      // make sure it's not too short or too long
-      let nameLength = enteredName.length;
-      let nameTooShort = false;
-      let nameTooLong = false;
-      let inputErrorText = '';
-      if (nameLength < 3) {
-        nameTooShort = true;
-        inputErrorText = 'NAME TOO SHORT!';
-      } else if (nameLength > 24) {
-        nameTooLong = true;
-        inputErrorText = 'NAME TOO LONG!';
-      }
-      DB.getScores().then((response) => {
-        // make sure it's not taken
-        let nameTaken = false;
-        let scoresArray = response.data;
-        if (scoresArray) {
-          scoresArray.map((scoreObj, i) => {
-            if (scoreObj.playerName === enteredName) {
-              inputErrorText = 'NAME TAKEN';
-              nameTaken = true;
-            }
-          });
+      if (!this.state.userStatus.loggedInAs) {
+
+        // had no cookie at load
+
+        console.error('Clicked Start while !loggedInAs - enteredName is', enteredName);
+        userStatusCopy.loggedInAs = enteredName;
+
+        // make sure it's not too short or too long
+
+        let nameLength = enteredName.length;
+        let nameTooShort = false;
+        let nameTooLong = false;
+        let inputErrorText = '';
+        if (nameLength < 3) {
+          nameTooShort = true;
+          inputErrorText = 'NAME TOO SHORT';
+        } else if (nameLength > 24) {
+          nameTooLong = true;
+          inputErrorText = 'NAME TOO LONG';
         }
-        if (nameTaken || nameTooLong || nameTooShort) {
-          let yPosition = document.getElementById('player-name-input').offsetTop;
-          let inputHeight = document.getElementById('player-name-input').offsetHeight;
-          console.log('placing error text at', yPosition);
-          document.getElementById('name-input-message').style.top = (yPosition + (inputHeight / 2)) + 'px';
-          document.getElementById('name-input-message').innerHTML = inputErrorText;
-          document.getElementById('name-input-message').classList.add('slid-on');
-          setTimeout(() => {
-            document.getElementById('name-input-message').classList.remove('slid-on');
-          }, 2000);
-          document.getElementById('player-name-input').value = '';
-        } else {
-          namesCopy.user = enteredName;
-          let optionsString = JSON.stringify(this.state.options);
-          DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
-            DB.getUserId(enteredName).then((response) => {
-              Util.setCookie('username', `${enteredName}||${response.data[0].id}`, 365);
-              console.error(`SAVED ${enteredName} with ID ${response.data[0].id}`);
-              let uniqueId = response.data[0].id;
-              userStatusCopy.cookieId = parseInt(uniqueId);
-              this.setState({
-                userStatus: userStatusCopy,
-                playerNames: namesCopy
-              }, () => {
-                this.evaluatePlayerName(enteredName);
-                this.setState({
-                  phase: 'selectingOpponent'
-                }, () => {
-                  // check if it's already in the DB...
-                  console.error('post- setState phase: selectingOpponent');
-                  DB.getActiveUsers(this).then((response) => {
-                    if (response.data) {
-                      let usersArray = response.data;
-                      let alreadyThere = false;
-                      usersArray.map((userObj, i) => {
-                        if (parseInt(userObj.userId) > 0 && parseInt(userObj.userId) === this.state.userStatus.cookieId) {
-                          console.error(`ALREADY IN ACTIVE! Found ${userObj.userId} in DB, which matches cookieId ${this.state.userStatus.cookieId}`);
-                          alreadyThere = true;
-                        }
-                      });
-                      // add it if it isn't
-                      if (!alreadyThere) {
-                        DB.addActiveUser(enteredName, userStatusCopy.cookieId).then((response) => {
-                          console.error('added new active', enteredName, response);
-                          DB.getActiveUsers(this).then((response) => {
-                            let newArray = response.data;
-                            console.warn('immediately after adding new active user, getActiveUsers returned', newArray);
-                            this.setState({
-                              usersHere: newArray
-                            });
-                            //return;
-                          });
-                        });
-                      } else {
-                        // don't add
-                        console.error('NOT ADDING NEW ACTIVE USER!');
-                        this.setState({
-                          usersHere: usersArray
-                        });
-                      }
-                      let activeUsersCopy = this.state.usersHere.slice();
-                      console.error('/////////////////////// 980 block //////////////////////////////////');
-                      activeUsersCopy.map((userObj, i) => {
-                        this.state.highScores.map((userScore, p) => {
-                          if (parseInt(userObj.userId) == parseInt(userScore.id)) {
-                            userObj.avatarIndex = parseInt(userScore.avatarIndex);
-                          }
-                        });
-                      });
-                      this.setState({
-                        usersHere: activeUsersCopy
-                      });
+        DB.getScores().then((response) => {
 
-                      //     // prune for expired
-                      //     // let now = Date.now();
-                      //     // usersArray.map((userObj, i) => {
-                      //     //   let sinceLast = now - userObj.lastPing;
-                      //     //   if (sinceLast > 10000) {
-                      //     //     console.error(`${userObj.userName} last ping was ${sinceLast} ago! Too old!`);
-                      //     //   } else {
-                      //     //     console.warn(`${userObj.userName} last ping was OK, ${sinceLast} ago!`);
-                      //     //   }
-                      //     // })
-                    } else {
-                      let status = this.state.userStatus;
-                      console.warn('PLAYER NOT IN (EMPTY) ACTIVE USERS DB! userStatus is', status);
-                      DB.addActiveUser(enteredName, userStatusCopy.cookieId).then((response) => {
-                        console.warn('added new active', enteredName, response);
-                        DB.getActiveUsers(this).then((response) => {
-                          let newArray = response.data;
-                          console.warn('Immediately after adding new active user, updating entire state.usersHere obj with', newArray);
-                          this.setState({
-                            usersHere: newArray
-                          });
-                          //return;
-                        });
-                      });
-                    }
+          // make sure it's not taken
+
+          let nameTaken = false;
+          let scoresArray = response.data;
+          if (scoresArray) {
+            scoresArray.map((scoreObj, i) => {
+              if (scoreObj.playerName === enteredName) {
+                inputErrorText = 'NAME TAKEN';
+                nameTaken = true;
+              }
+            });
+          }
+          if (nameTaken || nameTooLong || nameTooShort) {
+
+            // clear field and show error message
+
+            let yPosition = document.getElementById('player-name-input').offsetTop;
+            let inputHeight = document.getElementById('player-name-input').offsetHeight;
+            console.log('placing error text at', yPosition);
+            document.getElementById('name-input-message').style.top = (yPosition + (inputHeight / 2)) + 'px';
+            document.getElementById('name-input-message').innerHTML = inputErrorText;
+            document.getElementById('name-input-message').classList.add('slid-on');
+            setTimeout(() => {
+              document.getElementById('name-input-message').classList.remove('slid-on');
+            }, 2000);
+            document.getElementById('player-name-input').value = '';
+          } else {
+
+            // create a new user record and set cookie
+
+            namesCopy.user = enteredName;
+            let optionsString = JSON.stringify(this.state.options);
+            DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
+              DB.getUserId(enteredName).then((response) => {
+                Util.setCookie('username', `${enteredName}||${response.data[0].id}`, 365);
+                console.error(`SAVED ${enteredName} with ID ${response.data[0].id}`);
+                let uniqueId = response.data[0].id;
+                userStatusCopy.cookieId = parseInt(uniqueId);
+                this.setState({
+                  userStatus: userStatusCopy,
+                  playerNames: namesCopy
+                }, () => {
+                  this.evaluatePlayerName(enteredName);
+                  this.setState({
+                    phase: 'selectingOpponent'
                   });
                 });
               });
             });
-          });
-        }
-      });
-      //console.warn('calling evaluatePlayerName');
-      //this.evaluatePlayerName(enteredName, true);
-      return;
-    } else {
-      // had cookie and matched in DB
-      console.error('Clicked Start while logged in as', this.state.userStatus.loggedInAs);
-      if (enteredName !== this.state.userStatus.loggedInAs) {
-        console.error('ENTERED DIFFERENT NAME! re-calling with new enteredName(?)', enteredName);
-        this.evaluatePlayerName(enteredName);
-      }
-      // if (this.state.userStatus.avatarIndex !== this.state.userStatus.initialValues.avatarIndex) {
-      //   console.error('CHANGED AVATAR! calling DB.saveUserAvatarIndex', this.state.userStatus.avatarIndex);
-      //   DB.saveUserAvatarIndex(this.state.userStatus.loggedInAs, this.state.userStatus.avatarIndex);
-      // }
-      namesCopy.user = enteredName;
-    }
-    this.setState({
-      userStatus: userStatusCopy,
-      playerNames: namesCopy,
-      phase: 'selectingOpponent'
-    }, () => {
-      // check if it's already in the DB...
-      DB.getActiveUsers(this).then((response) => {
-        if (response.data) {
-          let usersArray = response.data;
-          let alreadyThere = false;
-          usersArray.map((userObj, i) => {
-            if (parseInt(userObj.userId) > 0 && parseInt(userObj.userId) === this.state.userStatus.cookieId) {
-              console.error(`ALREADY IN ACTIVE! Found ${parseInt(userObj.userId)} in DB, which matches cookieId ${this.state.userStatus.cookieId}`);
-              alreadyThere = true;
-            }
-          });
-          // add it if it isn't
-          if (!alreadyThere) {
-            let status = this.state.userStatus;
-            console.warn('PLAYER NOT IN ACTIVE USERS DB! userStatus is', status);
-            DB.addActiveUser(enteredName, userStatusCopy.cookieId).then((response) => {
-              console.error('added new active', enteredName, response);
-              DB.getActiveUsers(this).then((response) => {
-                let newArray = response.data;
-                console.warn('immediately after adding new active user, getActiveUsers returned', newArray);
-                this.setState({
-                  usersHere: newArray
-                });
-                //return;
-              });
-            });
-          } else {
-            // don't add
-            console.error('NOT ADDING NEW ACTIVE USER!');
-            this.setState({
-              usersHere: usersArray
-            });
           }
-          let activeUsersCopy = this.state.usersHere.slice();
-          console.error('/////////////////////// 1103 block //////////////////////////////////');
-          activeUsersCopy.map((userObj, i) => {
-            this.state.highScores.map((userScore, p) => {
-              if (parseInt(userObj.userId) == parseInt(userScore.id)) {
-                userObj.avatarIndex = parseInt(userScore.avatarIndex);
-              }
-            });
-          });
-          this.setState({
-            usersHere: activeUsersCopy
-          });
+        });
+      } else {
 
-          //     // prune for expired
-          //     // let now = Date.now();
-          //     // usersArray.map((userObj, i) => {
-          //     //   let sinceLast = now - userObj.lastPing;
-          //     //   if (sinceLast > 10000) {
-          //     //     console.error(`${userObj.userName} last ping was ${sinceLast} ago! Too old!`);
-          //     //   } else {
-          //     //     console.warn(`${userObj.userName} last ping was OK, ${sinceLast} ago!`);
-          //     //   }
-          //     // })
+        // had cookie and matched in DB
 
-
-        } else {
-          let status = this.state.userStatus;
-          console.warn('PLAYER NOT IN (EMPTY) ACTIVE USERS DB! userStatus is', status);
-          DB.addActiveUser(enteredName, userStatusCopy.cookieId).then((response) => {
-            console.error('added new active', enteredName, response);
-            DB.getActiveUsers(this).then((response) => {
-              let newArray = response.data;
-              console.warn('immediately after adding new active user, getActiveUsers returned', newArray);
-              this.setState({
-                usersHere: newArray
-              });
-              //return;
-            });
-          });
+        console.error('Clicked Start while logged in as', this.state.userStatus.loggedInAs);
+        if (enteredName !== this.state.userStatus.loggedInAs) {
+          console.error('ENTERED DIFFERENT NAME! re-calling with new enteredName(?)', enteredName);
+          this.evaluatePlayerName(enteredName);
         }
-      });
-
-    });
+        // if (this.state.userStatus.avatarIndex !== this.state.userStatus.initialValues.avatarIndex) {
+        //   console.error('CHANGED AVATAR! calling DB.saveUserAvatarIndex', this.state.userStatus.avatarIndex);
+        //   DB.saveUserAvatarIndex(this.state.userStatus.loggedInAs, this.state.userStatus.avatarIndex);
+        // }
+        namesCopy.user = enteredName;
+        setTimeout(() => {
+          this.setState({
+            phase: 'selectingOpponent',
+            playerNames: namesCopy
+          });
+        }, this.state.options.flashInterval)
+       
+      }
+      
+    }
   }
   handleClickSwitchSign(event) {
     event.preventDefault();
@@ -2084,19 +1694,6 @@ class App extends React.PureComponent {
     }
 
   }
-  handleClickSendMessage(event) {
-    event.preventDefault();
-    let clickedId = parseInt(event.target.id.split('-')[3]);
-    console.log('clicked', clickedId);
-    this.startChatInstance(clickedId);
-  }
-  handleClickRequestMatch(event) {
-    event.preventDefault();
-    console.log('clicked', event.target.id);
-    DB.createNewOpenMatch(this.state.userStatus.cookieId).then((response) => {
-      console.log('created match?', response);
-    });
-  }
   handleClickConfirmButton(event) {
     event.preventDefault();
     console.log('clicked', event.target.id);
@@ -2221,7 +1818,7 @@ class App extends React.PureComponent {
     let instructionsStyle = { display: 'none' };
     let optionsStyle = { display: 'none' };
     let hallOfFameStyle = { display: 'none' };
-    let opponentSelectStyle = { display: 'none' };
+    // let opponentSelectStyle = { display: 'none' };
     let deckSelectStyle = { display: 'none' };
     switch (this.state.phase) {
       case 'splashScreen': {
@@ -2234,7 +1831,7 @@ class App extends React.PureComponent {
         introStyle = { display: 'flex' };
         break;
       }
-      case 'selectingOpponent': opponentSelectStyle = { display: 'flex' }; break;
+      // case 'selectingOpponent': opponentSelectStyle = { display: 'flex' }; break;
       case 'showingOptions': optionsStyle = { display: 'flex' }; break;
       case 'selectingDeck': deckSelectStyle = { display: 'flex' }; break;
       case 'showingHallOfFame': hallOfFameStyle = { display: 'flex' }; break;
@@ -2242,10 +1839,6 @@ class App extends React.PureComponent {
       case 'gameStarted':
         gameBoardStyle.display = 'flex';
       // footerStyle = { pointerEvents: 'all', opacity: 1, position: 'relative', bottom: '0' }; break;
-    }
-    let headerMenuMode = 'userInfo';
-    if (this.state.chatShowing) {
-      headerMenuMode = 'chat';
     }
     let endTime = window.performance.now();
     // console.warn('App pre-return activites took', (endTime - startTime));
@@ -2255,14 +1848,12 @@ class App extends React.PureComponent {
           cardSize={this.state.cardSizes.cardSize}
           playerName={this.state.userStatus.loggedInAs}
           uniqueId={this.state.userStatus.cookieId}
-          portraitSource={this.state.portraitSources.user}
+          portraitSources={this.state.portraitSources}
           avatarIndex={this.state.userStatus.avatarIndex}
           onClickAccountArea={this.handleClickAccountInfo}
-          onClickMessageArea={this.handleClickMessages}
           userStatus={this.state.userStatus}
           onClickSignIn={this.handleClickSignIn}
-          onClickLogOut={this.handleClickLogOut}
-          usersHere={this.state.usersHere} />
+          onClickLogOut={this.handleClickLogOut} />
         {/* {phase === 'splashScreen' && */}
         <IntroScreen style={introStyle}
           cardSize={this.state.cardSizes.cardSize}
@@ -2305,20 +1896,15 @@ class App extends React.PureComponent {
             cardSizes={this.state.cardSizes} />
         }
         {phase === 'selectingOpponent' &&
-          <OpponentSelectScreen style={opponentSelectStyle}
+          <OpponentSelectScreen 
+            portraitSources={this.state.portraitSources}
             userStatus={this.state.userStatus}
-            userId={this.state.userStatus.cookieId}
-            highScores={this.state.highScores}
             characters={this.characters}
             opponentSelected={this.state.CPUOpponent}
             cardSize={microCardSize}
             onClickPanel={this.handleClickOpponentPanel}
             onClickOpponentReady={this.handleClickOpponentReady}
-            onClickBack={this.handleClickBack}
-            usersHere={this.state.usersHere}
-            onClickMoreInfo={this.handleClickMoreInfo}
-            onClickSendMessage={this.handleClickSendMessage}
-            onClickRequestMatch={this.handleClickRequestMatch} />
+            onClickBack={this.handleClickBack} />
         }
         <GameBoard style={gameBoardStyle}
           playerNames={this.state.playerNames}
@@ -2344,14 +1930,11 @@ class App extends React.PureComponent {
           onClickSwitchSign={this.handleClickSwitchSign}
         />
         {/* {this.state.userStatus.loggedInAs && */}
-        <HeaderMenu mode={headerMenuMode}
-          playerObject={this.state.userStatus}
-          chatObject={this.state.currentChat}
+        <HeaderMenu playerObject={this.state.userStatus}
           cardSize={this.state.cardSizes.cardSize}
-          portraitSource={this.state.portraitSources.user}
+          portraitSources={this.state.portraitSources}
           onClickSignIn={this.handleClickSignIn}
           onClickLogOut={this.handleClickLogOut}
-          onSubmitChatMessage={this.handleSubmitChatMessage}
           characters={this.characters} />
         {/* } */}
         {phase === 'gameStarted' &&
@@ -2368,16 +1951,6 @@ class App extends React.PureComponent {
             buttonText={this.state.confirmMessage.buttonText}
             onClickConfirmButton={this.handleClickConfirmButton}
             onClickCancelButton={this.handleClickCancelButton}
-          />
-        }
-        {this.state.selectedUser.playerName &&
-          <UserInfoModal showing={this.state.selectedUser.playerName}
-            playerObj={this.state.selectedUser}
-            cardSize={this.state.cardSizes.cardSize}
-            portraitSource={this.state.portraitSources.user}
-            onClickCloseButton={this.handleClickCloseButton}
-            onClickLogOut={this.handleClickLogOut}
-            onClickSignIn={this.handleClickSignIn}
           />
         }
         <ResultModal onClickOKButton={this.handleClickOKButton}

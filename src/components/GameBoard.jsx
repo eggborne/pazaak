@@ -290,7 +290,8 @@ function GameBoard(props) {
       <MoveIndicator />
       <div id='opponent-hand' className='player-hand-area'>
         <div className='player-portrait-area'>
-          <PlayerPortrait size={portraitSize} source={props.portraitSources.opponent} spriteIndex={opponentPortraitIndex} displayName={props.playerNames.opponent} type={'mini'} />
+          {/* <PlayerPortrait size={portraitSize} source={props.portraitSources.opponent} spriteIndex={opponentPortraitIndex} displayName={props.playerNames.opponent} type={'mini'} /> */}
+          <PlayerPortrait size={portraitSize} source={'https://pazaak.online/assets/images/opponentsheet.jpg'} spriteIndex={opponentPortraitIndex} displayName={props.playerNames.opponent} type={'mini'} />
         </div>
         <div id='opponent-cards' className='player-cards'>
           <div>{opponentHand[0]}</div>

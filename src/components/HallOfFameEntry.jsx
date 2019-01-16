@@ -4,25 +4,19 @@ import PlayerPortrait from './PlayerPortrait';
 let characters = require('../scripts/characters');
 
 function HallOfFameEntry(props) {
-  console.log(props.entry);
   let bgColor = 'rgba(0, 0, 0, 0.1)';
   if (props.entry.playerName === props.loggedInAs) {
     bgColor = 'rgba(0, 255, 0, 0.3)';
   }
-  let setWinPercent = Math.round((props.entry.setWins / props.entry.totalSets) * 100);
   let matchWinPercent = Math.round((props.entry.matchWins / props.entry.totalMatches) * 100);
   let userWinPercent = Math.round((props.entry.usersDefeated / props.entry.usersFought) * 100);
   if (props.entry.totalMatches == 0) {
     matchWinPercent = '0';
   }
-  if (props.entry.totalSets == 0) {
-    setWinPercent = '0';
-  }
   if (props.entry.usersFought == 0) {
     userWinPercent = '0';
   }
   let characterArray = Object.keys(characters.characters);
-  console.log('chararrary', characterArray);
   return (
     <div id={`high-score-entry-${props.entry.id}`} className='high-score-entry'>
       <style jsx>{`
@@ -113,7 +107,7 @@ function HallOfFameEntry(props) {
         <div className='defeated-opponents-list'>
           {props.entry.cpuDefeated.length > 0 && props.entry.cpuDefeated.map((cpuName, i) => {
             let portraitIndex = characterArray.indexOf(cpuName);
-            return <PlayerPortrait key={i} isSelf={false} size={Math.ceil(window.innerWidth*0.11)} source={document.getElementById('opponent-sheet').src} spriteIndex={portraitIndex} displayName={''} type={''} />;
+            return <PlayerPortrait key={i} isSelf={false} size={Math.ceil(window.innerWidth*0.11)} source={'https://pazaak.online/assets/images/opponentsheet.jpg'} spriteIndex={portraitIndex} displayName={''} type={''} />;
           })}
           {props.entry.cpuDefeated.length === 0 && <div>None</div>}
         </div>      
