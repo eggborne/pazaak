@@ -1,16 +1,14 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import CPUOpponentPanel from './CPUOpponentPanel';
+import OpponentPanel from './OpponentPanel';
 
 function OpponentSelectScreen(props) {
-  let characterArray = [];
- 
-  Object.entries(props.characters).map((entry, i) => {
-    characterArray[i] = entry[0];
-  });
+  console.error('OpponentSelectScreen rendering', props);  
+  let opponentList = props.characterArray;
+  // let opponentList = props.characterArray.slice(0,2);
   return (
-    <div id='opponent-select-screen'>
+    <div id='opponent-select-screen' className={props.phase === 'selectingOpponent' || 'obscured'}>
       <style jsx>{`
         #opponent-select-screen {
           font-size: 1.25rem;
@@ -18,8 +16,8 @@ function OpponentSelectScreen(props) {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          align-items: center;
-          overflow-y: scroll;
+          align-items: center;         
+          flex-grow: 1;
         }
         #opponent-select-title {
           box-sizing: border-box;
@@ -30,7 +28,6 @@ function OpponentSelectScreen(props) {
         }
         #opponent-select-area {
           overflow-y: scroll;
-          flex-grow: 1;
         }
         .opponent-type-label {
           font-size: 1em;
@@ -41,18 +38,10 @@ function OpponentSelectScreen(props) {
         }
         .pre-footer {
           border-top: 1px solid black;
+          box-sizing: border-box;
         }
         #opponent-ready-button {
           min-width: 8rem;
-          animation: throb 1000ms infinite;
-        }
-        @keyframes throb {
-          0% {
-            transform: scale(1)
-          }
-          50% {
-            transform: scale(1.05);
-          }
         }
         #nobody-here-message {
           width: 100%;
@@ -62,41 +51,59 @@ function OpponentSelectScreen(props) {
           color: #333;
           text-shadow: none;
         }
+        .obscured {
+          max-height: 0;
+          pointer-events: none;
+        }
       `}</style>
       <div className='pre-header' id='opponent-select-title'>
         <div className='shadowed-text'>Choose Your Opponent</div>
       </div>
-      <div id='opponent-select-area' className='shadowed-text'>
-        {characterArray.map((character, i) =>
-          <CPUOpponentPanel key={i}
-            selected={(props.opponentSelected === character)}
-            portraitSource={props.portraitSources.opponent}
-            cardSize={props.cardSize}
-            index={i}
-            character={props.characters[character]}
-            onClickPanel={props.onClickPanel} />
-        )}
-      </div>
-
+      {true &&
+        <div id='opponent-select-area' className='shadowed-text'>
+          {opponentList.map((character, i) =>
+            // let selected = (props.opponentSelected === character.name);
+            <OpponentPanel key={i}
+              selected={props.opponentSelected === character.name}
+              portraitSource={props.portraitSources.opponent}
+              cardSize={props.cardSize}
+              index={i}
+              character={props.characters[character.name]}
+              onClickPanel={props.onClickPanel}
+              clickFunction={props.clickFunction}
+            />
+          )}
+        </div>
+      }
       <div className='pre-footer' id='opponent-select-footer'>
-        <button id='opponent-select-back-button' onClick={(event) => props.onClickBack(event, 'splashScreen')} className='footer-back-button shadowed-text'>{'<'}</button>
-        <button className='ready-button' onClick={props.onClickOpponentReady} id='opponent-ready-button'>OK</button>
+        <button id='opponent-select-back-button' {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'splashScreen') }} className='footer-back-button shadowed-text'>{'<'}</button>
+        <button {...{ [props.clickFunction]: props.onClickOpponentReady }} className='ready-button' id='opponent-ready-button'>OK</button>
       </div>
     </div>
   );
 }
 OpponentSelectScreen.propTypes = {
+  phase: PropTypes.string,
+  readyToList: PropTypes.bool,
   portraitSources: PropTypes.object,
   characters: PropTypes.object,
-  userStatus: PropTypes.object,
+  characterArray: PropTypes.array,
   opponentSelected: PropTypes.string,
   cardSize: PropTypes.object,
   onClickOpponentReady: PropTypes.func,
   onClickPanel: PropTypes.func,
   onClickBack: PropTypes.func,
+  clickFunction: PropTypes.string
 };
 
-export default OpponentSelectScreen;
+function areEqual(prevProps, nextProps) {
+  let equalTest = prevProps.phase != 'selectingOpponent' && nextProps.phase != 'selectingOpponent';
+  console.warn('MMMMMMMMMMMMMMMMMMMMMM <><><><><><><><><><><><><> OpponentSelectScreen areEqual', equalTest);
+  return (equalTest);
+}
+
+// export default OpponentSelectScreen;
+export default React.memo(OpponentSelectScreen, areEqual);
 
 
 

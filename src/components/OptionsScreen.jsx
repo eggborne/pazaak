@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-let Util = require('../scripts/util');
+import { isFullScreen } from '../scripts/util';
 
 function OptionsScreen(props) {
   let soundOption = 'option-off';
@@ -21,19 +21,19 @@ function OptionsScreen(props) {
   if (props.currentOptions.darkTheme) {
     darkThemeOption = 'option-on';
   }
-  if (Util.isFullScreen()) {
+  if (isFullScreen()) {
     fullScreenOption = 'option-on';
   }
   return (
-    <div style={props.style} id='options-screen'>
+    <div id='options-screen'>
       <style jsx>{`
         #options-screen {
           background-color: var(--trans-blue-bg-color);
           font-size: 2.75vh;
           font-family: 'Bungee';
           line-height: 100%;
-          align-items: center !important;
-          justify-content: center !important;
+          align-items: center;
+          justify-content: space-between;
         }
         #options {
           box-sizing: border-box;
@@ -74,15 +74,17 @@ function OptionsScreen(props) {
       <div className='options-instructions-title shadowed-text'>Options</div>
       <div id='options' className='shadowed-text'>
         <div id='options-grid'>
-          <div className='option-label'>Sound FX</div><div onClick={props.onToggleOption} id='sound-fx-toggle' className={`option-toggle ${soundOption}`}></div>
-          <div className='option-label'>Ambience</div><div onClick={props.onToggleOption} id='ambience-toggle' className={`option-toggle ${ambientOption}`}></div>
-          <div className='option-label'>Quick Mode</div><div onClick={props.onToggleOption} id='quick-mode-toggle' className={`option-toggle ${quickModeOption}`}></div>
-          <div className='option-label'>Dark Theme</div><div onClick={props.onToggleOption} id='dark-theme-toggle' className={`option-toggle ${darkThemeOption}`}></div>
+          <div className='option-label'>Sound FX</div><div {...{ [props.clickFunction]: props.onToggleOption }} id='sound-fx-toggle' className={`option-toggle ${soundOption}`}></div>
+          <div className='option-label'>Ambience</div><div {...{ [props.clickFunction]: props.onToggleOption }} id='ambience-toggle' className={`option-toggle ${ambientOption}`}></div>
+          <div className='option-label'>Quick Mode</div><div {...{ [props.clickFunction]: props.onToggleOption }} id='quick-mode-toggle' className={`option-toggle ${quickModeOption}`}></div>
+          <div className='option-label'>Dark Theme</div><div {...{ [props.clickFunction]: props.onToggleOption }} id='dark-theme-toggle' className={`option-toggle ${darkThemeOption}`}></div>
           <div className='option-label'>Full Screen</div><div onClick={props.onToggleOption} id='full-screen-toggle' className={`option-toggle ${fullScreenOption}`}></div>
         </div>
       </div>
-      <div className='option-footer'>
-        <button onClick={(event) => props.onClickBack(event, 'splashScreen')} className='back-button' id='options-back-button'>Back</button>
+      <div className='pre-footer'>
+        <div></div>
+        <button {...{ [props.clickFunction]: props.onClickBack }} className='ready-button' id='options-back-button'>Back</button>
+        <div></div>
       </div>
     </div>
   );
@@ -92,6 +94,7 @@ OptionsScreen.propTypes = {
   currentOptions: PropTypes.object,
   onToggleOption: PropTypes.func,
   onClickBack: PropTypes.func,
+  clickFunction: PropTypes.string
 };
 
 export default OptionsScreen;

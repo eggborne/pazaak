@@ -23,7 +23,7 @@ function CardBack(props) {
         .inner-band {
           background-color: var(--card-back-bg-color);
           border-color: var(--card-back-border-color);
-          border-radius: ${bandRadius};
+          border-radius: ${bandRadius};          
         }
         .inner-band:nth-child(4) {
           border-radius: ${bandRadius} ${bandRadius} 0 0;
@@ -46,7 +46,6 @@ function CardBack(props) {
         }
         .number-badge {
           background-color: var(--card-back-color);
-          // background-color: pink;
           border: ${cardBorderSize} solid black;
           border-top: none;
           border-bottom: none;
@@ -57,6 +56,7 @@ function CardBack(props) {
           border-radius: ${bandRadius};
           width: 65%;
           height: 27%;
+          position: absolute;
           // box-sizing: content-box;
         }
         .band-arrow-up, .band-arrow-down {
@@ -75,12 +75,13 @@ function CardBack(props) {
         .inner-band:nth-child(2) {
           border-bottom: none;
           border-radius: 12% 12% 0 0;
+          
         }
         .inner-band:nth-child(3) {
           border-top: none;
           border-radius: 0 0 12% 12%;
         }
-        .inner-band:nth-child(5) {
+        .inner-band:nth-child(4) {
           height: 18%;
           position: absolute;
           border-top: none;
@@ -89,7 +90,6 @@ function CardBack(props) {
           top: 20%;
         }
       `}</style>
-      <div className='number-badge back-badge'></div>
       <div className='inner-band'>
         <div className='corner-bubble'></div>
         <div className='band-arrow-up'></div>
@@ -97,10 +97,11 @@ function CardBack(props) {
       <div className='inner-band'>
         <div className='band-arrow-down'></div>
       </div>
+      <div className='number-badge back-badge'></div>
+      <div></div>
       <div className='inner-band'>
         <div className='back-bubble'></div>
       </div>
-      <div className='inner-band'></div>
     </div>
   );
 }
@@ -109,5 +110,5 @@ CardBack.propTypes = {
   size: PropTypes.object,
 };
 
-
-export default CardBack;
+export default React.memo(CardBack);
+// export default CardBack;

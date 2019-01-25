@@ -17,9 +17,26 @@ function MoveIndicator() {
           z-index: 4;
           pointer-events: none;
           opacity: 0;
-          transition: transform 100ms ease-out, opacity 200ms ease-out;
         }
-        
+        .indicator-on {
+          animation: show-move 1000ms 1;
+        }
+        @keyframes show-move {
+          0%, 100% {
+            opacity: 0;
+          }
+          15% { 
+            opacity: 1;
+            transform: scaleX(1.1);
+          }
+          30% {
+            opacity: 1;
+            transform: scaleX(1);
+          }
+          80% {
+            opacity: 1;
+          }
+        }
       `}</style>
       <div id='move-message'></div>
     </div>

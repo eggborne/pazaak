@@ -1,77 +1,74 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import HamburgerMenu from './HamburgerMenu';
 import Hamburger from './Hamburger';
 
-function Footer(props) {
-  let extraClass;
-  let display = 'none';
-  if (props.showing) {
-    extraClass = 'control-footer-on';
-    display = 'inline-flex';
-  }
+function ControlFooter(props) {
+
   return (
-    <div id='control-footer' className={extraClass}>
+    <div id='control-footer'>
       <style jsx>{`
         #control-footer {
           width: 100%;
           box-sizing: border-box;
-          padding: 0.5vmax;
-          height: 10vmax;
-          min-height: 10vmax;
-          max-height: 10vmax;
+          padding: var(--menu-border-width);
+          height: var(--control-footer-height);
+          min-height: var(--control-footer-height);
+          max-height: var(--control-footer-height);
           background-color: var(--red-bg-color);
-          display: ${display};          
+          display: inline-flex;          
           justify-content: space-between;
           align-items: stretch;
-          position: absolute;
-          bottom: -10vmax;
-          border: 0.5vw solid var(--dark-red-bg-color);
-          border-left: 0;
-          border-right: 0;
-          border-bottom: 0;
-          transition: all 300ms ease;
+          border: ${props.cardSize.badgeRadius} solid var(--dark-red-bg-color);
         }
         #control-footer-button-area {
           display: inline-flex;
-          align-items: stretch;
           justify-content: space-between;
           flex-grow: 1; 
-        }
-        .control-footer-on {
-          position: relative !important;
-          bottom: 0 !important;
         }
         .move-button {
           width: 49%;
           font-size: 3vmax;
-          transition: background 200ms ease;
         }
         #stand-button {
-          margin-right: 1%;
+          margin-left: var(--menu-border-width);
+          margin-right: var(--menu-border-width);
         }
         #switch-sign-button {
           width: 20%;
           font-size: 1rem;
         }
       `}</style>
+      <HamburgerMenu
+        borderRadiusSize={parseInt(props.cardSize.arrowBorderSize)}
+        currentOptions={props.currentOptions}
+        onClickHamburgerQuit={props.onClickHamburgerQuit}
+        onToggleOption={props.onToggleOption}
+        clickFunction={props.clickFunction} />
       <div id='control-footer-button-area'>
-        <button className='move-button' onClick={props.onClickEndTurn} id='end-turn-button'>End Turn</button>
-        <button className='move-button disabled-button hidden-button' onClick={props.onClickSwitchSign} id='switch-sign-button'>+/-</button>
-        <button className='move-button' onClick={props.onClickStand} id='stand-button'>Stand</button>
+        <button {...{[props.clickFunction]: props.onClickEndTurn}} className='move-button' id='end-turn-button'>End Turn</button>
+        <button {...{[props.clickFunction]: props.onClickSwitchSign}} className='move-button disabled-button hidden-button' id='switch-sign-button'>+/-</button>
+        <button {...{[props.clickFunction]: props.onClickStand}} className='move-button' id='stand-button'>Stand</button>
       </div>
-      <Hamburger onClickHamburger={props.onClickHamburger} />
+      <Hamburger onClickHamburger={props.onClickHamburger}
+        clickFunction={props.clickFunction} />
     </div>
   );
 }
 
-Footer.propTypes = {
+ControlFooter.propTypes = {
+  cardSize: PropTypes.object,
+  currentOptions: PropTypes.object,
+  onClickHamburgerQuit: PropTypes.func,
+  onToggleOption: PropTypes.func,
   showing: PropTypes.bool,
   style: PropTypes.object,
   onClickEndTurn: PropTypes.func,
   onClickSwitchSign: PropTypes.func,
   onClickStand: PropTypes.func,
   onClickHamburger: PropTypes.func,
+  clickFunction: PropTypes.string
 };
 
 
-export default Footer;
+export default ControlFooter;

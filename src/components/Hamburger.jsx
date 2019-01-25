@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 function Hamburger(props) {
   return (
-    <div onClick={props.onClickHamburger} id='hamburger'>
+    <div {...{[props.clickFunction]: props.onClickHamburger}} className='balls' id='hamburger'>
       <style jsx>{`
         #hamburger {
           box-sizing: border-box;
@@ -13,24 +13,27 @@ function Hamburger(props) {
           justify-content: space-evenly;
           width: 10vmax;
           background-color: var(--button-bg-color);
-          border: solid var(--button-border-color);
+          //border: solid var(--button-border-color);
           cursor: pointer;
           border-radius: 0.25rem;
           border-width: 0.25rem;
-          transition: transform 30ms ease-in-out;
         }
-
+        #bars {
+        }
         .hamburger-bar {
           width: 7vmax;
           height: 1.1vmax;
           background-color: var(--button-text-color);
-          transition: transform 150ms ease;
           border-radius: 0.1rem;
+          transition: transform 150ms ease;
+          will-change: transform;
         }
-       
         #middle-hamburger-bar-2 {
           position: absolute;
           width: 7vmax;
+        }
+        #top-hamburger-bar, #bottom-hamburger-bar {
+          will-change: opacity;
         }
       `}
       </style>
@@ -42,7 +45,8 @@ function Hamburger(props) {
   );
 }
 Hamburger.propTypes = {
-  onClickHamburger: PropTypes.func
+  onClickHamburger: PropTypes.func,
+  clickFunction: PropTypes.string
 };
 
 

@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PlayerPortrait from './PlayerPortrait';
+import { characters } from '../scripts/characters';
 
 function UserCard(props) {
-  let portraitSize = Math.floor(props.cardSize.height * 1.5);
+  let portraitSize = window.innerWidth / 4;
+  let borderSize = '1px';
   let nameSize = '1.4rem';
-  let loggedIn = false;
-  let logButtons = false;
+  let loggedIn =  true;
+  let logButtons = true;
   let displayName;
   if (props.playerObj.loggedInAs) {
     loggedIn = props.playerObj.loggedInAs;
@@ -20,31 +22,18 @@ function UserCard(props) {
   if (!defeatedArray) {
     defeatedArray = [];
   }
-  let opponentSource = props.portraitSources.opponent;
-  // if (props.playerObj.cpuDefeated.length > 2) {
-  //   let trunc = props.playerObj.cpuDefeated.slice(2, -2);
-  //   defeatedArray = trunc.toString().split('","');
-  // }
-
-  // return <div key={i}>
-  //   <PlayerPortrait size={portraitSize/3} source={opponentSource} spriteIndex={i} displayName={opponent} type={'mini'} />
-  // </div>;
   return (
     <div id='user-info-grid' className='shadowed-text'>
       <style jsx>{`
         #user-info-grid {
           width: 100%;
-          max-height: 80vh;
           display: grid;
           box-sizing: border-box;
           padding: 1rem;
           grid-template-columns: 1fr auto;
           grid-template-rows: 1.5fr 1fr 1fr 1.25fr;
-          align-items: stretch;
-          justify-content: center;
-          border: 1px solid var(--dark-red-bg-color);
-          border-radius: 0.5rem;
-          background: rgba(0, 0, 0, 0.1);
+          background: var(--medium-red-bg-color);
+          border-radius: var(--menu-border-radius);
         }
         #user-info-grid > div {
           padding: 0.25rem;
@@ -63,12 +52,9 @@ function UserCard(props) {
           display: flex;
           align-items: center;
           justify-content: flex-end;
-          border: 0 !important;
-          margin-top: 4vw;
         }
         #user-info-grid > div {
           box-sizing: border-box;
-          //border: 1px solid rgba(0, 0, 0, 0.25);
         }
         #user-name {
           font-size: ${nameSize};
@@ -107,9 +93,6 @@ function UserCard(props) {
           grid-column-start: 0;
           grid-column-end: span 2;
         }
-        #info-modal-close-button {
-          width: 100%;
-        }
         #defeated-list {
           padding: 0.25rem;
           display: inline-flex;
@@ -121,7 +104,7 @@ function UserCard(props) {
 
       </div>
       <div id='large-user-portrait'>
-        <PlayerPortrait size={portraitSize} source={props.portraitSources.user} spriteIndex={props.playerObj.avatarIndex} displayName={''} type={'mini'} />
+        <PlayerPortrait size={portraitSize} spriteIndex={props.playerObj.avatarIndex} displayName={''} type={'mini'} />
         <div id='credits'>{props.playerObj.credits} credits</div>
         {/* <div id='id-display'>id #{props.playerObj.cookieId}</div> */}
       </div>
@@ -137,10 +120,10 @@ function UserCard(props) {
         CPU Opponents Defeated
         <div id='defeated-list' >
           {defeatedArray.length > 0 && defeatedArray.map((opponent, i) => {
-            let opponentSpriteIndex = Object.keys(props.characters).indexOf(opponent);
+            let opponentSpriteIndex = Object.keys(characters).indexOf(opponent);
             return (
               <div key={i}>
-                <PlayerPortrait size={portraitSize / 3.5} source={opponentSource} spriteIndex={opponentSpriteIndex} displayName={''} type={'mini'} />
+                <PlayerPortrait size={portraitSize / 3.5} cpu={true} spriteIndex={opponentSpriteIndex} displayName={''} type={'mini'} />
               </div>);
           })}
           {defeatedArray.length === 0 && <div>None</div>}
@@ -148,27 +131,23 @@ function UserCard(props) {
       </div>
       <div id='user-info-button-area' className={'user-area-lower'}>
         <div className={!logButtons && 'display-none'}>
-          <button onClick={props.onClickLogOut} className={!loggedIn && 'display-none'} id='user-info-log-out-button'>Log out</button>
-          <button onClick={props.onClickSignIn} className={loggedIn && 'display-none'} id='user-info-sign-in-button'>Sign in</button>
-        </div>
-        <div className={logButtons && 'display-none'}>
-          <button onClick={props.onClickCloseButton} id='info-modal-close-button'>Close</button>
+          <button {...{ [props.clickFunction]: props.onClickLogOut }} className={!loggedIn && 'display-none'} id='user-info-log-out-button'>Log out</button>
+          <button {...{ [props.clickFunction]: props.onClickSignIn }} className={loggedIn && 'display-none'} id='user-info-sign-in-button'>Sign in</button>
         </div>
       </div>
-      
     </div>
   );
 }
 
 UserCard.propTypes = {
   playerObj: PropTypes.object,
-  cardSize: PropTypes.object,
-  portraitSources: PropTypes.object,
   onClickLogOut: PropTypes.func,
   onClickSignIn: PropTypes.func,
   onClickCloseButton: PropTypes.func,
-  characters: PropTypes.object
 };
 
+function areEqual(prevProps, nextProps) {
+  return prevProps.playerObj.cookieId == nextProps.cookieId;
+}
 
-export default UserCard;
+export default React.memo(UserCard, areEqual);

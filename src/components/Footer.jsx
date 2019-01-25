@@ -1,53 +1,51 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-
-function Footer() {
-  let ppButtonSrc = 'https://pazaak.online/assets/images/ppbutton.gif';
+function Footer(props) {
+  console.error('footer rendering???', props.readyToShow);
   return (
     <div id='footer'>
       <style jsx>{`
         #footer {
           box-sizing: border-box;
-          width: 100vw;
           bottom: 0;
           font-family: sans-serif;
-          min-height: 6vh;
-          max-height: 6vh;
+          min-height: var(--header-height);
           min-width: 320px;
           background-color: var(--red-bg-color);
           display: inline-flex;
           align-items: center;
           font-size: 1.5vmax;
-          border: 0.5vw solid rgba(0, 0, 0, 0.2);
-          transform: translateY(100%);
-          transition: all 600ms;
+          border: var(--menu-border-width) solid var(--dark-red-bg-color);
+          border-bottom: 0;
+          border-radius: var(--menu-border-radius) var(--menu-border-radius) 0 0;
+          //transform: ${props.readyToShow ? 'none' : 'translateY(100%)'};
+          opacity: ${props.readyToShow ? '1' : '0'};
+          transition: opacity 500ms ease;
+          will-change: opacity;
         }
         #footer-contents {
           display: inline-flex;
           align-items: center;
           justify-content: space-around;
           width: 100%;
-          transition: all 400ms;
-        }
-        #footer-contents > div {
-          text-align: center;
-          width: calc(100vw / 3);
-        }
+        }        
       `}
       </style>
       <div id='footer-contents'>
         <div><a href='https://github.com/eggborne'>GitHub</a></div>
         <div><a href='mailto:mike@eggborne.com'>Contact</a></div>
-        <div>
-          <form id='donate-button' action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-            <input type='hidden' name='cmd' value='_s-xclick' />
-            <input type='hidden' name='hosted_button_id' value='GHAXRA5JU4Y2J' />
-            <input id='pp-button' src={ppButtonSrc} type='image' border='0' title='PayPal - The safer, easier way to pay online!' alt='Donate with PayPal button' />
-          </form>
-        </div>
       </div>
     </div>
   );
 }
 
-export default Footer;
+Footer.propTypes = {
+  readyToShow: PropTypes.bool,
+};
+
+function areEqual(prevProps, nextProps) {
+  return prevProps.readyToShow;
+}
+
+export default React.memo(Footer, areEqual);

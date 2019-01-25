@@ -1,5 +1,12 @@
 import axios from 'axios';
 
+export const portraitSources = {
+  user: 'https://pazaak.online/assets/images/avatarsheet.jpg',
+  opponent: 'https://pazaak.online/assets/images/opponentsheet.jpg'
+};
+
+
+
 export function deleteUserRecord(userId) {
   return axios({
     method: 'post',

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import Card from './Card';
 
 function DeckSelectionScreen(props) {
+  console.error('DeckSelectionScreen rendering');
   let selectedCardSize = props.cardSizes.mediumCardSize;
   let selectionCardSize = props.cardSizes.mediumCardSize;
   let cardsLeft = 10 - props.userDeck.length;
@@ -24,13 +25,13 @@ function DeckSelectionScreen(props) {
   } else {
     chooseText = `choose ${cardsLeft} card${cardPlural}`;
   }
-  let userSelectedGrid = ['', '', '', '', '', '', '', '', '', ''];
-  props.userDeck.map((card, i) => {
-    userSelectedGrid[i] = (<Card key={i} id={card.id} onClickCard={props.onClickCard} size={selectedCardSize} value={card.value} type={card.type} />);
-  });
   let cardSelectionGrid = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
   props.cardSelection.map((card, i) => {
-    cardSelectionGrid[i] = (<Card key={i} id={card.id} onClickCard={props.onClickCard} size={selectionCardSize} value={card.value} type={card.type} />);
+    cardSelectionGrid[i] = (<Card id={card.id} elementId={`selection-card-${card.id}`} onClickCard={props.onClickCard} size={selectionCardSize} value={card.value} type={card.type} inDeck={false} clickFunction={props.clickFunction} />);
+  });
+  let userSelectedGrid = ['', '', '', '', '', '', '', '', '', ''];
+  props.userDeck.map((card, i) => {
+    userSelectedGrid[i] = (<Card id={card.id} elementId={card.elementId} onClickCard={props.onClickCard} size={selectedCardSize} value={card.value} type={card.type} inDeck={true} clickFunction={props.clickFunction} />);
   });
   let gridWidth = selectionCardSize.width + (parseFloat(selectionCardSize.borderSize) * 3);
   let gridHeight = selectionCardSize.height + (parseFloat(selectionCardSize.borderSize) * 3);
@@ -45,7 +46,6 @@ function DeckSelectionScreen(props) {
           display: flex;
           flex-direction: column;
           flex-grow: 1;
-          justify-content: flex-start;
           justify-content: space-between;
           align-items: center;
         }
@@ -72,9 +72,6 @@ function DeckSelectionScreen(props) {
         }
         #deck-select-title > div:nth-child(1) {
           padding-left: 1rem;
-        }
-        #deck-selection-area {
-          
         } 
         #preview-deck-area {
           display: flex;
@@ -116,16 +113,18 @@ function DeckSelectionScreen(props) {
           background-color: rgba(51, 82, 5, 0.5) !important;
           border-color: rgba(51, 51, 0, 0.75) !important;
         }
-
+        .pre-footer {
+          border-color: transparent;
+        }
         .throbbing {
           animation: throb 1000ms infinite;
         }
         @keyframes throb {
           0% {
-            transform: scale(1)
+            //transform: scale(1)
           }
           50% {
-            transform: scale(1.05);
+            //transform: scale(1.05);
           }
         }
       `}
@@ -137,7 +136,8 @@ function DeckSelectionScreen(props) {
       <div id='deck-selection-area'>
         <div id='deck-selection-grid'>
           {cardSelectionGrid.map((card, i) => {
-            return <div key={i} id={`card-selection-space-${i}`}>{card}</div>;
+            // return <div key={i} id={`card-selection-space-${i}`}>{card}</div>;
+            return <div className='card-select-outline' key={i + 20}>{card}</div>;
           })}
         </div>
       </div>
@@ -145,14 +145,15 @@ function DeckSelectionScreen(props) {
         <div id='preview-deck-title' className='smaller shadowed-text'>YOUR DECK:</div>
         <div id='preview-deck-grid'>
           {userSelectedGrid.map((card, i) => {
-            return <div id={`player-deck-space-${i}`} key={i}>{card}</div>;
+            // return <div id={`player-deck-space-${i}`} key={i}>{card}</div>;
+            return <div className='card-select-outline' key={i + 60}>{card}</div>;
           })}
         </div>
       </div>
       <div className='pre-footer' id='deck-select-footer'>
-        <button id='deck-select-back-button' onClick={(event) => props.onClickBack(event, 'selectingOpponent')} className='footer-back-button shadowed-text'>{'<'}</button>
-        <button className={`ready-button ${buttonDisabled} ${throbbing}`} onClick={props.onClickPlay} id='deck-ready-button'>Start!</button>
-        <button onClick={props.onClickRandomize} className='shadowed-text' id='randomize-button'>Random</button>
+        <button {...{[props.clickFunction]: (event) => props.onClickBack(event, 'selectingOpponent')}} id='deck-select-back-button' className='footer-back-button shadowed-text'>{'<'}</button>
+        <button {...{[props.clickFunction]: props.onClickPlay}} className={`ready-button ${buttonDisabled} ${throbbing}`} id='deck-ready-button'>Start!</button>
+        <button {...{[props.clickFunction]: props.onClickRandomize}} className='shadowed-text' id='randomize-button'>Random</button>
       </div>
     </div>
   );
@@ -166,7 +167,8 @@ DeckSelectionScreen.propTypes = {
   onClickCard: PropTypes.func,
   cardSizes: PropTypes.object,
   mediumCardSize: PropTypes.object,
-  onClickBack: PropTypes.func
+  onClickBack: PropTypes.func,
+  clickFunction: PropTypes.string
 };
 
 export default DeckSelectionScreen;

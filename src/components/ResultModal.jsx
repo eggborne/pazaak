@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function ResultModal(props) {
+  console.error('<:<:<:<: ResultModal rendered :>:>:>');
   let userScoreStyle = { color: 'white' };
   let opponentScoreStyle = { color: 'white' };
   let winnerStyle = { display: 'none' };
@@ -20,6 +21,61 @@ function ResultModal(props) {
   }
   return (
     <div id='result-modal'>
+      <style jsx>{`
+        #result-modal {
+          font-family: 'Bungee';
+          box-sizing: border-box;
+          position: fixed;
+          margin-left: 12.5%;
+          margin-left: 12.5%;
+          width: 75%;
+          color: var(--main-text-color);
+          border-radius: 1.25rem;
+          margin-top: 30vw;
+          z-index: 5;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          line-height: 2.5rem;
+          transform: translateY(-95vw);
+          opacity: 0;
+          transition: transform 600ms ease, opacity 300ms ease;
+          will-change: transform, opacity;
+          padding: 2vh;
+          pointer-events: none;
+          box-shadow:
+          -2px -2px 0 #000,  
+          2px -2px 0 #000,
+          -2px 2px 0 #000,
+            1px 1px 2px #000;
+        }
+        #result-title {
+          font-size: 1.75rem;
+          text-align: center;
+        }
+        #result-body {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-size: 1.5rem;
+          padding: 1rem;
+        }
+        #result-winner {
+          font-size: 1.25rem;
+        }
+        #result-scores {
+          font-size: 1rem;
+          text-align: center;
+        }
+        #result-ok-button {
+          box-sizing: border-box;
+          font-size: 1.25rem;
+          padding: 1.5rem 2rem 1.5rem 2rem;
+          margin-bottom: 0.5rem;
+        }
+      `}
+      </style>
       <div className='shadowed-text' id='result-title'>
         {props.titleText}
       </div>
@@ -29,7 +85,7 @@ function ResultModal(props) {
           {props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span><br />{props.playerNames.opponent}: <span style={opponentScoreStyle}>{props.finalScores.opponent}</span>
         </div>
       </div>
-      <button onClick={props.onClickOKButton} id='ok-button'>{props.buttonText}</button>
+      <button {...{[props.clickFunction]: props.onClickOKButton}} className='balls' id='result-ok-button'>{props.buttonText}</button>
     </div>
   );
 }
@@ -41,8 +97,13 @@ ResultModal.propTypes = {
   matchOver: PropTypes.bool,
   finalScores: PropTypes.object,
   buttonText: PropTypes.string,
-  onClickOKButton: PropTypes.func
+  onClickOKButton: PropTypes.func,
+  clickFunction: PropTypes.string
 };
 
+function areEqual(prevProps, nextProps) {
+  return prevProps.matchOver === nextProps.matchOver;
+}
 
-export default ResultModal;
+// export default ResultModal;
+export default React.memo(ResultModal, areEqual);

@@ -1,91 +1,88 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { portraitSources } from '../scripts/db';
 
 function PlayerPortrait(props) {
-  let sheetWidth = props.size * 8;
-  let portraitSize = Math.floor(props.size);
-  let extraClass = 'left-side';
-  let displayLabel = '';
-  let labelOpacity = '0.5';
-  let labelAlign = 'center';
-  let labelFont = 'Nova Square';
-  let opacity = 1;
-  //let labelFontSize = props.size / 7;
-  let labelFontSize;
-  if (props.type === 'mini') {
-    extraClass = '';
-  } else if (props.type === 'micro') {
-    extraClass = '';
-    opacity = '0.5 !important';
-  }
-  if (!props.displayName) {
-    displayLabel = 'display-none';
+  console.warn('rendering PlayerPortrait', props.displayName, props.spriteIndex);
+  let portraitSize = props.size;
+  let sheetWidth = portraitSize * 8;
+  let sheetHeight = portraitSize * 3;
+  let labelFontSize = portraitSize / 6;
+  let wordsInName = props.displayName.split(' ').length;
+  let totalLength = props.displayName.length;
+
+  if (wordsInName <= 2 && totalLength > 9
+    || wordsInName > 2 && totalLength > 12) {
+    labelFontSize = portraitSize / 8;
+    if (totalLength > 18) {
+      labelFontSize = portraitSize / 9;
+    }
+  }  
+  let borderWidth = Math.ceil(portraitSize * 0.01);
+  if (borderWidth > 2) {
+    borderWidth = 2;
   }
   let spriteIndex = props.spriteIndex;
-  let backgroundPositionX = -spriteIndex * (props.size) + 'px';
+  let backgroundPositionX = -spriteIndex * (portraitSize) + 'px';
   let backgroundPositionY = 'top';
   if (spriteIndex > 7) {
-    backgroundPositionX = -(spriteIndex % 8) * (props.size) + 'px';
-    backgroundPositionY = -props.size + 'px';
+    backgroundPositionX = -(spriteIndex % 8) * (portraitSize) + 'px';
+    backgroundPositionY = -portraitSize + 'px';
     if (spriteIndex > 15) {
-      backgroundPositionY = (-props.size*2) + 'px';
+      backgroundPositionY = (-portraitSize * 2) + 'px';
     }
   }
-  let userPortrait = '';
-  
-  if (spriteIndex === -1) { // not logged in
-    backgroundPositionX = portraitSize;
-  }
-  let labelTextColor = 'white';
-  if (props.isSelf) {
-    labelTextColor = 'var(--option-on-color)';
-  }
-  if (props.source)
-    return (
-      <div className={`player-portrait ${extraClass} ${userPortrait}`}>
-        <style jsx>{`
+  let nullIndex = spriteIndex === null;
+  let source = props.cpu ? portraitSources.opponent : portraitSources.user;
+  return (
+    <div className={'player-portrait'} style={ props.style }>
+      <style jsx>{`
         .player-portrait {
-          position: relative;
-          border-radius: ${props.size/10}px;
-          border: 1px solid black;
+          box-sizing: border-box;
+          border-radius: ${props.type === 'header' ? '0' : '10%' };
+          border: ${borderWidth}px solid #333;
           display: flex;
           align-items: flex-end;
-          background-image: url(${props.source});
-          background-size: ${sheetWidth}px ${portraitSize*3}px;
+          background-image: ${!nullIndex && `url(${source})`};
+          background-size: ${sheetWidth}px ${sheetHeight}px;
           background-repeat: no-repeat;
           width: ${portraitSize}px;
           height: ${portraitSize}px;
+          max-height: ${portraitSize}px;
           background-position-x: ${backgroundPositionX};
           background-position-y: ${backgroundPositionY};
-          opacity: ${opacity};
         }
         .player-portrait-label {
-          font-family: ${labelFont};
-          font-size: ${labelFontSize}px;
           width: 100%;
-          background-color: rgba(0, 0, 0, ${labelOpacity});
+          height: 32%;
+          font-size: ${labelFontSize}px;
+          background-color: rgba(0, 0, 0, 0.5);
           box-sizing: border-box;
+          text-align: center;
           display: flex;
+          justify-content: center;
           align-items: center;
-          padding: 5%;
-          justify-content: ${labelAlign};
-          border-radius: 0 0 0.5rem 0.5rem;
-          color: ${labelTextColor} !important;
+          border-radius: 0 0 10% 10%;
         }
       `}
-        </style>
-        <div className={`player-portrait-label ${displayLabel}`}>{props.displayName}</div>
-      </div>
-    );
+      </style>
+      {props.displayName &&
+        <div className={'player-portrait-label'}>{props.displayName}</div>
+      }
+    </div>
+  );
 }
 PlayerPortrait.propTypes = {
-  isSelf: PropTypes.bool,
   size: PropTypes.number,
+  style: PropTypes.object,
   type: PropTypes.string,
-  source: PropTypes.string,
+  cpu: PropTypes.bool,
   spriteIndex: PropTypes.number,
   displayName: PropTypes.string,
 };
 
-
-export default PlayerPortrait;
+function areEqual(prevProps, nextProps) {
+  return prevProps.spriteIndex === nextProps.spriteIndex && prevProps.size === nextProps.size;
+}
+// export default PlayerPortrait;
+export default React.memo(PlayerPortrait, areEqual);

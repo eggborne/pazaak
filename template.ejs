@@ -4,23 +4,11 @@
     <meta charset="utf-8">
     <title><%= htmlWebpackPlugin.options.title %></title>
     <link href="https://fonts.googleapis.com/css?family=Bungee|Nova+Square" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-    rel="stylesheet">
-    <body onload='
-    document.getElementById("user-info-panel").style.opacity = 1;
-    document.getElementById("intro-screen").style.opacity = 1;
-    document.getElementById("header").style.opacity = 1;
-    document.getElementById("footer").style.transform = "none";
-    '>
-   
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  </head>
+  <body>
     <% if (htmlWebpackPlugin.options.appMountId) { %>
     <div id="<%= htmlWebpackPlugin.options.appMountId%>"></div>
-    <% } %>
-    <img id='avatar-sheet' src='https://pazaak.online/assets/images/avatarsheet.jpg' style='display: none' />
-    <audio defer id='click-sound' src='https://pazaak.online/assets/sounds/click.wav'></audio>
-    <audio defer id='turn-sound' src='https://pazaak.online/assets/sounds/startturn.wav'></audio>
-    <audio defer id='draw-sound' src='https://pazaak.online/assets/sounds/drawcard.wav'></audio>
-    <audio defer id='win-sound' src='https://pazaak.online/assets/sounds/win.wav'></audio>
-    <audio defer id='lose-sound' src='https://pazaak.online/assets/sounds/lose.wav'></audio>
+    <% } %>    
   </body>
 </html>

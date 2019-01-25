@@ -28,7 +28,8 @@ module.exports = {
         options: {
           plugins: [
             'react-hot-loader/babel',
-            'styled-jsx/babel'
+            'styled-jsx/babel',
+            '@babel/proposal-class-properties'
           ]
         }
       }

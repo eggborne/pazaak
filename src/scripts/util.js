@@ -1,3 +1,32 @@
+
+
+export const getPageLoadInfo = () => {
+  let perfEntries = performance.getEntriesByType('navigation');
+  perfEntries.map((p, i) => {
+    document.getElementById('debug-display').innerHTML += ('connect duration = ' + (p.connectEnd - p.connectStart).toPrecision(6) + '<br />');
+
+    document.getElementById('debug-display').innerHTML += ('domainLookupStart = ' + (p.domainLookupStart).toPrecision(6) + '<br />');
+    document.getElementById('debug-display').innerHTML += ('domContentLoadedEventStart = ' + (p.domContentLoadedEventStart).toPrecision(6) + '<br />');
+    document.getElementById('debug-display').innerHTML += ('loadEventStart = ' + (p.loadEventStart).toPrecision(6) + '<br />');
+    document.getElementById('debug-display').innerHTML += ('domContentLoadedEvent = ' + (p.domContentLoadedEventEnd - p.domContentLoadedEventStart).toPrecision(6) + '<br />');
+    document.getElementById('debug-display').innerHTML += ('domComplete = ' + (p.domComplete).toPrecision(6) + '<br />');
+    document.getElementById('debug-display').innerHTML += ('domInteractive = ' + (p.domInteractive).toPrecision(6) + '<br />');
+    document.getElementById('debug-display').innerHTML += ('duration = ' + (p.duration).toPrecision(6) + '<br />');
+
+    document.getElementById('debug-display').innerHTML += ('loadEvent = ' + (p.loadEventEnd - p.loadEventStart).toPrecision(6) + '<br />');
+    document.getElementById('debug-display').innerHTML += ('unloadEvent = ' + (p.unloadEventEnd - p.unloadEventStart).toPrecision(6) + '<br />');
+    document.getElementById('debug-display').innerHTML += ('domainLookup = ' + (p.domainLookupEnd - p.domainLookupStart).toPrecision(6) + '<br />');
+
+    document.getElementById('debug-display').innerHTML += ('transferSize = ' + p.transferSize + '<br />');
+    document.getElementById('debug-display').innerHTML += ('encodedBodySize = ' + p.encodedBodySize + '<br />');
+    document.getElementById('debug-display').innerHTML += ('decodedBodySize = ' + p.decodedBodySize + '<br />');
+
+    document.getElementById('debug-display').innerHTML += ('redirectCount = ' + p.redirectCount + '<br />');
+    document.getElementById('debug-display').innerHTML += ('time now = ' + (window.performance.now()) + '<br />');
+    document.getElementById('debug-display').innerHTML += ('type = ' + p.type + '<br />');
+    // document.getElementById('debug-display').innerHTML += ('= Navigation entry[' + i + ']<br />');
+  });
+};
 export const shuffle = (arr) => {
   arr.sort(() => Math.random() - 0.5);
   return arr;
@@ -29,7 +58,7 @@ const getCookie = (cname) => {
 export const checkCookie = (app) => {
   let startTime = window.performance.now();
   let response = getCookie('username');
-  console.warn('checked cookie in', window.performance.now()-startTime)
+  console.warn('checked cookie in', window.performance.now() - startTime);
   let userStatusCopy = Object.assign({}, app.state.userStatus);
   let playerName;
   let uniqueId;
@@ -39,32 +68,24 @@ export const checkCookie = (app) => {
     userStatusCopy.cookieId = parseInt(uniqueId);
     userStatusCopy.id = parseInt(uniqueId);
     userStatusCopy.loggedInAs = playerName;
-    console.error(`Recognized user as ${response}. Filling ${playerName} in name input and disabling checkbox etc.`);
-    document.getElementById('player-name-input').value = playerName;
-
-    // document.getElementById('player-name-input').disabled = true;
-    // document.getElementById('player-name-input').style.backgroundColor = 'gray';
-    // document.getElementById('remember-checkbox').checked = true;
-    // // document.getElementById('remember-checkbox').disabled = true;
-    document.getElementById('remember-check-area').classList.add('remembered');
-
+    console.warn(`Recognized user as ${response}`);
     app.setState({
-      userStatus: userStatusCopy
-    }, () => {
+      userStatus: userStatusCopy,
+    }, () => {         
       app.evaluatePlayerName(playerName);
     });
   } else {
+    app.setState({
+      checkedCookie: true
+    });
+    document.getElementById('avatar-row').style.opacity = 1;
     console.error('No cookie found. Leaving state.userStatus.cookieId undefined.');
     document.getElementById('player-name-input').disabled = false;
-    // document.getElementById('player-name-input').style.backgroundColor = 'white';
-    // // document.getElementById('remember-checkbox').disabled = true;
-    // document.getElementById('remember-checkbox').checked = false;
-    document.getElementById('remember-check-area').classList.remove('remembered');
+    // document.getElementById('initial-loading-message').innerHTML += `<br />User not recognized.`;
   }
 };
 
 export function getCardSizes() {
-  let startTime = window.performance.now();
   let cardSize = {};
   let mediumCardSize = {};
   let miniCardSize = {};
@@ -84,7 +105,7 @@ export function getCardSizes() {
   miniCardSize.height = Math.round(cardSize.height * 0.75);
   microCardSize.width = Math.round(cardSize.width * 0.6);
   microCardSize.height = Math.round(cardSize.height * 0.6);
-
+  
   let cardSizes = [cardSize, mediumCardSize, miniCardSize, microCardSize];
   cardSizes.map((sizeObj) => {
     let cardHeight = sizeObj.height;
@@ -104,25 +125,10 @@ export function getCardSizes() {
   cardsObj.miniCardSize = cardSizes[2];
   cardsObj.microCardSize = cardSizes[3];
   let endTime = window.performance.now();
-  console.warn('sized cards in', (endTime - startTime));
-  return cardsObj;
-}
+  
+  console.error('GOT CARDSIZES', cardsObj.cardSize.height);
 
-export function sizeElements(app, initialStart) {
-  if (initialStart) {
-    // size button text    
-    Array.from(document.getElementsByClassName('intro-button')).map((button) => {
-      let buttonTextLength = button.children[0].innerHTML.length;
-      if (button.children[0].innerHTML === 'How to Play') {
-        buttonTextLength = 7;
-      }
-      let fontSize = (button.offsetWidth / (buttonTextLength)) + 'px';
-      button.style.fontSize = fontSize;
-      button.style.height = (window.innerHeight / 10) + 'px';
-    });
-  }
-  // is this needed?
-  // document.getElementById('container').style.height = `${window.innerHeight}px`;
+  return cardsObj;
 }
 function fullScreenCall() {
   var root = document.body;

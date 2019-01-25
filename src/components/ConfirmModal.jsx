@@ -17,7 +17,7 @@ function ConfirmModal(props) {
           justify-content: center;
           opacity: 0;
           pointer-events: none;
-          z-index: 19;
+          z-index: 6;
           transition: all 200ms ease;
         }
         #confirm-modal {
@@ -82,10 +82,10 @@ function ConfirmModal(props) {
           {props.messageData.titleText}
         </div>
         <div className='modal-body shadowed-text' id='confirm-body'>
-          {props.bodyText}
+          {props.messageData.bodyText}
         </div>
-        <button onClick={props.onClickOKButton} className='confirm-button' id='confirm-ok-button'>{props.buttonText.confirm}</button>
-        <button onClick={props.onClickCancelButton} className='confirm-button' id='confirm-cancel-button'>{props.buttonText.cancel}</button>
+        <button className='confirm-button' id='confirm-ok-button'>{props.buttonText.confirm}</button>
+        <button {...{ [props.clickFunction]: props.onClickCancelButton }} className='confirm-button' id='confirm-cancel-button'>{props.buttonText.cancel}</button>
       </div>
     </div>
   );
@@ -93,12 +93,11 @@ function ConfirmModal(props) {
 
 ConfirmModal.propTypes = {
   showing: PropTypes.bool,
-  titleText: PropTypes.string,
-  bodyText: PropTypes.string,
+  messageData: PropTypes.object,
   buttonText: PropTypes.object,
   buttonData: PropTypes.object,
-  onClickConfirmButton: PropTypes.func,
-  onClickCancelButton: PropTypes.func
+  onClickCancelButton: PropTypes.func,
+  clickFunction: PropTypes.string
 };
 
 export default ConfirmModal;
