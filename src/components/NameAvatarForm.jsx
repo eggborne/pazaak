@@ -8,9 +8,7 @@ class NameAvatarForm extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      avatarSize: this.props.cardSize.height,
-      avatarBorderSize: 1,
-      avatarArray: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+      imageSource: 'https://pazaak.online/assets/images/avatarsheet.jpg'
     };
     this.handleAvatarClick = this.handleAvatarClick.bind(this);
   }
@@ -34,19 +32,21 @@ class NameAvatarForm extends React.PureComponent {
   }
   render() {
     console.error('----------------- NameAvatarForm rendered -------------');
-
-    let avatarSize = this.state.avatarSize;
-    let avatarSource = this.props.userAvatarSource;
-    let avatarBorderSize = this.state.avatarBorderSize;
-    let avatarPlusBorderSize = avatarSize + avatarBorderSize;
-    let playLabelSize = this.props.cardSize.height/2;
+    let imageSource = this.state.imageSource;
+    let avatarArray = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+    let avatarSize = window.innerHeight / 10;
+    let avatarBorderSize = 1;
+    let avatarPlusBorderSize = avatarSize + 1;
+    let playLabelSize = avatarSize / 2;
+    console.warn('avatarBorderSize', avatarBorderSize);
+    console.warn('avatarPlusBorderSize', avatarPlusBorderSize);
     let remembered = '';
     if (this.props.userStatus.cookieId) {
       remembered = 'remembered';
     }
     let avatarIndex = this.props.userAvatarIndex;
     if (avatarIndex === -1) {
-      avatarIndex = this.state.avatarArray[0];
+      avatarIndex = avatarArray[0];
     }
     let nameFontSize = '1rem';
     if (this.props.userStatus.loggedInAs.length > 12) {
@@ -55,17 +55,23 @@ class NameAvatarForm extends React.PureComponent {
     return (
       <div id='name-avatar-form'>
         <style jsx>{`
-          .input-area, .logged-in-area {
+          #name-avatar-form {
+            width: 100%;
             display: flex;
             flex-direction: column;
-            width: 76vw;
+            align-items: center;
+          }
+          .input-area, .logged-in-area {
+            display: flex;
+            flex-flow: column;
             background-color: rgba(0, 0, 0, 0.1);
             border-radius: 0.5rem 0.5rem 0 0;
             border-radius: ${remembered && '0.5rem'};
+            width: var(--intro-width);
           }
           .input-label {
             color: var(--main-text-color);
-            font-family: 'Nova Square';
+            font-family: var(--main-font);
             font-size: 1rem;
             padding: 0.5rem;
             background-color: rgba(0, 0, 0, 0.2);
@@ -94,7 +100,7 @@ class NameAvatarForm extends React.PureComponent {
           #name-text {
             color: gold;
             line-height: 150%;
-            font-size: ${nameFontSize};
+            font-size: ${nameFontSize}px;
           }
           #intro-log-out-button {
             align-self: start;
@@ -117,7 +123,7 @@ class NameAvatarForm extends React.PureComponent {
             color: gold;
           }
           #player-name-input {
-            font-family: 'Nova Square';
+            font-family: var(--main-font);
             font-size: var(--main-text-size);
             background-color: var(--name-input-color);
             color: var(--name-input-text-color);
@@ -140,7 +146,7 @@ class NameAvatarForm extends React.PureComponent {
           #name-input-message {
             box-sizing: border-box;
             position: absolute;
-            font-family: 'Bungee';
+            font-family: var(--title-font);
             width: calc(66vw - 2.25rem);
             font-size: 1.1em;
             padding-left: 0.5rem;
@@ -158,7 +164,7 @@ class NameAvatarForm extends React.PureComponent {
             opacity: 1 !important;
           }
           #remember-check-area, #logged-in-display {
-            font-family: 'Nova Square';
+            font-family: var(--main-font);
             font-size: 0.75em;
             box-sizing: border-box;
             margin: 1rem;
@@ -186,7 +192,7 @@ class NameAvatarForm extends React.PureComponent {
           #avatar-area {
             box-sizing: border-box;
             padding: 0;
-            width:  ${avatarPlusBorderSize * 3.5}px;
+            width:  ${avatarPlusBorderSize * 3.5}px;            
             min-width: 50vw;
             max-width: 80vw;
             background-color: rgba(0, 0, 0, 0.2);
@@ -209,7 +215,7 @@ class NameAvatarForm extends React.PureComponent {
             box-shadow: 0 0 ${avatarBorderSize + 2}px ${avatarBorderSize}px #333;
           }
           .avatar-thumb {
-            background-image: url(${avatarSource});
+            background-image: url(${imageSource});
             background-size: auto ${avatarPlusBorderSize * 3}px;
             background-repeat: no-repeat;
             background-position-y: top;
@@ -237,8 +243,10 @@ class NameAvatarForm extends React.PureComponent {
           }
           #start-button {
             //min-width: 68vw;
-            font-size: ${playLabelSize}px;
-            max-width: 68vw;
+            font-size: 6vh;
+            //max-width: 68vw;
+            width: 80%;
+            height: 12vh;
             min-height: 12vh;
             margin: 1rem;
             margin: ${!remembered && '0 1rem 1rem 1rem'};
@@ -281,7 +289,7 @@ class NameAvatarForm extends React.PureComponent {
           }
           @media (orientation: portrait) {
             #avatar-area {              
-              max-width: 90vw;
+             //max-width: 90vw;
             }
           }
         `}</style>
@@ -292,7 +300,7 @@ class NameAvatarForm extends React.PureComponent {
             </div>
             <div id='logged-in-body'>
               <div id='intro-portrait'>
-                <PlayerPortrait size={Math.round(this.props.cardSize.height * 0.75)} spriteIndex={this.props.userAvatarIndex} displayName={''} type={'mini'} />
+                <PlayerPortrait size={Math.round(avatarPlusBorderSize * 0.75)} spriteIndex={this.props.userAvatarIndex} displayName={''} type={'mini'} />
               </div>
               <div id='intro-stats' className='shadowed-text'>
                 <div className='intro-stat-label'>Credits:</div>
@@ -325,7 +333,7 @@ class NameAvatarForm extends React.PureComponent {
             <div id='avatar-select-area'>
               <span id='avatar-row'>
                 &nbsp;
-                {this.state.avatarArray.map((xPos) => {
+                {avatarArray.map((xPos) => {
                   let selected = '';
                   if (avatarIndex === xPos) {
                     selected = 'selected-avatar';
@@ -353,7 +361,6 @@ class NameAvatarForm extends React.PureComponent {
   }
 }
 NameAvatarForm.propTypes = {
-  cardSize: PropTypes.object,
   userAvatarIndex: PropTypes.number,
   onClickAvatar: PropTypes.func,
   onClickStart: PropTypes.func,

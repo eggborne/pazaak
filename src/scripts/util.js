@@ -1,4 +1,4 @@
-
+import { displayError } from '../components/App';
 
 export const getPageLoadInfo = () => {
   let perfEntries = performance.getEntriesByType('navigation');
@@ -84,54 +84,9 @@ export const checkCookie = (app) => {
     // document.getElementById('initial-loading-message').innerHTML += `<br />User not recognized.`;
   }
 };
-
-export function getCardSizes() {
-  let cardSize = {};
-  let mediumCardSize = {};
-  let miniCardSize = {};
-  let microCardSize = {};
-  let cardHeight = Math.round((window.innerHeight / 6) * 0.775);
-  cardSize.width = Math.round(cardHeight / 1.55);
-  let cardsPerWidth = window.innerWidth / cardSize.width;
-  if (cardsPerWidth < 6) {
-    let marg = window.innerWidth * 0.006;
-    let maxWidth = (window.innerWidth / 5) - (marg * 5);
-    cardSize.width = Math.round(maxWidth);
-  }
-  cardSize.height = cardHeight;
-  mediumCardSize.width = Math.round(cardSize.width * 0.875);
-  mediumCardSize.height = Math.round(cardSize.height * 0.875);
-  miniCardSize.width = Math.round(cardSize.width * 0.75);
-  miniCardSize.height = Math.round(cardSize.height * 0.75);
-  microCardSize.width = Math.round(cardSize.width * 0.6);
-  microCardSize.height = Math.round(cardSize.height * 0.6);
-  
-  let cardSizes = [cardSize, mediumCardSize, miniCardSize, microCardSize];
-  cardSizes.map((sizeObj) => {
-    let cardHeight = sizeObj.height;
-    sizeObj.borderSize = `${Math.round(cardHeight / 100)}px`;
-    sizeObj.arrowBorderSize = `${Math.round(cardHeight / 10)}px`;
-    sizeObj.borderRadius = `${Math.round(cardHeight / 18)}px`;
-    sizeObj.bandRadius = `${Math.round(cardHeight / 24)}px`;
-    sizeObj.badgeRadius = `${Math.round(cardHeight / 36)}px`;
-    sizeObj.margin = `${Math.round(cardHeight * 0.015)}px`;
-    sizeObj.bubbleSize = `${Math.round(cardHeight * 0.16)}px`;
-    sizeObj.backBubbleSize = `${Math.round(cardHeight * 0.18)}px`;
-    sizeObj.fontSize = `${(cardHeight * 0.17)}px`;
-  });
-  let cardsObj = {};
-  cardsObj.cardSize = cardSizes[0];
-  cardsObj.mediumCardSize = cardSizes[1];
-  cardsObj.miniCardSize = cardSizes[2];
-  cardsObj.microCardSize = cardSizes[3];
-  let endTime = window.performance.now();
-  
-  console.error('GOT CARDSIZES', cardsObj.cardSize.height);
-
-  return cardsObj;
-}
 function fullScreenCall() {
-  var root = document.body;
+  // var root = document.body;
+  var root = document.getElementById('container');
   return root.requestFullscreen || root.webkitRequestFullscreen || root.mozRequestFullScreen || root.msRequestFullscreen;
 }
 function exitFullScreenCall() {
@@ -140,11 +95,18 @@ function exitFullScreenCall() {
 export function isFullScreen() {
   return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 }
-export function toggleFullScreen() {
-  if (!isFullScreen()) {
-    fullScreenCall().call(document.getElementById('container'));
-  } else {
-    exitFullScreenCall().call(document);
-  }
+export function toggleFullScreen(app) {
+  document.getElementById('header').style.backgroundColor = 'green';
+  let oldHeight = window.innerHeight;
+  app.setState({
+    lastHeight: oldHeight
+  }, () => {
+    if (!isFullScreen()) {
+      fullScreenCall().call(document.getElementById('container'));
+    } else {
+      exitFullScreenCall().call(document);
+    }
+  });
+  
 }
 

@@ -15,31 +15,32 @@ function ConfirmModal(props) {
           display: flex;
           align-items: center;
           justify-content: center;
-          opacity: 0;
           pointer-events: none;
-          z-index: 6;
-          transition: all 200ms ease;
+          z-index: 6;  
+          opacity: 0;        
+          transition: opacity 200ms ease;
         }
         #confirm-modal {
-          padding: 0.1rem;
-          padding-bottom: 1.5rem;
+          padding: var(--menu-border-width);
+          padding-bottom: 4vh;
           box-sizing: border-box;
-          border: 0.5vw solid var(--dark-red-bg-color);
-          border-radius: 0.5rem;
+          border: var(--menu-border);
+          border-radius: var(--menu-border-radius);
           display: grid;
           grid-template-columns: 1fr;
           grid-template-rows: 3.5fr 4fr 3fr 3fr;
           align-items: center;
           justify-items: center;
           grid-row-gap: 1em;
-          width: 70%;
-          height: 60%;
+          width: 70vw;
+          min-height: 50vh;
           min-width: 300px;       
           background-color: var(--red-bg-color);
-          font-size: 1.5vmax;
-          transform: scale(0.9);
+          font-size: var(--small-font-size);
+          transform: scale(0.95);
           opacity: 0;
           transition: all 300ms ease;
+          margin-bottom: var(--control-footer-height);
         }
         .confirm-modal-showing {
           transform: scale(1) !important;
@@ -53,23 +54,25 @@ function ConfirmModal(props) {
           width: 100%;
           height: 100%;
           background-color: rgba(0, 0, 0, 0.2);
-          border-radius: 0.5rem;
           font-size: 2rem;
           line-height: 100%;
+          border-radius: var(--menu-border-width);
         }
         .confirm-button, #confirm-body {
           justify-self: center;
         }
         #confirm-body {
-          font-size: 1rem;
           width: 80%;
           align-self: center;
+          text-align: center;
+          margin-bottom: 1vh;]
         }
         .confirm-button {
           font-size: 1.25rem;
-          width: 80%;
+          width: 75%;
           height: 100%;
-          border-radius: 0.5rem;
+          padding-top: 2vh;
+          padding-bottom: 2vh;
         }
         #confirm-ok-button {
           font-size: 2rem;

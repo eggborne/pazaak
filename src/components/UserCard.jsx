@@ -4,10 +4,9 @@ import PlayerPortrait from './PlayerPortrait';
 import { characters } from '../scripts/characters';
 
 function UserCard(props) {
-  let portraitSize = window.innerWidth / 4;
-  let borderSize = '1px';
+  let portraitSize = window.innerWidth / 5;
   let nameSize = '1.4rem';
-  let loggedIn =  true;
+  let loggedIn = true;
   let logButtons = true;
   let displayName;
   if (props.playerObj.loggedInAs) {
@@ -30,21 +29,24 @@ function UserCard(props) {
           display: grid;
           box-sizing: border-box;
           padding: 1rem;
+          font-size: var(--small-font-size);
+          margin-top: calc(var(--menu-border-width) * 2);
           grid-template-columns: 1fr auto;
-          grid-template-rows: 1.5fr 1fr 1fr 1.25fr;
-          background: var(--medium-red-bg-color);
-          border-radius: var(--menu-border-radius);
+          grid-template-rows: var(--header-height) 1fr 1fr 1.25fr;          
+          //background-color: var(--medium-red-bg-color);
+          border-radius: var(--menu-border-width);
+          border: 1px solid var(--dark-red-bg-color);
         }
         #user-info-grid > div {
-          padding: 0.25rem;
+          //padding: 0.25rem;
         }
         #user-info-sign-in-button, #user-info-log-out-button, #info-modal-close-button {
-          padding: 1rem;
-          font-size:1rem;
+          //padding: 1rem;
+          //font-size: var(--small-font-size);
           width: 40%;
         }
         #user-info-sign-in-button, #user-info-log-out-button {
-          padding: 1rem;
+          padding: 1.5vh;
           font-size:1rem;
           width: 100%;
         }
@@ -62,7 +64,7 @@ function UserCard(props) {
         }
         #credits {
           margin-top: 0.5rem;
-          font-size: 1rem !important;
+          font-size: var(--small-font-size);
           text-align: center;
         }
         #id-display {
@@ -101,12 +103,11 @@ function UserCard(props) {
       `}</style>
       <div id='user-name'>
         {displayName}<br />
-
       </div>
       <div id='large-user-portrait'>
         <PlayerPortrait size={portraitSize} spriteIndex={props.playerObj.avatarIndex} displayName={''} type={'mini'} />
         <div id='credits'>{props.playerObj.credits} credits</div>
-        {/* <div id='id-display'>id #{props.playerObj.cookieId}</div> */}
+        <div id='id-display'>id #{props.playerObj.cookieId}</div>
       </div>
       <div>
         Sets won: {props.playerObj.setWins}<br />
@@ -117,7 +118,7 @@ function UserCard(props) {
         Matches played: {props.playerObj.totalMatches}
       </div>
       <div id='defeated-area' className='user-area-lower'>
-        CPU Opponents Defeated
+        CPU Opponents Defeated:
         <div id='defeated-list' >
           {defeatedArray.length > 0 && defeatedArray.map((opponent, i) => {
             let opponentSpriteIndex = Object.keys(characters).indexOf(opponent);

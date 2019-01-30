@@ -11,18 +11,18 @@ function Footer(props) {
           bottom: 0;
           font-family: sans-serif;
           min-height: var(--header-height);
-          min-width: 320px;
           background-color: var(--red-bg-color);
           display: inline-flex;
           align-items: center;
           font-size: 1.5vmax;
-          border: var(--menu-border-width) solid var(--dark-red-bg-color);
-          border-bottom: 0;
           border-radius: var(--menu-border-radius) var(--menu-border-radius) 0 0;
+          border: var(--menu-border);
+          border-bottom: 0;
           //transform: ${props.readyToShow ? 'none' : 'translateY(100%)'};
           opacity: ${props.readyToShow ? '1' : '0'};
-          transition: opacity 500ms ease;
+          transition: transform 500ms ease, opacity 500ms ease;
           will-change: opacity;
+          z-index: 2
         }
         #footer-contents {
           display: inline-flex;

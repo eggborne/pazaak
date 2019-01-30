@@ -11,29 +11,36 @@ function Hamburger(props) {
           flex-direction: column;
           align-items: center;
           justify-content: space-evenly;
-          width: 10vmax;
+          height: var(--hamburger-height);
+          width: var(--hamburger-height);
+          min-width: var(--hamburger-height);
+          min-height: var(--hamburger-height);
           background-color: var(--button-bg-color);
-          //border: solid var(--button-border-color);
+          border: solid var(--hamburger-border-color);
           cursor: pointer;
-          border-radius: 0.25rem;
-          border-width: 0.25rem;
-        }
-        #bars {
+          border-radius: var(--button-radius);
+          border-width: var(--button-border-width);
+          padding-top: calc(var(--menu-border-width) / 2);
+          padding-bottom: calc(var(--menu-border-width) / 2);
+          z-index: 3;
         }
         .hamburger-bar {
-          width: 7vmax;
-          height: 1.1vmax;
-          background-color: var(--button-text-color);
-          border-radius: 0.1rem;
+          box-sizing: border-box;
+          width: calc(var(--inner-hamburger-height) - var(--menu-border-width) * 3);
+          height: var(--hamburger-bar-height);
+          background-color: var(--hamburger-bar-color);
           transition: transform 150ms ease;
+          border-radius: calc(var(--menu-border-width) / 3);
           will-change: transform;
         }
         #middle-hamburger-bar-2 {
           position: absolute;
-          width: 7vmax;
         }
         #top-hamburger-bar, #bottom-hamburger-bar {
-          will-change: opacity;
+         will-change: opacity;
+        }
+        #bottom-hamburger-bar {
+
         }
       `}
       </style>

@@ -4,19 +4,23 @@ import PropTypes from 'prop-types';
 
 
 function CardBack(props) {
-  let cardHeight = props.size.height;
-  let cardBorderSize = props.size.borderSize;
-  let arrowBorderSize = props.size.arrowBorderSize;
-  let cardRadius = props.size.borderRadius;
-  let bandRadius = props.size.bandRadius;
-  let bubbleSize = props.size.bubbleSize;
-  let backBubbleSize = props.size.backBubbleSize;
+  
+  let cardSize = props.size;
+  let cardWidth = `var(--${cardSize}-card-width)`;
+  let cardHeight = `var(--${cardSize}-card-height)`;
+  let cardBorderSize = `calc(var(--${cardSize}-card-height) / 100)`;
+  let arrowBorderSize = `calc(var(--${cardSize}-card-height) / 10)`;
+  let cardRadius = `calc(var(--${cardSize}-card-height) / 18)`;
+  let bandRadius = `calc(var(--${cardSize}-card-height) / 24)`;
+  let bubbleSize = `calc(var(--${cardSize}-card-height) * 0.16)`;
+  let backBubbleSize = `calc(var(--${cardSize}-card-height) * 0.18)`;
+
   return (
     <div className='card'>
       <style jsx>{`
         .card {
-          width: ${props.size.width}px;
-          height: ${cardHeight}px;
+          width: ${cardWidth};
+          height: ${cardHeight};
           border-radius: ${cardRadius};
           border-width: ${cardBorderSize};
         }
@@ -107,7 +111,7 @@ function CardBack(props) {
 }
 
 CardBack.propTypes = {
-  size: PropTypes.object,
+  size: PropTypes.string,
 };
 
 export default React.memo(CardBack);

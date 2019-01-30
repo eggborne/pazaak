@@ -20,7 +20,7 @@ function HamburgerMenu(props) {
   if (props.currentOptions.darkTheme) {
     darkThemeOption = 'option-on';
   }
-  if (isFullScreen()) {
+  if (isFullScreen() || props.currentOptions.fullScreen) {
     fullScreenOption = 'option-on';
   }
   return (
@@ -28,58 +28,85 @@ function HamburgerMenu(props) {
       <style jsx>{`
         #hamburger-menu {
           position: absolute;
-          height: 56vh;
+          box-sizing: border-box;
+          height: 50vh;
+          //height: calc(100vh - var(--header-height) - var(--control-footer-height) + var(--menu-border-width));
           background-color: var(--red-bg-color);
           right: 0;
-          bottom: 10vmax;
-          font-size: 4.5vw;
-          font-family: 'Nova Square';    
-          padding: 3vw 4vw 3vw 2vw;
-          box-sizing: border-box;
-          //border-radius: 0.5rem 0 0 0;
-          //border: 0.5vw solid var(--dark-red-bg-color);
-          border-radius: var(--menu-border-radius) 0 0 0;
-          border: var(--menu-border-width) solid var(--dark-red-bg-color);
+          bottom: calc(var(--control-footer-height) - var(--menu-border-width));
+          font-size: var(--small-font-size);
+          font-family: var(--main-font);    
+          padding: 1.5vw 1.5vw calc(1.5vw + var(--menu-border-width)) 1.5vw;
+          padding-bottom: 0;
+          border-top-left-radius: var(--menu-border-radius);
+          //border-top-right-radius: var(--menu-border-radius);
+          border: var(--menu-border);
           border-right: 0;
           border-bottom: 0;
-          z-index: 5;
-          transform: translateX(100%);
-          transition: transform 300ms ease;
+          //border-bottom-color: var(--dark-red-bg-color);
+          z-index: 0;
+          //transform: translateX(100%);
+          transform: var(--hamburger-off-state);
+          //transition: transform 400ms ease;
+          display: flex;
+          align-items: flex-end;
           will-change: transform;
         }
         #hamburger-options-grid {
           height: 100%;
+          width: 100%;
           display: grid;
-          grid-template-columns: 32vw 26vw;
+          grid-template-columns: 1.2fr 1fr;
+          //grid-template-rows: 1.5fr 1fr 1fr 1fr 1fr 1fr 1.5fr;
           grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1.5fr;
-          grid-row-gap: 2vw;
+          grid-row-gap: 1vh;
           box-sizing: border-box;
+          //background-color: var(--medium-red-bg-color);
+          border-radius: var(--menu-border-width) var(--menu-border-width) 0 0;          
+          padding: 1.5vh;
+          padding-bottom: calc(3vw + var(--menu-border-width));
+          border: 1px solid var(--dark-red-bg-color);
+          border-bottom: 0;
         }
-        .mini-option-label, .mini-option-toggle {
-          border-radius: ${props.borderRadiusSize}px;
+        #mini-options-title {
+          justify-self: center;
+          align-self: center;
+          line-height: 100%;
+          grid-column-start: 0;
+          grid-column-end: span 2;
+          font-family: var(--title-font);
+          font-size: 4vh;
+        }
+        .mini-option-toggle {
           border: 1px solid;
+          border-radius: var(--menu-border-width);         
         }
         .mini-option-label {
-          border-color: var(--dark-red-bg-color);
-          width: 100%;
+          border-radius: var(--menu-border-width);
+          box-sizing: border-box;
+          border: 1px solid var(--dark-red-bg-color);
+          //width: 100%;
           height: 100%;
           display: flex;
-          justify-content: center;
-          align-items: center;          
-          background-color: rgba(0, 0, 0, 0.1);
+          align-items: center;
+          //justify-content: center;         
+          background-color: var(--medium-red-bg-color);
+          padding: 1vh 3vw 1vh 3vw;
         }
         .mini-option-toggle {
           border-color: #222;
-          font-size: 1.25em;
-          font-family: 'Bungee';
+          font-size: 3.25vh;
+          font-family: var(--title-font);
           line-height: 100%;
           background-color: var(--option-on-color);
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: background 200ms ease;
+          justify-self: end;
+          transition: background-color 300ms ease;
           width: 90%;
           height: 100%;
+          
           justify-self: end;
         }
         #hamburger-button-area {
@@ -90,18 +117,21 @@ function HamburgerMenu(props) {
           justify-content: center;
         }
         .hamburger-button {
-          position: relative;
-          font-size: 2.5vh;
+          //position: relative;
+          font-size: var(--small-font-size);
           width: 100%;
           height: 100%;
           margin-top: 2vw;
           margin-bottom: 0;
+          color: var(--option-off-color);     
+          border-color: var(--dark-red-bg-color);        
         }
         .hamburger-on {
-          transform: translateX(0) !important;
+          transform: none !important;
         }
       `}</style>
       <div className='shadowed-text' id='hamburger-options-grid'>
+        {/* <div id='mini-options-title'>Options</div> */}
         <div className='mini-option-label'> Sound FX </div>
         <div {...{[props.clickFunction]: props.onToggleOption}} id='hamburger-sound-fx-toggle' className={`mini-option-toggle ${soundOption}`}></div>
         <div className='mini-option-label'>Ambience </div>
@@ -120,7 +150,6 @@ function HamburgerMenu(props) {
   );
 }
 HamburgerMenu.propTypes = {
-  borderRadiusSize: PropTypes.number,
   currentOptions: PropTypes.object,
   onClickHamburgerQuit: PropTypes.func,
   onToggleOption: PropTypes.func,

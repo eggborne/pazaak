@@ -18,13 +18,16 @@ function ControlFooter(props) {
           background-color: var(--red-bg-color);
           display: inline-flex;          
           justify-content: space-between;
-          align-items: stretch;
-          border: ${props.cardSize.badgeRadius} solid var(--dark-red-bg-color);
+          border: var(--menu-border);
+          border-radius: var(--menu-border-radius) var(--menu-border-radius) 0 0;
+          //transition: transform 100ms ease;
+          //will-change: transform;
+          z-index: 2;      
         }
         #control-footer-button-area {
           display: inline-flex;
           justify-content: space-between;
-          flex-grow: 1; 
+          flex-grow: 1;          
         }
         .move-button {
           width: 49%;
@@ -39,12 +42,7 @@ function ControlFooter(props) {
           font-size: 1rem;
         }
       `}</style>
-      <HamburgerMenu
-        borderRadiusSize={parseInt(props.cardSize.arrowBorderSize)}
-        currentOptions={props.currentOptions}
-        onClickHamburgerQuit={props.onClickHamburgerQuit}
-        onToggleOption={props.onToggleOption}
-        clickFunction={props.clickFunction} />
+      
       <div id='control-footer-button-area'>
         <button {...{[props.clickFunction]: props.onClickEndTurn}} className='move-button' id='end-turn-button'>End Turn</button>
         <button {...{[props.clickFunction]: props.onClickSwitchSign}} className='move-button disabled-button hidden-button' id='switch-sign-button'>+/-</button>

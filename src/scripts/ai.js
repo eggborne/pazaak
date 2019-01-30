@@ -34,8 +34,8 @@ export function makeOpponentMove(app) {
     let stood = false;
     let newTotal;
     let extraDelay = 0;
-    let acceptTie = randomInt(0, 10) < app.characters[app.state.CPUOpponent].strategy.tie.chanceToBreak;
-    let standAt = app.characters[app.state.CPUOpponent].strategy.stand.standAt;
+    let acceptTie = randomInt(0, 10) < app.characters[app.state.cpuOpponent].strategy.tie.chanceToBreak;
+    let standAt = app.characters[app.state.cpuOpponent].strategy.stand.standAt;
     /**
      * Done whether user is standing or not
      * 

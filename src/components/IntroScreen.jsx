@@ -6,8 +6,14 @@ import Footer from './Footer';
 function IntroScreen(props) {
   console.error('----------------- IntroScreen rendered', props);
   let avatarBorderSize = 1;
-  let buttonLabelSize = props.cardSize.height / 4;
-  let buttonHeight = buttonLabelSize * 4;
+  let buttonLabelSize = 'var(--button-text-size)';
+  let buttonHeight = 'var(--normal-card-width)';
+  if (props.readyToShow && props.phase === 'splashScreen') {   
+    requestAnimationFrame(() => {
+      document.getElementById('intro-screen').style.opacity = 1;
+      document.getElementById('intro-screen').style.transform = 'none';
+    });
+  }
   return (
     <div style={props.style} id='intro-screen'>
       <style jsx>{`
@@ -16,21 +22,24 @@ function IntroScreen(props) {
           flex-direction: column;
           justify-content: space-between;
           flex-grow: 1;
+          opacity: 0;
+          transform: scale(1.05);
+          transition: opacity 300ms ease, transform 300ms ease;
         }
         #intro-screen-body {
+          width: 100vw;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          opacity: ${props.readyToShow && 1};
-          pointer-events: ${props.readyToShow && 'all'};
-          transform: none;
+          //opacity: ${props.readyToShow && 1};
+          //pointer-events: ${props.readyToShow && 'all'};
+          //transform: ${props.readyToShow && 'none'};
           flex-grow: 1;
           transition: transform 600ms ease, opacity 200ms ease;
         }
-        .small-intro-button {
-          font-size: ${buttonLabelSize * 0.8}px;
-          height: ${buttonHeight * 0.75}px;
+        .small-intro-button {          
+          height: 9vh;
           min-width: 30vw;
           max-width: 30vw;
         }
@@ -42,7 +51,7 @@ function IntroScreen(props) {
         }
         .input-label {
           color: var(--main-text-color);
-          font-family: 'Nova Square';
+          font-family: var(--main-font);
           font-size: 1rem;
           padding: 0.5rem;
           background-color: rgba(0, 0, 0, 0.2);
@@ -58,10 +67,16 @@ function IntroScreen(props) {
         .button-label {
           pointer-events: none;
         }
+        #options-button {
+          font-size: 2.5vh;
+        }
+        #how-button {
+          font-size: 2.5vh;
+        }
         #hall-of-fame-button {
-          font-size: ${buttonLabelSize * 1.1}px;
+          font-size: 3.5vh;
           width: 65vw;
-          height: ${buttonHeight}px;
+          min-height: calc(${buttonHeight} * 1.25);
           color: var(--special-button-text-color);
         }
         #hall-of-fame-button::after {
@@ -70,7 +85,7 @@ function IntroScreen(props) {
       `}</style>
       <div id='intro-screen-body'>
         {/* <form onSubmit={(event) => event.preventDefault()} action='https://www.eggborne.com/scripts/upload.php' method='post' id='avatar-form' encType='multipart/form-data'> */}
-        <NameAvatarForm cardSize={props.cardSize}
+        <NameAvatarForm
           userStatus={props.userStatus}
           userAvatarIndex={props.userStatus.avatarIndex}
           onClickAvatar={props.onClickAvatar}
@@ -92,7 +107,6 @@ IntroScreen.propTypes = {
   phase: PropTypes.string,
   userStatus: PropTypes.object,
   readyToShow: PropTypes.bool,
-  cardSize: PropTypes.object,  
   userAvatarIndex: PropTypes.number,
   onClickAvatar: PropTypes.func,
   onClickStart: PropTypes.func,
@@ -104,10 +118,15 @@ IntroScreen.propTypes = {
 };
 
 function areEqual(prevProps, nextProps) {
+  if (prevProps.phase == 'splashScreen' && nextProps.phase != 'splashScreen') {
+    document.getElementById('intro-screen').style.opacity = '0';
+    document.getElementById('intro-screen').style.transform = 'scale(1.05)';
+  }
   let equalTest =
-    prevProps.readyToShow == nextProps.readyToShow &&
-    prevProps.style.display == nextProps.style.display &&
-    prevProps.userAvatarIndex == nextProps.userAvatarIndex;
+    prevProps.readyToShow == nextProps.readyToShow
+    && prevProps.style.display == nextProps.style.display
+    && prevProps.userAvatarIndex == nextProps.userAvatarIndex
+    && (prevProps.phase == nextProps.phase);
   console.warn('---------------------------- IntroScreen equalTest', equalTest);
   return equalTest;
 }

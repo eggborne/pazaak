@@ -8,50 +8,60 @@ import OptionsScreen from './OptionsScreen';
 import HallOfFameScreen from './HallOfFameScreen';
 import DeckSelectScreen from './DeckSelectScreen';
 import GameBoard from './GameBoard';
+import HamburgerMenu from './HamburgerMenu';
 import ResultModal from './ResultModal';
 import ConfirmModal from './ConfirmModal';
+import ModeSelectScreen from './ModeSelectScreen';
 
 let Util = require('../scripts/util');
 let DB = require('../scripts/db');
 let AI = require('../scripts/ai');
 let characters = require('../scripts/characters');
 
-const debug = false;
-
 let clickFunction = window.PointerEvent ? 'onPointerDown' : window.TouchEvent ? 'onTouchStart' : 'onClick';
+
 console.error('USING CLICK -------', clickFunction, ' ------------------------');
 
-let initialSize = {
-  width: window.innerWidth,
-  height: window.innerHeight
-};
+const ROOT = document.documentElement;
+const DEVICE_PIXEL_RATIO = window.devicePixelRatio;
+const RULES = {
+  cardRatio: {
+    min: 1.475,
+    max: 1.525
+  }
+}
 
-const plusMinusSymbol = '±';
 let lastGotRecords = 0;
+let fullScreenAttempts = 3;
 
 const hideDebug = () => {
   event.target.removeEventListener('touchstart', hideDebug);
   event.target.remove();
 };
 
-const displayError = error => {
-  document.getElementById('debug-touch-display').innerHTML = error;
-}
+
+let lastResize = 0;
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.characters = characters.characters;
     this.state = {
+      debug: false,
       checkedCookie: false,
       lazyTime: [],
       vsCPU: true,
-      CPUOpponent: 'jarjarbinks',
+      cpuOpponent: 'jarjarbinks',
       lastWinner: null,
       lastFirstTurn: 'user',
       playerNames: {
         user: undefined,
         opponent: 'Jar Jar Binks'
+      },
+      initialValues: {
+        viewWidth: window.innerWidth,
+        viewHeight: window.innerHeight,
+        outerHeight: window.outerHeight
       },
       phase: 'splashScreen',
       deck: [],
@@ -68,14 +78,13 @@ class App extends React.Component {
         { id: 89, value: -2, type: '-' },
         { id: 88, value: -3, type: '-' },
         { id: 87, value: -3, type: '-' },
-        { id: 86, value: 1, type: plusMinusSymbol },
-        { id: 85, value: 2, type: plusMinusSymbol },
-        { id: 84, value: 3, type: plusMinusSymbol },
-        { id: 83, value: 4, type: plusMinusSymbol },
-        { id: 82, value: 5, type: plusMinusSymbol },
-        { id: 81, value: 6, type: plusMinusSymbol }
+        { id: 86, value: 1, type: '±' },
+        { id: 85, value: 2, type: '±' },
+        { id: 84, value: 3, type: '±' },
+        { id: 83, value: 4, type: '±' },
+        { id: 82, value: 5, type: '±' },
+        { id: 81, value: 6, type: '±' }
       ],
-      idCount: 0,
       userDeck: [],
       opponentDeck: [],
       userHand: [],
@@ -94,7 +103,7 @@ class App extends React.Component {
         lastLogin: undefined,
         cookieId: undefined,
         initialValues: {
-          avatarIndex: null,
+          avatarIndex: null,          
         },
         avatarIndex: null,
         setWins: 0,
@@ -149,16 +158,17 @@ class App extends React.Component {
         opponentMoveWaitTime: 1600,
         moveIndicatorTime: 900,
         dealWaitTime: 600,
+        fullScreen: false
       },
-      cardSizes: Util.getCardSizes(),
       inputHasFocus: true,
       keyboardShowing: false,
       highScores: this.getPlayerRecords().then((response) => {
         Util.checkCookie(this);
-        // Util.sizeIntroButtons();
       }).catch((reason) => {
         console.error('getPlayerRecords failed because', reason);
       }),
+      lastWidth: window.innerWidth,
+      lastHeight: window.innerHeight,
     };
 
     this.delayEvents = {
@@ -169,7 +179,7 @@ class App extends React.Component {
       postLoad3: false
     }
 
-    this.postLoadDelays = [300, 1200, 2400];
+    this.postLoadDelayTimes = [300, 1200, 2400];
 
     this.lazyTimeouts = [];
     this.lazyTimeouts[0] = setTimeout(() => {
@@ -179,22 +189,21 @@ class App extends React.Component {
         lazyTime: [true]
       });
       console.log('lazy0 is at 00000000000000000000000000000000000------------ ', Date.now());
-    }, this.postLoadDelays[0]);
+    }, this.postLoadDelayTimes[0]);
     this.lazyTimeouts[1] = setTimeout(() => {
       this.delayEvents.postLoad2 = true;
       this.setState({
         lazyTime: [true, true]
       });
-      document.getElementById('user-info-panel').style.transition = 'transform 300ms ease';
       console.log('lazy1 is at 11111111111111111111111111111111111------------ ', Date.now());
-    }, this.postLoadDelays[1]);
+    }, this.postLoadDelayTimes[1]);
     this.lazyTimeouts[2] = setTimeout(() => {
       this.delayEvents.postLoad3 = true;
       this.setState({
         lazyTime: [true, true, true]
       });
       console.log('lazy2 is at 22222222222222222222222222222222222------------ ', Date.now());
-    }, this.postLoadDelays[2]);
+    }, this.postLoadDelayTimes[2]);
 
     // make a deck of 40, 4 each of value 1-10...
     let deck = [];
@@ -211,90 +220,227 @@ class App extends React.Component {
       deck[i - 1].value = currentValue;
       deck[i - 1].type = 'house';
     }
-
     // ...put them all in state
-    this.state.idCount = 10; // these are the 10 opponent deck cards
     this.state.deck = this.shuffleDeck(deck);
+  }
 
-    // are all of these necessary?
-    this.playSound = this.playSound.bind(this);
-    this.createNewGuest = this.createNewGuest.bind(this);
-    this.incrementPlayerScore = this.incrementPlayerScore.bind(this);
-    this.applyStateOptions = this.applyStateOptions.bind(this);
-    this.evaluatePlayerName = this.evaluatePlayerName.bind(this);
-    this.shuffleDeck = this.shuffleDeck.bind(this);
-    this.getNewPlayerHands = this.getNewPlayerHands.bind(this);
-    this.dealToPlayerGrid = this.dealToPlayerGrid.bind(this);
-    this.handleToggleOption = this.handleToggleOption.bind(this);
-    this.handleClickAvatar = this.handleClickAvatar.bind(this);
-    this.handleClickBack = this.handleClickBack.bind(this);
-    this.handleClickStart = this.handleClickStart.bind(this);
-    this.handleClickHow = this.handleClickHow.bind(this);
-    this.handleClickOptions = this.handleClickOptions.bind(this);
-    this.handleClickHallOfFame = this.handleClickHallOfFame.bind(this);
-    this.handleClickOpponentPanel = this.handleClickOpponentPanel.bind(this);
-    this.handleClickOpponentReady = this.handleClickOpponentReady.bind(this);
-    this.handleClickPlay = this.handleClickPlay.bind(this);
-    this.handleClickCard = this.handleClickCard.bind(this);
-    this.handleClickEndTurn = this.handleClickEndTurn.bind(this);
-    this.handleClickSwitchSign = this.handleClickSwitchSign.bind(this);
-    this.handleClickStand = this.handleClickStand.bind(this);
-    this.removeCardFromHand = this.removeCardFromHand.bind(this);
-    this.addCardtoGrid = this.addCardtoGrid.bind(this);
-    this.changeCardTotal = this.changeCardTotal.bind(this);
-    this.getCardIndexById = this.getCardIndexById.bind(this);
-    this.swapTurn = this.swapTurn.bind(this);
-    this.changeTurn = this.changeTurn.bind(this);
-    this.callResultModal = this.callResultModal.bind(this);
-    this.dismissResultModal = this.dismissResultModal.bind(this);
-    this.handleClickRandomize = this.handleClickRandomize.bind(this);
-    this.callConfirmModal = this.callConfirmModal.bind(this);
-    this.dismissConfirmModal = this.dismissConfirmModal.bind(this);
-    this.callUserInfoModal = this.callUserInfoModal.bind(this);
-    this.dismissUserInfoModal = this.dismissUserInfoModal.bind(this);
-    this.handleClickRandomize = this.handleClickRandomize.bind(this);
-    this.handleClickOKButton = this.handleClickOKButton.bind(this);
-    this.handleClickHamburger = this.handleClickHamburger.bind(this);
-    this.resetBoard = this.resetBoard.bind(this);
-    this.determineWinnerFromTotal = this.determineWinnerFromTotal.bind(this);
-    this.handleClickHamburgerQuit = this.handleClickHamburgerQuit.bind(this);
-    this.handleFullscreenChange = this.handleFullscreenChange.bind(this);
-    this.handleClickAccountInfo = this.handleClickAccountInfo.bind(this);
-    this.handleClickLogOut = this.handleClickLogOut.bind(this);
-    this.handleClickSignIn = this.handleClickSignIn.bind(this);
-    this.handleClickConfirmButton = this.handleClickConfirmButton.bind(this);
-    this.handleClickCancelButton = this.handleClickCancelButton.bind(this);
-    this.handleClickCloseButton = this.handleClickCloseButton.bind(this);
+  displayError = error => {
+    document.getElementById('debug-touch-display').innerHTML += '<p>' + error + '</p>';
   }
 
   componentDidMount() {
+    console.error('APP MOUNTED.');
+    this.sizeCards();
+
     if (document.readyState === 'loading') {  // Loading hasn't finished yet
       document.addEventListener('DOMContentLoaded', () => {
         console.error('DDDDDOOOOOOOOOOOOOOOOOOOOOOOMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM');
         this.delayEvents.domLoaded = true;
-        if (debug) {
+        if (this.state.debug) {
           Util.getPageLoadInfo();
-          document.getElementById('debug-touch-display').style.display = 'block';
-          displayError(`clickFunction: ${clickFunction}`);
+          this.displayError(`<p>|</p><p>at DOM LOADED: ------------------> <p>DEVICE_PIXEL_RATIO: ${DEVICE_PIXEL_RATIO}</p><p> innerW: ${window.innerWidth} innerH: ${window.innerHeight} - outerH ${window.outerHeight} - scrH ${window.screen.height} scrAv - ${window.screen.availHeight} body rect (${document.body.getBoundingClientRect().width}, ${document.body.getBoundingClientRect().height}) - body offsetHeight ${document.body.offsetHeight} <p>-</p><p>-</p>`);
         }
       });
       window.addEventListener('load', () => {
-        console.error('LLOOOAODADDADODOODODLLDODOEEDEDDLDLDOOAOOLDALd');
+        console.warn(`'load' event ///////////////////////////////////////////////////////////////////////////`);
         this.delayEvents.pageLoaded = true;
 
       });
     } else {  // `DOMContentLoaded` has already fired
-      console.info('already loaded');
+      console.info('already loaded at App mount');
     }
+
     window.addEventListener('fullscreenchange', this.handleFullscreenChange);
     window.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('msfullscreenchange', this.handleFullscreenChange);
 
-    document.getElementById('debug-display').addEventListener('click', hideDebug);
+    // window.addEventListener('resize', this.handleResize);
+
+    document.getElementById('container').addEventListener('transitionend', (event) => {
+      if (event) {
+        if (event.target.id === 'container') {
+          document.getElementById('container').transition = 'none';
+        }
+        if (event.target.id === 'shade') {
+          document.getElementById('shade').transition = 'none';
+        }
+      }
+      //console.log(`${event.target.id} transition ended!`);
+    });
+
+    //debug ? document.getElementById('debug-display').addEventListener('click', hideDebug) : null;
   }
 
-  getTimeSinceFromSeconds(sessionLengthInSeconds) {
+  sizeCards = () => {
+    let cardRatio = 1.4;
+    let newWidth;
+    let newHeight;
+
+    let extraX;
+    let extraY;
+
+    // assume the ideal situation (room for both maximum card width and height at 1:1)
+    let perfectWidth = window.innerWidth / 5.6;
+    let perfectHeight = window.innerHeight / 7.65;
+    console.info('perfectWidth', perfectWidth)
+    let proposedRatio = perfectHeight / perfectWidth;
+    console.info('perfectHeight', perfectHeight)
+
+    // keep ratio within RULES.range if the cards are violating
+    console.info('proposedRatio', proposedRatio);
+    if (proposedRatio < RULES.cardRatio.min) {
+      cardRatio = RULES.cardRatio.min;
+    } else if (proposedRatio > RULES.cardRatio.max) {
+      cardRatio = RULES.cardRatio.max;
+    }
+
+    console.info(' - ratio changed', proposedRatio, cardRatio);
+    // test the new ratio
+
+    // try keeping perfectWidth and changing height
+    newHeight = perfectWidth * cardRatio;
+
+
+    // see if height is too great
+    console.info('keeping perfect width and changing newHeight to', newHeight);
+    let cardsPerHeight = window.innerHeight / newHeight;
+    console.info('cardsPerHeight', cardsPerHeight);
+    if (cardsPerHeight > 8) {
+      console.log('height OK, but how much extraY?');
+      // it fits... but check the extra space
+      extraY = window.innerHeight - (newHeight * 5);
+      console.info('extraY', extraY);
+    } else {
+      console.log(' - TOO TALL');
+      newHeight = perfectHeight;
+      newWidth = newHeight / cardRatio;
+
+    }
+
+    // see if width is too great
+    newWidth = perfectHeight / cardRatio;
+    console.info('keeping perfect height and changing newWidth to', newWidth);
+    let cardsPerWidth = window.innerWidth / newWidth;
+    console.info('cardsPerWidth', cardsPerWidth);
+    if (cardsPerWidth > 5.6) {
+      extraX = window.innerWidth - (newWidth * 5.6);
+      console.info('Height OK with extraX', extraX);
+    } else {
+      console.log(' - TOO WIDE');
+      newWidth = perfectWidth;
+      newHeight = newWidth * cardRatio;
+    }
+
+    if (extraX && extraY) {
+      console.log('both extraX and extraY?? >>>>>>>>>>>>>>>>>')
+    }
+
+    console.info('newRatio', cardRatio);
+    console.info('newWidth', newWidth);
+    console.info('newHeight', newHeight);
+    console.info('extraX', extraX);
+    console.info('extraY', extraY);
+
+    newWidth ? ROOT.style.setProperty('--normal-card-width', `${newWidth}px`) : null;
+    newHeight ? ROOT.style.setProperty('--normal-card-height', `${newHeight}px`) : null;
+
+    //this.state.debug ? this.displayError(`<p>called sizeCards() ~~~~~~~~~~~~~~~~~~~~~~~~~</p>N-C-H: ${window.innerHeight * 0.13} innerW: ${window.innerWidth} |innerH: ${window.innerHeight}<p>inH * 0.13: ${window.innerHeight * 0.13}<br />outH * 0.13: ${window.outerHeight * 0.13}<br />winscravail * 0.13: ${window.screen.availHeight * 0.13}<br /><p>-</p><p>-</p>`) : null;
+  }
+  handleResize = () => {
+    if (!lastResize || window.performance.now() - lastResize > 5000) {
+      // this.sizeCards();
+      lastResize = window.performance.now();
+    }
+  }
+  handleFullscreenChange = () => {
+    console.log('calling handleFullscreenChange with fullScreenAttempts', fullScreenAttempts)
+    if (fullScreenAttempts === 2) {
+      document.getElementById('header').style.backgroundColor = 'yellow';
+    }
+    if (fullScreenAttempts === 1) {
+      document.getElementById('header').style.backgroundColor = 'blue';
+    }
+    let currentHeight = window.innerHeight;
+    let heightEqual = (currentHeight === window.innerHeight)
+    console.log('at beginning of FS handler, heightEqual is:', heightEqual);
+    this.checkIfViewHeightChangedInMs(250).then((changed) => {
+      console.log('after initial checkIfViewHeightChangedInMs promise, changed is: --> ' + changed);
+
+    });
+    this.displayError(`<p>handleFullscreenChange was called ~~~~~~~~~~~~~~~~~~~~~~~~~</p>lastHeight: <h2>${this.state.lastHeight}</h2><br />window.innerHeight: ${window.innerHeight}<br />window.outerHeight ${window.outerHeight}<br />window.screen.height ${window.screen.height}<br />window.screen.availHeight ${window.screen.availHeight}<p> header height: ${document.getElementById('header').getBoundingClientRect().height}</p>`);
+
+  }
+
+  checkIfViewHeightChangedInMs = (waitTime) => {
+    fullScreenAttempts--;
+    let attempt = new Promise((resolve) => {
+      setTimeout(() => {
+        let currentHeight = window.innerHeight;
+        console.log(`after waitTime of ${waitTime}, oldH --- innerH is:`);
+        console.log(this.state.lastHeight + ' --- ' + currentHeight);
+        let isFull = Util.isFullScreen() !== undefined;
+        let viewChanged = (currentHeight !== this.state.lastHeight);
+        let completelyOff = (currentHeight === this.state.initialValues.viewHeight);
+        let completelyOn = (currentHeight > this.state.initialValues.outerHeight);
+        let outerChanged = (currentHeight > this.state.initialValues.outerHeight);
+        console.log('isFull says', isFull);
+        console.log('completelyOff', this.state.initialValues.viewHeight, completelyOff);        
+        console.log('completelyOn', window.outerHeight, completelyOn);
+        console.log('this.state.initialValues.outerHeight is', this.state.initialValues.outerHeight)
+        console.log('outerChanged is', outerChanged);
+        console.log('this.state.initialValues.outerHeight', this.state.initialValues.outerHeight)
+        console.log('window.screen.height', window.screen.height)
+        console.info(window.screen);
+        console.log('window.outerHeight', window.outerHeight)
+        console.log('currentHeight is', currentHeight);
+        if (!completelyOff && !completelyOn) {
+          alert(currentHeight + ' is not > current window.outerHeight ' + window.outerHeight + ' or === this.state.initialValues.viewHeight ' + this.state.initialValues.viewHeight);
+        }
+        if (viewChanged) {
+          console.log(`##################### ------------------ CHANGED from ${this.state.lastHeight} to ${currentHeight}`);
+          let optionsCopy = { ...this.state.options };
+          optionsCopy.fullScreen = isFull;
+          this.setState({
+            options: optionsCopy,
+            lastHeight: currentHeight
+          }, () => {
+            document.getElementById('header').style.backgroundColor = 'var(--red-bg-color)';
+            this.sizeCards();
+            fullScreenAttempts = 3;
+          });
+        } else {
+          document.getElementById('header').style.backgroundColor = 'red';
+          if (fullScreenAttempts > 0) {
+            this.checkIfViewHeightChangedInMs(200);
+          } else {
+            document.getElementById('header').style.backgroundColor = 'black';
+          }
+          console.log('////////// not changed yet!! fullScreenAttempts now --> ', fullScreenAttempts)
+        }
+        resolve(viewChanged);
+      }, waitTime);
+    });
+    return attempt;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    console.log('APP UPDATED....................')
+  }
+
+  handleShadeClick = () => {
+    if (this.state.phase === 'gameStarted') {
+      if (document.getElementById('hamburger-menu').classList.contains('hamburger-on')) {
+        this.handleClickHamburger();
+      }
+    }
+    if (!document.getElementById('user-info-panel').classList.contains('user-info-panel-off')) {
+      this.handleClickAccountInfo();
+    }
+
+  }
+
+  getTimeSinceFromSeconds = sessionLengthInSeconds => {
     let output;
     let sessionMinutes = Math.ceil(sessionLengthInSeconds / 60);
     let minutePlural = 's';
@@ -333,69 +479,6 @@ class App extends React.Component {
       }
     }
     return output;
-  }
-  handleFullscreenChange() {
-    let hamburgerWasOpen = false;
-    if (document.getElementById('hamburger-menu')) {
-      hamburgerWasOpen = document.getElementById('hamburger-menu').classList.contains('hamburger-on');
-    }
-    setTimeout(() => {
-      // wait for the fullscreen change to be done
-      let newSizes = Util.getCardSizes();
-      let isFull = Util.isFullScreen() !== undefined;
-      let cardHeightDiff = newSizes.cardSize.height - this.state.cardSizes.cardSize.height;
-      let fullHeightDiff = initialSize.height - window.innerHeight;
-      let readyToResizeContents = (isFull && fullHeightDiff < 0 && cardHeightDiff) || (!isFull && fullHeightDiff > 0 && cardHeightDiff);
-      initialSize = { width: window.innerWidth, height: window.innerHeight };
-      if (readyToResizeContents) {
-        // document.getElementById('container').style.backgroundColor = 'green';
-        this.setState({
-          cardSizes: newSizes
-        }, () => {
-          if (hamburgerWasOpen) {
-            document.getElementById('hamburger-menu').classList.add('hamburger-on');
-          }
-        });
-      } else {
-        // try again
-        setTimeout(() => {
-          newSizes = Util.getCardSizes();
-          isFull = Util.isFullScreen() !== undefined;
-          cardHeightDiff = newSizes.cardSize.height - this.state.cardSizes.cardSize.height;
-          fullHeightDiff = initialSize.height - window.innerHeight;
-          readyToResizeContents = (isFull && fullHeightDiff < 0 && cardHeightDiff) || (!isFull && fullHeightDiff > 0 && cardHeightDiff);
-          initialSize = { width: window.innerWidth, height: window.innerHeight };
-          if (readyToResizeContents) {
-            newSizes = Util.getCardSizes();
-            // document.getElementById('container').style.backgroundColor = 'yellow';
-            this.setState({
-              cardSizes: newSizes
-            }, () => {
-              if (hamburgerWasOpen) {
-                document.getElementById('hamburger-menu').classList.add('hamburger-on');
-              }
-            });
-          } else {
-            // try again
-            setTimeout(() => {
-              newSizes = Util.getCardSizes();
-              // document.getElementById('container').style.backgroundColor = 'red';
-              this.setState({
-                cardSizes: newSizes
-              }, () => {
-                if (hamburgerWasOpen) {
-                  document.getElementById('hamburger-menu').classList.add('hamburger-on');
-                }
-              });
-              initialSize = { width: window.innerWidth, height: window.innerHeight };
-            }, 1000);
-          }
-        }, 500);
-      }
-    }, 500);
-    // setTimeout(() => {
-    //   document.getElementById('container').style.backgroundColor = 'var(--main-bg-color)';
-    // }, 1400);
   }
   getPlayerData(callback) {
     DB.getScores().then((response) => {
@@ -449,12 +532,12 @@ class App extends React.Component {
     }
   }
 
-  incrementPlayerTotalGames(playerName, type) {
+  incrementPlayerTotalGames = (playerName, type) => {
     let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
     eval(funcName)(playerName);
   }
 
-  incrementPlayerScore(playerName, type) {
+  incrementPlayerScore = (playerName, type) => {
     let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
     eval(funcName)(playerName);
   }
@@ -481,7 +564,7 @@ class App extends React.Component {
     });
   }
 
-  shuffleDeck(deck) {
+  shuffleDeck = (deck) => {
     let deckCopy = deck.slice();
     Util.shuffle(deckCopy);
     Util.shuffle(deckCopy);
@@ -491,7 +574,7 @@ class App extends React.Component {
     return deckCopy;
   }
 
-  getNewPlayerHands() {
+  getNewPlayerHands = () => {
     let userDeckCopy = Util.shuffle(this.state.userDeck.slice());
     let opponentDeckCopy = Util.shuffle(this.state.opponentDeck.slice());
     let newUserHand = [];
@@ -539,7 +622,7 @@ class App extends React.Component {
     });
   }
 
-  dealToPlayerGrid(player) {
+  dealToPlayerGrid = (player) => {
     this.playSound('draw');
     //console.warn(`DEALING to ${player}`);
     let deckCopy = this.state.deck.slice();
@@ -554,7 +637,7 @@ class App extends React.Component {
     });
     return newCard.value;
   }
-  handleClickLogOut(event) {
+  handleClickLogOut = (event) => {
     if (event) {
       event.preventDefault();
     }
@@ -571,8 +654,8 @@ class App extends React.Component {
         document.getElementById('player-name-input').disabled = false;
         document.getElementById('player-name-input').style.backgroundColor = 'white';
         document.getElementById('player-name-input').value = '';
-        document.getElementById('remember-checkbox').disabled = false;
-        document.getElementById('remember-checkbox').checked = true;
+        // document.getElementById('remember-checkbox').disabled = false;
+        // document.getElementById('remember-checkbox').checked = true;
         document.getElementById('remember-check-area').classList.remove('remembered');
         userStatusCopy = {
           loggedInAs: '',
@@ -621,14 +704,14 @@ class App extends React.Component {
       }
     );
   }
-  handleClickSignIn() {
+  handleClickSignIn = () => {
     this.setState({
       phase: 'splashScreen'
     }, () => {
       this.handleClickAccountInfo();
     });
   }
-  handleToggleOption(event, forceDirection) {
+  handleToggleOption = (event, forceDirection) => {
     let changeState = true;
     let el;
     let eventId;
@@ -648,29 +731,34 @@ class App extends React.Component {
       }
       if (eventId === 'ambience-toggle' || eventId === 'hamburger-ambience-toggle') {
         optionsCopy.ambience = true;
+        // debug = true;
       }
       if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
-        document.body.style.setProperty('--pulse-speed', '500ms');
+        ROOT.style.setProperty('--pulse-speed', '500ms');
         optionsCopy.turnInterval = 200;
         optionsCopy.opponentMoveWaitTime = 300;
       }
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
-        document.body.style.setProperty('--main-bg-color', '#050505');
-        document.body.style.setProperty('--main-text-color', '#dfdfff');
-        document.body.style.setProperty('--name-input-text-color', '#aaa');
-        document.body.style.setProperty('--button-bg-color', '#060606');
-        document.body.style.setProperty('--special-button-text-color', '#529e4b');
-        document.body.style.setProperty('--button-text-color', '#995');
-        document.body.style.setProperty('--card-spot-bg-color', 'rgba(0, 0, 0, 0.125)');
-        document.body.style.setProperty('--card-spot-border-color', 'rgba(100, 100, 100, 0.25)');
-        document.body.style.setProperty('--red-bg-color', '#340000');
-        document.body.style.setProperty('--dark-red-border-color', '#180000');
+        document.getElementById('container').style.transition = 'background 500ms ease';
+
+        ROOT.style.setProperty('--main-bg-color', '#050505');
+        ROOT.style.setProperty('--main-text-color', '#dfdfff');
+        ROOT.style.setProperty('--name-input-text-color', '#aaa');
+        ROOT.style.setProperty('--button-bg-color', '#060606');
+        ROOT.style.setProperty('--special-button-text-color', '#529e4b');
+        ROOT.style.setProperty('--button-text-color', '#995');
+        ROOT.style.setProperty('--card-spot-bg-color', 'rgba(0, 0, 0, 0.125)');
+        ROOT.style.setProperty('--card-spot-border-color', 'rgba(100, 100, 100, 0.25)');
+        ROOT.style.setProperty('--red-bg-color', '#340000');
+        ROOT.style.setProperty('--medium-red-bg-color', '#240000');
+        ROOT.style.setProperty('--dark-red-bg-color', '#180000');
         optionsCopy.darkTheme = true;
       }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
         el.classList.add('disabled-button');
-        Util.toggleFullScreen();
-        changeState = false;
+        Util.toggleFullScreen(this);
+        optionsCopy.fullScreen = true;
+        // changeState = false;
       }
     }
     if ((forceDirection === 'off') || (!forceDirection && el.classList.contains('option-on'))) {
@@ -679,29 +767,32 @@ class App extends React.Component {
       }
       if (eventId === 'ambience-toggle' || eventId === 'hamburger-ambience-toggle') {
         optionsCopy.ambience = false;
+        // debug = false;
       }
       if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
-        document.body.style.setProperty('--pulse-speed', '900ms');
+        ROOT.style.setProperty('--pulse-speed', '900ms');
         optionsCopy.turnInterval = 800;
         optionsCopy.opponentMoveWaitTime = 1600;
       }
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
-        document.body.style.setProperty('--main-bg-color', 'rgb(107, 121, 138)');
-        document.body.style.setProperty('--main-text-color', 'rgb(255, 247, 213)');
-        document.body.style.setProperty('--name-input-text-color', 'black');
-        document.body.style.setProperty('--button-bg-color', 'black');
-        document.body.style.setProperty('--special-button-text-color', '#ffffa3');
-        document.body.style.setProperty('--button-text-color', '#5CB3FF');
-        document.body.style.setProperty('--card-spot-bg-color', 'rgba(0, 0, 0, 0.05)');
-        document.body.style.setProperty('--card-spot-border-color', '#999');
-        document.body.style.setProperty('--red-bg-color', '#560000');
-        document.body.style.setProperty('--dark-red-border-color', '#380000');
+        ROOT.style.setProperty('--main-bg-color', 'rgb(107, 121, 138)');
+        ROOT.style.setProperty('--main-text-color', 'rgb(255, 247, 213)');
+        ROOT.style.setProperty('--name-input-text-color', 'black');
+        ROOT.style.setProperty('--button-bg-color', 'black');
+        ROOT.style.setProperty('--special-button-text-color', '#ffffa3');
+        ROOT.style.setProperty('--button-text-color', '#5CB3FF');
+        ROOT.style.setProperty('--card-spot-bg-color', 'rgba(0, 0, 0, 0.05)');
+        ROOT.style.setProperty('--card-spot-border-color', '#999');
+        ROOT.style.setProperty('--red-bg-color', '#560000');
+        ROOT.style.setProperty('--medium-red-bg-color', '#490000');
+        ROOT.style.setProperty('--dark-red-bg-color', '#380000');
         optionsCopy.darkTheme = false;
       }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
         el.classList.add('disabled-button');
-        Util.toggleFullScreen();
-        changeState = false;
+        Util.toggleFullScreen(this);
+        optionsCopy.fullScreen = false;
+        // changeState = false;
       }
     }
     if (changeState) {
@@ -711,8 +802,8 @@ class App extends React.Component {
       this.setState({
         options: optionsCopy
       }, () => {
-        
         if (this.state.userStatus.cookieId && this.state.userStatus.loggedInAs) {
+          optionsCopy.fullScreen = false;
           let optionsString = JSON.stringify(optionsCopy);
           DB.updatePreferences(this.state.userStatus.cookieId, optionsString);
         }
@@ -720,7 +811,7 @@ class App extends React.Component {
     }
   }
 
-  applyStateOptions(forceDirection) {
+  applyStateOptions = (forceDirection) => {
     let optionsCopy = Object.assign({}, this.state.options);
     let optionsArray = Object.keys(optionsCopy);
     optionsArray.map((option, i) => {
@@ -749,7 +840,7 @@ class App extends React.Component {
     });
   }
 
-  createNewGuest() {
+  createNewGuest = () => {
     // resolves a string of unique Guest-XXX name
     let promise = new Promise((resolve, reject) => {
       let optionsString = JSON.stringify(this.state.options);
@@ -769,7 +860,7 @@ class App extends React.Component {
     return promise;
   }
 
-  evaluatePlayerName(enteredName) {
+  evaluatePlayerName = (enteredName) => {
     console.warn('calling evaluatePlayerName -------------------------------------->');
     let uniqueId = this.state.userStatus.cookieId;
     let userStatusCopy = Object.assign({}, this.state.userStatus);
@@ -876,26 +967,36 @@ class App extends React.Component {
       });
     }
   }
-  handleClickAccountInfo() {
+
+  handleClickAccountInfo = () => {
+    this.state.debug ? document.getElementById('debug-touch-display').innerHTML = '' : null;
+    this.setState({
+      debug: !this.state.debug
+    });    
     let userPanel = document.getElementById('user-info-panel');
     let settingsIcon = document.getElementById('user-account-icon');
-    // let settingsIcon = document.getElementById('corner-button-area');
     if (userPanel.classList.contains('user-info-panel-off')) {
+      // open
+      this.toggleShade('on');
       settingsIcon.classList.add('corner-button-on');
       userPanel.classList.remove('user-info-panel-off');
     } else {
+      // close
       settingsIcon.classList.remove('corner-button-on');
       userPanel.classList.add('user-info-panel-off');
+      if (!(this.state.phase === 'gameStarted' && document.getElementById('hamburger-menu').classList.contains('hamburger-on'))) {
+        this.toggleShade('off');
+      }
     }
-
   }
-  handleClickStart(event) {
+  handleClickStart = (event) => {
     event.preventDefault();
     if (this.lazyTimeouts.map) {
       this.lazyTimeouts.map(timeout => {
         clearTimeout(timeout);
       });
     }
+    Object.keys(this.delayEvents).map(event => { this.delayEvents[event] = true });
     // this.playSound('click');
     let enteredName = document.getElementById('player-name-input').value;
     let namesCopy = Object.assign({}, this.state.playerNames);
@@ -912,7 +1013,8 @@ class App extends React.Component {
         userStatusCopy.playerName = enteredName;
         this.setState({
           userStatus: userStatusCopy,
-          phase: 'selectingOpponent',
+          // phase: 'selectingOpponent',
+          phase: 'selectingMode',
           lazyTime: [true, true, true]
         });
       });
@@ -986,7 +1088,8 @@ class App extends React.Component {
                 }, () => {
                   this.evaluatePlayerName(enteredName);
                   this.setState({
-                    phase: 'selectingOpponent'
+                    // phase: 'selectingOpponent'
+                    phase: 'selectingMode'
                   });
                 });
               });
@@ -1001,7 +1104,8 @@ class App extends React.Component {
         namesCopy.user = enteredName;
         // setTimeout(() => {
         this.setState({
-          phase: 'selectingOpponent',
+          // phase: 'selectingOpponent',
+          phase: 'selectingMode',
           playerNames: namesCopy,
           lazyTime: [true, true, true]
         }, () => {
@@ -1014,11 +1118,11 @@ class App extends React.Component {
 
     }
   }
-  handleClickSwitchSign(event) {
+  handleClickSwitchSign = (event) => {
     event.preventDefault();
     let turnStatusCopy = Object.assign({}, this.state.turnStatus);
     let displaySign = turnStatusCopy.user.highlightedCard.element.children[0].innerHTML[0];
-    if (displaySign === plusMinusSymbol || displaySign === '-') {
+    if (displaySign === '±' || displaySign === '-') {
       turnStatusCopy.user.highlightedCard.obj.value = Math.abs(turnStatusCopy.user.highlightedCard.obj.value);
     } else if (displaySign === '+') {
       turnStatusCopy.user.highlightedCard.obj.value = Math.abs(turnStatusCopy.user.highlightedCard.obj.value) * -1;
@@ -1032,13 +1136,14 @@ class App extends React.Component {
       turnStatus: turnStatusCopy
     });
   }
-  handleClickOpponentReady(event) {
+  handleClickOpponentReady = (event) => {
+    console.log('clickeds')
     event.preventDefault();
     this.setState({
       phase: 'selectingDeck'
     });
   }
-  handleClickPlay(event) {
+  handleClickPlay = (event) => {
     // this.playSound('click');
     event.preventDefault();
     this.getNewPlayerHands();
@@ -1050,14 +1155,15 @@ class App extends React.Component {
       this.dealToPlayerGrid(this.state.turn);
     }, this.state.options.turnInterval);
   }
-  handleClickBack(event, newPhase) {
+  handleClickBack = (event, newPhase) => {
     // this.playSound('click');
+    console.log('newPhase', newPhase)
     event.preventDefault();
     this.setState({
       phase: newPhase
     });
   }
-  handleClickHow(event) {
+  handleClickHow = (event) => {
     // this.playSound('click');
     // window.open('https://starwars.wikia.com/wiki/Pazaak/Legends', '_blank');
     event.preventDefault();
@@ -1067,7 +1173,7 @@ class App extends React.Component {
     });
     // }, this.state.options.flashInterval);
   }
-  handleClickOptions(event) {
+  handleClickOptions = (event) => {
     console.error('CLICKED OPTIONS');
     //console.error('OPTIONS -------------------------------------------------------', event);
     // this.playSound('click');
@@ -1078,7 +1184,7 @@ class App extends React.Component {
     });
     // }, this.state.options.flashInterval);
   }
-  handleClickHallOfFame(event) {
+  handleClickHallOfFame = (event) => {
     event.preventDefault();
     // this.playSound('click');
     document.getElementById('hall-of-fame-button').classList.add('loading-message');
@@ -1095,7 +1201,7 @@ class App extends React.Component {
     });
 
   }
-  handleClickEndTurn(event) {
+  handleClickEndTurn = (event) => {
     // this.playSound('click');
     event.preventDefault();
     let buttonText = document.getElementById('end-turn-button').innerHTML;
@@ -1118,6 +1224,7 @@ class App extends React.Component {
       let turnStatusCopy = Object.assign({}, this.state.turnStatus);
       let handCardElement = this.state.turnStatus.user.highlightedCard.element;
       let handCardObj = turnStatusCopy.user.highlightedCard.obj;
+      console.log('playHandCard taking in', handCardObj)
       this.playHandCard('user', handCardObj);
       this.state.turnStatus.user.highlightedCard.element.classList.remove('highlighted-card');
       turnStatusCopy.user.highlightedCard.element = null;
@@ -1133,7 +1240,7 @@ class App extends React.Component {
       document.getElementById('stand-button').innerHTML = 'Stand';
     }
   }
-  handleClickStand(event) {
+  handleClickStand = (event) => {
     event.preventDefault();
     // this.playSound('click');
     let buttonText = document.getElementById('stand-button').innerHTML;
@@ -1156,13 +1263,19 @@ class App extends React.Component {
     });
     this.callMoveIndicator('user', 'Stand', this.state.options.moveIndicatorTime);
   }
-  handleClickCard(elementId, value, type, inDeck) {
-    // SELECTING DECK
-    let target = event.target || document.getElementById(elementId);
-    console.warn('target', target);
+  handleClickCard = (event, value, type, inDeck) => {
+    let target = event.target;
+    let elementId = event.target.id
     let cardId = parseInt(elementId.split('-').reverse()[0]);
+    console.log('clicked card')
+    console.log('args', event, value, type, inDeck)
+    console.log('target.id', target.id);
+    console.log('target', target);
     console.log('cardId', cardId);
     if (this.state.phase === 'selectingDeck') {
+
+      // SELECTING DECK
+
       if (!inDeck) {
         // it's a selection card, so put it in player deck
         if (this.state.userDeck.length < 10) {
@@ -1170,11 +1283,9 @@ class App extends React.Component {
           if (!this.arrayContainsCardWithId(this.state.userDeck, cardId)) {
             // it's not there already
             let deckCopy = this.state.userDeck.slice();
-            let newElementId = elementId.split('-').slice(1, 3).join('-');
-            let newCard = { id: cardId, value: value, type: type, elementId: newElementId, inDeck: true };
-            deckCopy.push(newCard);
+            let newCardObj = { id: cardId, context: 'selected-deck', value: value, type: type, inDeck: true };
+            deckCopy.push(newCardObj);
             console.warn('pushed new card id', cardId);
-            console.warn('pushed new card elementId', newElementId);
             console.warn('length is now', deckCopy.length);
             target.style.opacity = 0.1;
             this.setState({
@@ -1183,10 +1294,10 @@ class App extends React.Component {
           }
         }
       } else {
-        // it's already in the player deck, so take it out        
+        // it's already in the player deck, so take it out
         let deckCopy = this.state.userDeck.slice();
         console.log('deckCopy before taking out...', deckCopy);
-        console.log('elementId before taking out...', cardId);
+        console.log('cardId before taking out...', cardId);
         let indexToRemove = this.getCardIndexById(deckCopy, cardId);
         // if (deckCopy.length === 1 || indexToRemove === -1) {
         //   indexToRemove = 0;
@@ -1194,7 +1305,7 @@ class App extends React.Component {
         // } else {
         //   console.log('found that it\'s index...', indexToRemove)
         // }
-        let selectionHomeId = 'selection-' + elementId;
+        let selectionHomeId = 'deck-selection-option-card-' + cardId;
         console.warn('sending back to', selectionHomeId);
         console.warn('removing index from user deck:', indexToRemove);
         document.getElementById(selectionHomeId).style.opacity = 1;
@@ -1210,7 +1321,6 @@ class App extends React.Component {
     // GAME STARTED
 
     if (this.state.phase === 'gameStarted') {
-
       // highlight card and change footer buttons
       if (!this.state.turnStatus.user.playedCard && this.state.userGrid.length < 9) {
         // no card played and room on grid for a card
@@ -1224,18 +1334,23 @@ class App extends React.Component {
           // add highlighted card to state
           let turnStatusCopy = Object.assign({}, this.state.turnStatus);
           turnStatusCopy.user.highlightedCard.element = target;
-          turnStatusCopy.user.highlightedCard.obj = { id: target.id, value: value, type: type };
+          turnStatusCopy.user.highlightedCard.obj = { id: cardId, context: 'user-hand', value: value, type: type };
           this.setState({
             turnStatus: turnStatusCopy
           });
           // show the switch sign button...
           document.getElementById('switch-sign-button').classList.remove('hidden-button');
-          let cardObj = this.state.userHand[this.getCardIndexById(this.state.userHand, target.id)];
+          console.log('searching this.state.userHand for cardObj', this.state.userHand);
+          console.log('target.id is', cardId);
+          let cardObj = this.state.userHand[this.getCardIndexById(this.state.userHand, cardId)];
+          console.log('cardObj', cardObj);
           // ... but only enable it if the card is a plus-minus
-          if (cardObj.type === plusMinusSymbol) {
-            document.getElementById('switch-sign-button').classList.remove('disabled-button');
+          if (cardObj.type === '±') {
+            // document.getElementById('switch-sign-button').classList.remove('disabled-button');
+            document.getElementById('switch-sign-button').classList.add('hidden-button');
           } else {
-            document.getElementById('switch-sign-button').classList.add('disabled-button');
+            // document.getElementById('switch-sign-button').classList.add('disabled-button');
+            document.getElementById('switch-sign-button').classList.remove('hidden-button');
           }
           // change the button texts
           document.getElementById('stand-button').innerHTML = 'Cancel';
@@ -1256,7 +1371,7 @@ class App extends React.Component {
       }
     }
   }
-  arrayContainsCardWithId(arr, id) {
+  arrayContainsCardWithId = (arr, id) => {
     let contains = false;
     arr.map((card) => {
       if (card.id === id) {
@@ -1265,7 +1380,7 @@ class App extends React.Component {
     });
     return contains;
   }
-  playHandCard(player, cardObject) {
+  playHandCard = (player, cardObject) => {
     this.removeCardFromHand(player, cardObject.id);
     this.addCardtoGrid(player, cardObject.value, cardObject.type);
     this.changeCardTotal(player, this.state[`${player}Total`] + cardObject.value);
@@ -1287,7 +1402,7 @@ class App extends React.Component {
     }, this.state.options.moveIndicatorTime);
   }
 
-  removeCardFromHand(player, cardId) {
+  removeCardFromHand = (player, cardId) => {
     let handCopy = this.state[`${player}Hand`].slice();
     let indexToRemove = this.getCardIndexById(handCopy, cardId);
     handCopy.splice(indexToRemove, 1);
@@ -1295,9 +1410,9 @@ class App extends React.Component {
       [`${player}Hand`]: handCopy
     });
   }
-  addCardtoGrid(player, value, type) {
+  addCardtoGrid = (player, value, type) => {
     let gridCopy = this.state[`${player}Grid`].slice();
-    if (type === plusMinusSymbol) {
+    if (type === '±') {
       if (value > 0) {
         value = `+${value.toString()}`;
       }
@@ -1308,7 +1423,7 @@ class App extends React.Component {
       [`${player}Grid`]: gridCopy
     });
   }
-  changeCardTotal(player, newTotal) {
+  changeCardTotal = (player, newTotal) => {
     if (newTotal === 20) {
       document.getElementById(`${player}-total`).classList.add('green-total');
     } else if (newTotal > 20) {
@@ -1321,7 +1436,7 @@ class App extends React.Component {
       [`${player}Total`]: newTotal
     });
   }
-  getCardIndexById(arr, id) {
+  getCardIndexById = (arr, id) => {
     let match = -1;
     arr.forEach((card, i) => {
       console.log('---------------------------- checking card', card);
@@ -1331,7 +1446,7 @@ class App extends React.Component {
     });
     return match;
   }
-  declareWinner(winner) {
+  declareWinner = (winner) => {
     console.error('declareWinner()');
     if (winner !== 'TIE') {
       let newWins = this.state[`${winner}Wins`] + 1;
@@ -1374,7 +1489,7 @@ class App extends React.Component {
     }
 
   }
-  swapTurn() {
+  swapTurn = () => {
     let newTurn;
     if (this.state.turn === 'user') {
       newTurn = 'opponent';
@@ -1396,7 +1511,7 @@ class App extends React.Component {
     return newTurn;
   }
 
-  determineWinnerFromTotal() {
+  determineWinnerFromTotal = () => {
     console.error('determineWinnerFromTotal()');
 
     console.warn(`app.determineWinnerFromTotal is comparing userTotal ${this.state.userTotal} - opponentTotal ${this.state.opponentTotal}`);
@@ -1419,7 +1534,7 @@ class App extends React.Component {
       this.declareWinner('TIE');
     }
   }
-  changeTurn(newPlayer) {
+  changeTurn = (newPlayer) => {
     console.error('changeTurn()', newPlayer);
     this.playSound('turn');
     if (newPlayer === 'user') {
@@ -1522,7 +1637,7 @@ class App extends React.Component {
       lastFirstTurn: newPlayer
     });
   }
-  callResultModal(winner) {
+  callResultModal = (winner) => {
     let bgColor = 'var(--red-bg-color)';
     let title;
     let winnerDisplay = winner;
@@ -1555,11 +1670,11 @@ class App extends React.Component {
       },
     });
   }
-  dismissResultModal() {
+  dismissResultModal = () => {
     let modal = document.getElementById('result-modal');
     modal.classList.remove('modal-on');
   }
-  callConfirmModal(titleText, bodyText, buttonText, confirmAction, noCancel) {
+  callConfirmModal = (titleText, bodyText, buttonText, confirmAction, noCancel) => {
     this.setState({
       confirmMessage: {
         showing: true,
@@ -1574,7 +1689,7 @@ class App extends React.Component {
       }
     });
   }
-  dismissConfirmModal() {
+  dismissConfirmModal = () => {
     document.getElementById('confirm-modal').classList.remove('confirm-modal-showing');
     this.setState({
       confirmMessage: {
@@ -1585,7 +1700,7 @@ class App extends React.Component {
       }
     });
   }
-  callUserInfoModal(selectedUserId) {
+  callUserInfoModal = (selectedUserId) => {
     this.setState({
       confirmMessage: {
         showing: true,
@@ -1597,13 +1712,13 @@ class App extends React.Component {
       document.getElementById('confirm-ok-button').addEventListener('click', confirmAction);
     });
   }
-  dismissUserInfoModal() {
+  dismissUserInfoModal = () => {
     document.getElementById('user-info-modal').classList.remove('user-info-modal-showing');
     this.setState({
       selectedUser: {}
     });
   }
-  handleClickAvatar(event) {
+  handleClickAvatar = (event) => {
     if (document.getElementsByClassName('selected-avatar')[0]) {
       document.getElementsByClassName('selected-avatar')[0].classList.remove('selected-avatar');
     }
@@ -1615,19 +1730,18 @@ class App extends React.Component {
       userStatus: userStatusCopy
     });
   }
-  handleClickRandomize(event) {
+  handleClickRandomize = (event) => {
     event.preventDefault();
     let selectionCopy = Util.shuffle(this.state.cardSelection.slice());
     let newRandomDeck = [];
     selectionCopy.map((selectionCard, i) => {
-      let newElementId = `card-${selectionCard.id}`;
-      let newCard = { id: selectionCard.id, value: selectionCard.value, type: selectionCard.type, elementId: newElementId, inDeck: true };
+      let newCard = { id: selectionCard.id, context: 'deck-selected', value: selectionCard.value, type: selectionCard.type, inDeck: true };
       if (i < 10) {
         console.log('made new ', newCard);
         newRandomDeck.push(newCard);
-        document.getElementById(`selection-${newCard.elementId}`).style.opacity = 0.1;
+        document.getElementById(`deck-selection-option-card-${newCard.id}`).style.opacity = 0.1;
       } else {
-        document.getElementById(`selection-${newCard.elementId}`).style.opacity = 1;
+        document.getElementById(`deck-selection-option-card-${newCard.id}`).style.opacity = 1;
       }
     });
     // for (let i = 0; i < 10; i++) {
@@ -1645,7 +1759,7 @@ class App extends React.Component {
       userDeck: newRandomDeck
     });
   }
-  handleClickOKButton(event) {
+  handleClickOKButton = (event) => {
     event.preventDefault();
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
       this.getNewPlayerHands();
@@ -1681,25 +1795,25 @@ class App extends React.Component {
       }, this.state.options.turnInterval);
     }, this.state.options.turnInterval);
   }
-  toggleHamburgerAppearance(position) {
+  toggleHamburgerAppearance = (position) => {
     let topBar = document.getElementById('top-hamburger-bar');
     let bottomBar = document.getElementById('bottom-hamburger-bar');
     let middleBar = document.getElementById('middle-hamburger-bar');
     let middleBar2 = document.getElementById('middle-hamburger-bar-2');
     if (position === 'hamburger') {
       // un-rotate middle bars to flat
-      // middleBar.style.transform = middleBar2.style.transform = 'rotate(0) scaleX(1)';
-      middleBar.style.transform = middleBar2.style.transform = 'none';
+      middleBar.style.transform = middleBar2.style.transform = 'rotate(0) scaleX(1)';
+      // middleBar.style.transform = middleBar2.style.transform = 'none';
       setTimeout(() => {
         topBar.style.opacity = bottomBar.style.opacity = 1;
         // un-collapse top and bottom bars from middle
-        // topBar.style.transform = bottomBar.style.transform = 'translateY(0%)';
-        topBar.style.transform = bottomBar.style.transform = 'none';
+        topBar.style.transform = bottomBar.style.transform = 'translateY(0)';
+        // topBar.style.transform = bottomBar.style.transform = 'none';
       }, 150);
     } else {
       // collapse top and bottom bars to middle
-      topBar.style.transform = 'translateY(225%)';
-      bottomBar.style.transform = 'translateY(-225%)';
+      topBar.style.transform = 'translateY(200%)';
+      bottomBar.style.transform = 'translateY(-200%)';
       setTimeout(() => {
         topBar.style.opacity = bottomBar.style.opacity = 0;
         // rotate middle bars to an X shape
@@ -1707,74 +1821,85 @@ class App extends React.Component {
         middleBar2.style.transform = 'rotate(-40deg) scaleX(1.1)';
       }, 150);
     }
-    // if (position === 'hamburger') {
-    //   // un-rotate middle bars to flat
-    //   middleBar.classList.add('mid-1-to-ham');
-    //   middleBar.classList.remove('mid-1-to-x');
-    // } else {
-    //   middleBar.classList.add('mid-1-to-x');
-    //   middleBar.classList.remove('mid-1-to-ham');
-    //   // middleBar.classList.add('mid-1-to-ham');      
-    // }
-    // setTimeout(() => {
-    //   middleBar.classList.remove('mid-1-to-x');
-    //   middleBar.classList.remove('mid-1-to-ham');
-    // }, 400)
   }
-  handleClickHamburger() {
+  handleClickHamburger = () => {    
+    document.getElementById('hamburger-menu').style.transition = 'transform 300ms ease';
+    document.getElementById('game-board').style.transition = 'opacity 300ms ease';
     if (!document.getElementById('hamburger-menu').classList.contains('hamburger-on')) {
-      // if (!document.getElementById('hamburger-menu').classList.contains('hamburger-slide-in')) {
-      // document.getElementById('hamburger-menu').classList.add('hamburger-slide-in');
-      // document.getElementById('hamburger-menu').classList.remove('hamburger-slide-out');
-
-      requestAnimationFrame(() => this.toggleHamburgerAppearance('close'));
+      // requestAnimationFrame(() => this.toggleHamburgerAppearance('close'));
+      this.toggleShade('on');
       document.getElementById('hamburger-menu').classList.add('hamburger-on');
-
+      this.toggleHamburgerAppearance('close');      
+      ROOT.style.setProperty('--hamburger-border-color', '#900');
     } else {
-      // document.getElementById('hamburger-menu').classList.add('hamburger-slide-out');
-      // document.getElementById('hamburger-menu').classList.remove('hamburger-slide-in');
-
-      requestAnimationFrame(() => this.toggleHamburgerAppearance('hamburger'));
+      // requestAnimationFrame(() => this.toggleHamburgerAppearance('hamburger'));
       document.getElementById('hamburger-menu').classList.remove('hamburger-on');
-
+      this.toggleHamburgerAppearance('hamburger');
+      ROOT.style.setProperty('--hamburger-border-color', 'var(--button-border-color)');     
+      if (document.getElementById('user-info-panel').classList.contains('user-info-panel-off')) {
+        this.toggleShade('off');
+      }
     }
   }
 
-  handleClickOpponentPanel(opponentName) {
-    //event.preventDefault();
-    document.getElementById(`${opponentName}-panel`).classList.add('panel-selected');
-    document.getElementById(`${this.state.CPUOpponent}-panel`).classList.remove('panel-selected');
-    document.getElementById(`${opponentName}-select-button`).classList.add('disabled-select-button');
-    document.getElementById(`${this.state.CPUOpponent}-select-button`).classList.remove('panel-selected');
-    setTimeout(() => {
+  toggleShade = (direction) => {
+    document.getElementById('shade').style.transitionProperty = 'opacity';
+    let switching = 'off';
+    if (direction) {
+      switching = direction;
+    } else {
+      if (!document.getElementById('shade').classList.contains('shade-on')) {
+        switching = 'on';
+      }
+    }
+    if (switching === 'off') {
+      document.getElementById('shade').classList.remove('shade-on');
+      if (this.state.phase === 'gameStarted') {
+        Array.from(document.getElementsByClassName('move-button')).map((button) => {
+          button.classList.remove('disabled-button');          
+        });
+      }
+    } else {      
+      document.getElementById('shade').classList.add('shade-on');
+      if (this.state.phase === 'gameStarted') {
+        Array.from(document.getElementsByClassName('move-button')).map((button) => {
+          button.classList.add('disabled-button');          
+        });
+      }
+    }
+  }
+
+  handleClickOpponentPanel = (opponentName) => {
+    console.log('----- running handleClickOpponentPanel')
+    this.setState({
+      cpuOpponent: opponentName,
+    }, () => {
       let namesCopy = Object.assign({}, this.state.playerNames);
       namesCopy.opponent = this.characters[opponentName].displayName;
       let opponentDeckCopy = Util.shuffle(this.characters[opponentName].deck);
       // let opponentDeckCopy = this.characters[opponentName].deck;
       this.setState({
-        CPUOpponent: opponentName,
         playerNames: namesCopy,
         opponentDeck: opponentDeckCopy
       });
-    }, 150);
-
+    });
   }
-  handleClickConfirmButton(event) {
+  handleClickConfirmButton = (event) => {
     event.preventDefault();
     console.log('clicked', event.target.id);
 
   }
-  handleClickCancelButton(event) {
+  handleClickCancelButton = (event) => {
     event.preventDefault();
     this.dismissConfirmModal();
     console.log('clicked', event.target.id);
   }
-  handleClickCloseButton(event) {
+  handleClickCloseButton = (event) => {
     event.preventDefault();
     this.dismissUserInfoModal();
     console.log('clicked', event.target.id);
   }
-  resetBoard(newTurn, total) {
+  resetBoard = (newTurn, total) => {
     document.getElementById('user-total').classList.remove('red-total');
     document.getElementById('user-total').classList.remove('green-total');
     document.getElementById('opponent-total').classList.remove('red-total');
@@ -1828,7 +1953,7 @@ class App extends React.Component {
       });
     }
   }
-  handleClickHamburgerQuit(event) {
+  handleClickHamburgerQuit = (event) => {
     this.callConfirmModal(
       'Quit match?',
       'You will forfeit and your progress will be lost.',
@@ -1837,6 +1962,7 @@ class App extends React.Component {
         document.getElementById('hamburger-menu').classList.remove('hamburger-on');
         this.resetBoard('user', true);
         this.dismissConfirmModal();
+        document.getElementById('shade').classList.remove('shade-on');
         // setTimeout(() => {
         // this.toggleHamburgerAppearance('hamburger');
         // }, 400);
@@ -1844,7 +1970,7 @@ class App extends React.Component {
     );
 
   }
-  callMoveIndicator(player, message, duration) {
+  callMoveIndicator = (player, message, duration) => {
     this.playSound('click');
     let indicator = document.getElementById('move-indicator');
     if (message === 'End Turn') {
@@ -1880,18 +2006,32 @@ class App extends React.Component {
     // setTimeout(() => {
     //   indicator.classList.remove('indicator-on');      
     // }, 1000);
-
   }
+
+  handleClickCampaign = () => {
+    this.setState({
+      phase: 'selectingOpponent'
+    });
+  }
+
+  handleClickQuickMatch = () => {
+    this.setState({
+      phase: 'splashScreen'
+    });
+  }
+
   render() {
+    console.warn('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY')
+    console.warn('------------ =================================   APP RENDERING')
+    console.warn('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY')
+
     let phase = this.state.phase;
-    let onIntroPhase = (phase === 'showingOptions' || phase === 'showingInstructions' || phase === 'showingHallOfFame');
+    let onIntroPhase = (phase === 'showingOptions' || phase === 'showingInstructions' || phase === 'showingHallOfFame' || phase === 'selectingMode');
     // default styles are hidden...
+
     // - maybe keep these in state?
     // - or use routing?
-    let cardSize = this.state.cardSizes.cardSize;
-    let mediumCardSize = this.state.cardSizes.mediumCardSize;
-    let miniCardSize = this.state.cardSizes.miniCardSize;
-    let microCardSize = this.state.cardSizes.microCardSize;
+
     // let footerStyle = { pointerEvents: 'none', opacity: 1, position: 'absolute', bottom: '-10vmax' };
     let gameBoardStyle = { display: 'none' };
     let introStyle = { display: 'none' };
@@ -1935,12 +2075,12 @@ class App extends React.Component {
     let lazyTime2 = this.delayEvents.postLoad2
     let lazyTime3 = this.delayEvents.postLoad3
     return (
-      <div id='container'>
-
-        <div id='debug-display' />
-        <div id='debug-touch-display'>fuck cock</div>
+      <div id='container'>        
+        <div style={{ opacity: this.state.debug ? '1' : '0' }}>
+          <div id='debug-display' />
+          <div id='debug-touch-display'></div>
+        </div>
         <Header
-          cardSize={this.state.cardSizes.cardSize}
           readyToFill={this.delayEvents.postLoad1}
           userStatus={this.state.userStatus}
           playerName={this.state.userStatus.playerName}
@@ -1954,8 +2094,7 @@ class App extends React.Component {
         {(phase === 'splashScreen' || phase === 'selectingOpponent' || onIntroPhase) &&
           <IntroScreen style={introStyle}
             phase={phase}
-            readyToShow={pageLoaded}
-            cardSize={this.state.cardSizes.cardSize}
+            readyToShow={this.state.checkedCookie}
             userAvatarIndex={this.state.userStatus.avatarIndex}
             onClickAvatar={this.handleClickAvatar}
             onClickStart={this.handleClickStart}
@@ -1979,6 +2118,14 @@ class App extends React.Component {
             onClickBack={(event) => { this.handleClickBack(event, 'splashScreen'); }}
             clickFunction={clickFunction} />
         }
+        {(this.state.checkedCookie && (phase === 'selectingMode')) &&
+          <ModeSelectScreen
+            phase={phase}
+            onClickCampaign={this.handleClickCampaign}
+            onClickQuickMatch={this.handleClickQuickMatch}
+            onClickBack={(event) => { this.handleClickBack(event, 'splashScreen'); }}
+            clickFunction={clickFunction} />
+        }
         {(this.state.checkedCookie && (phase === 'splashScreen' || phase === 'selectingOpponent' || onIntroPhase)) &&
           <HallOfFameScreen
             phase={phase}
@@ -1998,7 +2145,6 @@ class App extends React.Component {
             onClickPlay={this.handleClickPlay}
             onClickCard={this.handleClickCard}
             onClickBack={this.handleClickBack}
-            cardSizes={this.state.cardSizes}
             clickFunction={clickFunction} />
         }
         {/* {(phase === 'splashScreen' || phase === 'selectingOpponent') && */}
@@ -2006,11 +2152,14 @@ class App extends React.Component {
           // {lazyTime1 &&
           <OpponentSelectScreen phase={phase}
             readyToList={lazyTime2}
+            listRange={{
+              begin: 0,
+              end: characterArray.length
+            }}
             portraitSources={this.state.portraitSources}
             characters={this.characters}
             characterArray={charactersToList}
-            opponentSelected={this.state.CPUOpponent}
-            cardSize={microCardSize}
+            opponentSelected={this.state.cpuOpponent}
             onClickPanel={this.handleClickOpponentPanel}
             onClickOpponentReady={this.handleClickOpponentReady}
             onClickBack={this.handleClickBack}
@@ -2031,7 +2180,7 @@ class App extends React.Component {
             phase={phase}
             playerNames={{ user: this.state.userStatus.playerName, opponent: this.state.playerNames.opponent }}
             opponentNames={Object.keys(this.characters)}
-            CPUOpponent={this.state.CPUOpponent}
+            cpuOpponent={this.state.cpuOpponent}
             portraitSources={this.state.portraitSources}
             avatarIndex={this.state.userStatus.avatarIndex}
             hands={{ user: this.state.userHand, opponent: this.state.opponentHand }}
@@ -2040,36 +2189,31 @@ class App extends React.Component {
             wins={{ user: this.state.userWins, opponent: this.state.opponentWins }}
             turn={this.state.turn}
             turnStatus={this.state.turnStatus}
-            cardSize={cardSize}
-            mediumCardSize={mediumCardSize}
-            miniCardSize={miniCardSize}
             onClickCard={this.handleClickCard}
             clickFunction={clickFunction} />
         }
+        <div {...{ [clickFunction]: this.handleShadeClick }} id='shade'></div>
         {(this.state.checkedCookie && phase === 'gameStarted') &&
-          <ControlFooter
-            showing={phase === 'gameStarted'}
-            cardSize={this.state.cardSizes.cardSize}
-            currentOptions={this.state.options}
-            onClickHamburgerQuit={this.handleClickHamburgerQuit}
-            onToggleOption={this.handleToggleOption}
-            onClickEndTurn={this.handleClickEndTurn}
-            onClickStand={this.handleClickStand}
-            onClickHamburger={this.handleClickHamburger}
-            onClickSwitchSign={this.handleClickSwitchSign}
-            clickFunction={clickFunction}
-          />
+          <>
+            <HamburgerMenu
+              currentOptions={this.state.options}
+              onClickHamburgerQuit={this.handleClickHamburgerQuit}
+              onToggleOption={this.handleToggleOption}
+              clickFunction={clickFunction} />
+            <ControlFooter
+              showing={phase === 'gameStarted'}
+              currentOptions={this.state.options}
+              onClickHamburgerQuit={this.handleClickHamburgerQuit}
+              onToggleOption={this.handleToggleOption}
+              onClickEndTurn={this.handleClickEndTurn}
+              onClickStand={this.handleClickStand}
+              onClickHamburger={this.handleClickHamburger}
+              onClickSwitchSign={this.handleClickSwitchSign}
+              clickFunction={clickFunction}
+            />
+          </>
         }
-        {/* {phase === 'gameStarted' &&
-          <HamburgerMenu
-            borderSize={parseInt(this.state.cardSizes.cardSize.badgeRadius)}
-            borderRadiusSize={parseInt(this.state.cardSizes.cardSize.arrowBorderSize)}
-            currentOptions={this.state.options}
-            onClickHamburgerQuit={this.handleClickHamburgerQuit}
-            onToggleOption={this.handleToggleOption} />
-          
-        } */}
-        {(this.state.checkedCookie && this.state.confirmMessage.showing) &&
+        {(this.state.checkedCookie) &&
           <ConfirmModal showing={this.state.confirmMessage.showing}
             messageData={this.state.confirmMessage}
             buttonText={this.state.confirmMessage.buttonText}

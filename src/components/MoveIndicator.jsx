@@ -12,7 +12,7 @@ function MoveIndicator() {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: 'Bungee';
+          font-family: var(--title-font);
           font-size: 14vw;
           z-index: 4;
           pointer-events: none;

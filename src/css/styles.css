@@ -1,5 +1,8 @@
-body {
-  --min-width: 0;
+:root {
+  --title-font: "Bungee";
+  --main-font: "Nova Flat";
+  --secondary-font: "Open Sans";
+  --small-font-size: 2vh;
   --main-bg-color: rgb(107, 121, 138);
   --main-text-color: rgb(255, 247, 213);
   --option-on-color: rgb(94, 128, 94);
@@ -11,17 +14,21 @@ body {
   --trans-blue-bg-color: rgba(0, 0, 255, 0.05);
   --button-bg-color: black;
   --disabled-button-bg-color: #352222;
+  
   --button-text-color: #5CB3FF;
   --special-button-text-color: #ffffa3;
   --button-border-color: #111;
+  --button-text-size: calc(var(--normal-card-width) / 2.5);
+  
   --green-move-color: rgba(7, 107, 12, 0.35);
   --yellow-move-color: rgba(89, 107, 7, 0.35);
   --red-move-color: rgba(107, 7, 7, 0.35);
+  
   --red-bg-color: #560000;
   --medium-red-bg-color: #490000;
   --dark-red-bg-color: #380000;
+  
   --card-text-color: #FFFFFF;
-  /* --pulse-speed: 900ms; */
   --card-bg-color: #ccc;
   --house-card-color: #D3D300;
   --plus-card-color: #0C00B2;
@@ -31,32 +38,115 @@ body {
   --card-back-border-color: #444;
   --card-spot-border-color: #999;
   --card-spot-bg-color: rgba(0, 0, 0, 0.05);
-
+  /* --pulse-speed: 900ms; */
+  
   --main-text-size: 1rem;
   --header-text-size: 1.2rem;
-
-  --header-height: 8vh;
-  --control-footer-height: 10vmax;
-  --intro-width: 72vw;
-  --menu-border-width: 0.25rem;
-  --menu-border-radius: 0.4rem;
-  --button-radius: 0.5rem;
   
+  --header-height: 7vh;
+  --intro-width: 76vmin;
+  
+  /* --menu-border-width: 0.3rem; */
+  --menu-border-width: calc(var(--normal-card-width) / 14);
+  /* --button-border-width: 0.25rem; */
+  --button-border-width: calc(var(--normal-card-width) / 15);
+  /* --menu-border-radius: 0.5rem; */
+  --menu-border-radius: calc(var(--normal-card-width) / 8);
+
+  --control-footer-height: 11vh;
+  --hamburger-height: calc(var(--control-footer-height) - (var(--menu-border-width) * 4));
+  --inner-hamburger-height: calc(var(--hamburger-height) - var(--menu-border-width) * 2);
+  --hamburger-bar-height: calc((var(--inner-hamburger-height) / 7));
+  --hamburger-bar-color: var(--button-text-color);
+  --hamburger-border-color: var(--button-border-color);
+
+  /* --button-radius: 0.35rem; */
+  --button-radius: calc(var(--normal-card-width) / 12);
+  
+  --menu-border: var(--menu-border-width) solid var(--dark-red-bg-color);
+  
+  /* --card-ratio: 1.6; */
+
+  /* --normal-card-height: 13vh; */
+  /* --normal-card-width: calc(var(--normal-card-height) / var(--card-ratio)); */
+  
+  --medium-card-height: calc(var(--normal-card-height) * 0.875);
+  --medium-card-width: calc(var(--normal-card-width) * 0.875);
+  
+  --mini-card-height: calc(var(--normal-card-height) * 0.8);
+  --mini-card-width: calc(var(--normal-card-width) * 0.8);
+  
+  --micro-card-height: calc(var(--normal-card-height) * 0.6);
+  --micro-card-width: calc(var(--normal-card-width) * 0.6);
+  
+  --card-buffer-size: 0.5vw;
+
+  --hamburger-off-state: translateX(100%);
+}
+@media screen
+and (orientation: landscape) {
+  :root {
+    --min-width: 300px;
+    --min-height: 400px;
+  }
+}
+body {  
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   overflow: hidden;
-  margin: 0 auto;
+  margin: 0;
   position: absolute;
   width: 100%;
+  max-width: 100%;
   height: 100%;
-  min-width: var(--min-width);
+  /* min-width: var(--min-width); */
   background-color: black;
-  font-family: 'Nova Square';
-  /* font-display: auto; */
+  font-family: var(--main-font);
+  box-sizing: border-box;
+  font-display: auto;
+  overflow: auto;
 }
+#shade {
+  position: fixed;
+  width: 100vh;
+  height: 100vh;
+  /* height: calc(100vh - var(--header-height) - var(--control-footer-height)); */
+  /* top: var(--header-height); */
+  background: black;
+  pointer-events: none;
+  opacity: 0;
+  transition-duration: 300ms;
+  transition-timing-function: ease;
+  /* will-change: opacity; */
+}
+#shade.shade-on {
+  pointer-events: all;
+  opacity: 0.5;
+  
+}
+#container {
+  overflow: hidden;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  /* max-height: 100vh; */
+  justify-content: space-between;
+  width: 100%;
+  min-width: var(--min-width);
+  margin: 0 auto;
+  background-color: var(--main-bg-color);
+  color: var(--main-text-color);
+}
+/* #container:fullscreen {
+  width: 100%;
+  height: 100%;
+  background-color: rgb(84, 93, 84);
+} */
 ::-webkit-scrollbar {
   width: 0rem;
   background-color: transparent;
@@ -79,7 +169,7 @@ body {
   margin-bottom: var(--header-height);
 }
 .modal-title {
-  font-family: 'Bungee';
+  font-family: var(--title-font);
 }
 @keyframes spin-x {
   0% {
@@ -107,7 +197,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 64vw;
+  /* min-width: 64vw; */
   border-radius: var(--button-radius);
   margin-top: 1vh;
   margin-bottom: 1vh;
@@ -116,10 +206,20 @@ body {
   color: green;
   font-size: 1.2em;
 }
-#intro-screen-body {
-  transform: scale(1.1);
-  pointer-events: none;
+#intro-screen {
   opacity: 0;
+  transform: scale(1.05);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+#mode-select-screen {
+  opacity: 0;
+  transform: scale(1.1);
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+#intro-screen-body {
+  /* transform: scale(1.1);
+  pointer-events: none;
+  opacity: 0; */
 }
 #initial-loading-area {
   position: absolute;
@@ -140,21 +240,22 @@ body {
 a {
   color: var(--main-text-color);
 }
-button {
-  font-family: 'Bungee';
+button {  
+  font-family: var(--title-font);
   outline: 0;
   line-height: 100%;
   background-color: var(--button-bg-color);
   color: var(--button-text-color);
-  border-radius: 0.25rem;
+  border-radius: var(--button-radius);
   cursor: pointer;
   border: solid var(--button-border-color);
-  border-width: 0.25rem;
+  border-width: var(--button-border-width);
 }
-/* .move-button:active {
-  color: red;
-  transform: scale(0.97)
-} */
+.pressed-button {
+  color: red !important;
+  transform: scale(0.9);
+  background: #444;
+}
 .shadowed-text {
   text-shadow:
    -1px -1px 0 #000,  
@@ -184,17 +285,16 @@ li:before {
 .opponent-select-entry {
   box-sizing: border-box;
   margin-bottom: 0.5vh;
-  margin-left: 2.5vw;
-  margin-right: 2.5vw;
-  border: 1px groove #333;
+  margin-left: 1.5vw;
+  margin-right: 1.5vw;
+  border: 1px solid #333;
   border-radius: 0.5rem;
   display: flex;
   background-color: var(--trans-blue-bg-color);
   transform: scale(0.95);
   transition: transform 200ms ease;
   padding: 0.5rem;
-
-  will-change: transform, background-color;
+  will-change: transform;
 }
 .left-opponent-panel {
   display: grid;
@@ -292,7 +392,7 @@ li:before {
   line-height: 100%;  
 }
 .opponent-prize-credits {
-  font-family: 'Bungee';
+  font-family: var(--title-font);
   color: green;
 }
 .opponent-prize-cards {
@@ -399,29 +499,14 @@ li:before {
   align-items: center;
   flex-grow: 2;
 } */
-#container {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 100%;
-  justify-content: space-between;
-  width: 100%;
-  /* min-width: 300px; */
-  /* max-width: 800px; */
-  margin: 0 auto;
-  background-color: var(--main-bg-color);
-  color: var(--main-text-color);
-  /* transition: background 300ms ease; */
-}
 .options-instructions-title {
-  font-family: 'Bungee';
+  font-family: var(--title-font);
   box-sizing: border-box;
   font-size: 2rem;
   line-height: 100%;
   width: 100vw;
-  height: calc(var(--header-height)*1.35);
-  min-height: calc(var(--header-height)*1.35);
+  height: var(--control-footer-height);
+  min-height: var(--control-footer-height);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -433,7 +518,7 @@ li:before {
   /* for Firefox! */
   min-height: 0;
 }
-#instructions-screen, #options-screen {
+#instructions-screen, #options-screen, #mode-select-screen {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -444,7 +529,7 @@ li:before {
   /* min-height: 0; */
 }
 #instructions {
-  font-family: 'Nova Square';
+  font-family: var(--main-font);
   box-sizing: border-box;
   padding: 5vw;
   padding-top: 1rem;
@@ -480,35 +565,36 @@ li:before {
 }
 
 #debug-display, #debug-touch-display {
+  font-family: sans-serif;
   box-sizing: border-box;
   position: fixed;
   top: var(--header-height);
-  font-size: 1rem !important;
+  font-size: 0.65rem !important;
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.75);
   left: 0;
-  font-size: 2rem;
   color: white;
   width: 100%;
   padding: 1rem;
   line-height: 140%;
-  display: none;
+  /* display: none; */
 }
 #debug-touch-display {
   background: rgba(0, 0, 0, 0.75);
   color: white;
-  height: var(--header-height);
-  top: calc(100% - calc(var(--header-height) * 2));
-  z-index: 1
+  top: var(--header-height);
+  pointer-events: none;
+  z-index: 12;
+  display: block;
+  overflow: scroll;
 }
 #header-container {
   opacity: 0;
 }
 .pre-header {
-  height: 6vmax;
-  min-height: 6vmax;
-  max-height: 6vmax;
+  height: var(--header-height);
+  min-height: var(--header-height);
   font-size: 1.25rem;
   display: flex;
 }
@@ -526,6 +612,7 @@ li:before {
   min-height: var(--control-footer-height);
   max-height: var(--control-footer-height);
   border-top: 1px solid black;
+  background-color: var(--trans-blue-bg-color);
 }
 .ready-button {
   box-sizing: border-box;
@@ -575,7 +662,7 @@ li:before {
   pointer-events: none;
 }
 .card {
-  font-family: 'Nova Square';
+  font-family: var(--main-font);
   box-sizing: border-box;
   color: var(--card-back-color);
   background-color: var(--card-bg-color);
@@ -652,7 +739,7 @@ li:before {
   pointer-events: none;
   width: 70%;
   height: 28%;
-  top: 26%;
+  top: 23%;
   background-color: black;
   position: absolute;
   display: inline-flex;
@@ -705,7 +792,7 @@ li:before {
       align-items: center;
       width: 90px;
       /* min-height: 12vh; */
-      max-height: 12vh;
+      /* max-height: 12vh; */
       border-radius: 0.5rem;
       margin-top: 1vh;
       margin-bottom: 1vh;

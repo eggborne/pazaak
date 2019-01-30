@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { portraitSources } from '../scripts/db';
 
 function PlayerPortrait(props) {
-  console.warn('rendering PlayerPortrait', props.displayName, props.spriteIndex);
+  // console.warn('rendering PlayerPortrait', props.displayName, props.spriteIndex);
   let portraitSize = props.size;
   let sheetWidth = portraitSize * 8;
   let sheetHeight = portraitSize * 3;
@@ -79,10 +79,11 @@ PlayerPortrait.propTypes = {
   cpu: PropTypes.bool,
   spriteIndex: PropTypes.number,
   displayName: PropTypes.string,
+  readyToShow: PropTypes.bool
 };
 
 function areEqual(prevProps, nextProps) {
-  return prevProps.spriteIndex === nextProps.spriteIndex && prevProps.size === nextProps.size;
+  return (prevProps.spriteIndex === nextProps.spriteIndex && prevProps.size === nextProps.size);
 }
 // export default PlayerPortrait;
 export default React.memo(PlayerPortrait, areEqual);

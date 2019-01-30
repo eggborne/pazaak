@@ -5,9 +5,8 @@ import PlayerPortrait from './PlayerPortrait';
 import Card from './Card';
 
 function OpponentPanel(props) {
-  console.warn('OpponentPanel rendering ---', props.character.displayName);
+  console.error('OpponentPanel rendering ---', props.character.displayName);
   let charName = props.character.name;
-  let extraClasses = ['', ''];
   let quoteLength = props.character.quotes.panel.length;
   let quoteTextSize;
   if (quoteLength > 28) {
@@ -17,14 +16,11 @@ function OpponentPanel(props) {
     quoteTextSize = '0.85rem';
   }
   let skillArray = Array.apply(null, Array(10)).map(function () { });
-  let cardHeight = props.cardSize.height;
+  let cardHeight = 'var(--mini-card-height)';
   let portraitSize = window.innerWidth * 0.35;
   let nameFontSize = '1.2rem';
-  // if (props.character.quotes.panel.length > 64) {
-  //   quoteTextSize = '0.65rem';
-  // }
   return (
-    <div id={`${charName}-panel`} className={'opponent-select-entry'}>
+    <div id={`${charName}-panel`} className={`opponent-select-entry ${props.selected && 'panel-selected'}`}>
       <style jsx>{`
         #${charName}-name-area {
           font-size: ${nameFontSize};
@@ -36,14 +32,14 @@ function OpponentPanel(props) {
 
         }
         #${charName}-select-button {
-          height: ${cardHeight*1.2}px;
+          height: ${cardHeight};
         }        
         `}
       </style>
       <div className='left-opponent-panel'>
         <PlayerPortrait size={portraitSize} cpu={true} spriteIndex={props.index} displayName={''} />
         <div id={`${charName}-quote`} className='opponent-quote'>{props.character.quotes.panel}</div>
-        <button id={`${charName}-select-button`} {...{ [props.clickFunction]: (event) => props.onClickPanel(charName) }} className={`select-button ${extraClasses[1]}`}></button>
+        <button id={`${charName}-select-button`} {...{ [props.clickFunction]: () => props.onClickPanel(charName) }} className={`select-button ${props.selected && 'disabled-select-button'}`}></button>
       </div>
       <div className='opponent-description'>
         <div className='opponent-stats-grid'>
@@ -75,7 +71,7 @@ function OpponentPanel(props) {
             <div className='opponent-prize-cards'>
               {props.character.prize.cards.map((card, i) => {
                 let key = i * (props.index + 1);
-                return <Card key={key} size={props.cardSize} value={card.value} type={card.type} clickFunction={props.clickFunction} />;
+                return <Card key={key} context={'opponent-prize'} size={'micro'} value={card.value} type={card.type} clickFunction={props.clickFunction} />;
               })}
             </div>
           </div>
@@ -87,7 +83,6 @@ function OpponentPanel(props) {
 
 OpponentPanel.propTypes = {
   selected: PropTypes.bool,
-  cardSize: PropTypes.object,
   index: PropTypes.number,
   character: PropTypes.object,
   onClickPanel: PropTypes.func,
@@ -95,12 +90,10 @@ OpponentPanel.propTypes = {
 };
 
 function areEqual(prevProps, nextProps) {
-  let equalTest = prevProps.selected !== nextProps.selected;
-  console.log('OpponentPanel areEqual', equalTest);
-  return (equalTest);
+  return (prevProps.selected === nextProps.selected);
 }
 
-export default React.memo(OpponentPanel);
+export default React.memo(OpponentPanel, areEqual);
 
 
 

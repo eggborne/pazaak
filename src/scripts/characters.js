@@ -1,4 +1,3 @@
-const plusMinusSymbol = '±';
 export const characters = {
   jarjarbinks: {
     name: 'jarjarbinks',
@@ -7,7 +6,7 @@ export const characters = {
     prize: {
       credits: 50,
       cards: [
-        { value: 1, type: plusMinusSymbol }
+        { value: 1, type: '±' }
       ]
     },
     strategy: {
@@ -46,8 +45,8 @@ export const characters = {
     prize: {
       credits: 100,
       cards: [
-        { value: 2, type: plusMinusSymbol },
-        { value: 3, type: plusMinusSymbol },
+        { value: 2, type: '±' },
+        { value: 3, type: '±' },
       ]
     },
     strategy: {
@@ -86,8 +85,8 @@ export const characters = {
     prize: {
       credits: 200,
       cards: [
-        { value: 3, type: plusMinusSymbol },
-        { value: 4, type: plusMinusSymbol },
+        { value: 3, type: '±' },
+        { value: 4, type: '±' },
       ]
     },
     strategy: {
@@ -126,8 +125,8 @@ export const characters = {
     prize: {
       credits: 400,
       cards: [
-        { value: 4, type: plusMinusSymbol },
-        { value: 5, type: plusMinusSymbol },
+        { value: 4, type: '±' },
+        { value: 5, type: '±' },
       ]
     },
     strategy: {
@@ -151,9 +150,9 @@ export const characters = {
       { id: 4, value: 5, type: '+' },
       { id: 5, value: -1, type: '-' },
       { id: 6, value: -2, type: '-' },
-      { id: 7, value: 1, type: plusMinusSymbol },
-      { id: 8, value: 2, type: plusMinusSymbol },
-      { id: 9, value: 3, type: plusMinusSymbol }
+      { id: 7, value: 1, type: '±' },
+      { id: 8, value: 2, type: '±' },
+      { id: 9, value: 3, type: '±' }
     ],
     quotes: {
       panel: '"MISSION: DESTROY PLAYER SCORE"'
@@ -166,9 +165,9 @@ export const characters = {
     prize: {
       credits: 1000,
       cards: [
-        { value: 4, type: plusMinusSymbol },
-        { value: 5, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 4, type: '±' },
+        { value: 5, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -185,16 +184,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"Underestimated not, will I be. Beat you handily I will."'
@@ -207,10 +206,10 @@ export const characters = {
     prize: {
       credits: 2000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -227,16 +226,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"In time you will call me Master."'
@@ -249,10 +248,10 @@ export const characters = {
     prize: {
       credits: 3000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -269,16 +268,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"E.T. crush opponents."'
@@ -291,10 +290,10 @@ export const characters = {
     prize: {
       credits: 3000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -311,16 +310,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"Say... that\'s a nice deck."'
@@ -333,10 +332,10 @@ export const characters = {
     prize: {
       credits: 3000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -353,16 +352,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"And to think I hesitated."'
@@ -375,10 +374,10 @@ export const characters = {
     prize: {
       credits: 5000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -395,16 +394,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"Better be careful. I\'m the geniune article."'
@@ -417,10 +416,10 @@ export const characters = {
     prize: {
       credits: 8000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -437,16 +436,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"Fools! You have no perception! The stakes we are gambling are frightenly high!"'
@@ -459,10 +458,10 @@ export const characters = {
     prize: {
       credits: 3000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -479,16 +478,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"Start the reactor... failing that, deal up some cards!"'
@@ -501,10 +500,10 @@ export const characters = {
     prize: {
       credits: 10000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -521,16 +520,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"I WILL TIRE QUICKLY OF BESTING YOU REPEATEDLY IN THIS SIMPLE ANCIENT GAME."'
@@ -543,10 +542,10 @@ export const characters = {
     prize: {
       credits: 12000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -563,16 +562,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"I wouldn\'t trade my supreme Pazaak skills for all the riches in Zamunda."'
@@ -585,10 +584,10 @@ export const characters = {
     prize: {
       credits: 15000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -605,16 +604,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"Stand, draw, it\'s all in the mind."'
@@ -627,10 +626,10 @@ export const characters = {
     prize: {
       credits: 15000,
       cards: [
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
-        { value: 6, type: plusMinusSymbol },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
+        { value: 6, type: '±' },
       ]
     },
     strategy: {
@@ -647,16 +646,16 @@ export const characters = {
       }
     },
     deck: [
-      { id: 0, value: 1, type: plusMinusSymbol },
-      { id: 1, value: 2, type: plusMinusSymbol },
-      { id: 2, value: 3, type: plusMinusSymbol },
-      { id: 3, value: 4, type: plusMinusSymbol },
-      { id: 4, value: 5, type: plusMinusSymbol },
-      { id: 5, value: 1, type: plusMinusSymbol },
-      { id: 6, value: 2, type: plusMinusSymbol },
-      { id: 7, value: 3, type: plusMinusSymbol },
-      { id: 8, value: 4, type: plusMinusSymbol },
-      { id: 9, value: 5, type: plusMinusSymbol }
+      { id: 0, value: 1, type: '±' },
+      { id: 1, value: 2, type: '±' },
+      { id: 2, value: 3, type: '±' },
+      { id: 3, value: 4, type: '±' },
+      { id: 4, value: 5, type: '±' },
+      { id: 5, value: 1, type: '±' },
+      { id: 6, value: 2, type: '±' },
+      { id: 7, value: 3, type: '±' },
+      { id: 8, value: 4, type: '±' },
+      { id: 9, value: 5, type: '±' }
     ],
     quotes: {
       panel: '"All life begins and ends with Nu. I know this to be true."'

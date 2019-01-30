@@ -4,9 +4,13 @@ import PropTypes from 'prop-types';
 import Card from './Card';
 
 function DeckSelectionScreen(props) {
-  console.error('DeckSelectionScreen rendering');
-  let selectedCardSize = props.cardSizes.mediumCardSize;
-  let selectionCardSize = props.cardSizes.mediumCardSize;
+  console.error('------------------------------------------- DeckSelectionScreen rendering', props);
+  requestAnimationFrame(() => {
+    document.getElementById('deck-select-screen').style.opacity = 1;
+    document.getElementById('deck-select-screen').style.transform = 'none';
+  });
+  let selectionCardSize = 'medium';
+  let selectedCardSize = 'normal';
   let cardsLeft = 10 - props.userDeck.length;
   let chooseStyle = { transition: 'all 300ms ease' };
   let chooseText = 'Ready to play!';
@@ -27,34 +31,46 @@ function DeckSelectionScreen(props) {
   }
   let cardSelectionGrid = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
   props.cardSelection.map((card, i) => {
-    cardSelectionGrid[i] = (<Card id={card.id} elementId={`selection-card-${card.id}`} onClickCard={props.onClickCard} size={selectionCardSize} value={card.value} type={card.type} inDeck={false} clickFunction={props.clickFunction} />);
+    cardSelectionGrid[i] = (<Card id={card.id} context={'deck-selection-option'} onClickCard={props.onClickCard} size={selectionCardSize} value={card.value} type={card.type} inDeck={false} clickFunction={props.clickFunction} />);
   });
   let userSelectedGrid = ['', '', '', '', '', '', '', '', '', ''];
   props.userDeck.map((card, i) => {
-    userSelectedGrid[i] = (<Card id={card.id} elementId={card.elementId} onClickCard={props.onClickCard} size={selectedCardSize} value={card.value} type={card.type} inDeck={true} clickFunction={props.clickFunction} />);
+    userSelectedGrid[i] = (<Card id={card.id} context={'deck-selected'} onClickCard={props.onClickCard} size={selectedCardSize} value={card.value} type={card.type} inDeck={true} clickFunction={props.clickFunction} />);
   });
-  let gridWidth = selectionCardSize.width + (parseFloat(selectionCardSize.borderSize) * 3);
-  let gridHeight = selectionCardSize.height + (parseFloat(selectionCardSize.borderSize) * 3);
-  let previewGridWidth = selectedCardSize.width + (parseFloat(selectedCardSize.borderSize) * 3);
-  let previewGridHeight = selectedCardSize.height + (parseFloat(selectedCardSize.borderSize) * 3);
+  // let cardWidth = getComputedStyle(element).getPropertyValue(`--${selectionCardSize}-card-width)`);
+  // let cardHeight = getComputedStyle(element).getPropertyValue(`--${selectionCardSize}-card-height)`);
+  let cardWidth = `var(--${selectionCardSize}-card-width)`;
+  let cardHeight = `var(--${selectionCardSize}-card-height)`;
+  let previewCardWidth = `var(--${selectedCardSize}-card-width)`;
+  let previewCardHeight = `var(--${selectedCardSize}-card-height)`;
+  let cardRadius = `calc(var(--${selectionCardSize}-card-width) / 18)`;
+  let cardBorder = `calc(var(--${selectionCardSize}-card-height) / 100)`;
+  let previewGridWidth = `calc(${previewCardWidth} + ${cardBorder})`;
+  let previewGridHeight = `calc(${previewCardHeight} + ${cardBorder})`;
+  let gridWidth = cardWidth;
+  let gridHeight = cardHeight;
   return (
     <div style={props.style} id='deck-select-screen'>
       <style jsx>{`
         #deck-select-screen {
           font-size: 1.5rem;
-          font-family: 'Nova Square';
+          font-family: var(--main-font);
           display: flex;
           flex-direction: column;
           flex-grow: 1;
           justify-content: space-between;
           align-items: center;
+
+          opacity: 0;
+          transform: scale(1.05);
+          transition: opacity 300ms ease, transform 300ms ease;
         }
         #deck-selection-grid {
           display: grid;
-          grid-template-columns: ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px ${gridWidth}px;
-          grid-template-rows: ${gridHeight}px ${gridHeight}px ${gridHeight}px;
-          grid-column-gap: ${gridWidth/20}px;
-          grid-row-gap: ${gridHeight/20}px;
+          grid-template-columns: ${gridWidth} ${gridWidth} ${gridWidth} ${gridWidth} ${gridWidth} ${gridWidth};
+          grid-template-rows: ${gridHeight} ${gridHeight} ${gridHeight};
+          grid-column-gap: var(--card-buffer-size);
+          grid-row-gap: var(--card-buffer-size);
         }
         #deck-select-title {
           box-sizing: border-box;
@@ -83,10 +99,10 @@ function DeckSelectionScreen(props) {
         }
         #preview-deck-grid {
           display: grid;
-          grid-template-columns: ${previewGridWidth}px ${previewGridWidth}px ${previewGridWidth}px ${previewGridWidth}px ${previewGridWidth}px;
-          grid-template-rows: ${previewGridHeight}px ${previewGridHeight}px;
-          grid-row-gap: ${previewGridHeight/12}px;
-          grid-column-gap: ${previewGridHeight/12}px;
+          grid-template-columns: ${previewGridWidth} ${previewGridWidth} ${previewGridWidth} ${previewGridWidth} ${previewGridWidth};
+          grid-template-rows: ${previewGridHeight} ${previewGridHeight};
+          grid-column-gap: var(--card-buffer-size);
+          grid-row-gap: var(--card-buffer-size);
         }
         #preview-deck-grid  > div, #deck-selection-grid  > div {
           display: flex;
@@ -96,13 +112,14 @@ function DeckSelectionScreen(props) {
           background-color: var(--card-spot-bg-color) !important;
         }
         #deck-selection-grid  > div {
-          border: ${selectionCardSize.borderSize} inset var(--card-spot-border-color);
-          border-radius: ${parseInt(selectionCardSize.borderRadius)+2}px !important;
-          background-color: var(--card-spot-bg-color) !important
+          box-sizing: content-box;
+          border: ${cardBorder} inset var(--card-spot-border-color);
+          border-radius: calc(${cardRadius} * 2) !important;
+          background-color: var(--card-spot-bg-color) !important;
         }
         #preview-deck-grid  > div {
-          border: ${selectedCardSize.borderSize} inset var(--card-spot-border-color);
-          border-radius: ${parseInt(selectedCardSize.borderRadius)+2}px !important;
+          border: ${cardBorder} inset var(--card-spot-border-color);
+          border-radius: calc(${cardRadius} * 2) !important;
           background-color: var(--card-spot-bg-color) !important;
         }
         #randomize-button {
@@ -115,6 +132,7 @@ function DeckSelectionScreen(props) {
         }
         .pre-footer {
           border-color: transparent;
+          background-color: transparent;
         }
         .throbbing {
           animation: throb 1000ms infinite;
@@ -165,13 +183,17 @@ DeckSelectionScreen.propTypes = {
   onClickRandomize: PropTypes.func,
   onClickPlay: PropTypes.func,
   onClickCard: PropTypes.func,
-  cardSizes: PropTypes.object,
-  mediumCardSize: PropTypes.object,
   onClickBack: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
-export default DeckSelectionScreen;
+function areEqual(prevProps, nextProps) {
+  console.log('prevProps', prevProps);
+  console.log('nextProps', nextProps);
+  return false;
+}
+
+export default React.memo(DeckSelectionScreen);
 
 
 

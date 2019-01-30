@@ -1,28 +1,24 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 function TurnIndicator(props) {
-  
+  console.log('ti props', props);
   return (
-    <div className='turn-indicator-area'>
-      <style jsx>{`
-      .turn-indicator-area {
-          width: var(--header-height);
-          height: var(--header-height);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          justify-self: flex-end;
-        }
+    <div id={`${props.owner}-turn-indicator`} className={`turn-indicator ${props.status}`}>
+      <style jsx>{`      
         .turn-indicator {
-          width: 90%;
-          height: 90%;
+          min-width: var(--micro-card-width);
+          height: var(--micro-card-width);
           border-radius: 50%;
           background-color: gray;
           border: 1px solid black;
+          animation-duration: 1200ms;
+          animation-iteration-count: infinite;
+          z-index: 0;
         }
         .turn-lighted {
-          animation: pulse 1200ms infinite;
-          
+          animation-name: pulse;
+          //background-color: red;
         }
         .standing {
           background-color: rgb(189, 189, 95);
@@ -32,13 +28,17 @@ function TurnIndicator(props) {
             background-color: rgb(124, 0, 0);
           }
           50% {
-            background-color: red;
+            background-color: rgb(255, 0, 0);
           }                
         }        
       `}</style>
-      <div className={`turn-indicator ${props.status}`}></div>
     </div>
   );
 }
+
+TurnIndicator.propTypes = {
+  owner: PropTypes.string,
+  status: PropTypes.string
+};
 
 export default TurnIndicator;

@@ -23,14 +23,14 @@ function ResultModal(props) {
     <div id='result-modal'>
       <style jsx>{`
         #result-modal {
-          font-family: 'Bungee';
+          font-family: var(--title-font);
           box-sizing: border-box;
           position: fixed;
           margin-left: 12.5%;
           margin-left: 12.5%;
           width: 75%;
           color: var(--main-text-color);
-          border-radius: 1.25rem;
+          border-radius: var(--menu-border-radius);
           margin-top: 30vw;
           z-index: 5;
           display: flex;

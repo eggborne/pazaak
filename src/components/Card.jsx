@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function Card(props) {
-  console.error('RENDERING CARD ---------------- ', props.value, props.type);
+  // console.error('RENDERING CARD ------------ ', props.value, props.type);
   let color;
   let altColor;
   let cornerSymbol = props.type;
@@ -20,30 +20,36 @@ function Card(props) {
     cornerSymbol = '';
     valueDisplay = props.value;
   }
-  let cardHeight = props.size.height;
-  let cardBorderSize = props.size.borderSize;
-  let arrowBorderSize = props.size.arrowBorderSize;
-  let cardRadius = props.size.borderRadius;
-  let bandRadius = props.size.bandRadius;
-  let badgeRadius = props.size.badgeRadius;
-  let bubbleSize = props.size.bubbleSize;
-  let fontSize = props.size.fontSize;
 
-  function handleCardClick(event) {
-    props.onClickCard(props.elementId, props.value, props.type, props.inDeck);
+  let cardSize = props.size;
+  if (typeof cardSize !== 'string') {
+    cardSize = 'normal';
+    console.error('cardSize was ', typeof cardSize);
   }
+  let cardWidth = `var(--${cardSize}-card-width)`;
+  let cardHeight = `var(--${cardSize}-card-height)`;
+  let cardBorderSize = `calc(var(--${cardSize}-card-height) / 100)`;
+  let arrowBorderSize = `calc(var(--${cardSize}-card-height) / 10)`;
+  let cardRadius = `calc(var(--${cardSize}-card-height) / 18)`;
+  let bandRadius = `calc(var(--${cardSize}-card-height) / 24)`;
+  let badgeRadius = `calc(var(--${cardSize}-card-height) / 36)`;
+  let bubbleSize = `calc(var(--${cardSize}-card-height) * 0.16)`;
+  let fontSize = `calc(var(--${cardSize}-card-height) * 0.17)`;
+
+  let clickAction = (props.context === 'deck-selected' || props.context === 'deck-selection-option' || props.context === 'user-hand')
+    ? (event) => props.onClickCard(event, props.value, props.type, props.inDeck)
+    : () => console.log('no click for this');
 
   return (
-    // <div id={props.elementId} {...{ [props.clickFunction]: () => props.onClickCard(props.elementId, props.value, props.type, props.inDeck) }} className='card'>
-    <div id={props.elementId} {...{ [props.clickFunction]: handleCardClick }} className='card'>
+    <div id={`${props.context}-card-${props.id}`} {...{ [props.clickFunction]: clickAction }} className='card'>
       <style jsx>{`
         .card {
-          width: ${props.size.width}px;
-          height: ${cardHeight}px;
+          width: ${cardWidth};
+          height: ${cardHeight};
           border-radius: ${cardRadius};
           border-width: ${cardBorderSize};
           opacity: 1;
-        }
+        }        
         .inner-band {
           background-color: ${color};
           border-radius: ${bandRadius};
@@ -103,17 +109,15 @@ function Card(props) {
       <div className='inner-band'>
       </div>
       <div className='number-badge'>{valueDisplay}</div>
+      {/* <div className='number-badge'>{(cardSize.slice(0,3))}</div> */}
     </div>
   );
 }
 
-Card.defaultProps = {
-  onClickCard: () => null,
-  elementId: ''
-};
 Card.propTypes = {
   id: PropTypes.number,
-  size: PropTypes.object,
+  context: PropTypes.string,
+  size: PropTypes.string,
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number
@@ -135,9 +139,9 @@ function areEqual(prevProps, nextProps) {
     && prevProps.value === nextProps.value
     && prevProps.size.height === nextProps.size.height
   );
-  // console.warn('---------- Card equal? ----> ', equalTest, prevProps, nextProps)
-  return false;
-  // return true;
+  // console.warn('---------- Card equal? ----> ', equalTest, prevProps, nextProps);
+  return equalTest;
+  // return false;
 }
 export default React.memo(Card, areEqual);
 // export default Card;

@@ -5,13 +5,19 @@ import HallOfFameEntry from './HallOfFameEntry';
 
 function HallOfFameScreen(props) {
   console.error('HallOfFameScreen rendering, new phase is', props.phase);
-
   let recordList = props.highScores;
   if (recordList.filter) {
     recordList = recordList.filter(record => (record.playerName.slice(0, 5) !== 'Guest' && record.setWins >= 0));
   }
   let timeNow = Math.round(parseInt(Date.now()) / 1000).toString();
   let scoresExist = props.highScores.length ? true : false;
+  if (props.phase === 'showingHallOfFame') {
+    
+    requestAnimationFrame(() => {
+      document.getElementById('hall-of-fame-screen').style.opacity = 1;
+      document.getElementById('hall-of-fame-screen').style.transform = 'none';
+    });
+  }
   return (
     <div id='hall-of-fame-screen' className={props.phase === 'showingHallOfFame' || 'obscured'}>
       <style jsx>{`
@@ -19,25 +25,31 @@ function HallOfFameScreen(props) {
           box-sizing: border-box;
           display: flex;
           flex-direction: column;
-          //justify-content: space-between;
-          //flex-grow: 1;
+          justify-content: space-between;
           /* for Firefox! */
           min-height: 0;
           overflow-y: scroll;
+
+          transform: scale(1.05);
+          opacity: 0;
+          transition: opacity 300ms ease, transform 300ms ease;
         }
         #high-score-area {
           display: flex;
           flex-direction: column;
           align-items: stretch;
-          font-family: 'Nova Square';
+          font-family: var(--main-font);
           font-size: 1rem;          
         }
         #high-scores-list {
           overflow-y: scroll;
           font-size: 0.8rem;
-          display: flex;
-          flex-direction: column;
+          display: grid;
+          grid-template-rows: auto;
+          justify-items: center;         
           align-items: center;
+          grid-row-gap: 1rem;
+          padding: 1rem;
         }
         #empty-list-message {
           box-sizing: border-box;
@@ -47,7 +59,7 @@ function HallOfFameScreen(props) {
         }
         .obscured {
           display: none !important;
-          height: 0;
+          height: 0 !important;
           pointer-events: none;
         }
       `}</style>
@@ -76,7 +88,12 @@ HallOfFameScreen.propTypes = {
   clickFunction: PropTypes.string
 };
 function areEqual(prevProps, nextProps) {
-  console.warn('44444444 -------- prev', prevProps.phase + ' to next ' + nextProps.phase);
+  if (prevProps.phase === 'showingHallOfFame' && nextProps.phase != 'showingHallOfFame') {
+    // document.getElementById('hall-of-fame-screen').style.transition = 'none';
+    document.getElementById('hall-of-fame-screen').style.opacity = '0';
+    document.getElementById('hall-of-fame-screen').style.transform = 'scale(1.05)';
+    // document.getElementById('hall-of-fame-screen').style.transition = 'opacity 300ms ease, transform 300ms ease';
+  }
   let equalTest =
     (prevProps.readyToList === nextProps.readyToList) &&
     (

@@ -21,19 +21,29 @@ function OptionsScreen(props) {
   if (props.currentOptions.darkTheme) {
     darkThemeOption = 'option-on';
   }
-  if (isFullScreen()) {
+  if (isFullScreen() || props.currentOptions.fullScreen) {
     fullScreenOption = 'option-on';
   }
+
+  requestAnimationFrame(() => {
+    document.getElementById('options-screen').style.opacity = 1;
+    document.getElementById('options-screen').style.transform = 'none';
+  });
+
   return (
     <div id='options-screen'>
       <style jsx>{`
         #options-screen {
           background-color: var(--trans-blue-bg-color);
           font-size: 2.75vh;
-          font-family: 'Bungee';
+          font-family: var(--title-font);
           line-height: 100%;
           align-items: center;
           justify-content: space-between;
+          
+          opacity: 0;
+          transform: scale(1.05);
+          transition: opacity 300ms ease, transform 300ms ease;
         }
         #options {
           box-sizing: border-box;
@@ -90,7 +100,6 @@ function OptionsScreen(props) {
   );
 }
 OptionsScreen.propTypes = {
-  style: PropTypes.object,
   currentOptions: PropTypes.object,
   onToggleOption: PropTypes.func,
   onClickBack: PropTypes.func,
