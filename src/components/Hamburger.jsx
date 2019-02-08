@@ -11,8 +11,8 @@ function Hamburger(props) {
           flex-direction: column;
           align-items: center;
           justify-content: space-evenly;
-          height: var(--hamburger-height);
           width: var(--hamburger-height);
+          height: var(--hamburger-height);
           min-width: var(--hamburger-height);
           min-height: var(--hamburger-height);
           background-color: var(--button-bg-color);
@@ -22,7 +22,7 @@ function Hamburger(props) {
           border-width: var(--button-border-width);
           padding-top: calc(var(--menu-border-width) / 2);
           padding-bottom: calc(var(--menu-border-width) / 2);
-          z-index: 3;
+          //z-index: 3;
         }
         .hamburger-bar {
           box-sizing: border-box;
@@ -37,7 +37,7 @@ function Hamburger(props) {
           position: absolute;
         }
         #top-hamburger-bar, #bottom-hamburger-bar {
-         will-change: opacity;
+          will-change: opacity;
         }
         #bottom-hamburger-bar {
 

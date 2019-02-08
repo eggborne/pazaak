@@ -6,14 +6,15 @@ function MoveIndicator() {
       <style jsx>{`
         #move-indicator {
           box-sizing: border-box;
-          position: fixed;
+          //position: fixed;
+          position: absolute;
           width: 100%;
           left: 0;
           display: flex;
           align-items: center;
           justify-content: center;
           font-family: var(--title-font);
-          font-size: 14vw;
+          font-size: calc(var(--header-height) / 1.1);
           z-index: 4;
           pointer-events: none;
           opacity: 0;

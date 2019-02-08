@@ -4,7 +4,7 @@ import PlayerPortrait from './PlayerPortrait';
 import { characters } from '../scripts/characters';
 
 function UserCard(props) {
-  let portraitSize = window.innerWidth / 5;
+  let portraitSize = window.innerWidth / 3;
   let nameSize = '1.4rem';
   let loggedIn = true;
   let logButtons = true;
@@ -28,14 +28,14 @@ function UserCard(props) {
           width: 100%;
           display: grid;
           box-sizing: border-box;
-          padding: 1rem;
+          padding: var(--menu-border-radius);
           font-size: var(--small-font-size);
           margin-top: calc(var(--menu-border-width) * 2);
           grid-template-columns: 1fr auto;
-          grid-template-rows: var(--header-height) 1fr 1fr 1.25fr;          
-          //background-color: var(--medium-red-bg-color);
+          grid-template-rows: var(--header-height) 0.75fr 0.75fr;
+          background-color: var(--medium-red-bg-color);
+          border: var(--inner-menu-border);
           border-radius: var(--menu-border-width);
-          border: 1px solid var(--dark-red-bg-color);
         }
         #user-info-grid > div {
           //padding: 0.25rem;
@@ -98,7 +98,11 @@ function UserCard(props) {
         #defeated-list {
           padding: 0.25rem;
           display: inline-flex;
-          flex-wrap: wrap
+          flex-wrap: wrap;
+          
+        }
+        #user-info-button-area {
+          
         }
       `}</style>
       <div id='user-name'>
@@ -106,7 +110,7 @@ function UserCard(props) {
       </div>
       <div id='large-user-portrait'>
         <PlayerPortrait size={portraitSize} spriteIndex={props.playerObj.avatarIndex} displayName={''} type={'mini'} />
-        <div id='credits'>{props.playerObj.credits} credits</div>
+        <div id='credits'></div>
         <div id='id-display'>id #{props.playerObj.cookieId}</div>
       </div>
       <div>
@@ -151,4 +155,4 @@ function areEqual(prevProps, nextProps) {
   return prevProps.playerObj.cookieId == nextProps.cookieId;
 }
 
-export default React.memo(UserCard, areEqual);
+export default UserCard;

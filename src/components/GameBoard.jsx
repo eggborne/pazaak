@@ -7,47 +7,50 @@ import MoveIndicator from './MoveIndicator';
 import PlayerPortrait from './PlayerPortrait';
 import TurnIndicator from './TurnIndicator';
 
-class GameBoard extends React.Component {
+class GameBoard extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      playerNames: { user: this.props.playerNames.user, opponent: this.props.playerNames.opponent },
-      userHand: [],
-      opponentHand: [],
-      userGrid: [],
-      opponentGrid: [],
-      handCardSize: 0,
+      // playerNames: { user: this.props.playerNames.user, opponent: this.props.playerNames.opponent },
+      // userHand: [],
+      // opponentHand: [],
+      // userGrid: [],
+      // opponentGrid: [],
+      // handCardSize: 0,
     };        
-
+    this.readyToStartGame = false;
     console.error('CONSTRUCTED GAMEBOARD');
   }
 
   componentDidMount() {
-    document.getElementById('hamburger-menu').addEventListener('transitionend', () => {
-      document.getElementById('hamburger-menu').transition = 'none';
-      console.log('transition ended!');      
-    });
-    requestAnimationFrame(() => {
+    // document.getElementById('hamburger-menu').addEventListener('transitionend', () => {
+    //   document.getElementById('hamburger-menu').transition = 'none';
+    //   console.log('transition ended!');      
+    // });
+    setTimeout(() => {
       document.getElementById('game-board').style.opacity = 1;
       document.getElementById('game-board').style.transform = 'none';
-    });
+    }, 10);
+    setTimeout(() => {
+      this.readyToStart = true;
+      this.forceUpdate();
+    }, 600);
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      // nextProps.turn != this.props.turn ||
-      (nextProps.phase != 'gameStarted' && nextProps.phase == 'gameStarted') ||
-      nextProps.grids.user.length != this.props.grids.user.length ||
-      nextProps.grids.opponent.length != this.props.grids.opponent.length ||
-      nextProps.hands.user.length != this.props.hands.user.length ||
-      nextProps.hands.opponent.length != this.props.hands.opponent.length
-      // nextProps.totals.user != this.props.totals.user ||
-      // nextProps.totals.opponent != this.props.totals.opponent
-    );
-  }
+  // shouldComponentUpdate(nextProps) {
+  //   return (
+  //     nextProps.turn != this.props.turn
+  //     || nextProps.grids.user.length != this.props.grids.user.length
+  //     || nextProps.grids.opponent.length != this.props.grids.opponent.length
+  //     || nextProps.hands.user.length != this.props.hands.user.length
+  //     || nextProps.hands.opponent.length != this.props.hands.opponent.length
+  //     || nextProps.totals.user != this.props.totals.user
+  //     || nextProps.totals.opponent != this.props.totals.opponent
+  //   );
+  // }
 
   render() {
-    console.error('RENDERING GAMEBOARD <<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    console.big('Rendering GameBoard', 'forestgreen');
     let userWins = ['', '', ''];
     let opponentWins = ['', '', ''];
     if (this.props.wins.user === 1) {
@@ -95,18 +98,18 @@ class GameBoard extends React.Component {
     let opponentGrid = [];
     let userGrid = [];
     this.props.grids.opponent.map((card, i) => {
-      opponentGrid.push(<Card key={i} context={'opponent-grid'} size={'normal'} value={card.value} type={card.type} clickFunction={this.props.clickFunction} />);
+      opponentGrid.push(<Card key={i} id={card.id} context={'opponent-grid'} size={'normal'} value={card.value} type={card.type} clickFunction={this.props.clickFunction} />);
     });
     this.props.grids.user.map((card, i) => {
-      userGrid.push(<Card key={i} context={'user-grid'} size={'normal'} value={card.value} type={card.type} clickFunction={this.props.clickFunction} />);
+      userGrid.push(<Card key={i} id={card.id} context={'user-grid'} size={'normal'} value={card.value} type={card.type} clickFunction={this.props.clickFunction} />);
     });
     let cardWidth = 'var(--normal-card-width)';
     let cardHeight = 'var(--normal-card-height)';
     let cardRadius = `calc(${cardWidth} / 18)`;
     let cardBorder = `calc(${cardHeight} / 100)`;
-    
-    let gridWidth = `calc(${cardWidth} + ${cardBorder})`;
-    let gridHeight = `calc(${cardHeight} + ${cardBorder})`;
+
+    let gridWidth = cardWidth;
+    let gridHeight = cardHeight;
     let handCardSize = 'medium';
 
     let actualCardWidth = window.getComputedStyle(document.documentElement).getPropertyValue('--normal-card-width');
@@ -135,91 +138,98 @@ class GameBoard extends React.Component {
     });
     let handCardWidth = `var(--${handCardSize}-card-width)`;
     let handCardHeight = `var(--${handCardSize}-card-height)`;
-    let handGridWidth = `calc(${handCardWidth} + ${cardBorder})`;
-    let handGridHeight = `calc(${handCardHeight} + ${cardBorder})`;
+    let handGridWidth = handCardWidth;
+    let handGridHeight = handCardHeight;
     
     // let portraitSize = Math.round(parseInt(handCardSize.width * 1.75));
     let opponentPortraitIndex = this.props.opponentNames.indexOf(this.props.cpuOpponent);
+
     return (
-      <div style={this.props.style} id='game-board'>
+      <div id='game-board'>
         <style jsx>{`
         #game-board {
-          display: flex;
+          box-sizing: border-box;
+          position: absolute;
+          top: var(--header-height);
           flex-direction: column;
           justify-content: space-between;
-          min-height: calc(100% - var(--header-height) - var(--control-footer-height));
-          max-height: 100vh;
-          //align-items: stretch;
-          flex-grow: 1;
-          z-index: 0;
-
+          width: 100%;
+          height: var(--inner-height);
+          z-index: 0;          
+          transform: scale(0.4);
           opacity: 0;
-          transform: scale(1.05);
-          transition: opacity 300ms ease, transform 300ms ease;
+          display: flex;
+          transition: transform 600ms ease-out, opacity 300ms ease-out;
+          will-change: transform, opacity;
         }
         .player-area {
-          display: inline-flex;          
-          justify-content: space-around;
           box-sizing: border-box;
-          flex-grow: 2;
+          display: inline-flex;          
+          justify-content: center;
           width: 100%;
+          flex-grow: 1;
+          padding-top: var(--menu-border-width);
+          padding-bottom: var(--menu-border-width);
+          //background: plum !important;
+          //transition: background-color 800ms ease;
         }
         .player-hand-area {
           box-sizing: border-box;
           display: inline-flex;
           justify-content: center;          
+          align-items: center;
+          width: 100%;  
           flex-grow: 1;
-          padding: 0.5vh;         
-        }
-        
+          padding-top: var(--menu-border-width);
+          padding-bottom: var(--menu-border-width);
+          transition: background-color 800ms ease;
+
+          //background: purple !important;
+        }        
         #user-area, #user-hand {
-          background-color: var(--trans-blue-bg-color);
+          background-color: ${this.readyToStart && 'var(--trans-blue-bg-color)'};
         }        
         #opponent-area, #opponent-hand {
-          background-color: var(--trans-red-bg-color);
-        }
-        #user-hand {
-          align-items: flex-end;
+          background-color: ${this.readyToStart && 'var(--trans-red-bg-color)'};
         }
         #opponent-area {
-          //border-bottom: ${gridWidth * 0.02}px solid #555;
-          border-bottom: ${cardBorder} solid #555;
+          border-bottom: calc(var(--menu-border-width) / 6) solid #222;
+          //border-bottom: 1px solid red;
         }
         #user-area {
-          //border-top: ${gridWidth * 0.02}px solid #444;
-          border-top: ${cardBorder} solid #444;
+          border-top: calc(var(--menu-border-width) / 6) solid #333;
+          //border-top: 1px solid #5f5;
+          //background: green !important;
         }
         .deal-grid {
           box-sizing: border-box;
           display: grid;
           grid-template-columns: ${gridWidth} ${gridWidth} ${gridWidth} ${gridWidth} ${gridWidth};
           grid-template-rows: ${gridHeight} ${gridHeight};
-          grid-column-gap: 1vw;
-          grid-row-gap: 0.5vh;
+          grid-column-gap: calc(var(--menu-border-width));
+          grid-row-gap: calc(var(--menu-border-width));
           align-self: center;
-          padding: 0.5vh; 
         }
         .player-cards {
           display: grid;
-          grid-template-columns: ${handGridWidth} ${handGridWidth} ${handGridWidth} ${handGridWidth};
-          grid-template-rows: ${handGridHeight};
-          grid-column-gap: ${cardBorder};
+          grid-template-columns: ${handCardWidth} ${handCardWidth} ${handCardWidth} ${handCardWidth};
+          grid-template-rows: ${handCardHeight};
+          grid-column-gap: calc(var(--menu-border-width) / 2);
           align-items: center;
         }
         .player-cards > div {
-          border: ${cardBorder} inset var(--card-spot-border-color);
-          border-radius: calc(${cardRadius} * 1.5) !important;
+          
+          border-radius: calc(${cardRadius} * 1.25) !important;
           background-color: var(--card-spot-bg-color);
           display: flex;
-          box-sizing: border-box;
+          box-sizing: content-box;
           justify-content: center;
           align-items: center;
           width: 100%;
           height: 100%;
         }
         .deal-grid > div {
-          border: ${cardBorder} inset var(--card-spot-border-color);
-          border-radius: calc(${cardRadius} * 1.5) !important;
+          border-radius: calc(${cardRadius} * 1.25) !important;
           background-color: var(--card-spot-bg-color);
           display: flex;
           box-sizing: border-box;
@@ -399,7 +409,6 @@ class GameBoard extends React.Component {
   }
 }
 GameBoard.propTypes = {
-  style: PropTypes.object,
   phase: PropTypes.string,
   hands: PropTypes.object,
   grids: PropTypes.object,

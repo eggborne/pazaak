@@ -3,14 +3,17 @@ import PropTypes from 'prop-types';
 
 function Footer(props) {
   console.error('footer rendering???', props.readyToShow);
+  requestAnimationFrame(() => {
+    document.getElementById('footer').style.transform = 'none';
+  });
   return (
     <div id='footer'>
       <style jsx>{`
         #footer {
           box-sizing: border-box;
-          bottom: 0;
+          width: 100%;
           font-family: sans-serif;
-          min-height: var(--header-height);
+          height: var(--header-height);
           background-color: var(--red-bg-color);
           display: inline-flex;
           align-items: center;
@@ -18,13 +21,16 @@ function Footer(props) {
           border-radius: var(--menu-border-radius) var(--menu-border-radius) 0 0;
           border: var(--menu-border);
           border-bottom: 0;
-          //transform: ${props.readyToShow ? 'none' : 'translateY(100%)'};
-          opacity: ${props.readyToShow ? '1' : '0'};
-          transition: transform 500ms ease, opacity 500ms ease;
-          will-change: opacity;
-          z-index: 2
+          transition: transform 200ms ease;
+          //will-change: opacity;
+          //z-index: 8;
+          //transform: translateY(100%);
+          //transition-delay: 100ms;
+          //will-change: transform;
+
         }
         #footer-contents {
+          color: var(--main-text-color);
           display: inline-flex;
           align-items: center;
           justify-content: space-around;
@@ -44,8 +50,4 @@ Footer.propTypes = {
   readyToShow: PropTypes.bool,
 };
 
-function areEqual(prevProps, nextProps) {
-  return prevProps.readyToShow;
-}
-
-export default React.memo(Footer, areEqual);
+export default Footer;

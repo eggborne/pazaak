@@ -1,112 +1,138 @@
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isFullScreen } from '../scripts/util';
 
 function ModeSelectScreen(props) {
-  requestAnimationFrame(() => { 
-    document.getElementById('mode-select-screen').style.opacity = '1';
-    document.getElementById('mode-select-screen').style.transform = 'none';
+  requestAnimationFrame(() => {
+    if (document.getElementById('mode-select-screen')) {
+      document.getElementById('mode-select-screen').style.transform = 'none';
+    }
   });
-  // if (props.phase !== 'selectingMode') {
-  //   document.getElementById('mode-select-screen').style.opacity = '0';
-  //   document.getElementById('mode-select-screen').style.transform = 'scale(1.05)';
-  // }
+  let modeSelected = props.modeSelected;
   return (
-    <div id='mode-select-screen' className='shadowed-text'>
+    <div id="mode-select-screen" className="shadowed-text">
       <style jsx>{`
         #mode-select-screen {
-          height: 100%;
-          background-color: var(--trans-blue-bg-color);
-          font-size: 2.75vh;
+          position: absolute;
+          //height: 100vh;
+          height: var(--inner-height);
+          top: var(--header-height);
           font-family: var(--title-font);
           line-height: 100%;
           align-items: center;
-
-          opacity: 0;
-          transform: scale(1.1);
-          transition: transform 300ms ease, opacity 300ms ease;
+          transform: translateY(calc(var(--shift-distance) / -2));
+          transition: transform var(--shift-duration) ease, opacity var(--shift-duration) ease;
+          will-change: transform, opacity;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
         }
         #mode-select-choices {
+          margin-top: 7vmin;
           display: flex;
-          flex-flow: column;
-          flex-wrap: wrap;
+          flex-direction: column;
           align-items: center;
-          height: 100%;
-          padding: var(--header-height);
-
+          flex-grow: 1;
         }
-        .mode-row {
-          background: rgba(0, 0, 0, 0.1);
-          width: 100%;
+        .mode-panel {
+          box-sizing: border-box;
+          width: 80vmin;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
           margin-bottom: 3vh;
-          padding: 1vh;
-          border: 1px solid #444;
-          border-radius: var(--button-radius);
+          opacity: 0.8;
+          transition: border 300ms ease,  opacity 300ms ease, transform 200ms ease;
+          will-change: transform, opacity, border;
+        }
+        .mode-panel > div {
+          width: 100%;
+          
         }
         .mode-button {
-          width: 100%;
-          padding: 3vh 2vh 3vh 2vh;
-          font-size: 2.5vh;
+          line-height: 100%;
+          box-sizing: border-box;
+          //width: 100%;
+          height: 12vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: calc(var(--header-height) / 2);
+          border: var(--inner-menu-border);
+          border-radius: var(--menu-border-width);
+          margin: var(--menu-border-radius);
+          background-color: var(--trans-black-bg-color);
+          color: gray;
+          transition: background-color 300ms ease, color 300ms ease;
         }
         .mode-description {
+          margin: var(--menu-border-radius);
           font-family: var(--main-font);
-          font-size: var(--small-font-size);
-          width: 80%;
-          padding: 5vw;
+          font-size: 1.8vh;
+          width: 100%;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          padding-top: var(--small-font-size);
+          padding-bottom: var(--small-font-size);
         }
+        .mode-selected-button {          
+          background-color: var(--option-on-color);
+          color: white;
+        }
+        .mode-panel.mode-selected-panel {    
+          opacity: 1;      
+          transform: scale(1.1);
+          border: var(--menu-border-width) double var(--option-on-color) !important;
+        }
+        ul {
+          list-style: square;
+          margin: 0;
+          padding-inline-start: 0;
+          margin-block-start: 0;
+          margin-block-end: 0;
+        }
+
       `}</style>
-      <div className='options-instructions-title'>Select Game Mode</div>
-      <div id='mode-select-choices'>
-        <div className='mode-row'>
-          <button {...{ [props.clickFunction]: props.onClickCampaign }} className='mode-button' id='campaign-button'>Campaign Mode</button>
-          <div className='mode-description'>
-            Climb a roster of outlandish villains
+      <div className="options-instructions-title">Game Mode</div>
+      <div id="mode-select-choices">
+        {/* <div  {...{ [props.clickFunction]: props.onClickCampaign }} className={'mode-panel' + (modeSelected === 'campaign') && ' mode-selected-panel' }> */}
+        <div {...{ [props.clickFunction]: props.onClickCampaign }} className={`mode-panel red-panel ${modeSelected === 'campaign' && 'mode-selected-panel'}`}>
+          <div className='inner-red-panel'>
+            <div className={`mode-button ${modeSelected === 'campaign' && 'mode-selected-button'}`} id="campaign-button">
+              Campaign
+            </div>
+            <div className="mode-description">
+              <ul>
+                <li>Defeat a roster of crafty AI opponents</li>
+                <li>Win credits / special cards to progress</li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div className='mode-row'>
-          <button {...{ [props.clickFunction]: props.onClickQuickMatch }} className='mode-button' id='quick-match-button'>Quick Match</button>
-          <div className='mode-description'>
-            Single match with a random CPU opponent
+        <div {...{ [props.clickFunction]: props.onClickQuickMatch }} className={`mode-panel red-panel ${modeSelected === 'quick' && 'mode-selected-panel'}`}>
+          <div className='inner-red-panel'>
+            <div className={`mode-button ${modeSelected === 'quick' && 'mode-selected-button'}`} id="quick-match-button">
+              Quick Match
+            </div>
+            <div className="mode-description">
+              <ul>
+                <li>Single match with a random opponent</li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-      <div className='pre-footer' id='deck-select-footer'>
-        <button {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'selectingOpponent') }} id='deck-select-back-button' className='footer-back-button shadowed-text'>{'<'}</button>
-        <div></div>
-        <div></div>
       </div>
     </div>
   );
 }
 ModeSelectScreen.propTypes = {
-  phase: PropTypes.string,  
+  phase: PropTypes.string,
+  modeSelected: PropTypes.string,
   onClickCampaign: PropTypes.func,
   onClickQuickMatch: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
 export default ModeSelectScreen;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

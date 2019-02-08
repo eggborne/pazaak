@@ -1,30 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import NameAvatarForm from './NameAvatarForm';
-import Footer from './Footer';
 
 function IntroScreen(props) {
-  console.error('----------------- IntroScreen rendered', props);
-  let avatarBorderSize = 1;
-  let buttonLabelSize = 'var(--button-text-size)';
-  let buttonHeight = 'var(--normal-card-width)';
-  if (props.readyToShow && props.phase === 'splashScreen') {   
+  console.orange('INTROSCREEN RENDERING ----');
+  let mainOpacity = document.documentElement.style.getPropertyValue('--main-opacity');
+  if (props.readyToShow && !mainOpacity) {
     requestAnimationFrame(() => {
-      document.getElementById('intro-screen').style.opacity = 1;
-      document.getElementById('intro-screen').style.transform = 'none';
+      document.documentElement.style.setProperty('--main-opacity', 1);
+      document.getElementById('intro-screen-body').style.transform = 'none';
+      document.getElementById('intro-screen-body').style.opacity = 1;
+      //document.getElementById('intro-screen-body').style.opacity = 1;
+    });
+  } else if (props.readyToShow && props.phase === 'splashScreen') {
+    requestAnimationFrame(() => {
+      document.getElementById('intro-screen-body').style.transform = 'none';
+      document.getElementById('intro-screen-body').style.opacity = 1;
+      document.getElementById('intro-screen-body').style.pointerEvents = 'all';
     });
   }
   return (
-    <div style={props.style} id='intro-screen'>
+    <div id="intro-screen">
       <style jsx>{`
         #intro-screen {
-          display: ${props.phase === 'splashScreen' ? 'flex' : 'none' };
+          //display: ${props.phase === 'splashScreen' ? 'flex' : 'none'};
+          position: absolute;
           flex-direction: column;
-          justify-content: space-between;
-          flex-grow: 1;
-          opacity: 0;
-          transform: scale(1.05);
-          transition: opacity 300ms ease, transform 300ms ease;
+          justify-content: center;
+          height: 100%;
+          top: 0;
         }
         #intro-screen-body {
           width: 100vw;
@@ -32,19 +36,29 @@ function IntroScreen(props) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          //opacity: ${props.readyToShow && 1};
-          //pointer-events: ${props.readyToShow && 'all'};
-          //transform: ${props.readyToShow && 'none'};
-          flex-grow: 1;
-          transition: transform 600ms ease, opacity 200ms ease;
+          
+          pointer-events: ${props.readyToShow && 'all'};
+          //flex-grow: 1;
+          height: 100%;
+          transform: scale(0.9);
+          opacity: 0;
         }
-        .small-intro-button {          
+        .intro-button {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          /* min-width: 64vw; */
+          border-radius: var(--button-radius);
+          margin-top: 1vh;
+          margin-bottom: 1vh;
+        }
+        .small-intro-button {
           height: 9vh;
-          min-width: 30vw;
-          max-width: 30vw;
+          min-width: 33vw;
+          max-width: 33vw;
         }
         #small-button-area {
-          width: 65vw;
+          width: 72vw;
           display: inline-flex;
           justify-content: space-between;
           margin-top: 1vh;
@@ -62,28 +76,37 @@ function IntroScreen(props) {
           opacity: 1;
           -webkit-filter: grayscale(0%); /* Safari 6.0 - 9.0 */
           filter: grayscale(0%);
-          box-shadow: 0 0 ${avatarBorderSize}px 1px #222;
+          box-shadow: 0 0 1px 1px #222;
         }
         .button-label {
           pointer-events: none;
         }
         #options-button {
-          font-size: 2.5vh;
+          font-size: 2.25vh;
         }
         #how-button {
-          font-size: 2.5vh;
+          font-size: 2.25vh;
         }
         #hall-of-fame-button {
           font-size: 3.5vh;
-          width: 65vw;
-          min-height: calc(${buttonHeight} * 1.25);
+          width: 72vw;
+          min-height: calc(var(--normal-card-width) * 1.25);
           color: var(--special-button-text-color);
+          transition: color 300ms linear;
+          will-change: color;
         }
         #hall-of-fame-button::after {
           content: 'Hall of Fame';
-        }  
+        }
+        .hof-loading-message {
+          color: white !important;
+          font-size: 3vh !important;
+        }
+        .hof-loading-message::after {
+          content: 'Retrieving...' !important;
+        }
       `}</style>
-      <div id='intro-screen-body'>
+      <div id="intro-screen-body">
         {/* <form onSubmit={(event) => event.preventDefault()} action='https://www.eggborne.com/scripts/upload.php' method='post' id='avatar-form' encType='multipart/form-data'> */}
         <NameAvatarForm
           userStatus={props.userStatus}
@@ -91,19 +114,24 @@ function IntroScreen(props) {
           onClickAvatar={props.onClickAvatar}
           onClickStart={props.onClickStart}
           onClickLogOut={props.onClickLogOut}
-          clickFunction={props.clickFunction} />
-        <div id='small-button-area'>
-          <button {...{ [props.clickFunction]: props.onClickOptions }} className='intro-button small-intro-button' id='options-button'><div className='button-label'>Options</div></button>
-          <button {...{ [props.clickFunction]: props.onClickHow }} className='intro-button small-intro-button' id='how-button'><div className='button-label'>How to Play</div></button>
+          clickFunction={props.clickFunction}
+        />
+        <div id="small-button-area">
+          <button {...{ [props.clickFunction]: props.onClickOptions }} className="intro-button small-intro-button" id="options-button">
+            <div className="button-label">Options</div>
+          </button>
+          <button {...{ [props.clickFunction]: props.onClickHow }} className="intro-button small-intro-button" id="how-button">
+            <div className="button-label">How to Play</div>
+          </button>
         </div>
-        <button {...{ [props.clickFunction]: props.onClickHallOfFame }} className='intro-button' id='hall-of-fame-button'><div className='button-label'></div></button>
+        <button {...{ [props.clickFunction]: props.onClickHallOfFame }} className="intro-button" id="hall-of-fame-button">
+          <div className="button-label" />
+        </button>
       </div>
-      <Footer readyToShow={props.readyToShow} />
-    </div >
+    </div>
   );
 }
 IntroScreen.propTypes = {
-  style: PropTypes.object,
   phase: PropTypes.string,
   userStatus: PropTypes.object,
   readyToShow: PropTypes.bool,
@@ -119,37 +147,18 @@ IntroScreen.propTypes = {
 
 function areEqual(prevProps, nextProps) {
   if (prevProps.phase == 'splashScreen' && nextProps.phase != 'splashScreen') {
-    document.getElementById('intro-screen').style.opacity = '0';
-    document.getElementById('intro-screen').style.transform = 'scale(1.05)';
+    // document.documentElement.style.setProperty('--main-opacity', 0);
+    document.getElementById('intro-screen-body').style.transform = 'scale(0.9)';
+    document.getElementById('intro-screen-body').style.opacity = 0;
+    document.getElementById('intro-screen-body').style.pointerEvents = 'none';
   }
   let equalTest =
-    prevProps.readyToShow == nextProps.readyToShow
-    && prevProps.style.display == nextProps.style.display
-    && prevProps.userAvatarIndex == nextProps.userAvatarIndex
-    && (prevProps.phase == nextProps.phase);
+    prevProps.readyToShow == nextProps.readyToShow &&
+    prevProps.userAvatarIndex == nextProps.userAvatarIndex &&
+    prevProps.phase == nextProps.phase;
   console.warn('---------------------------- IntroScreen equalTest', equalTest);
   return equalTest;
 }
 
 // export default IntroScreen;
 export default React.memo(IntroScreen, areEqual);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

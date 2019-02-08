@@ -1,129 +1,107 @@
-
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isFullScreen } from '../scripts/util';
+import OptionsPanel from './OptionsPanel';
 
 function OptionsScreen(props) {
-  let soundOption = 'option-off';
-  let ambientOption = 'option-off';
-  let quickModeOption = 'option-off';
-  let darkThemeOption = 'option-off';
-  let fullScreenOption = 'option-off';
-  if (props.currentOptions.sound) {
-    soundOption = 'option-on';
+  console.orange('OptionsScreen rendering');
+  if (props.phase === 'showingOptions') {
+    requestAnimationFrame(() => {
+      document.getElementById('options-screen').style.transform = 'none';
+      document.getElementById('options-screen').style.opacity = 1;
+    });
   }
-  if (props.currentOptions.ambience) {
-    ambientOption = 'option-on';
-  }
-  if (props.currentOptions.opponentMoveWaitTime === 300) {
-    quickModeOption = 'option-on';
-  }
-  if (props.currentOptions.darkTheme) {
-    darkThemeOption = 'option-on';
-  }
-  if (isFullScreen() || props.currentOptions.fullScreen) {
-    fullScreenOption = 'option-on';
-  }
-
-  requestAnimationFrame(() => {
-    document.getElementById('options-screen').style.opacity = 1;
-    document.getElementById('options-screen').style.transform = 'none';
-  });
-
+  // if (document.getElementById('options-screen')) {
+  //   transitionIn(document.getElementById('options-screen'), {
+  //     property: 'transform',
+  //     preValue: 'scale(1.05)',
+  //     transition: 'transform 300ms ease'
+  //   });
+  // }
+  let obscured = props.phase !== 'showingOptions';
   return (
-    <div id='options-screen'>
+    <div id="options-screen">
       <style jsx>{`
         #options-screen {
-          background-color: var(--trans-blue-bg-color);
-          font-size: 2.75vh;
-          font-family: var(--title-font);
-          line-height: 100%;
-          align-items: center;
-          justify-content: space-between;
-          
-          opacity: 0;
-          transform: scale(1.05);
-          transition: opacity 300ms ease, transform 300ms ease;
-        }
-        #options {
-          box-sizing: border-box;
-          padding: 15vw;
-          display: flex;
-          flex-grow: 1;
-          width: 100%;
-        }
-        #options-grid {
-          position: relative;
-          box-sizing: border-box;
-          display: grid;
+          --shift-x-distance: calc(-1 * var(--shift-distance));
+          position: absolute;
+          top: var(--header-height);
+          font-family: var(--main-font);
+          opacity: var(--starting-opacity);
+          transform: translateX(var(--shift-x-distance));
+          pointer-events: ${obscured && 'none'};
           width: 100vw;
-          grid-template-columns: 1fr 1fr;
-          grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
-          align-items: center;
-          flex-grow: 1;
-        }
-        .option-label {
-          width: 100%;
-        }
-        .option-toggle {
-          box-sizing: border-box;
           display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          height: var(--inner-height);
+          min-width: var(--min-width);
+          transition: opacity var(--shift-duration) ease-out, transform var(--shift-duration) ease-out;
+          will-change: transform, opacity;
+        }
+        #lower-options-screen {
+          font-size: var(--small-font-size);
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          border: 1px solid black;
-          background-color: var(--option-on-color);
-          font-size: 2rem;
-          border-radius: 0.25rem;
-          transition: background 200ms ease;
-          content: 'OFF';
-          justify-self: end;
-          width: 80%;
-          height: 80%;
         }
+        #options-screen-panel {
+          box-sizing: border-box;
+          width: 80vw;
+          //max-width: calc(var(--mini-card-width) * 5);
+          font-size: calc(var(--medium-font-size) * 0.9);
+        }               
       `}</style>
-      <div className='options-instructions-title shadowed-text'>Options</div>
-      <div id='options' className='shadowed-text'>
-        <div id='options-grid'>
-          <div className='option-label'>Sound FX</div><div {...{ [props.clickFunction]: props.onToggleOption }} id='sound-fx-toggle' className={`option-toggle ${soundOption}`}></div>
-          <div className='option-label'>Ambience</div><div {...{ [props.clickFunction]: props.onToggleOption }} id='ambience-toggle' className={`option-toggle ${ambientOption}`}></div>
-          <div className='option-label'>Quick Mode</div><div {...{ [props.clickFunction]: props.onToggleOption }} id='quick-mode-toggle' className={`option-toggle ${quickModeOption}`}></div>
-          <div className='option-label'>Dark Theme</div><div {...{ [props.clickFunction]: props.onToggleOption }} id='dark-theme-toggle' className={`option-toggle ${darkThemeOption}`}></div>
-          <div className='option-label'>Full Screen</div><div onClick={props.onToggleOption} id='full-screen-toggle' className={`option-toggle ${fullScreenOption}`}></div>
+      <div className="options-instructions-title shadowed-text">Options</div>
+      {/* <div id="options-panel" className="shadowed-text"> */}
+      <div id="lower-options-screen">
+        <div id='options-screen-panel' className="red-panel">
+          <OptionsPanel id={'options-screen'} currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} />
         </div>
+        
       </div>
-      <div className='pre-footer'>
-        <div></div>
-        <button {...{ [props.clickFunction]: props.onClickBack }} className='ready-button' id='options-back-button'>Back</button>
-        <div></div>
-      </div>
+      {/* </div> */}
     </div>
   );
 }
 OptionsScreen.propTypes = {
+  phase: PropTypes.string,
   currentOptions: PropTypes.object,
   onToggleOption: PropTypes.func,
   onClickBack: PropTypes.func,
+  onClickLessOptions: PropTypes.func,
+  onClickMoreOptions: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
-export default OptionsScreen;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function areEqual(prevProps, nextProps) {
+  let leaving = prevProps.phase == 'showingOptions' && nextProps.phase != 'showingOptions';
+  let entering = prevProps.phase != 'showingOptions' && nextProps.phase == 'showingOptions';
+  if (leaving) {
+    console.orange('optionsscreen leaving');
+    document.getElementById('options-screen').style.transitionDuration = 'var(--shift-duration-out)';
+    document.getElementById('options-screen').style.opacity = 0;
+    setTimeout(() => {
+      console.pink('reset OptionsScreen to pre-enter state');
+      document.getElementById('options-screen').style.transform = 'translateX(var(--shift-x-distance))';
+    }, 300);
+  }
+  if (entering) {
+    console.orange('optionsscreen entering');
+    document.getElementById('options-screen').style.transitionDuration = 'var(--shift-duration)';
+    document.getElementById('options-screen').style.opacity = 1;
+  }
+  let equal = true;
+  for (let option in prevProps.currentOptions) {
+    if (prevProps.currentOptions[option] !== nextProps.currentOptions[option]) {
+      equal = false;
+    }
+  }
+  if (leaving || entering) {
+    equal = false;
+  }
+  return equal;
+}
+// export default OptionsScreen;
+export default React.memo(OptionsScreen, areEqual);

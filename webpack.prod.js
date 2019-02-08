@@ -36,7 +36,8 @@ module.exports = {
           plugins: [
             'styled-jsx/babel',
             'transform-remove-console',
-            '@babel/proposal-class-properties'
+            '@babel/proposal-class-properties',
+            "@babel/plugin-transform-runtime",
           ]
         }
       }

@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PlayerPortrait from './PlayerPortrait';
-import { portraitSources } from '../scripts/db';
+import { getTimeSinceFromSeconds } from '../scripts/util';
+
 
 let characters = require('../scripts/characters');
 
@@ -12,7 +13,6 @@ function HallOfFameEntry(props) {
   if (isSelf) {
     bgColor = '#587a58';
   }
-  let portraitSize = window.innerHeight * 0.1;
   let matchWinPercent = Math.round((props.entry.matchWins / props.entry.totalMatches) * 100);
   let setWinPercent = Math.round((props.entry.setWins / props.entry.totalSets) * 100);
   if (props.entry.totalMatches == 0) {
@@ -22,127 +22,154 @@ function HallOfFameEntry(props) {
     setWinPercent = '0';
   }
   let characterArray = Object.keys(characters.characters);
-  let lastLogin = props.getTimeSinceFromSeconds(parseInt(props.now) - parseInt(props.entry.lastLogin));
+  let lastLogin = getTimeSinceFromSeconds(parseInt(props.now) - parseInt(props.entry.lastLogin));
+  let rowHeight = props.portraitSize / 3;
   return (
-    <div id={`high-score-entry-${props.entry.id}`} className='high-score-entry'>
+    <div id={`high-score-entry-${props.entry.id}`} className='high-score-entry red-panel'>
       <style jsx>{`
         .high-score-entry {
           box-sizing: border-box;         
-          width: 92vw;          
+          width: 100%;
+          max-width: calc(var(--mini-card-width) * 8);
+          display: ${props.hidden && 'none'};
+          font-size: 1.65vh;
+          transition: opacity 300ms ease;
+          will-change: opacity;
         }
         .main-body {
           box-sizing: border-box;
-          background-color: ${bgColor};
-          border: 1px solid #333;
-          border-radius: 0 var(--menu-border-radius) var(--menu-border-radius) var(--menu-border-radius);
-          padding: 0.5rem;
-          padding-top: 1rem;
+          padding: calc(var(--menu-border-width) * 2);
+          padding-bottom: var(--menu-border-width);
+          //padding-top: calc(var(--menu-border-width) * 2);
           width: 100%;
           display: grid;
-          grid-template-columns: auto 1fr 1fr;
-          grid-column-gap: 0.5rem;
-          grid-row-gap: 0.5rem;
+          grid-template-columns: auto 3fr 1fr;
+          grid-template-rows: ${rowHeight}px ${rowHeight}px ${rowHeight}px auto;
+          //grid-row-gap: var(--menu-border-width);
         }
-        .tab-area {
+        .name-header {      
+          grid-column-start: 0;
+          grid-column-end: span 3;
           display: flex;
-          width: 100%;
           justify-content: space-between;
-          align-items: flex-end;
+          align-items: center;
+          padding: var(--menu-border-width);
+          margin-bottom: var(--menu-border-width);
+          font-size: 3vh;
         }
-        .name-tab {
-          border: 1px solid #222;
-          border-bottom: none;
-          color: gold;
-          font-size: 1.1rem;
-          background-color: ${bgColor};
-          padding: 0.5rem 0.75rem 0.5rem 0.5rem;
-          border-radius: var(--menu-border-radius) var(--menu-border-radius) 0 0;
+        .last-login {
+          font-size: 1.2vh;
         }
-        .last-login-tab {
-          border: none;
-          background-color: transparent;
-          padding: 0.5rem;
-          border-radius: var(--menu-border-radius) var(--menu-border-radius) 0 0;
-        }
-        .portrait-area {
+        .portrait-area {                    
           grid-row-start: 0;
           grid-row-end: span 4;
           flex-direction: column;
           justify-content: flex-start !important;
+          align-items: center;
           text-align: center;
+          margin-right: calc(var(--menu-border-width) * 2);
+          height: ${props.portraitSize}px;          
         }
         .credits-header {
+          box-sizing: border-box;
           background-color: transparent !important;
-          border: 0 none !important;
-
-        }
-        .credits-header {
-          display: block;
+          border: 0 !important;
+          grid-column-end: 4;
         }
         .credit-amount {
           color: var(--option-on-color);
-          font-size: 1.5em;
+          font-size: 2.5vh;
+          padding: var(--menu-border-width);
         }
-        .rate-header {          
-          border: 1px solid #333;
-          padding: 0.25rem;
-          background-color: rgba(0, 0, 0, 0.1);
-          display: inline-flex:
+        .rate-header {
+          grid-column-start: 2;      
+          background: var(--trans-black-bg-color);
+          border-radius: var(--menu-border-width) 0 0 var(--menu-border-width);
+          padding: var(--menu-border-width);
+          border: 1px solid var(--dark-red-bg-color);
+          display: flex;
           justify-content: space-between;
-        }  
+          align-items: center;
+        }
+        .rate-result {
+          grid-column-start: 3;
+          display: flex;   
+          justify-content: flex-end;
+          align-items: center;
+          border-radius: 0 var(--menu-border-width) var(--menu-border-width) 0;
+          border: 1px solid var(--dark-red-bg-color);
+          border-left: 0;
+          padding: var(--menu-border-width);
+        }
         .cpu-opponents-header {
           grid-column-end: span 3;
+          margin-top: ${'var(--menu-border-width)'};
+          padding: var(--menu-border-width);
         }
         .defeated-opponents-list {
-          min-height: ${portraitSize/2}px;
-          grid-column-start: 0;
+          padding-top: ${props.entry.cpuDefeated.length > 0 && 'var(--menu-border-width)'};
+          padding-bottom: ${props.entry.cpuDefeated.length > 0 && 'var(--menu-border-width)'};
           grid-column-end: span 3;
           justify-content: flex-start !important;
           display: inline-flex;
-          flex-wrap: wrap
+          flex-wrap: wrap;
+        }
+        .obscured-entry {
+          opacity: 0;
+
         }
       `}</style>
-      <div className='tab-area'>
-        <div className='name-tab'>{props.entry.playerName}{isSelf && ' (you)'}</div>
-        <div className='last-login-tab'>Last login: {lastLogin} ago</div>
+      <div className='name-header'>
+        {props.entry.playerName}
+        <div className='last-login'>Last login:<br />{lastLogin} ago</div>
       </div>
-      <div className='main-body'>
+      <div className='main-body inner-red-panel'>
         <div className='portrait-area'>
-          <PlayerPortrait isSelf={isSelf} size={portraitSize} spriteIndex={props.entry.avatarIndex} displayName={''} type={'mini'} />
+          <PlayerPortrait isSelf={isSelf} size={props.portraitSize} spriteIndex={props.entry.avatarIndex} displayName={''} type={'mini'} />
         </div>
-        <div className='credits-header rate-header'>Credits:&nbsp;<span className='credit-amount'>{props.entry.credits}</span></div>
-        <div></div>
-        <div className='rate-header'><div>Sets won</div><div>{setWinPercent}%</div></div>
-        <div className='rate-header'><div>Matches won</div> <div>{matchWinPercent}%</div></div>
-        <div className='rate-result'>{props.entry.setWins} / {props.entry.totalSets}</div>
-        <div className='rate-result'>{props.entry.matchWins} / {props.entry.totalMatches}</div>
-        <div></div>
-        <div></div>
-        <div className='cpu-opponents-header rate-header'>CPU opponents defeated</div>
+        <div className='credits-header rate-header'>Credits: <div className='credit-amount'>{props.entry.credits}</div></div>
+        <div className='rate-header'>
+          <div>Sets won: </div>
+          <div>{props.entry.setWins}/{props.entry.totalSets}</div>
+        </div>
+        <div className='rate-result'>{setWinPercent}%</div>
+
+        <div className='rate-header'>
+          <div>Matches won:</div>
+          <div>{props.entry.matchWins}/{props.entry.totalMatches}</div> 
+        </div>
+        <div className='rate-result'>{matchWinPercent}%</div>
+
+        <div className='cpu-opponents-header'>CPU opponents defeated: {props.entry.cpuDefeated.length === 0 &&  ' None'}</div>
         <div className='defeated-opponents-list'>
           {props.entry.cpuDefeated.length > 0 && props.entry.cpuDefeated.map((cpuName, i) => {
             let portraitIndex = characterArray.indexOf(cpuName);
-            return <PlayerPortrait key={i} isSelf={false} size={portraitSize/2} cpu={true} spriteIndex={portraitIndex} displayName={''} type={'mini'} />;
+            return <PlayerPortrait key={i} isSelf={false} size={props.portraitSize/2} cpu={true} spriteIndex={portraitIndex} displayName={''} type={'mini'} />;
           })}
-          {props.entry.cpuDefeated.length === 0 && <div>None</div>}
+          
         </div>
       </div>
-
     </div>);
 }
-HallOfFameEntry.propTypes = {
-  now: PropTypes.string,
-  entry: PropTypes.object,
-  loggedInAs: PropTypes.string,
-  getTimeSinceFromSeconds: PropTypes.func
+
+HallOfFameEntry.defaultProps = {
+  hidden: false
 };
 
-function areEqual(prevProps, nextProps) {
-  return prevProps.entry.id === nextProps.entry.id;
-}
+HallOfFameEntry.propTypes = {
+  now: PropTypes.string,
+  hidden: PropTypes.bool,
+  entry: PropTypes.object,
+  portraitSize: PropTypes.number,
+  loggedInAs: PropTypes.string,
+};
 
-// export default HallOfFameEntry;
-export default React.memo(HallOfFameEntry, areEqual);
+// function areEqual(prevProps, nextProps) {
+//   return prevProps.entry.id === nextProps.entry.id;
+// }
+
+export default HallOfFameEntry;
+// export default React.memo(HallOfFameEntry);
 
 
 

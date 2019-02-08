@@ -29,7 +29,8 @@ module.exports = {
           plugins: [
             'react-hot-loader/babel',
             'styled-jsx/babel',
-            '@babel/proposal-class-properties'
+            '@babel/proposal-class-properties',
+            "@babel/plugin-transform-runtime",
           ]
         }
       }

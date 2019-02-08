@@ -68,7 +68,7 @@ export const checkCookie = (app) => {
     userStatusCopy.cookieId = parseInt(uniqueId);
     userStatusCopy.id = parseInt(uniqueId);
     userStatusCopy.loggedInAs = playerName;
-    console.warn(`Recognized user as ${response}`);
+    console.big(`Recognized user as ${response}`, 'green');
     app.setState({
       userStatus: userStatusCopy,
     }, () => {         
@@ -79,14 +79,57 @@ export const checkCookie = (app) => {
       checkedCookie: true
     });
     document.getElementById('avatar-row').style.opacity = 1;
-    console.error('No cookie found. Leaving state.userStatus.cookieId undefined.');
+    console.error('No cookie found. Leaving state.userStatus.cookieId undefined. Animating starfield.');
+    document.getElementById('container').style.backgroundImage = 'url(https://pazaak.online/assets/images/starfield.png)';
     document.getElementById('player-name-input').disabled = false;
     // document.getElementById('initial-loading-message').innerHTML += `<br />User not recognized.`;
   }
 };
+
+export const getTimeSinceFromSeconds = sessionLengthInSeconds => {
+  let output;
+  let sessionMinutes = Math.ceil(sessionLengthInSeconds / 60);
+  let minutePlural = 's';
+  if (sessionMinutes === 1) {
+    minutePlural = '';
+  }
+  if (sessionMinutes >= 60) {
+    let wholeHours = Math.floor(sessionMinutes / 60);
+    let minutes = sessionMinutes % 60;
+    if (minutes === 1) {
+      minutePlural = '';
+    }
+    let hourPlural = 's';
+    if (wholeHours === 1) {
+      hourPlural = '';
+    }
+    if (wholeHours >= 24) {
+      let dayPlural = 's';
+      let wholeDays = Math.floor(sessionMinutes / 60);
+      if (wholeDays === 1) {
+        dayPlural = '';
+      }
+      output = `${wholeDays} day${dayPlural}`;
+    } else {
+      if (minutes === 0 || wholeHours >= 6) {
+        output = `${wholeHours} hour${hourPlural}`;
+      } else {
+        output = `${wholeHours} hour${hourPlural} ${minutes} min${minutePlural}`;
+      }
+    }
+  } else {
+    if (sessionMinutes === 0) {
+      output = 'moments';
+    } else {
+      output = `${sessionMinutes} min${minutePlural}`;
+    }
+  }
+  return output;
+};
+
 function fullScreenCall() {
-  // var root = document.body;
-  var root = document.getElementById('container');
+  var root = document.documentElement;
+  // var root = document.getElementById('container');
   return root.requestFullscreen || root.webkitRequestFullscreen || root.mozRequestFullScreen || root.msRequestFullscreen;
 }
 function exitFullScreenCall() {
@@ -96,7 +139,6 @@ export function isFullScreen() {
   return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 }
 export function toggleFullScreen(app) {
-  document.getElementById('header').style.backgroundColor = 'green';
   let oldHeight = window.innerHeight;
   app.setState({
     lastHeight: oldHeight

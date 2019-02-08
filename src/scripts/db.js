@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const portraitSources = {
-  user: 'https://pazaak.online/assets/images/avatarsheet.jpg',
+  user: 'https://pazaak.online/assets/images/avatarsheetlq.jpg',
   opponent: 'https://pazaak.online/assets/images/opponentsheet.jpg'
 };
 

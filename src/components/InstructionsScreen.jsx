@@ -1,58 +1,117 @@
-
 import React from 'react';
 import PropTypes from 'prop-types';
 
 function InstructionsScreen(props) {
-  requestAnimationFrame(() => {
-    document.getElementById('instructions-screen').style.opacity = 1;
-    document.getElementById('instructions-screen').style.transform = 'none';
-  });
-  let instructionsText = `${''}And what of the Rebellion? If the Rebels have obtained a complete technical readout of this station, it is possible, however unlikely, that they might find a weakness and exploit it. The plans you refer to will soon be back in our hands. Any attack made by the Rebels against this station would be a useless gesture, no matter what technical data they've obtained. This station is now the ultimate power in the universe. I suggest we use it! Are they away? They have just made the jump into hyperspace. You're sure the homing beacon is secure aboard their ship? I'm taking an awful risk, Vader. This had better work. Aren't you a little short to be a stormtrooper? What? Oh...the uniform. I'm Luke Skywalker. I'm here to rescue you. You're who? I'm here to rescue you. I've got your R2 unit. I'm here with Ben Kenobi. Ben Kenobi is here! Where is he? Come on! The ship's all yours. If the scanners pick up anything, report it immediately. All right, let's go. Hey down there, could you give us a hand with this? TX-four-one-two. Why aren't you at your post? TX-four-one-two, do you copy? Take over. We've got a bad transmitter. I'll see what I can do. You know, between his howling and your blasting everything in sight, it's a wonder the whole station doesn't know we're here. Bring them on! I prefer a straight fight to all this sneaking around. We found the computer outlet, sir. Plug in. He should be able to interpret the entire Imperial computer network. That malfunctioning little twerp. This is all his fault! He tricked me into going this way, but he'll do no better. Wait, what's that? A transport! I'm saved! Over here! Help! Please, help! Artoo-Detoo! It's you! It's you!`;
+  if (props.phase === 'showingInstructions') {
+    requestAnimationFrame(() => {
+      document.getElementById('instructions-screen').style.transform = 'none';
+      document.getElementById('instructions-screen').style.opacity = 1;
+    });
+  }
+  // if (props.phase === 'showingInstructions') {
+  //   transitionIn(document.getElementById('instructions-screen'), {
+  //     property: 'transform',
+  //     preValue: 'scale(1.05)',
+  //     transition: 'transform 300ms ease'
+  //   });
+  // }
   return (
-    <div id='instructions-screen'>
+    <div id="instructions-screen">
       <style jsx>{`
         #instructions-screen {
-          
-          opacity: 0;
-          transform: scale(1.05);
-          transition: opacity 300ms ease, transform 300ms ease;
+          position: absolute;
+          top: var(--header-height);
+          opacity: var(--starting-opacity);
+          transform: translateX(var(--shift-distance));
+          transition: opacity var(--shift-duration) ease-out, transform var(--shift-duration) ease-out;
+          will-change: opacity, transform;
+          font-size: var(--small-font-size);
+          flex-grow: 1;
+          height: var(--inner-height);
+          overflow-y: scroll;
+          pointer-events: ${props.phase === 'showingInstructions' || 'none'};
+        }
+        #instructions {
+          font-family: var(--main-font);
+          box-sizing: border-box;
+          padding: var(--micro-card-width);
+          padding-top: 0;
+          padding-bottom: 0;
+          flex-grow: 1;
+          //min-height: 100%;
+          overflow-y: scroll;
+          min-height: 0;
+          //padding-bottom: var(--header-height);
+        }
+        #instructions > p {
+          padding-bottom: calc(var(--header-height) / 2);
+        }
+        #instructions > h3 {
+          padding-top: calc(var(--header-height) / 4);
+        }
+        h3 {
+          color: var(--house-card-color);
         }
       `}</style>
-      <div className='options-instructions-title shadowed-text'>How to play</div>
-      <div id='instructions' className='shadowed-text'>
-        {instructionsText}
-      </div>
-      <div className='pre-footer'>
-        <div></div>
-        <button {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'splashScreen') }} className='ready-button' id='instructions-back-button'>Back</button>
-        <div></div>
+      <div className="options-instructions-title shadowed-text">How to play</div>
+      <div id="instructions">
+        <h3>It looks like an Imperial cruiser.</h3>
+        <p>
+          Our passengers must be hotter than I thought. Try and hold them off. Angle the deflector shield while I make the calculations for the jump to light speed. Stay sharp! There are two more
+          coming in, they're going to try to cut us off. Why don't you outrun them? I thought you said this thing was fast. Watch your mouth, kid, or you're going to find yourself floating home. We'll
+          be safe enough once we make the jump to hyperspace. Besides, I know a few maneuvers. We'll lose them! Here's where the fun begins!
+        </p>
+        <h3>Those guys must really be desperate.</h3>
+        <p>
+          This could really save my neck. Get back to the ship and get her ready. You'll have to sell your speeder. That's okay. I'm never coming back to this planet again. Going somewhere, Solo? Yes,
+          Greedo. As a matter of fact, I was just going to see your boss. Tell Jabba that I've got his money. It's too late. You should have paid him when you had the chance. Jabba's put a price on
+          your head, so large that every bounty hunter in the galaxy will be looking for you. I'm lucky I found you first. Yeah, but this time I got the money. If you give it to me, I might forget I
+          found you. I don't have it with me.
+        </p>
+        <h3>Cut in the sublight engines.</h3>
+        <p>
+          What the...? Aw, we've come out of hyperspace into a meteor shower. Some kind of asteroid collision. It's not on any of the charts. What's going on? Our position is correct, except...no,
+          Alderaan! What do you mean? Where is it? Thats what I'm trying to tell you, kid. It ain't there. It's been totally blown away. What? How?
+        </p>
+        <h3>The Death Star plans are not in the main computer.</h3>
+        <p>
+          The Death Star plans are not in the main computer. Where are those transmissions you intercepted? What have you done with those plans? We intercepted no transmissions. Aaah....This is a
+          consular ship. Were on a diplomatic mission. If this is a consular ship...were is the Ambassador? Commander, tear this ship apart until you've found those plans and bring me the Ambassador.
+          I want her alive! There she is! Set for stun! She'll be all right. Inform Lord Vader we have a prisoner.
+        </p>
+        <h3>This ground sure feels strange.</h3>
+        <p>
+          It doesn't feel like rock at all. There's an awful lot of moisture in here. I don't know. I have a bad feeling about this. Yeah. Watch out! Yeah, that's what I thought. Mynock. Chewie, check
+          the rest of the ship, make sure there aren't any more attached. They're chewing on the power cables. Mynocks? Go on inside. We'll clean them off if there are any more.
+        </p>
       </div>
     </div>
   );
 }
 InstructionsScreen.propTypes = {
+  phase: PropTypes.string,
   onClickBack: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
-export default InstructionsScreen;
+function areEqual(prevProps, nextProps) {
+  let leaving = prevProps.phase == 'showingInstructions' && nextProps.phase != 'showingInstructions';
+  let entering = prevProps.phase != 'showingInstructions' && nextProps.phase == 'showingInstructions';
+  if (leaving) {
+    console.green('instructions leaving');
+    document.getElementById('instructions-screen').style.transitionDuration = 'var(--shift-duration-out)';
+    document.getElementById('instructions-screen').style.opacity = 0;
+    setTimeout(() => {
+      console.pink('reset InstructionsScreen to pre-enter state');
+      document.getElementById('instructions-screen').style.transform = 'translateX(var(--shift-distance))';
+    }, 300);
+  }
+  if (entering) {
+    console.green('instructions entering');
+    document.getElementById('instructions-screen').style.transitionDuration = 'var(--shift-duration)';
+    document.getElementById('instructions-screen').style.opacity = 1;
+  }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// export default InstructionsScreen;
+export default React.memo(InstructionsScreen, areEqual);

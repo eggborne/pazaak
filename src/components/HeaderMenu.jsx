@@ -6,26 +6,28 @@ function HeaderMenu(props) {
   console.error('((((((((((((((((((  HEADER MENU - RENDERING');
 
   return (
-    <div id='user-info-panel' className='user-info-panel-off shadowed-text'>
+    <div id='user-info-panel' className='red-panel user-info-panel-off shadowed-text'>
       <style jsx>{`
       #user-info-panel {
           position: absolute;
           box-sizing: border-box;
           width: 100%;
           //min-width: 100vw;
-          max-height: 50vh;
+          //max-height: 50vh;
           left: 0;
           top: calc(var(--header-height) - var(--menu-border-width) - var(--menu-border-width));
-          background-color: var(--red-bg-color);
-          border: var(--menu-border);
-          border-radius: 0 0 var(--menu-border-radius) var(--menu-border-radius);
-          border-top: none;   
+          //background-color: var(--red-bg-color);
+          //border: var(--menu-border);
+          //border-radius: 0 0 var(--menu-border-radius) var(--menu-border-radius);
+          border-top-left-radius: 0 !important;   
+          border-top-right-radius: 0 !important;   
+          border-top: 0 !important;   
           padding: var(--menu-border-width);
           padding: 1.5vw;
           padding-top: 0.75vw;
           transition: transform 300ms ease;
           will-change: transform;
-          z-index: 0;
+          z-index: 1;
         }
         .user-info-panel-off {
           transform: translateY(calc(-100% + var(--menu-border-width) + var(--menu-border-width))) !important;
@@ -48,12 +50,10 @@ HeaderMenu.propTypes = {
 };
 
 function areEqual(prevProps, nextProps) {
-  // return prevProps.playerObject.loggedInAs == nextProps.playerObject.loggedInAs;
   let equalTest = (
     prevProps.playerObject.avatarIndex == nextProps.playerObject.avatarIndex &&
     prevProps.playerObject.loggedInAs == nextProps.playerObject.loggedInAs
   );
-  console.warn('HeaderMenu equalTest ----------- ', equalTest);
   return equalTest;
 }
 

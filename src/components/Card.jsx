@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function Card(props) {
-  // console.error('RENDERING CARD ------------ ', props.value, props.type);
+  console.error('RENDERING CARD ------------ ', props.context, props.id, props.value, props.type);
   let color;
   let altColor;
   let cornerSymbol = props.type;
@@ -35,11 +35,19 @@ function Card(props) {
   let badgeRadius = `calc(var(--${cardSize}-card-height) / 36)`;
   let bubbleSize = `calc(var(--${cardSize}-card-height) * 0.16)`;
   let fontSize = `calc(var(--${cardSize}-card-height) * 0.17)`;
-
   let clickAction = (props.context === 'deck-selected' || props.context === 'deck-selection-option' || props.context === 'user-hand')
     ? (event) => props.onClickCard(event, props.value, props.type, props.inDeck)
     : () => console.log('no click for this');
-
+  
+  
+  let animated = (props.context !== 'deck-selection-option')
+    && (props.context !== 'opponent-prize');
+  if (animated) {
+    setTimeout(() => {
+      document.getElementById(`${props.context}-card-${props.id}`).style.opacity = 1;
+      document.getElementById(`${props.context}-card-${props.id}`).style.transform = 'none';
+    },50);
+  }
   return (
     <div id={`${props.context}-card-${props.id}`} {...{ [props.clickFunction]: clickAction }} className='card'>
       <style jsx>{`
@@ -48,7 +56,10 @@ function Card(props) {
           height: ${cardHeight};
           border-radius: ${cardRadius};
           border-width: ${cardBorderSize};
-          opacity: 1;
+          opacity: ${animated && 0.1};
+          transform: ${animated && 'scale(1.25)'};
+          transition: transform 300ms ease, opacity 300ms ease;
+          will-change: transform;
         }        
         .inner-band {
           background-color: ${color};
@@ -139,7 +150,6 @@ function areEqual(prevProps, nextProps) {
     && prevProps.value === nextProps.value
     && prevProps.size.height === nextProps.size.height
   );
-  // console.warn('---------- Card equal? ----> ', equalTest, prevProps, nextProps);
   return equalTest;
   // return false;
 }

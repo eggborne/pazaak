@@ -1,22 +1,25 @@
 import React from 'react';
+import HeaderMenu from './HeaderMenu';
 import Header from './Header';
 import IntroScreen from './IntroScreen';
 import OpponentSelectScreen from './OpponentSelectScreen';
 import ControlFooter from './ControlFooter';
+import HamburgerMenu from './HamburgerMenu';
 import InstructionsScreen from './InstructionsScreen';
 import OptionsScreen from './OptionsScreen';
 import HallOfFameScreen from './HallOfFameScreen';
 import DeckSelectScreen from './DeckSelectScreen';
 import GameBoard from './GameBoard';
-import HamburgerMenu from './HamburgerMenu';
-import ResultModal from './ResultModal';
-import ConfirmModal from './ConfirmModal';
+import ResultModal from './modals/ResultModal';
+import ConfirmModal from './modals/ConfirmModal';
 import ModeSelectScreen from './ModeSelectScreen';
-
-let Util = require('../scripts/util');
+import Footer from './Footer';
+import Toast from './modals/Toast';
 let DB = require('../scripts/db');
-let AI = require('../scripts/ai');
-let characters = require('../scripts/characters');
+// import * as DB from '../scripts/db';
+import * as AI from '../scripts/ai';
+import * as Util from '../scripts/util';
+import { characters } from '../scripts/characters';
 
 let clickFunction = window.PointerEvent ? 'onPointerDown' : window.TouchEvent ? 'onTouchStart' : 'onClick';
 
@@ -29,27 +32,25 @@ const RULES = {
     min: 1.475,
     max: 1.525
   }
-}
+};
 
 let lastGotRecords = 0;
 let fullScreenAttempts = 3;
+let lastResize = 0;
 
 const hideDebug = () => {
   event.target.removeEventListener('touchstart', hideDebug);
   event.target.remove();
 };
 
-
-let lastResize = 0;
-
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.characters = characters.characters;
     this.state = {
       debug: false,
       checkedCookie: false,
       lazyTime: [],
+      gameMode: 'campaign',
       vsCPU: true,
       cpuOpponent: 'jarjarbinks',
       lastWinner: null,
@@ -103,14 +104,14 @@ class App extends React.Component {
         lastLogin: undefined,
         cookieId: undefined,
         initialValues: {
-          avatarIndex: null,          
+          avatarIndex: null
         },
         avatarIndex: null,
         setWins: 0,
         totalSets: 0,
         matchWins: 0,
         totalMatches: 0,
-        credits: 5633,
+        credits: 200,
         cpuDefeated: [],
         messages: [],
         unreadMessages: 0
@@ -149,26 +150,29 @@ class App extends React.Component {
           cancel: ''
         }
       },
+      toastMessage: 'Suck a cock.',
       options: {
         sound: false,
         ambience: false,
+        quickMode: false,
         darkTheme: false,
+        fullScreen: false,
         turnInterval: 800,
+        gameStartDelay: 2000,
         flashInterval: 90,
         opponentMoveWaitTime: 1600,
         moveIndicatorTime: 900,
         dealWaitTime: 600,
-        fullScreen: false
+        animatedStarfield: true,
       },
       inputHasFocus: true,
       keyboardShowing: false,
-      highScores: this.getPlayerRecords().then((response) => {
-        Util.checkCookie(this);
-      }).catch((reason) => {
-        console.error('getPlayerRecords failed because', reason);
-      }),
+      highScores: this.getPlayerRecords()
+        .then(response => {
+          Util.checkCookie(this);
+        }),
       lastWidth: window.innerWidth,
-      lastHeight: window.innerHeight,
+      lastHeight: window.innerHeight
     };
 
     this.delayEvents = {
@@ -177,33 +181,9 @@ class App extends React.Component {
       postLoad1: false,
       postLoad2: false,
       postLoad3: false
-    }
+    };
 
     this.postLoadDelayTimes = [300, 1200, 2400];
-
-    this.lazyTimeouts = [];
-    this.lazyTimeouts[0] = setTimeout(() => {
-      document.getElementById('footer').style.transform = 'none';
-      this.delayEvents.postLoad1 = true;
-      this.setState({
-        lazyTime: [true]
-      });
-      console.log('lazy0 is at 00000000000000000000000000000000000------------ ', Date.now());
-    }, this.postLoadDelayTimes[0]);
-    this.lazyTimeouts[1] = setTimeout(() => {
-      this.delayEvents.postLoad2 = true;
-      this.setState({
-        lazyTime: [true, true]
-      });
-      console.log('lazy1 is at 11111111111111111111111111111111111------------ ', Date.now());
-    }, this.postLoadDelayTimes[1]);
-    this.lazyTimeouts[2] = setTimeout(() => {
-      this.delayEvents.postLoad3 = true;
-      this.setState({
-        lazyTime: [true, true, true]
-      });
-      console.log('lazy2 is at 22222222222222222222222222222222222------------ ', Date.now());
-    }, this.postLoadDelayTimes[2]);
 
     // make a deck of 40, 4 each of value 1-10...
     let deck = [];
@@ -225,49 +205,77 @@ class App extends React.Component {
   }
 
   displayError = error => {
-    document.getElementById('debug-touch-display').innerHTML += '<p>' + error + '</p>';
-  }
+    //document.getElementById('debug-touch-display').innerHTML += '<p>' + error + '</p>';
+  };
 
   componentDidMount() {
-    console.error('APP MOUNTED.');
-    this.sizeCards();
+    // if (this.state.options.ambience) {
+    //   document.getElementById('ambience').play();
+    // }
+    console.big('App MOUNTED.', 'white');    
+    this.lazyTimeouts = [];
+    this.lazyTimeouts[0] = setTimeout(() => {
+      // document.getElementById('footer').style.transform = 'none';
+      this.delayEvents.postLoad1 = true;
+      this.setState({
+        lazyTime: [true]
+      });
+      console.big('LAZY 0', 'yellow');
+    }, this.postLoadDelayTimes[0]);
+    this.lazyTimeouts[1] = setTimeout(() => {
+      this.delayEvents.postLoad2 = true;
+      this.setState({
+        lazyTime: [true, true]
+      });
+      document.getElementById('header').classList.remove('intact');
+      
+      console.big('LAZY 1', 'orange');
+    }, this.postLoadDelayTimes[1]);
+    this.lazyTimeouts[2] = setTimeout(() => {
+      this.delayEvents.postLoad3 = true;
+      this.setState({
+        lazyTime: [true, true, true]
+      });
+      console.big('LAZY 2', 'lightgreen');      
+      
+    }, this.postLoadDelayTimes[2]);
 
-    if (document.readyState === 'loading') {  // Loading hasn't finished yet
-      document.addEventListener('DOMContentLoaded', () => {
-        console.error('DDDDDOOOOOOOOOOOOOOOOOOOOOOOMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM');
+    
+
+    this.sizeCards();
+    if (document.readyState === 'loading') {
+      // Loading hasn't finished yet
+      document.addEventListener('DOMContentLoaded', () => {           
+        console.big('DOM LOADED');        
         this.delayEvents.domLoaded = true;
-        if (this.state.debug) {
-          Util.getPageLoadInfo();
-          this.displayError(`<p>|</p><p>at DOM LOADED: ------------------> <p>DEVICE_PIXEL_RATIO: ${DEVICE_PIXEL_RATIO}</p><p> innerW: ${window.innerWidth} innerH: ${window.innerHeight} - outerH ${window.outerHeight} - scrH ${window.screen.height} scrAv - ${window.screen.availHeight} body rect (${document.body.getBoundingClientRect().width}, ${document.body.getBoundingClientRect().height}) - body offsetHeight ${document.body.offsetHeight} <p>-</p><p>-</p>`);
-        }
+        setTimeout(() => {
+          document.getElementById('starfield').style.opacity = 0.75;
+        }, 10);
+        // if (this.state.debug) {
+        //   Util.getPageLoadInfo();
+        //   this.displayError(
+        //     `<p>|</p><p>at DOM LOADED: ------------------> <p>DEVICE_PIXEL_RATIO: ${DEVICE_PIXEL_RATIO}</p><p> innerW: ${window.innerWidth} innerH: ${window.innerHeight} - outerH ${
+        //       window.outerHeight
+        //     } - scrH ${window.screen.height} scrAv - ${window.screen.availHeight} body rect (${document.body.getBoundingClientRect().width}, ${
+        //       document.body.getBoundingClientRect().height
+        //     }) - body offsetHeight ${document.body.offsetHeight} <p>-</p><p>-</p>`
+        //   );
+        // }
       });
       window.addEventListener('load', () => {
-        console.warn(`'load' event ///////////////////////////////////////////////////////////////////////////`);
+        console.big('PAGE LOADED');
         this.delayEvents.pageLoaded = true;
-
       });
-    } else {  // `DOMContentLoaded` has already fired
+    } else {
+      // `DOMContentLoaded` has already fired
       console.info('already loaded at App mount');
     }
-
     window.addEventListener('fullscreenchange', this.handleFullscreenChange);
     window.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('msfullscreenchange', this.handleFullscreenChange);
 
-    // window.addEventListener('resize', this.handleResize);
-
-    document.getElementById('container').addEventListener('transitionend', (event) => {
-      if (event) {
-        if (event.target.id === 'container') {
-          document.getElementById('container').transition = 'none';
-        }
-        if (event.target.id === 'shade') {
-          document.getElementById('shade').transition = 'none';
-        }
-      }
-      //console.log(`${event.target.id} transition ended!`);
-    });
+    // window.addEventListener('resize', this.sizeCards);
 
     //debug ? document.getElementById('debug-display').addEventListener('click', hideDebug) : null;
   }
@@ -276,156 +284,190 @@ class App extends React.Component {
     let cardRatio = 1.4;
     let newWidth;
     let newHeight;
-
     let extraX;
     let extraY;
-
     // assume the ideal situation (room for both maximum card width and height at 1:1)
-    let perfectWidth = window.innerWidth / 5.6;
+    // let perfectWidth = window.innerWidth / 5.6;
+    let perfectWidth = window.innerWidth / 5.55;
+    // let perfectHeight = window.innerHeight / 7.65;
     let perfectHeight = window.innerHeight / 7.65;
-    console.info('perfectWidth', perfectWidth)
+    //console.info('perfectWidth', perfectWidth);
     let proposedRatio = perfectHeight / perfectWidth;
-    console.info('perfectHeight', perfectHeight)
+    //console.info('perfectHeight', perfectHeight);
 
     // keep ratio within RULES.range if the cards are violating
-    console.info('proposedRatio', proposedRatio);
+    //console.info('proposedRatio', proposedRatio);
     if (proposedRatio < RULES.cardRatio.min) {
       cardRatio = RULES.cardRatio.min;
     } else if (proposedRatio > RULES.cardRatio.max) {
       cardRatio = RULES.cardRatio.max;
     }
 
-    console.info(' - ratio changed', proposedRatio, cardRatio);
+    //console.info(' - ratio changed', proposedRatio, cardRatio);
     // test the new ratio
 
     // try keeping perfectWidth and changing height
     newHeight = perfectWidth * cardRatio;
 
-
     // see if height is too great
-    console.info('keeping perfect width and changing newHeight to', newHeight);
+    //console.info('keeping perfect width and changing newHeight to', newHeight);
     let cardsPerHeight = window.innerHeight / newHeight;
-    console.info('cardsPerHeight', cardsPerHeight);
+    //console.info('cardsPerHeight', cardsPerHeight);
     if (cardsPerHeight > 8) {
-      console.log('height OK, but how much extraY?');
+      //console.log('height OK, but how much extraY?');
       // it fits... but check the extra space
-      extraY = window.innerHeight - (newHeight * 5);
-      console.info('extraY', extraY);
+      extraY = window.innerHeight - newHeight * 5;
+      //console.info('extraY', extraY);
     } else {
-      console.log(' - TOO TALL');
+      //console.log(' - TOO TALL');
       newHeight = perfectHeight;
       newWidth = newHeight / cardRatio;
-
     }
 
     // see if width is too great
     newWidth = perfectHeight / cardRatio;
-    console.info('keeping perfect height and changing newWidth to', newWidth);
+    //console.info('keeping perfect height and changing newWidth to', newWidth);
     let cardsPerWidth = window.innerWidth / newWidth;
-    console.info('cardsPerWidth', cardsPerWidth);
+    //console.info('cardsPerWidth', cardsPerWidth);
     if (cardsPerWidth > 5.6) {
-      extraX = window.innerWidth - (newWidth * 5.6);
-      console.info('Height OK with extraX', extraX);
+      extraX = window.innerWidth - newWidth * 5.6;
+      //console.info('Height OK with extraX', extraX);
     } else {
-      console.log(' - TOO WIDE');
+      //console.log(' - TOO WIDE');
       newWidth = perfectWidth;
       newHeight = newWidth * cardRatio;
     }
 
     if (extraX && extraY) {
-      console.log('both extraX and extraY?? >>>>>>>>>>>>>>>>>')
+      console.log('both extraX and extraY?? >>>>>>>>>>>>>>>>>');
     }
 
-    console.info('newRatio', cardRatio);
-    console.info('newWidth', newWidth);
-    console.info('newHeight', newHeight);
-    console.info('extraX', extraX);
-    console.info('extraY', extraY);
+    // console.info('newRatio', cardRatio);
+    // console.info('newWidth', newWidth);
+    // console.info('newHeight', newHeight);
+    // console.info('extraX', extraX);
+    // console.info('extraY', extraY);
 
     newWidth ? ROOT.style.setProperty('--normal-card-width', `${newWidth}px`) : null;
     newHeight ? ROOT.style.setProperty('--normal-card-height', `${newHeight}px`) : null;
 
-    //this.state.debug ? this.displayError(`<p>called sizeCards() ~~~~~~~~~~~~~~~~~~~~~~~~~</p>N-C-H: ${window.innerHeight * 0.13} innerW: ${window.innerWidth} |innerH: ${window.innerHeight}<p>inH * 0.13: ${window.innerHeight * 0.13}<br />outH * 0.13: ${window.outerHeight * 0.13}<br />winscravail * 0.13: ${window.screen.availHeight * 0.13}<br /><p>-</p><p>-</p>`) : null;
-  }
+    //this.state.debug ? this.displayError(`<p>called sizeCards() ~~~~~~~~~~</p>N-C-H: ${window.innerHeight * 0.13} innerW: ${window.innerWidth} |innerH: ${window.innerHeight}<p>inH * 0.13: ${window.innerHeight * 0.13}<br />outH * 0.13: ${window.outerHeight * 0.13}<br />winscravail * 0.13: ${window.screen.availHeight * 0.13}<br /><p>-</p><p>-</p>`) : null;
+  };
   handleResize = () => {
     if (!lastResize || window.performance.now() - lastResize > 5000) {
       // this.sizeCards();
       lastResize = window.performance.now();
     }
+  };
+  createRandomDeck = () => {
+    let deck = [];
+    for (let i = 0; i < 10; i++) {
+      let type = '+';
+      if (!Util.randomInt(0, 2)) {
+        type = '-';
+      }
+      let value = Util.randomInt(1, 6);
+      let newCardObj = {
+        id: i,
+        value: value,
+        type: type,
+        inDeck: true
+      };
+      deck.push(newCardObj);
+    }
+    return deck;
+  }
+  getRandomOpponent = () => {
+    let characterArray = Object.keys(characters)
+    let rando = characterArray[Util.randomInt(0, characterArray.length - 1)];
+    console.big('got ' + rando);
+    return rando;
   }
   handleFullscreenChange = () => {
-    console.log('calling handleFullscreenChange with fullScreenAttempts', fullScreenAttempts)
+    console.log('calling handleFullscreenChange with fullScreenAttempts', fullScreenAttempts);
     if (fullScreenAttempts === 2) {
-      document.getElementById('header').style.backgroundColor = 'yellow';
+      // document.getElementById('header').style.backgroundColor = 'yellow';
     }
     if (fullScreenAttempts === 1) {
-      document.getElementById('header').style.backgroundColor = 'blue';
+      // document.getElementById('header').style.backgroundColor = 'blue';
     }
-    let currentHeight = window.innerHeight;
-    let heightEqual = (currentHeight === window.innerHeight)
-    console.log('at beginning of FS handler, heightEqual is:', heightEqual);
-    this.checkIfViewHeightChangedInMs(250).then((changed) => {
+    // let currentHeight = window.innerHeight;
+    // let heightEqual = currentHeight === window.innerHeight;
+    // console.log('at beginning of FS handler, heightEqual is:', heightEqual);
+    this.checkIfViewHeightChangedInMs(250).then(changed => {
+      let currentHeight = window.innerHeight;
+      console.log(`##################### ------------------ CHANGED from ${this.state.lastHeight} to ${currentHeight}`);
       console.log('after initial checkIfViewHeightChangedInMs promise, changed is: --> ' + changed);
-
+      let full = Util.isFullScreen() ? true : false;
+      let newOptions = { ...this.state.options };
+      console.log(`############ now full? ${full}`);
+      newOptions.fullScreen = full
+      this.setState({
+        options: newOptions
+      });
     });
-    this.displayError(`<p>handleFullscreenChange was called ~~~~~~~~~~~~~~~~~~~~~~~~~</p>lastHeight: <h2>${this.state.lastHeight}</h2><br />window.innerHeight: ${window.innerHeight}<br />window.outerHeight ${window.outerHeight}<br />window.screen.height ${window.screen.height}<br />window.screen.availHeight ${window.screen.availHeight}<p> header height: ${document.getElementById('header').getBoundingClientRect().height}</p>`);
+    // this.displayError(
+    //   `<p>handleFullscreenChange was called ~~~~~~~~~~~~~~~~~~~~~~~~~</p>lastHeight: <h2>${this.state.lastHeight}</h2><br />window.innerHeight: ${window.innerHeight}<br />window.outerHeight ${
+    //     window.outerHeight
+    //   }<br />window.screen.height ${window.screen.height}<br />window.screen.availHeight ${window.screen.availHeight}<p> header height: ${
+    //     document.getElementById('header').getBoundingClientRect().height
+    //   }</p>`
+    // );
+  };
 
-  }
-
-  checkIfViewHeightChangedInMs = (waitTime) => {
+  checkIfViewHeightChangedInMs = waitTime => {
     fullScreenAttempts--;
-    let attempt = new Promise((resolve) => {
+    let attempt = new Promise(resolve => {
       setTimeout(() => {
         let currentHeight = window.innerHeight;
         console.log(`after waitTime of ${waitTime}, oldH --- innerH is:`);
         console.log(this.state.lastHeight + ' --- ' + currentHeight);
         let isFull = Util.isFullScreen() !== undefined;
-        let viewChanged = (currentHeight !== this.state.lastHeight);
-        let completelyOff = (currentHeight === this.state.initialValues.viewHeight);
-        let completelyOn = (currentHeight > this.state.initialValues.outerHeight);
-        let outerChanged = (currentHeight > this.state.initialValues.outerHeight);
+        let viewChanged = currentHeight !== this.state.lastHeight;
+        let completelyOff = currentHeight === this.state.initialValues.viewHeight;
+        let completelyOn = currentHeight > this.state.initialValues.outerHeight;
+        let outerChanged = currentHeight > this.state.initialValues.outerHeight;
         console.log('isFull says', isFull);
-        console.log('completelyOff', this.state.initialValues.viewHeight, completelyOff);        
+        console.log('completelyOff', this.state.initialValues.viewHeight, completelyOff);
         console.log('completelyOn', window.outerHeight, completelyOn);
-        console.log('this.state.initialValues.outerHeight is', this.state.initialValues.outerHeight)
+        console.log('this.state.initialValues.outerHeight is', this.state.initialValues.outerHeight);
         console.log('outerChanged is', outerChanged);
-        console.log('this.state.initialValues.outerHeight', this.state.initialValues.outerHeight)
-        console.log('window.screen.height', window.screen.height)
+        console.log('this.state.initialValues.outerHeight', this.state.initialValues.outerHeight);
+        console.log('window.screen.height', window.screen.height);
         console.info(window.screen);
-        console.log('window.outerHeight', window.outerHeight)
+        console.log('window.outerHeight', window.outerHeight);
         console.log('currentHeight is', currentHeight);
         if (!completelyOff && !completelyOn) {
-          alert(currentHeight + ' is not > current window.outerHeight ' + window.outerHeight + ' or === this.state.initialValues.viewHeight ' + this.state.initialValues.viewHeight);
+          console.green(currentHeight + ' is not > current window.outerHeight ' + window.outerHeight + ' or === this.state.initialValues.viewHeight ' + this.state.initialValues.viewHeight);
         }
         if (viewChanged) {
-          console.log(`##################### ------------------ CHANGED from ${this.state.lastHeight} to ${currentHeight}`);
-          let optionsCopy = { ...this.state.options };
-          optionsCopy.fullScreen = isFull;
-          this.setState({
-            options: optionsCopy,
-            lastHeight: currentHeight
-          }, () => {
-            document.getElementById('header').style.backgroundColor = 'var(--red-bg-color)';
-            this.sizeCards();
-            fullScreenAttempts = 3;
-          });
+          this.setState(
+            {
+              lastHeight: currentHeight,
+            },
+            () => {
+              // document.getElementById('header').style.backgroundColor = 'var(--red-bg-color)';
+              this.sizeCards();
+              fullScreenAttempts = 3;
+            }
+          );
         } else {
-          document.getElementById('header').style.backgroundColor = 'red';
+          // document.getElementById('header').style.backgroundColor = 'red';
           if (fullScreenAttempts > 0) {
             this.checkIfViewHeightChangedInMs(200);
           } else {
-            document.getElementById('header').style.backgroundColor = 'black';
+            // document.getElementById('header').style.backgroundColor = 'black';
           }
-          console.log('////////// not changed yet!! fullScreenAttempts now --> ', fullScreenAttempts)
+          console.log('////////// not changed yet!! fullScreenAttempts now --> ', fullScreenAttempts);
         }
         resolve(viewChanged);
       }, waitTime);
     });
     return attempt;
-  }
+  };
 
   componentDidUpdate(prevProps, prevState) {
-    console.log('APP UPDATED....................')
+    console.log('APP UPDATED....................');
   }
 
   handleShadeClick = () => {
@@ -437,75 +479,52 @@ class App extends React.Component {
     if (!document.getElementById('user-info-panel').classList.contains('user-info-panel-off')) {
       this.handleClickAccountInfo();
     }
+  };
 
-  }
-
-  getTimeSinceFromSeconds = sessionLengthInSeconds => {
-    let output;
-    let sessionMinutes = Math.ceil(sessionLengthInSeconds / 60);
-    let minutePlural = 's';
-    if (sessionMinutes === 1) {
-      minutePlural = '';
-    }
-    if (sessionMinutes >= 60) {
-      let wholeHours = Math.floor(sessionMinutes / 60);
-      let minutes = (sessionMinutes % 60);
-      if (minutes === 1) {
-        minutePlural = '';
-      }
-      let hourPlural = 's';
-      if (wholeHours === 1) {
-        hourPlural = '';
-      }
-      if (wholeHours >= 24) {
-        let dayPlural = 's';
-        let wholeDays = Math.floor(sessionMinutes / 60);
-        if (wholeDays === 1) {
-          dayPlural = '';
-        }
-        output = `${wholeDays} day${dayPlural}`;
-      } else {
-        if (minutes === 0 || wholeHours >= 6) {
-          output = `${wholeHours} hour${hourPlural}`;
-        } else {
-          output = `${wholeHours} hour${hourPlural} ${minutes} min${minutePlural}`;
-        }
-      }
+  handleClickSelectMode = () => {
+    if (this.state.gameMode === 'campaign') {
+      this.setState({
+        phase: 'selectingOpponent'
+      })
     } else {
-      if (sessionMinutes === 0) {
-        output = 'moments';
-      } else {
-        output = `${sessionMinutes} min${minutePlural}`;
-      }
-    }
-    return output;
-  }
+      let randomDeck = this.createRandomDeck();
+      let randomOpponent = this.getRandomOpponent();
+      let namesCopy = { ...this.state.playerNames };
+      namesCopy.opponent = characters[randomOpponent].displayName;
+      console.info('made', randomDeck);
+      this.setState({
+        userDeck: randomDeck,
+        cpuOpponent: randomOpponent,
+        playerNames: namesCopy
+      }, () => {
+        this.initiateGame();          
+      })
+    }  
+  };  
   getPlayerData(callback) {
-    DB.getScores().then((response) => {
+    DB.getScores().then(response => {
       let playerScoreArray = response.data;
       if (!response.data) {
         playerScoreArray = [];
-      } else {
-        // playerScoreArray.map((playerScore, i) => {
-        //   playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated);
-        //   playerScore.avatarIndex = parseInt(playerScore.avatarIndex);
-        // });
       }
-      this.setState({
-        highScores: playerScoreArray
-      }, () => {
-        console.log('getplayerData called', response);
-        callback;
-      });
+      this.setState(
+        {
+          highScores: playerScoreArray
+        },
+        () => {
+          console.log('getplayerData called', response);
+          callback;
+        }
+      );
     });
   }
   getPlayerRecords() {
     let sinceLastGot = Date.now() - lastGotRecords;
     console.warn('--------- since got ----', sinceLastGot);
     if (sinceLastGot >= 60000) {
-      console.error('RETRIEVING HIGH SCORES FROM DB!! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
+      console.big('RETRIEVING HIGH SCORES FROM DB', 'brown');
       return new Promise((resolve, reject) => {
-        DB.getScores().then((response) => {
+        DB.getScores().then(response => {
           let playerRecordArray = response.data.slice();
           if (!response.data) {
             playerRecordArray = [];
@@ -517,12 +536,15 @@ class App extends React.Component {
               playerScore.messages = JSON.parse(playerScore.messages);
             });
           }
-          this.setState({
-            highScores: playerRecordArray,
-          }, () => {
-            lastGotRecords = Date.now();
-            resolve(playerRecordArray);
-          });
+          this.setState(
+            {
+              highScores: playerRecordArray
+            },
+            () => {
+              lastGotRecords = Date.now();
+              resolve(playerRecordArray);
+            }
+          );
         });
       });
     } else {
@@ -533,38 +555,43 @@ class App extends React.Component {
   }
 
   incrementPlayerTotalGames = (playerName, type) => {
+    console.log('type?', type)
     let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
+    console.log('trying to call funcName', funcName)
     eval(funcName)(playerName);
-  }
+  };
 
   incrementPlayerScore = (playerName, type) => {
+    console.log('type?', type)
     let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
-    eval(funcName)(playerName);
-  }
+    console.log('tryiong to call funcName', funcName)
 
-  playSound = (sound) => {
+    eval(funcName)(playerName);
+  };
+
+  playSound = sound => {
     if (this.state.options.sound) {
       console.warn(`playing ${sound}-sound`);
       // document.getElementById(`${sound}-sound`).play();
       this.state.sounds[sound].play();
     }
-  }
+  };
 
   loadSounds = () => {
-    console.error('### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###  LOADING SOUNDS ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ')
+    console.error('### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###  LOADING SOUNDS ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ');
     let sounds = {
       click: new Audio('https://pazaak.online/assets/sounds/click.wav'),
       draw: new Audio('https://pazaak.online/assets/sounds/drawcard.wav'),
       turn: new Audio('https://pazaak.online/assets/sounds/startturn.wav'),
       lose: new Audio('https://pazaak.online/assets/sounds/lose.wav'),
       win: new Audio('https://pazaak.online/assets/sounds/win.wav')
-    }
+    };
     this.setState({
       sounds: sounds
     });
-  }
+  };
 
-  shuffleDeck = (deck) => {
+  shuffleDeck = deck => {
     let deckCopy = deck.slice();
     Util.shuffle(deckCopy);
     Util.shuffle(deckCopy);
@@ -572,7 +599,7 @@ class App extends React.Component {
     Util.shuffle(deckCopy);
     Util.shuffle(deckCopy);
     return deckCopy;
-  }
+  };
 
   getNewPlayerHands = () => {
     let userDeckCopy = Util.shuffle(this.state.userDeck.slice());
@@ -580,7 +607,7 @@ class App extends React.Component {
     let newUserHand = [];
     let newOpponentHand = [];
     if (!opponentDeckCopy.length) {
-      opponentDeckCopy = this.characters.jarjarbinks.deck;
+      opponentDeckCopy = characters.jarjarbinks.deck;
     }
     let newUserHandSlice = userDeckCopy.slice(0, 4);
     let newOpponentHandSlice = opponentDeckCopy.slice(0, 4);
@@ -589,14 +616,14 @@ class App extends React.Component {
     let opponentPlus = [];
     let opponentMinus = [];
     // separate pluses and minuses into their own arrays
-    newUserHandSlice.map((card) => {
+    newUserHandSlice.map(card => {
       if (card.type === '+') {
         userPlus.push(card);
       } else {
         userMinus.push(card);
       }
     });
-    newOpponentHandSlice.map((card) => {
+    newOpponentHandSlice.map(card => {
       if (card.type === '+') {
         opponentPlus.push(card);
       } else {
@@ -605,9 +632,13 @@ class App extends React.Component {
     });
     // sort those arrays by value (negatives in reverse order)
     userPlus.sort((a, b) => a.value - b.value);
-    userMinus.sort(function (a, b) { return b.value - a.value; });
+    userMinus.sort(function(a, b) {
+      return b.value - a.value;
+    });
     opponentPlus.sort((a, b) => a.value - b.value);
-    opponentMinus.sort(function (a, b) { return b.value - a.value; });
+    opponentMinus.sort(function(a, b) {
+      return b.value - a.value;
+    });
     // put them back in the array, pluses first
     userPlus.map(card => newUserHand.push(card));
     userMinus.map(card => newUserHand.push(card));
@@ -620,74 +651,59 @@ class App extends React.Component {
       userHand: newUserHand,
       opponentHand: newOpponentHand
     });
-  }
+  };
 
-  dealToPlayerGrid = (player) => {
-    this.playSound('draw');
-    //console.warn(`DEALING to ${player}`);
-    let deckCopy = this.state.deck.slice();
-    let newCard = Util.shuffle(deckCopy)[0];
-    let newGridCards = this.state[`${player}Grid`].slice();
-    newGridCards.push(newCard);
-    let newTotal = 0;
-    newTotal += this.state[`${player}Total`] + newCard.value;
-    this.changeCardTotal(player, newTotal);
-    this.setState({
-      [`${player}Grid`]: newGridCards,
-    });
-    return newCard.value;
-  }
-  handleClickLogOut = (event) => {
+
+  handleClickLogOut = event => {
     if (event) {
       event.preventDefault();
     }
-    this.callConfirmModal(
-      'Log out?',
-      `This will log you out permanently and delete all records of ${this.state.userStatus.loggedInAs}. All of your progress will be lost.`,
-      { confirm: 'Do it', cancel: 'Never mind' },
-      () => {
-        // setting time limit to 0 destroys cookie
-        let doomedId = this.state.userStatus.cookieId;
-        Util.setCookie('username', `${this.state.userStatus.loggedInAs}||${doomedId}`, 0);
-        console.error('Cookie destroyed!');
-        let userStatusCopy = Object.assign({}, this.state.userStatus);
-        document.getElementById('player-name-input').disabled = false;
-        document.getElementById('player-name-input').style.backgroundColor = 'white';
-        document.getElementById('player-name-input').value = '';
-        // document.getElementById('remember-checkbox').disabled = false;
-        // document.getElementById('remember-checkbox').checked = true;
-        document.getElementById('remember-check-area').classList.remove('remembered');
-        userStatusCopy = {
-          loggedInAs: '',
-          cookieId: -1,
-          initialValues: {
-            avatarIndex: 0
-          },
-          avatarIndex: 0, // if -1, custom
-          totalSetWins: 0,
-          matchWins: 0,
-          totalSetsPlayed: 0,
-          matchesPlayed: 0
-        };
-        let defaultOptions = {
-          sound: false,
-          ambience: false,
-          darkTheme: false,
-          turnInterval: 300,
-          flashInterval: 90,
-          opponentMoveWaitTime: 1600,
-          moveIndicatorTime: 900,
-          dealWaitTime: 600,
-        };
-        this.setState({
+    this.callConfirmModal('Log out?', `This will log you out permanently and delete all records of ${this.state.userStatus.loggedInAs}.`, { confirm: 'Do it', cancel: 'Never mind' }, () => {
+      // setting time limit to 0 destroys cookie
+      let doomedId = this.state.userStatus.cookieId;
+      Util.setCookie('username', `${this.state.userStatus.loggedInAs}||${doomedId}`, 0);
+      console.big('Cookie destroyed!');
+      let userStatusCopy = Object.assign({}, this.state.userStatus);
+      document.getElementById('player-name-input').disabled = false;
+      document.getElementById('player-name-input').style.backgroundColor = 'white';
+      document.getElementById('player-name-input').value = '';
+      // document.getElementById('remember-checkbox').disabled = false;
+      // document.getElementById('remember-checkbox').checked = true;
+      document.getElementById('remember-check-area').classList.remove('remembered');
+      userStatusCopy = {
+        loggedInAs: '',
+        cookieId: -1,
+        initialValues: {
+          avatarIndex: 0
+        },
+        avatarIndex: 0, // if -1, custom
+        totalSetWins: 0,
+        matchWins: 0,
+        totalSetsPlayed: 0,
+        matchesPlayed: 0
+      };
+      let defaultOptions = {
+        sound: false,
+        ambience: false,
+        darkTheme: false,
+        animatedStarfield: true,
+        turnInterval: 300,
+        flashInterval: 90,
+        opponentMoveWaitTime: 1600,
+        moveIndicatorTime: 900,
+        dealWaitTime: 600
+      };
+      this.setState(
+        {
           userStatus: userStatusCopy,
           options: defaultOptions,
           phase: 'splashScreen'
-        }, () => {
+        },
+        () => {
           this.dismissConfirmModal();
           this.applyStateOptions('off');
-          DB.deleteUserRecord(doomedId).then((response) => {
-            console.error('DELETED ' + doomedId);
+          DB.deleteUserRecord(doomedId).then(response => {
+            console.big('DELETED ' + doomedId);
           });
           // roll up header menu
           let userPanel = document.getElementById('user-info-panel');
@@ -697,20 +713,20 @@ class App extends React.Component {
           cornerArea0.style.border = '0';
           settingsIcon.classList.remove('corner-button-on');
           userPanel.classList.add('user-info-panel-off');
-          // setTimeout(() => {
-          //   document.getElementById('header').classList.remove('no-bottom-border');
-          // }, 350);
-        });
+        }
+      );
+    });
+  };
+  handleClickSignIn = () => {
+    this.setState(
+      {
+        phase: 'splashScreen'
+      },
+      () => {
+        this.handleClickAccountInfo();
       }
     );
-  }
-  handleClickSignIn = () => {
-    this.setState({
-      phase: 'splashScreen'
-    }, () => {
-      this.handleClickAccountInfo();
-    });
-  }
+  };
   handleToggleOption = (event, forceDirection) => {
     let changeState = true;
     let el;
@@ -720,102 +736,130 @@ class App extends React.Component {
       eventId = event.target.id;
     } else {
       // 1st arg is el id
-      console.log(`handleToggleOption w/ ${forceDirection} trying document.getElementById(${event})`);
       eventId = event;
       el = document.getElementById(eventId);
     }
     let optionsCopy = Object.assign({}, this.state.options);
-    if ((forceDirection === 'on') || (!forceDirection && el.classList.contains('option-off'))) {
+    if (forceDirection === 'on' || (!forceDirection && el.classList.contains('toggle-off'))) {
       if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = true;
       }
       if (eventId === 'ambience-toggle' || eventId === 'hamburger-ambience-toggle') {
         optionsCopy.ambience = true;
-        // debug = true;
+        document.getElementById('ambience').play();
       }
-      if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
+      if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {       
         ROOT.style.setProperty('--pulse-speed', '500ms');
         optionsCopy.turnInterval = 200;
         optionsCopy.opponentMoveWaitTime = 300;
+        optionsCopy.quickMode = true;
       }
-      if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
-        document.getElementById('container').style.transition = 'background 500ms ease';
-
-        ROOT.style.setProperty('--main-bg-color', '#050505');
-        ROOT.style.setProperty('--main-text-color', '#dfdfff');
-        ROOT.style.setProperty('--name-input-text-color', '#aaa');
-        ROOT.style.setProperty('--button-bg-color', '#060606');
-        ROOT.style.setProperty('--special-button-text-color', '#529e4b');
-        ROOT.style.setProperty('--button-text-color', '#995');
-        ROOT.style.setProperty('--card-spot-bg-color', 'rgba(0, 0, 0, 0.125)');
-        ROOT.style.setProperty('--card-spot-border-color', 'rgba(100, 100, 100, 0.25)');
-        ROOT.style.setProperty('--red-bg-color', '#340000');
-        ROOT.style.setProperty('--medium-red-bg-color', '#240000');
-        ROOT.style.setProperty('--dark-red-bg-color', '#180000');
+      if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {      
+        ROOT.style.setProperty('--main-text-color', '#ababbb');
+        ROOT.style.setProperty('--red-bg-color', '#141414');
+        ROOT.style.setProperty('--medium-red-bg-color', '#111111');
+        ROOT.style.setProperty('--dark-red-bg-color', '#090909');
+        ROOT.style.setProperty('--button-bg-color', '#020202');
+        ROOT.style.setProperty('--button-border-color', '#111');
+        ROOT.style.setProperty('--button-text-color', '#437222');
+        ROOT.style.setProperty('--special-button-text-color', '#e49f51');
         optionsCopy.darkTheme = true;
       }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
-        el.classList.add('disabled-button');
+        // el.classList.add('disabled-button');
         Util.toggleFullScreen(this);
-        optionsCopy.fullScreen = true;
-        // changeState = false;
+        changeState = false;
+      }
+      if (eventId === 'animated-starfield-toggle' || eventId === 'hamburger-animated-starfield-toggle') {
+        console.pink('anim star ON')
+        // document.getElementById('container').style.backgroundImage = 'none',
+        document.getElementById('starfield').play();
+        optionsCopy.animatedStarfield = true;
       }
     }
-    if ((forceDirection === 'off') || (!forceDirection && el.classList.contains('option-on'))) {
+    if (forceDirection === 'off' || (!forceDirection && el.classList.contains('toggle-on'))) {
       if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = false;
       }
       if (eventId === 'ambience-toggle' || eventId === 'hamburger-ambience-toggle') {
         optionsCopy.ambience = false;
-        // debug = false;
+        document.getElementById('ambience').pause();
       }
       if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
         ROOT.style.setProperty('--pulse-speed', '900ms');
         optionsCopy.turnInterval = 800;
         optionsCopy.opponentMoveWaitTime = 1600;
+        optionsCopy.quickMode = false;
       }
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
-        ROOT.style.setProperty('--main-bg-color', 'rgb(107, 121, 138)');
         ROOT.style.setProperty('--main-text-color', 'rgb(255, 247, 213)');
-        ROOT.style.setProperty('--name-input-text-color', 'black');
-        ROOT.style.setProperty('--button-bg-color', 'black');
-        ROOT.style.setProperty('--special-button-text-color', '#ffffa3');
-        ROOT.style.setProperty('--button-text-color', '#5CB3FF');
-        ROOT.style.setProperty('--card-spot-bg-color', 'rgba(0, 0, 0, 0.05)');
-        ROOT.style.setProperty('--card-spot-border-color', '#999');
         ROOT.style.setProperty('--red-bg-color', '#560000');
         ROOT.style.setProperty('--medium-red-bg-color', '#490000');
         ROOT.style.setProperty('--dark-red-bg-color', '#380000');
+        ROOT.style.setProperty('--button-bg-color', 'black');
+        ROOT.style.setProperty('--button-border-color', 'rgb(25, 24, 39)');
+        ROOT.style.setProperty('--button-text-color', '#5cb3ff');
+        ROOT.style.setProperty('--special-button-text-color', '#529e4b');
         optionsCopy.darkTheme = false;
       }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
-        el.classList.add('disabled-button');
+        // el.classList.add('disabled-button');
         Util.toggleFullScreen(this);
-        optionsCopy.fullScreen = false;
-        // changeState = false;
+        changeState = false;
+      }
+      if (eventId === 'animated-starfield-toggle' || eventId === 'hamburger-animated-starfield-toggle') {
+        console.pink('anim star OFF')
+        document.getElementById('starfield').pause();
+        optionsCopy.animatedStarfield = false;
       }
     }
     if (changeState) {
       if (this.state.sounds === null && optionsCopy.sound) {
         this.loadSounds();
       }
-      this.setState({
-        options: optionsCopy
-      }, () => {
-        if (this.state.userStatus.cookieId && this.state.userStatus.loggedInAs) {
-          optionsCopy.fullScreen = false;
-          let optionsString = JSON.stringify(optionsCopy);
-          DB.updatePreferences(this.state.userStatus.cookieId, optionsString);
+      this.setState(
+        {
+          options: optionsCopy
+        },
+        () => {
+          console.log('changed state to', this.state)
+          if (this.state.userStatus.cookieId && this.state.userStatus.loggedInAs) {
+            let optionsString = JSON.stringify(optionsCopy);
+            DB.updatePreferences(this.state.userStatus.cookieId, optionsString).then((response) => {
+              console.log('updatePreferences', response);
+              if (this.state.phase === 'showingOptions' || this.state.phase === 'gameStarted')
+              this.callToast('Setting saved.', 'vertical');
+            });
+          }
         }
-      });
+      );
+    } else {
+      this.forceUpdate();
     }
+  };
+
+  callToast = (message, direction, position) => {
+    let el = document.getElementById(`toast-${direction}`);
+    if (el.timeout) {
+      clearTimeout(el.timeout);
+    }
+    el.style.transitionDuration = '200ms';
+    el.classList.add('toast-on');
+    el.timeout = setTimeout(() => {
+      el.style.transitionDuration = '1000ms';
+      el.classList.remove('toast-on');
+      
+    }, 800);
+    this.setState({
+      toastMessage: message
+    });
   }
 
-  applyStateOptions = (forceDirection) => {
+  applyStateOptions = forceDirection => {
     let optionsCopy = Object.assign({}, this.state.options);
     let optionsArray = Object.keys(optionsCopy);
     optionsArray.map((option, i) => {
-      if (i < 3) {
+      if (i <= 3 || option === 'animatedStarfield') {
         let eventId;
         if (option === 'sound') {
           eventId = 'sound-fx-toggle';
@@ -826,31 +870,39 @@ class App extends React.Component {
         if (option === 'darkTheme') {
           eventId = 'dark-theme-toggle';
         }
+        if (option === 'quickMode') {
+          eventId = 'quick-mode-toggle';
+        }
+        if (option === 'animatedStarfield') {
+          eventId = 'animated-starfield-toggle';
+        }
         if (forceDirection === 'on') {
           if (optionsCopy[option]) {
             this.handleToggleOption(eventId, forceDirection);
-            // this.setOption(optionName, position);
-          }
-        } else {
-          if (!optionsCopy[option]) {
+          } 
+        } else {          
+          if (!optionsCopy[option]) {           
             this.handleToggleOption(eventId, forceDirection);
+          }
+          if (eventId === 'animated-starfield-toggle' && optionsCopy[option]) {
+            this.handleToggleOption(eventId, 'on')
           }
         }
       }
     });
-  }
+  };
 
   createNewGuest = () => {
     // resolves a string of unique Guest-XXX name
     let promise = new Promise((resolve, reject) => {
       let optionsString = JSON.stringify(this.state.options);
-      DB.saveUser('Guest', this.state.userStatus.avatarIndex, optionsString).then((response) => {
-        DB.getUserId('Guest').then((response) => {
+      DB.saveUser('Guest', this.state.userStatus.avatarIndex, optionsString).then(response => {
+        DB.getUserId('Guest').then(response => {
           console.error('response.data[0] for Guest?', response.data[0].id);
           let guestId = parseInt(response.data[0].id);
           DB.updateLastLoginTime(guestId);
           console.error('type guestId', guestId, typeof guestId);
-          DB.updateUserName(guestId, `Guest-${guestId}`).then((response) => {
+          DB.updateUserName(guestId, `Guest-${guestId}`).then(response => {
             console.error('updateUserName to Guest?', `Guest-${response.data[0].id}`, response);
             resolve(`Guest-${guestId}`);
           });
@@ -858,9 +910,9 @@ class App extends React.Component {
       });
     });
     return promise;
-  }
+  };
 
-  evaluatePlayerName = (enteredName) => {
+  evaluatePlayerName = enteredName => {
     console.warn('calling evaluatePlayerName -------------------------------------->');
     let uniqueId = this.state.userStatus.cookieId;
     let userStatusCopy = Object.assign({}, this.state.userStatus);
@@ -869,8 +921,7 @@ class App extends React.Component {
       // DB.getRecordForUserId(uniqueId).then((response) => {
       //   console.log('resp', response);
       // })
-      DB.getDataForPlayer(enteredName).then((response) => {
-
+      DB.getDataForPlayer(enteredName).then(response => {
         if (response.data) {
           console.warn('On evaluatePlayerName after getDataForPlayer, response.data (at least one matching name) is FOUND', response.data);
           // NAME IN DB
@@ -895,12 +946,12 @@ class App extends React.Component {
 
             newOptionsArr.map((option, i) => {
               if (oldOptionsArr[i] !== option) {
-                console.log(`${option} don't match no ${oldOptionsArr[i]}`);
+                console.log(`${Object.keys(JSON.parse(playerObj.preferences))[i]} ${option} don't match no ${oldOptionsArr[i]}`);
                 nonDefaultOptions = true;
               }
             });
 
-            console.warn('DB options different than default?', nonDefaultOptions);
+            console.log('DB options different than default?', nonDefaultOptions);
             playerObj.cpuDefeated = JSON.parse(playerObj.cpuDefeated);
             //console.error(`Cookie recognized! Logging in player as ${playerObj.playerName}, recording into state.userStatus, highlighting avatar ${playerObj.avatarIndex} and scrolling into view.`);
             playerObj.loggedInAs = playerObj.playerName;
@@ -910,22 +961,29 @@ class App extends React.Component {
             //document.getElementById('avatar-row').style.opacity = 1;
             console.log('checkedCookie at 00000000000000000000000000000000000------------ ', Date.now());
             if (nonDefaultOptions) {
+              console.green('non-default options found! Setting options from DB.');
               if (this.state.sounds === null && playerObj.preferences.sound) {
                 this.loadSounds();
               }
+           
               playerObj.preferences = JSON.parse(playerObj.preferences);
-              this.setState({
-                userStatus: playerObj,
-                checkedCookie: true,
-                options: playerObj.preferences
-              }, () => {
-                this.applyStateOptions('on');
-              });
+
+              this.setState(
+                {
+                  userStatus: playerObj,
+                  checkedCookie: true,
+                  options: playerObj.preferences
+                },
+                () => {                  
+                  this.applyStateOptions('on');
+                }
+              );
             } else {
-              console.warn('NOT setting options from DB.');
+              console.green('NOT setting options from DB.');
+              // document.getElementById('container').style.backgroundImage = `url('https://pazaak.online/assets/images/starfield.png')`;
               this.setState({
                 userStatus: playerObj,
-                checkedCookie: true,
+                checkedCookie: true
               });
             }
           }
@@ -939,8 +997,8 @@ class App extends React.Component {
       //console.error('calling DB.saveUser()', enteredName, this.state.userStatus.avatarIndex);
       let optionsString = JSON.stringify(this.state.options);
       //console.error('saving with options string', optionsString);
-      DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
-        DB.getUserId(enteredName).then((response) => {
+      DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then(response => {
+        DB.getUserId(enteredName).then(response => {
           let uniqueId = response.data[0].id;
           console.error('--------------------------------');
           console.error('new user record id is', uniqueId);
@@ -956,23 +1014,26 @@ class App extends React.Component {
           userStatusCopy.cookieId = parseInt(uniqueId);
           console.error(`setting cookieId: ${parseInt(uniqueId)}`);
           console.error(`setting phase: ${this.state.phase}`);
-          this.setState({
-            userStatus: userStatusCopy,
-            checkedCookie: true
-          }, () => {
-            console.error('calling evaluatePlayerName a second time');
-            this.evaluatePlayerName(enteredName);
-          });
+          this.setState(
+            {
+              userStatus: userStatusCopy,
+              checkedCookie: true
+            },
+            () => {
+              console.error('calling evaluatePlayerName a second time');
+              this.evaluatePlayerName(enteredName);
+            }
+          );
         });
       });
     }
-  }
+  };
 
   handleClickAccountInfo = () => {
-    this.state.debug ? document.getElementById('debug-touch-display').innerHTML = '' : null;
-    this.setState({
-      debug: !this.state.debug
-    });    
+    // this.state.debug ? document.getElementById('debug-touch-display').innerHTML = '' : null;
+    // this.setState({
+    //   debug: !this.state.debug
+    // });
     let userPanel = document.getElementById('user-info-panel');
     let settingsIcon = document.getElementById('user-account-icon');
     if (userPanel.classList.contains('user-info-panel-off')) {
@@ -988,15 +1049,17 @@ class App extends React.Component {
         this.toggleShade('off');
       }
     }
-  }
-  handleClickStart = (event) => {
+  };
+  handleClickStart = event => {
     event.preventDefault();
     if (this.lazyTimeouts.map) {
       this.lazyTimeouts.map(timeout => {
         clearTimeout(timeout);
       });
     }
-    Object.keys(this.delayEvents).map(event => { this.delayEvents[event] = true });
+    Object.keys(this.delayEvents).map(event => {
+      this.delayEvents[event] = true;
+    });
     // this.playSound('click');
     let enteredName = document.getElementById('player-name-input').value;
     let namesCopy = Object.assign({}, this.state.playerNames);
@@ -1006,22 +1069,21 @@ class App extends React.Component {
       // playing as Guest
       console.error('NO NAME ENTERED. USING GUEST-XXX');
       // enteredName = document.getElementById('player-name-input').placeholder;
-      this.createNewGuest().then((response) => {
-        enteredName = response;
-        let guestId = parseInt(response.split('-')[1]);
-        userStatusCopy.cookieId = guestId;
-        userStatusCopy.playerName = enteredName;
-        this.setState({
-          userStatus: userStatusCopy,
-          // phase: 'selectingOpponent',
-          phase: 'selectingMode',
-          lazyTime: [true, true, true]
-        });
+      // this.createNewGuest().then(response => {
+      // enteredName = response;
+      enteredName = 'Guest';
+      //let guestId = parseInt(response.split('-')[1]);
+      userStatusCopy.cookieId = -1;
+      userStatusCopy.playerName = enteredName;
+      this.setState({
+        userStatus: userStatusCopy,
+        // phase: 'selectingOpponent',
+        phase: 'selectingMode',
+        lazyTime: [true, true, true]
       });
+      // });
     } else {
-
       if (!this.state.userStatus.loggedInAs) {
-
         // had no cookie at load
 
         console.error('Clicked Start while !loggedInAs - enteredName is', enteredName);
@@ -1040,8 +1102,7 @@ class App extends React.Component {
           nameTooLong = true;
           inputErrorText = 'NAME TOO LONG';
         }
-        DB.getScores().then((response) => {
-
+        DB.getScores().then(response => {
           // make sure it's not taken
 
           let nameTaken = false;
@@ -1055,13 +1116,12 @@ class App extends React.Component {
             });
           }
           if (nameTaken || nameTooLong || nameTooShort) {
-
             // clear field and show error message
 
             let yPosition = document.getElementById('player-name-input').offsetTop;
             let inputHeight = document.getElementById('player-name-input').offsetHeight;
             console.log('placing error text at', yPosition);
-            document.getElementById('name-input-message').style.top = (yPosition + (inputHeight / 2)) + 'px';
+            document.getElementById('name-input-message').style.top = yPosition + inputHeight / 2 + 'px';
             document.getElementById('name-input-message').innerHTML = inputErrorText;
             document.getElementById('name-input-message').classList.add('slid-on');
             setTimeout(() => {
@@ -1069,59 +1129,59 @@ class App extends React.Component {
             }, 2000);
             document.getElementById('player-name-input').value = '';
           } else {
-
             // create a new user record and set cookie
 
             namesCopy.user = enteredName;
             let optionsString = JSON.stringify(this.state.options);
-            DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then((response) => {
-              DB.getUserId(enteredName).then((response) => {
+            DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then(response => {
+              DB.getUserId(enteredName).then(response => {
                 Util.setCookie('username', `${enteredName}||${response.data[0].id}`, 365);
                 console.error(`SAVED ${enteredName} with ID ${response.data[0].id}`);
                 let uniqueId = response.data[0].id;
                 userStatusCopy.cookieId = parseInt(uniqueId);
                 DB.updateLastLoginTime(userStatusCopy.cookieId);
-                this.setState({
-                  userStatus: userStatusCopy,
-                  playerNames: namesCopy,
-                  lazyTime: [true, true, true]
-                }, () => {
-                  this.evaluatePlayerName(enteredName);
-                  this.setState({
-                    // phase: 'selectingOpponent'
-                    phase: 'selectingMode'
-                  });
-                });
+                this.setState(
+                  {
+                    userStatus: userStatusCopy,
+                    playerNames: namesCopy,
+                    lazyTime: [true, true, true]
+                  },
+                  () => {
+                    this.evaluatePlayerName(enteredName);
+                    this.setState({
+                      // phase: 'selectingOpponent'
+                      phase: 'selectingMode'
+                    });
+                  }
+                );
               });
             });
           }
         });
-
       } else {
-
         // had cookie and matched in DB
 
         namesCopy.user = enteredName;
         // setTimeout(() => {
-        this.setState({
-          // phase: 'selectingOpponent',
-          phase: 'selectingMode',
-          playerNames: namesCopy,
-          lazyTime: [true, true, true]
-        }, () => {
-          DB.updateLastLoginTime(userStatusCopy.cookieId).then(() => {
-          });
-        });
+        this.setState(
+          {
+            // phase: 'selectingOpponent',
+            phase: 'selectingMode',
+            playerNames: namesCopy,
+            lazyTime: [true, true, true]
+          },
+          () => {
+            DB.updateLastLoginTime(userStatusCopy.cookieId).then(() => {});
+          }
+        );
         // }, this.state.options.flashInterval);
-
       }
-
     }
-  }
-  handleClickSwitchSign = (event) => {
+  };
+  handleClickSwitchSign = event => {
     event.preventDefault();
     let turnStatusCopy = Object.assign({}, this.state.turnStatus);
-    let displaySign = turnStatusCopy.user.highlightedCard.element.children[0].innerHTML[0];
+    let displaySign = turnStatusCopy.user.highlightedCard.element.children[3].innerHTML[0];
     if (displaySign === '±' || displaySign === '-') {
       turnStatusCopy.user.highlightedCard.obj.value = Math.abs(turnStatusCopy.user.highlightedCard.obj.value);
     } else if (displaySign === '+') {
@@ -1131,39 +1191,41 @@ class App extends React.Component {
     if (displayValue > 0) {
       displayValue = `+${displayValue.toString()}`;
     }
-    turnStatusCopy.user.highlightedCard.element.children[0].innerHTML = displayValue;
+    turnStatusCopy.user.highlightedCard.element.children[3].innerHTML = displayValue;
     this.setState({
       turnStatus: turnStatusCopy
     });
-  }
+  };
   handleClickOpponentReady = (event) => {
-    console.log('clickeds')
+    console.log('clickeds');
     event.preventDefault();
     this.setState({
-      phase: 'selectingDeck'
+      phase: 'selectingDeck',
     });
-  }
-  handleClickPlay = (event) => {
-    // this.playSound('click');
-    event.preventDefault();
+  };
+  initiateGame = () => {
     this.getNewPlayerHands();
-    document.getElementById('deck-select-footer').style.transform = 'transform: translateY(100%)';
-    this.setState((state, props) => {
-      return { phase: 'gameStarted' };
+    this.setState({
+      phase: 'gameStarted'
     });
     setTimeout(() => {
       this.dealToPlayerGrid(this.state.turn);
-    }, this.state.options.turnInterval);
+    }, this.state.options.gameStartDelay);
   }
+  handleClickPlay = event => {
+    // this.playSound('click');
+    event.preventDefault();
+    this.initiateGame();
+  };
   handleClickBack = (event, newPhase) => {
     // this.playSound('click');
-    console.log('newPhase', newPhase)
+    console.log('newPhase', newPhase);
     event.preventDefault();
     this.setState({
       phase: newPhase
     });
-  }
-  handleClickHow = (event) => {
+  };
+  handleClickHow = event => {
     // this.playSound('click');
     // window.open('https://starwars.wikia.com/wiki/Pazaak/Legends', '_blank');
     event.preventDefault();
@@ -1172,36 +1234,34 @@ class App extends React.Component {
       phase: 'showingInstructions'
     });
     // }, this.state.options.flashInterval);
-  }
-  handleClickOptions = (event) => {
+  };
+  handleClickOptions = event => {
     console.error('CLICKED OPTIONS');
     //console.error('OPTIONS -------------------------------------------------------', event);
     // this.playSound('click');
-    event.preventDefault();
     // setTimeout(() => {
-    this.setState({
-      phase: 'showingOptions'
-    });
+      this.setState({
+        phase: 'showingOptions'
+      });
+      event.preventDefault();
     // }, this.state.options.flashInterval);
-  }
-  handleClickHallOfFame = (event) => {
+  };
+  handleClickHallOfFame = event => {
     event.preventDefault();
     // this.playSound('click');
-    document.getElementById('hall-of-fame-button').classList.add('loading-message');
-    this.getPlayerRecords().then((response) => {
-      this.setState({
-        highScores: response
-      }, () => {
+    document.getElementById('hall-of-fame-button').classList.add('hof-loading-message');
+    setTimeout(() => {
+      this.getPlayerRecords().then(response => {
+        document.getElementById('hall-of-fame-button').classList.remove('hof-loading-message');
         this.setState({
-          phase: 'showingHallOfFame'
-        });
-        document.getElementById('hall-of-fame-button').classList.remove('loading-message');
-
+          highScores: response,
+          phase: 'showingHallOfFame'            
+        }); 
       });
-    });
-
-  }
-  handleClickEndTurn = (event) => {
+    },5);
+    
+  };
+  handleClickEndTurn = event => {
     // this.playSound('click');
     event.preventDefault();
     let buttonText = document.getElementById('end-turn-button').innerHTML;
@@ -1224,7 +1284,7 @@ class App extends React.Component {
       let turnStatusCopy = Object.assign({}, this.state.turnStatus);
       let handCardElement = this.state.turnStatus.user.highlightedCard.element;
       let handCardObj = turnStatusCopy.user.highlightedCard.obj;
-      console.log('playHandCard taking in', handCardObj)
+      console.log('playHandCard taking in', handCardObj);
       this.playHandCard('user', handCardObj);
       this.state.turnStatus.user.highlightedCard.element.classList.remove('highlighted-card');
       turnStatusCopy.user.highlightedCard.element = null;
@@ -1239,8 +1299,8 @@ class App extends React.Component {
       }
       document.getElementById('stand-button').innerHTML = 'Stand';
     }
-  }
-  handleClickStand = (event) => {
+  };
+  handleClickStand = event => {
     event.preventDefault();
     // this.playSound('click');
     let buttonText = document.getElementById('stand-button').innerHTML;
@@ -1262,18 +1322,17 @@ class App extends React.Component {
       turnStatus: turnStatusCopy
     });
     this.callMoveIndicator('user', 'Stand', this.state.options.moveIndicatorTime);
-  }
+  };
   handleClickCard = (event, value, type, inDeck) => {
     let target = event.target;
-    let elementId = event.target.id
+    let elementId = event.target.id;
     let cardId = parseInt(elementId.split('-').reverse()[0]);
-    console.log('clicked card')
-    console.log('args', event, value, type, inDeck)
+    console.log('clicked card');
+    console.log('args', event, value, type, inDeck);
     console.log('target.id', target.id);
     console.log('target', target);
     console.log('cardId', cardId);
     if (this.state.phase === 'selectingDeck') {
-
       // SELECTING DECK
 
       if (!inDeck) {
@@ -1283,7 +1342,13 @@ class App extends React.Component {
           if (!this.arrayContainsCardWithId(this.state.userDeck, cardId)) {
             // it's not there already
             let deckCopy = this.state.userDeck.slice();
-            let newCardObj = { id: cardId, context: 'selected-deck', value: value, type: type, inDeck: true };
+            let newCardObj = {
+              id: cardId,
+              context: 'selected-deck',
+              value: value,
+              type: type,
+              inDeck: true
+            };
             deckCopy.push(newCardObj);
             console.warn('pushed new card id', cardId);
             console.warn('length is now', deckCopy.length);
@@ -1334,23 +1399,22 @@ class App extends React.Component {
           // add highlighted card to state
           let turnStatusCopy = Object.assign({}, this.state.turnStatus);
           turnStatusCopy.user.highlightedCard.element = target;
-          turnStatusCopy.user.highlightedCard.obj = { id: cardId, context: 'user-hand', value: value, type: type };
+          turnStatusCopy.user.highlightedCard.obj = {
+            id: cardId,
+            context: 'user-hand',
+            value: value,
+            type: type
+          };
           this.setState({
             turnStatus: turnStatusCopy
           });
-          // show the switch sign button...
-          document.getElementById('switch-sign-button').classList.remove('hidden-button');
-          console.log('searching this.state.userHand for cardObj', this.state.userHand);
-          console.log('target.id is', cardId);
           let cardObj = this.state.userHand[this.getCardIndexById(this.state.userHand, cardId)];
-          console.log('cardObj', cardObj);
-          // ... but only enable it if the card is a plus-minus
           if (cardObj.type === '±') {
-            // document.getElementById('switch-sign-button').classList.remove('disabled-button');
-            document.getElementById('switch-sign-button').classList.add('hidden-button');
-          } else {
-            // document.getElementById('switch-sign-button').classList.add('disabled-button');
             document.getElementById('switch-sign-button').classList.remove('hidden-button');
+            document.getElementById('switch-sign-button').classList.remove('disabled-button');
+          } else {
+            document.getElementById('switch-sign-button').classList.add('disabled-button');
+            document.getElementById('switch-sign-button').classList.add('hidden-button');
           }
           // change the button texts
           document.getElementById('stand-button').innerHTML = 'Cancel';
@@ -1370,19 +1434,37 @@ class App extends React.Component {
         }
       }
     }
-  }
+  };
   arrayContainsCardWithId = (arr, id) => {
     let contains = false;
-    arr.map((card) => {
+    arr.map(card => {
       if (card.id === id) {
         contains = true;
       }
     });
     return contains;
-  }
+  };
+  dealToPlayerGrid = player => {
+    this.playSound('draw');
+    
+    let deckCopy = [ ...this.state.deck ];
+    let newCard = Util.shuffle(deckCopy)[0];
+    this.addCardToGrid(player, newCard.value, newCard.type);
+    // console.green(`DEALING to ${player}`);
+    // let deckCopy = this.state.deck.slice();
+    // let newCard = Util.shuffle(deckCopy)[0];
+    // let newGridCards = [...this.state[`${player}Grid`]];
+    
+    // newGridCards.push(newCard);
+    // console.info(newGridCards);
+    let newTotal = 0;
+    newTotal += this.state[`${player}Total`] + newCard.value;
+    this.changeCardTotal(player, newTotal);
+    // return newCard.value;
+  };
   playHandCard = (player, cardObject) => {
     this.removeCardFromHand(player, cardObject.id);
-    this.addCardtoGrid(player, cardObject.value, cardObject.type);
+    this.addCardToGrid(player, cardObject.value, cardObject.type);
     this.changeCardTotal(player, this.state[`${player}Total`] + cardObject.value);
     setTimeout(() => {
       let turnStatusCopy = Object.assign({}, this.state.turnStatus);
@@ -1400,8 +1482,7 @@ class App extends React.Component {
       }
       document.getElementById('stand-button').innerHTML = 'Stand';
     }, this.state.options.moveIndicatorTime);
-  }
-
+  };
   removeCardFromHand = (player, cardId) => {
     let handCopy = this.state[`${player}Hand`].slice();
     let indexToRemove = this.getCardIndexById(handCopy, cardId);
@@ -1409,20 +1490,23 @@ class App extends React.Component {
     this.setState({
       [`${player}Hand`]: handCopy
     });
-  }
-  addCardtoGrid = (player, value, type) => {
-    let gridCopy = this.state[`${player}Grid`].slice();
+  };
+  addCardToGrid = (player, value, type) => {
+    console.info('adding card', player, value, type)
+
+    let gridCopy = [ ...this.state[`${player}Grid`]];
     if (type === '±') {
-      if (value > 0) {
-        value = `+${value.toString()}`;
-      }
+      // if (value > 0) {
+      //   value = `+${value.toString()}`;
+      // }
     }
     let newCard = { value: value, type: type };
+    newCard.id = 500 + this.state.userGrid.length + this.state.opponentGrid.length;
     gridCopy.push(newCard);
     this.setState({
       [`${player}Grid`]: gridCopy
     });
-  }
+  };
   changeCardTotal = (player, newTotal) => {
     if (newTotal === 20) {
       document.getElementById(`${player}-total`).classList.add('green-total');
@@ -1435,7 +1519,7 @@ class App extends React.Component {
     this.setState({
       [`${player}Total`]: newTotal
     });
-  }
+  };
   getCardIndexById = (arr, id) => {
     let match = -1;
     arr.forEach((card, i) => {
@@ -1445,8 +1529,8 @@ class App extends React.Component {
       }
     });
     return match;
-  }
-  declareWinner = (winner) => {
+  };
+  declareWinner = winner => {
     console.error('declareWinner()');
     if (winner !== 'TIE') {
       let newWins = this.state[`${winner}Wins`] + 1;
@@ -1465,30 +1549,35 @@ class App extends React.Component {
           }
         }
       }
-      this.setState({
-        turn: null,
-        [`${winner}Wins`]: newWins,
-        lastWinner: winner
-      }, () => {
-        this.callResultModal(winner);
-        document.getElementById('game-board').style.opacity = 0.3;
-      });
+      this.setState(
+        {
+          turn: null,
+          [`${winner}Wins`]: newWins,
+          lastWinner: winner
+        },
+        () => {
+          this.callResultModal(winner);
+          document.getElementById('game-board').style.opacity = 0.3;
+        }
+      );
     } else {
       // TIE
       if (this.state.playerNames.user !== 'Guest' && this.state.userStatus.loggedInAs) {
         let playerName = this.state.userStatus.loggedInAs;
         this.incrementPlayerTotalGames(playerName, 'sets');
       }
-      this.setState({
-        turn: null,
-        lastWinner: null
-      }, () => {
-        this.callResultModal('tie');
-        document.getElementById('game-board').style.opacity = 0.3;
-      });
+      this.setState(
+        {
+          turn: null,
+          lastWinner: null
+        },
+        () => {
+          this.callResultModal('tie');
+          document.getElementById('game-board').style.opacity = 0.3;
+        }
+      );
     }
-
-  }
+  };
   swapTurn = () => {
     let newTurn;
     if (this.state.turn === 'user') {
@@ -1509,7 +1598,7 @@ class App extends React.Component {
     });
     // this.playSound('turn');
     return newTurn;
-  }
+  };
 
   determineWinnerFromTotal = () => {
     console.error('determineWinnerFromTotal()');
@@ -1533,8 +1622,8 @@ class App extends React.Component {
     } else {
       this.declareWinner('TIE');
     }
-  }
-  changeTurn = (newPlayer) => {
+  };
+  changeTurn = newPlayer => {
     console.error('changeTurn()', newPlayer);
     this.playSound('turn');
     if (newPlayer === 'user') {
@@ -1576,7 +1665,6 @@ class App extends React.Component {
             this.dealToPlayerGrid(newTurn);
           }, this.state.options.dealWaitTime);
         }
-
       } else {
         // OPPONENT IN PLAY
 
@@ -1598,7 +1686,6 @@ class App extends React.Component {
         setTimeout(() => {
           this.dealToPlayerGrid(newTurn);
         }, this.state.options.dealWaitTime);
-
       }
     } else {
       if (this.state.vsCPU) {
@@ -1614,7 +1701,6 @@ class App extends React.Component {
           if (!this.state.turnStatus.opponent.standing) {
             let newTurn = this.swapTurn();
             if (this.state[`${newTurn}Grid`].length < 9) {
-
               setTimeout(() => {
                 this.dealToPlayerGrid(newTurn);
               }, this.state.options.dealWaitTime);
@@ -1636,8 +1722,8 @@ class App extends React.Component {
       turnStatus: turnStatusCopy,
       lastFirstTurn: newPlayer
     });
-  }
-  callResultModal = (winner) => {
+  };
+  callResultModal = winner => {
     let bgColor = 'var(--red-bg-color)';
     let title;
     let winnerDisplay = winner;
@@ -1650,7 +1736,7 @@ class App extends React.Component {
       this.playSound('lose');
       title = 'YOU LOSE';
     } else {
-      title = 'It\'s a tie';
+      title = "It's a tie";
       bgColor = 'var(--main-bg-color)';
     }
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
@@ -1667,28 +1753,31 @@ class App extends React.Component {
         title: title,
         winner: winnerDisplay,
         buttonText: buttonText
-      },
+      }
     });
-  }
+  };
   dismissResultModal = () => {
     let modal = document.getElementById('result-modal');
     modal.classList.remove('modal-on');
-  }
+  };
   callConfirmModal = (titleText, bodyText, buttonText, confirmAction, noCancel) => {
-    this.setState({
-      confirmMessage: {
-        showing: true,
-        titleText: titleText,
-        bodyText: bodyText,
-        buttonText: buttonText
+    this.setState(
+      {
+        confirmMessage: {
+          showing: true,
+          titleText: titleText,
+          bodyText: bodyText,
+          buttonText: buttonText
+        }
+      },
+      () => {
+        document.getElementById('confirm-ok-button').addEventListener('click', confirmAction);
+        if (noCancel) {
+          document.getElementById('confirm-cancel-button').style.display = 'none';
+        }
       }
-    }, () => {
-      document.getElementById('confirm-ok-button').addEventListener('click', confirmAction);
-      if (noCancel) {
-        document.getElementById('confirm-cancel-button').style.display = 'none';
-      }
-    });
-  }
+    );
+  };
   dismissConfirmModal = () => {
     document.getElementById('confirm-modal').classList.remove('confirm-modal-showing');
     this.setState({
@@ -1699,26 +1788,29 @@ class App extends React.Component {
         buttonText: {}
       }
     });
-  }
-  callUserInfoModal = (selectedUserId) => {
-    this.setState({
-      confirmMessage: {
-        showing: true,
-        titleText: titleText,
-        bodyText: bodyText,
-        buttonText: buttonText
+  };
+  callUserInfoModal = selectedUserId => {
+    this.setState(
+      {
+        confirmMessage: {
+          showing: true,
+          titleText: titleText,
+          bodyText: bodyText,
+          buttonText: buttonText
+        }
+      },
+      () => {
+        document.getElementById('confirm-ok-button').addEventListener('click', confirmAction);
       }
-    }, () => {
-      document.getElementById('confirm-ok-button').addEventListener('click', confirmAction);
-    });
-  }
+    );
+  };
   dismissUserInfoModal = () => {
     document.getElementById('user-info-modal').classList.remove('user-info-modal-showing');
     this.setState({
       selectedUser: {}
     });
-  }
-  handleClickAvatar = (event) => {
+  };
+  handleClickAvatar = event => {
     if (document.getElementsByClassName('selected-avatar')[0]) {
       document.getElementsByClassName('selected-avatar')[0].classList.remove('selected-avatar');
     }
@@ -1729,13 +1821,19 @@ class App extends React.Component {
     this.setState({
       userStatus: userStatusCopy
     });
-  }
-  handleClickRandomize = (event) => {
-    event.preventDefault();
+  };
+  handleClickRandomize = event => {
+    if (event) { event.preventDefault() };
     let selectionCopy = Util.shuffle(this.state.cardSelection.slice());
     let newRandomDeck = [];
     selectionCopy.map((selectionCard, i) => {
-      let newCard = { id: selectionCard.id, context: 'deck-selected', value: selectionCard.value, type: selectionCard.type, inDeck: true };
+      let newCard = {
+        id: selectionCard.id,
+        context: 'deck-selected',
+        value: selectionCard.value,
+        type: selectionCard.type,
+        inDeck: true
+      };
       if (i < 10) {
         console.log('made new ', newCard);
         newRandomDeck.push(newCard);
@@ -1758,14 +1856,14 @@ class App extends React.Component {
     this.setState({
       userDeck: newRandomDeck
     });
-  }
-  handleClickOKButton = (event) => {
+  };
+  handleClickOKButton = event => {
     event.preventDefault();
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
       this.getNewPlayerHands();
       this.setState({
         userWins: 0,
-        opponentWins: 0,
+        opponentWins: 0
       });
     }
     let newTurn = this.state.lastWinner;
@@ -1783,10 +1881,10 @@ class App extends React.Component {
       setTimeout(() => {
         this.setState({
           userGrid: [],
-          opponentGrid: [],
+          opponentGrid: []
         });
         this.setState({
-          turn: newTurn,
+          turn: newTurn
         });
         this.dealToPlayerGrid(this.state.turn);
         if (this.state.vsCPU && newTurn === 'opponent') {
@@ -1794,8 +1892,8 @@ class App extends React.Component {
         }
       }, this.state.options.turnInterval);
     }, this.state.options.turnInterval);
-  }
-  toggleHamburgerAppearance = (position) => {
+  };
+  toggleHamburgerAppearance = position => {
     let topBar = document.getElementById('top-hamburger-bar');
     let bottomBar = document.getElementById('bottom-hamburger-bar');
     let middleBar = document.getElementById('middle-hamburger-bar');
@@ -1821,28 +1919,26 @@ class App extends React.Component {
         middleBar2.style.transform = 'rotate(-40deg) scaleX(1.1)';
       }, 150);
     }
-  }
-  handleClickHamburger = () => {    
-    document.getElementById('hamburger-menu').style.transition = 'transform 300ms ease';
-    document.getElementById('game-board').style.transition = 'opacity 300ms ease';
+  };
+  handleClickHamburger = () => {
+    // document.getElementById('hamburger-menu').style.transition = 'transform 300ms ease';
+    // document.getElementById('game-board').style.transition = 'opacity 300ms ease';
     if (!document.getElementById('hamburger-menu').classList.contains('hamburger-on')) {
       // requestAnimationFrame(() => this.toggleHamburgerAppearance('close'));
       this.toggleShade('on');
       document.getElementById('hamburger-menu').classList.add('hamburger-on');
-      this.toggleHamburgerAppearance('close');      
-      ROOT.style.setProperty('--hamburger-border-color', '#900');
+      this.toggleHamburgerAppearance('close');
     } else {
       // requestAnimationFrame(() => this.toggleHamburgerAppearance('hamburger'));
       document.getElementById('hamburger-menu').classList.remove('hamburger-on');
       this.toggleHamburgerAppearance('hamburger');
-      ROOT.style.setProperty('--hamburger-border-color', 'var(--button-border-color)');     
       if (document.getElementById('user-info-panel').classList.contains('user-info-panel-off')) {
         this.toggleShade('off');
       }
     }
-  }
+  };
 
-  toggleShade = (direction) => {
+  toggleShade = direction => {
     document.getElementById('shade').style.transitionProperty = 'opacity';
     let switching = 'off';
     if (direction) {
@@ -1855,50 +1951,52 @@ class App extends React.Component {
     if (switching === 'off') {
       document.getElementById('shade').classList.remove('shade-on');
       if (this.state.phase === 'gameStarted') {
-        Array.from(document.getElementsByClassName('move-button')).map((button) => {
-          button.classList.remove('disabled-button');          
+        Array.from(document.getElementsByClassName('move-button')).map(button => {
+          button.classList.remove('disabled-button');
         });
       }
-    } else {      
+    } else {
       document.getElementById('shade').classList.add('shade-on');
       if (this.state.phase === 'gameStarted') {
-        Array.from(document.getElementsByClassName('move-button')).map((button) => {
-          button.classList.add('disabled-button');          
+        Array.from(document.getElementsByClassName('move-button')).map(button => {
+          button.classList.add('disabled-button');
         });
       }
     }
-  }
+  };
 
-  handleClickOpponentPanel = (opponentName) => {
-    console.log('----- running handleClickOpponentPanel')
-    this.setState({
-      cpuOpponent: opponentName,
-    }, () => {
-      let namesCopy = Object.assign({}, this.state.playerNames);
-      namesCopy.opponent = this.characters[opponentName].displayName;
-      let opponentDeckCopy = Util.shuffle(this.characters[opponentName].deck);
-      // let opponentDeckCopy = this.characters[opponentName].deck;
-      this.setState({
-        playerNames: namesCopy,
-        opponentDeck: opponentDeckCopy
-      });
-    });
-  }
-  handleClickConfirmButton = (event) => {
+  handleClickOpponentPanel = opponentName => {
+    console.log('----- running handleClickOpponentPanel for opponentName', opponentName);
+    this.setState(
+      {
+        cpuOpponent: opponentName
+      },
+      () => {
+        let namesCopy = Object.assign({}, this.state.playerNames);
+        namesCopy.opponent = characters[opponentName].displayName;
+        let opponentDeckCopy = Util.shuffle(characters[opponentName].deck);
+        // let opponentDeckCopy = characters[opponentName].deck;
+        this.setState({
+          playerNames: namesCopy,
+          opponentDeck: opponentDeckCopy
+        });
+      }
+    );
+  };
+  handleClickConfirmButton = event => {
     event.preventDefault();
     console.log('clicked', event.target.id);
-
-  }
-  handleClickCancelButton = (event) => {
+  };
+  handleClickCancelButton = event => {
     event.preventDefault();
     this.dismissConfirmModal();
     console.log('clicked', event.target.id);
-  }
-  handleClickCloseButton = (event) => {
+  };
+  handleClickCloseButton = event => {
     event.preventDefault();
     this.dismissUserInfoModal();
     console.log('clicked', event.target.id);
-  }
+  };
   resetBoard = (newTurn, total) => {
     document.getElementById('user-total').classList.remove('red-total');
     document.getElementById('user-total').classList.remove('green-total');
@@ -1936,7 +2034,7 @@ class App extends React.Component {
             obj: null
           }
         }
-      },
+      }
     });
     if (total) {
       // only disable if clearing player deck
@@ -1952,24 +2050,18 @@ class App extends React.Component {
         // userDeck: []
       });
     }
-  }
-  handleClickHamburgerQuit = (event) => {
-    this.callConfirmModal(
-      'Quit match?',
-      'You will forfeit and your progress will be lost.',
-      { confirm: 'Do it', cancel: 'Never mind' },
-      () => {
-        document.getElementById('hamburger-menu').classList.remove('hamburger-on');
-        this.resetBoard('user', true);
-        this.dismissConfirmModal();
-        document.getElementById('shade').classList.remove('shade-on');
-        // setTimeout(() => {
-        // this.toggleHamburgerAppearance('hamburger');
-        // }, 400);
-      }
-    );
-
-  }
+  };
+  handleClickHamburgerQuit = event => {
+    this.callConfirmModal('Quit match?', 'You will forfeit and your progress will be lost.', { confirm: 'Do it', cancel: 'Never mind' }, () => {
+      document.getElementById('hamburger-menu').classList.remove('hamburger-on');
+      this.resetBoard('user', true);
+      this.dismissConfirmModal();
+      document.getElementById('shade').classList.remove('shade-on');
+      // setTimeout(() => {
+      // this.toggleHamburgerAppearance('hamburger');
+      // }, 400);
+    });
+  };
   callMoveIndicator = (player, message, duration) => {
     this.playSound('click');
     let indicator = document.getElementById('move-indicator');
@@ -1984,7 +2076,7 @@ class App extends React.Component {
       duration = Math.round(duration / 3);
     }
     document.getElementById('move-message').innerHTML = message;
-    indicator.style.height = (document.getElementById('user-area').offsetHeight + document.getElementById('user-hand').offsetHeight) + 'px';
+    indicator.style.height = document.getElementById('user-area').offsetHeight + document.getElementById('user-hand').offsetHeight + 'px';
     if (player === 'user') {
       // indicator.style.top = Math.round(window.innerHeight / 20) + (document.getElementById('user-area').offsetHeight + document.getElementById('user-hand').offsetHeight) + 'px';
       indicator.style.top = document.getElementById('user-area').offsetTop + 'px';
@@ -1994,237 +2086,245 @@ class App extends React.Component {
     indicator.classList.remove('indicator-on');
     void indicator.offsetWidth;
     indicator.classList.add('indicator-on');
-
-    // indicator.style.opacity = 1;
-    // indicator.style.transform = 'scaleX(1.1)';
-    // setTimeout(() => {
-    //   indicator.style.transform = 'scaleX(1)';
-    //   setTimeout(() => {
-    //     indicator.style.opacity = 0;
-    //   }, duration - 200);
-    // }, 200);
-    // setTimeout(() => {
-    //   indicator.classList.remove('indicator-on');      
-    // }, 1000);
-  }
+  };
 
   handleClickCampaign = () => {
     this.setState({
-      phase: 'selectingOpponent'
+      gameMode: 'campaign'
     });
-  }
+  };
 
   handleClickQuickMatch = () => {
     this.setState({
-      phase: 'splashScreen'
+      gameMode: 'quick'
     });
-  }
+  };
 
   render() {
-    console.warn('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY')
-    console.warn('------------ =================================   APP RENDERING')
-    console.warn('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY')
-
+    console.green('APP RENDERING ----');
     let phase = this.state.phase;
-    let onIntroPhase = (phase === 'showingOptions' || phase === 'showingInstructions' || phase === 'showingHallOfFame' || phase === 'selectingMode');
-    // default styles are hidden...
-
-    // - maybe keep these in state?
-    // - or use routing?
-
-    // let footerStyle = { pointerEvents: 'none', opacity: 1, position: 'absolute', bottom: '-10vmax' };
-    let gameBoardStyle = { display: 'none' };
-    let introStyle = { display: 'none' };
-    // let optionsStyle = { display: 'none' };
-    // let introStyle = { display: 'flex' };
-    // let instructionsStyle = { display: 'none' };
-    // let hallOfFameStyle = { display: 'none' };
-    // let opponentSelectStyle = { display: 'none' };
-    let deckSelectStyle = { display: 'none' };
-    switch (phase) {
-      case 'splashScreen': {
-        introStyle = { display: 'flex' };
-        break;
-      }
-      // case 'selectingOpponent': opponentSelectStyle = { display: 'flex' }; break;
-      case 'selectingDeck': deckSelectStyle = { display: 'flex' }; break;
-
-      // case 'showingHallOfFame': hallOfFameStyle = { display: 'flex' }; break;
-
-      // case 'showingInstructions': instructionsStyle = { display: 'flex' }; break;
-      // case 'showingOptions': options = { display: 'flex' }; break;
-      case 'gameStarted':
-        gameBoardStyle.display = 'flex';
-      // footerStyle = { pointerEvents: 'all', opacity: 1, position: 'relative', bottom: '0' }; break;
-    }
+    let onIntroPhase = phase === 'showingOptions' || phase === 'showingInstructions' || phase === 'showingHallOfFame';
     let characterArray = [];
-    Object.keys(this.characters).map((entry, i) => {
-      characterArray[i] = this.characters[entry];
+    Object.keys(characters).map((entry, i) => {
+      characterArray[i] = characters[entry];
     });
-
-    let charactersToList = characterArray;
-
-    // let lazyTimings = this.state.lazyTime;
-    let lazyTimings = this.delayEvents
-    // let lazyTime1 = lazyTimings[0];
-    // let lazyTime2 = lazyTimings[1];
-    // let lazyTime3 = lazyTimings[2];
     let domLoaded = this.delayEvents.domLoaded;
     let pageLoaded = this.delayEvents.pageLoaded;
-    let lazyTime1 = this.delayEvents.postLoad1
-    let lazyTime2 = this.delayEvents.postLoad2
-    let lazyTime3 = this.delayEvents.postLoad3
-    return (
-      <div id='container'>        
-        <div style={{ opacity: this.state.debug ? '1' : '0' }}>
-          <div id='debug-display' />
-          <div id='debug-touch-display'></div>
-        </div>
+    let lazyTime1 = this.delayEvents.postLoad1;
+    let lazyTime2 = this.delayEvents.postLoad2;
+    let lazyTime3 = this.delayEvents.postLoad3;
+    return (      
+      <div id="container">
+        <Toast message={this.state.toastMessage} />
+        <Toast message={this.state.toastMessage} />
+        {/* <div style={{ opacity: this.state.debug ? '1' : '0' }}>
+          <div id="debug-display" />
+          <div id="debug-touch-display" />
+        </div> */}
+        <video id='starfield' loop={true} muted={true}>
+          <source src="https://pazaak.online/assets/images/starfield.mp4" type="video/mp4" />
+        </video>        
+        {domLoaded && (
+          <HeaderMenu
+            playerObject={this.state.userStatus}
+            onClickSignIn={this.handleClickSignIn}
+            onClickLogOut={this.handleClickLogOut}
+            onClickCloseButton={this.handleClickCloseButton}
+            clickFunction={clickFunction}
+          />
+        )}
         <Header
-          readyToFill={this.delayEvents.postLoad1}
+          readyToFill={this.state.checkedCookie}
           userStatus={this.state.userStatus}
           playerName={this.state.userStatus.playerName}
+          playerCredits={this.state.userStatus.credits}
           uniqueId={this.state.userStatus.cookieId}
           avatarIndex={this.state.userStatus.avatarIndex}
           onClickAccountArea={this.handleClickAccountInfo}
           onClickSignIn={this.handleClickSignIn}
           onClickLogOut={this.handleClickLogOut}
-          clickFunction={clickFunction} />
+          clickFunction={clickFunction}
+        />
+        <div id="content-area">
+          {(phase === 'splashScreen' || onIntroPhase) && (
+            <>
+            <IntroScreen
+              phase={phase}
+              readyToShow={this.state.checkedCookie}
+              userAvatarIndex={this.state.userStatus.avatarIndex}
+              onClickAvatar={this.handleClickAvatar}
+              onClickStart={this.handleClickStart}
+              onClickHow={this.handleClickHow}
+              onClickOptions={this.handleClickOptions}
+              onClickHallOfFame={this.handleClickHallOfFame}
+              onClickLogOut={this.handleClickLogOut}
+              userStatus={this.state.userStatus}
+              clickFunction={clickFunction}
+            />
+            <OptionsScreen
+              phase={phase}
+              currentOptions={this.state.options}
+              onToggleOption={this.handleToggleOption}
+              onClickBack={event => {
+                this.handleClickBack(event, 'splashScreen');
+              }}
+              clickFunction={clickFunction}
+            />
+            <InstructionsScreen
+              phase={phase}
+              onClickBack={this.handleClickBack}
+              clickFunction={clickFunction} />
+            </>
+          )}
+          {/* {this.state.checkedCookie && (phase === 'splashScreen' || onIntroPhase) && (
+            
+          )} */}
+          {/* {this.state.checkedCookie && (phase === 'splashScreen' || onIntroPhase) && (
+            
+          )} */}
+          {this.state.checkedCookie && phase === 'selectingMode' && (
+            <ModeSelectScreen
+              phase={phase}
+              modeSelected={this.state.gameMode}
+              onClickCampaign={this.handleClickCampaign}
+              onClickQuickMatch={this.handleClickQuickMatch}
+              onClickBack={event => {
+                this.handleClickBack(event, 'splashScreen');
+              }}
+              clickFunction={clickFunction}
+            />
+          )}
+          {this.state.checkedCookie && (phase === 'showingHallOfFame') && (
+            <HallOfFameScreen
+              phase={phase}
+              readyToList={lazyTime2}
+              highScores={this.state.highScores}
+              userStatus={this.state.userStatus}
+              onClickBack={this.handleClickBack}
+              clickFunction={clickFunction}
+            />
+          )}
+          {/* {(this.state.checkedCookie && (phase === 'selectingDeck' || phase === 'selectingOpponent')) && */}
+          {this.state.checkedCookie && phase === 'selectingDeck' && (
+            <DeckSelectScreen
+              cardSelection={this.state.cardSelection}
+              userDeck={this.state.userDeck}
+              onClickPlay={this.handleClickPlay}
+              onClickCard={this.handleClickCard}
+              onClickBack={this.handleClickBack}
+              clickFunction={clickFunction}
+            />
+          )}
+          {/* {(phase === 'splashScreen' || phase === 'selectingOpponent') && */}
+          {pageLoaded && (
+            // (phase === 'selectingOpponent') && (
+            // {lazyTime1 &&
+            <OpponentSelectScreen
+              phase={phase}
+              readyToList={false}
+              listRange={{
+                begin: 0,
+                // end: (characterArray.length/5)
+                end: characterArray.length
+              }}
+              userCredits={this.state.userStatus.credits}
+              portraitSources={this.state.portraitSources}
+              characters={characters}
+              characterArray={characterArray}
+              onClickPanel={this.handleClickOpponentPanel}
+              onClickOpponentReady={this.handleClickOpponentReady}
+              onClickBack={this.handleClickBack}
+              clickFunction={clickFunction}
+            />
+          )}
+          {phase === 'gameStarted' && (
+            <GameBoard
+              phase={phase}
+              playerNames={{
+                user: this.state.userStatus.playerName,
+                opponent: this.state.playerNames.opponent
+              }}
+              opponentNames={Object.keys(characters)}
+              cpuOpponent={this.state.cpuOpponent}
+              portraitSources={this.state.portraitSources}
+              avatarIndex={this.state.userStatus.avatarIndex}
+              hands={{
+                user: this.state.userHand,
+                opponent: this.state.opponentHand
+              }}
+              grids={{
+                user: this.state.userGrid,
+                opponent: this.state.opponentGrid
+              }}
+              totals={{
+                user: this.state.userTotal,
+                opponent: this.state.opponentTotal
+              }}
+              wins={{
+                user: this.state.userWins,
+                opponent: this.state.opponentWins
+              }}
+              turn={this.state.turn}
+              turnStatus={this.state.turnStatus}
+              onClickCard={this.handleClickCard}
+              clickFunction={clickFunction}
+            />
+          )}
+        </div>
+
+        <ControlFooter
+          phase={phase}
+          currentOptions={this.state.options}
+          onClickHamburgerQuit={this.handleClickHamburgerQuit}
+          onToggleOption={this.handleToggleOption}
+          onClickEndTurn={this.handleClickEndTurn}
+          onClickStand={this.handleClickStand}
+          onClickHamburger={this.handleClickHamburger}
+          onClickSwitchSign={this.handleClickSwitchSign}
+          onClickBack={this.handleClickBack}
+          onClickSelectMode={this.handleClickSelectMode}
+          onClickOpponentReady={this.handleClickOpponentReady}
+          onClickPlay={this.handleClickPlay}
+          onClickRandomize={this.handleClickRandomize}
+          clickFunction={clickFunction}
+        />
+
         {/* {(phase === 'splashScreen' || phase === 'showingOptions' || phase === 'showingInstructions' || phase === 'showingHallOfFame') && */}
-        {(phase === 'splashScreen' || phase === 'selectingOpponent' || onIntroPhase) &&
-          <IntroScreen style={introStyle}
-            phase={phase}
-            readyToShow={this.state.checkedCookie}
-            userAvatarIndex={this.state.userStatus.avatarIndex}
-            onClickAvatar={this.handleClickAvatar}
-            onClickStart={this.handleClickStart}
-            onClickHow={this.handleClickHow}
-            onClickOptions={this.handleClickOptions}
-            onClickHallOfFame={this.handleClickHallOfFame}
-            onClickLogOut={this.handleClickLogOut}
-            userStatus={this.state.userStatus}
-            clickFunction={clickFunction}
-          />
-        }
-        {(this.state.checkedCookie && phase === 'showingInstructions') &&
-          <InstructionsScreen
-            onClickBack={this.handleClickBack}
-            clickFunction={clickFunction} />
-        }
-        {(this.state.checkedCookie && (phase === 'showingOptions')) &&
-          <OptionsScreen
-            currentOptions={this.state.options}
-            onToggleOption={this.handleToggleOption}
-            onClickBack={(event) => { this.handleClickBack(event, 'splashScreen'); }}
-            clickFunction={clickFunction} />
-        }
-        {(this.state.checkedCookie && (phase === 'selectingMode')) &&
-          <ModeSelectScreen
-            phase={phase}
-            onClickCampaign={this.handleClickCampaign}
-            onClickQuickMatch={this.handleClickQuickMatch}
-            onClickBack={(event) => { this.handleClickBack(event, 'splashScreen'); }}
-            clickFunction={clickFunction} />
-        }
-        {(this.state.checkedCookie && (phase === 'splashScreen' || phase === 'selectingOpponent' || onIntroPhase)) &&
-          <HallOfFameScreen
-            phase={phase}
-            readyToList={lazyTime2}
-            highScores={this.state.highScores}
-            userStatus={this.state.userStatus}
-            onClickBack={this.handleClickBack}
-            getTimeSinceFromSeconds={this.getTimeSinceFromSeconds}
-            clickFunction={clickFunction} />
-        }
-        {/* {(this.state.checkedCookie && (phase === 'selectingDeck' || phase === 'selectingOpponent')) && */}
-        {(this.state.checkedCookie && (phase === 'selectingDeck')) &&
-          <DeckSelectScreen style={deckSelectStyle}
-            cardSelection={this.state.cardSelection}
-            userDeck={this.state.userDeck}
-            onClickRandomize={this.handleClickRandomize}
-            onClickPlay={this.handleClickPlay}
-            onClickCard={this.handleClickCard}
-            onClickBack={this.handleClickBack}
-            clickFunction={clickFunction} />
-        }
-        {/* {(phase === 'splashScreen' || phase === 'selectingOpponent') && */}
-        {pageLoaded && (phase === 'splashScreen' || phase === 'selectingOpponent' || phase === 'selectingDeck' || onIntroPhase) &&
-          // {lazyTime1 &&
-          <OpponentSelectScreen phase={phase}
-            readyToList={lazyTime2}
-            listRange={{
-              begin: 0,
-              end: characterArray.length
-            }}
-            portraitSources={this.state.portraitSources}
-            characters={this.characters}
-            characterArray={charactersToList}
-            opponentSelected={this.state.cpuOpponent}
-            onClickPanel={this.handleClickOpponentPanel}
-            onClickOpponentReady={this.handleClickOpponentReady}
-            onClickBack={this.handleClickBack}
-            clickFunction={clickFunction} />
-        }
-        {(this.state.checkedCookie && phase === 'gameStarted') &&
-          <ResultModal onClickOKButton={this.handleClickOKButton}
+
+        {this.state.checkedCookie && phase === 'gameStarted' && (
+          <ResultModal
+            onClickOKButton={this.handleClickOKButton}
             titleText={this.state.resultMessage.title}
             playerNames={this.state.playerNames}
             winner={this.state.resultMessage.winner}
-            matchOver={(this.state.userWins === 3 || this.state.opponentWins === 3)}
-            finalScores={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
+            matchOver={this.state.userWins === 3 || this.state.opponentWins === 3}
+            finalScores={{
+              user: this.state.userTotal,
+              opponent: this.state.opponentTotal
+            }}
             buttonText={this.state.resultMessage.buttonText}
-            clickFunction={clickFunction} />
-        }
-        {lazyTime2 && (phase === 'gameStarted') &&
-          <GameBoard style={gameBoardStyle}
-            phase={phase}
-            playerNames={{ user: this.state.userStatus.playerName, opponent: this.state.playerNames.opponent }}
-            opponentNames={Object.keys(this.characters)}
-            cpuOpponent={this.state.cpuOpponent}
-            portraitSources={this.state.portraitSources}
-            avatarIndex={this.state.userStatus.avatarIndex}
-            hands={{ user: this.state.userHand, opponent: this.state.opponentHand }}
-            grids={{ user: this.state.userGrid, opponent: this.state.opponentGrid }}
-            totals={{ user: this.state.userTotal, opponent: this.state.opponentTotal }}
-            wins={{ user: this.state.userWins, opponent: this.state.opponentWins }}
-            turn={this.state.turn}
-            turnStatus={this.state.turnStatus}
-            onClickCard={this.handleClickCard}
-            clickFunction={clickFunction} />
-        }
-        <div {...{ [clickFunction]: this.handleShadeClick }} id='shade'></div>
-        {(this.state.checkedCookie && phase === 'gameStarted') &&
-          <>
-            <HamburgerMenu
-              currentOptions={this.state.options}
-              onClickHamburgerQuit={this.handleClickHamburgerQuit}
-              onToggleOption={this.handleToggleOption}
-              clickFunction={clickFunction} />
-            <ControlFooter
-              showing={phase === 'gameStarted'}
-              currentOptions={this.state.options}
-              onClickHamburgerQuit={this.handleClickHamburgerQuit}
-              onToggleOption={this.handleToggleOption}
-              onClickEndTurn={this.handleClickEndTurn}
-              onClickStand={this.handleClickStand}
-              onClickHamburger={this.handleClickHamburger}
-              onClickSwitchSign={this.handleClickSwitchSign}
-              clickFunction={clickFunction}
-            />
-          </>
-        }
-        {(this.state.checkedCookie) &&
-          <ConfirmModal showing={this.state.confirmMessage.showing}
+            clickFunction={clickFunction}
+          />
+        )}
+        
+        <div {...{ [clickFunction]: this.handleShadeClick }} id="shade" />
+        {/* {this.state.checkedCookie && phase === 'gameStarted' && ( */}
+        {this.state.checkedCookie && (
+          <HamburgerMenu currentOptions={this.state.options} onClickHamburgerQuit={this.handleClickHamburgerQuit} onToggleOption={this.handleToggleOption} clickFunction={clickFunction} />
+        )}
+        {this.state.checkedCookie && (
+          <ConfirmModal
+            showing={this.state.confirmMessage.showing}
             messageData={this.state.confirmMessage}
             buttonText={this.state.confirmMessage.buttonText}
             onClickConfirmButton={this.handleClickConfirmButton}
             onClickCancelButton={this.handleClickCancelButton}
             clickFunction={clickFunction}
           />
-        }
-
-        {/* <img id='avatar-sheet' src='https://pazaak.online/assets/images/avatarsheet.jpg' style='display: none' /> */}
-
+        )}
+        
+        {phase === 'splashScreen2' && <Footer readyToShow={this.state.checkedCookie} />}
+        {/* <img id='avatar-sheet' src='https://pazaak.online/assets/images/avatarsheetlq.jpg' style='display: none' /> */}
       </div>
     );
   }

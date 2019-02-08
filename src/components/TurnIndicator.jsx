@@ -17,8 +17,8 @@ function TurnIndicator(props) {
           z-index: 0;
         }
         .turn-lighted {
-          animation-name: pulse;
-          //background-color: red;
+          //animation-name: pulse;
+          background-color: red;
         }
         .standing {
           background-color: rgb(189, 189, 95);
@@ -41,4 +41,4 @@ TurnIndicator.propTypes = {
   status: PropTypes.string
 };
 
-export default TurnIndicator;
+export default React.memo(TurnIndicator);

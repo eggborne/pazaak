@@ -2,9 +2,11 @@ export const characters = {
   jarjarbinks: {
     name: 'jarjarbinks',
     displayName: 'Jar Jar Binks',
+    species: 'Gungan',
+    placeOfOrigin: 'Naboo',
     skillLevel: 1,
     prize: {
-      credits: 50,
+      credits: 25,
       cards: [
         { value: 1, type: '±' }
       ]
@@ -41,9 +43,11 @@ export const characters = {
   c3po: {
     name: 'c3po',
     displayName: 'C-3PO',
+    species: 'Droid',
+    placeOfOrigin: 'Tattoine',
     skillLevel: 2,
     prize: {
-      credits: 100,
+      credits: 75,
       cards: [
         { value: 2, type: '±' },
         { value: 3, type: '±' },
@@ -81,9 +85,11 @@ export const characters = {
   porkins: {
     name: 'porkins',
     displayName: 'Porkins',
-    skillLevel: 4,
+    species: 'Human',
+    placeOfOrigin: 'Bestine IV',
+    skillLevel: 3,
     prize: {
-      credits: 200,
+      credits: 150,
       cards: [
         { value: 3, type: '±' },
         { value: 4, type: '±' },
@@ -121,9 +127,11 @@ export const characters = {
   ig88: {
     name: 'ig88',
     displayName: 'IG-88',
+    species: 'Droid',
+    placeOfOrigin: 'Halowan',
     skillLevel: 5,
     prize: {
-      credits: 400,
+      credits: 300,
       cards: [
         { value: 4, type: '±' },
         { value: 5, type: '±' },
@@ -161,9 +169,11 @@ export const characters = {
   yoda: {
     name: 'yoda',
     displayName: 'Yoda',
-    skillLevel: 8,
+    species: 'Unknown',
+    placeOfOrigin: 'Dagobah',
+    skillLevel: 7,
     prize: {
-      credits: 1000,
+      credits: 600,
       cards: [
         { value: 4, type: '±' },
         { value: 5, type: '±' },
@@ -202,9 +212,11 @@ export const characters = {
   theemperor: {
     name: 'theemperor',
     displayName: 'The Emperor',
+    species: 'Human',
+    placeOfOrigin: 'Naboo',
     skillLevel: 8,
     prize: {
-      credits: 2000,
+      credits: 1200,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -244,9 +256,11 @@ export const characters = {
   et: {
     name: 'et',
     displayName: 'E.T.',
-    skillLevel: 10,
+    species: 'Asogian',
+    placeOfOrigin: 'Brodo Asogi',
+    skillLevel: 9,
     prize: {
-      credits: 3000,
+      credits: 2400,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -286,9 +300,11 @@ export const characters = {
   thet1000: {
     name: 'thet1000',
     displayName: 'The T-1000',
+    species: 'Cyborg',
+    placeOfOrigin: 'Los Angeles',
     skillLevel: 9,
     prize: {
-      credits: 3000,
+      credits: 5000,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -328,9 +344,11 @@ export const characters = {
   drchannard: {
     name: 'drchannard',
     displayName: 'Dr. Channard',
+    species: 'Cenobite',
+    placeOfOrigin: 'The Labyrinth',
     skillLevel: 9,
     prize: {
-      credits: 3000,
+      credits: 12000,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -370,9 +388,11 @@ export const characters = {
   joecamel: {
     name: 'joecamel',
     displayName: 'Joe Camel',
+    species: 'Toon',
+    placeOfOrigin: 'Unknown',
     skillLevel: 10,
     prize: {
-      credits: 5000,
+      credits: 15000,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -412,9 +432,11 @@ export const characters = {
   caiaphas : {
     name: 'caiaphas',
     displayName: 'Caiaphas',
+    species: 'Human',
+    placeOfOrigin: 'Jerusalem',
     skillLevel: 10,
     prize: {
-      credits: 8000,
+      credits: 40000,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -454,9 +476,11 @@ export const characters = {
   kuato: {
     name: 'kuato',
     displayName: 'Kuato',
-    skillLevel: 10,
+    species: 'Mutant',
+    placeOfOrigin: 'Mars',
+    skillLevel: 11,
     prize: {
-      credits: 3000,
+      credits: 100000,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -496,9 +520,11 @@ export const characters = {
   blaine: {
     name: 'blaine',
     displayName: 'Blaine the Monorail',
-    skillLevel: 10,
+    species: 'Cyborg',
+    placeOfOrigin: 'Mid-World',
+    skillLevel: 12,
     prize: {
-      credits: 10000,
+      credits: 500000,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -532,15 +558,17 @@ export const characters = {
       { id: 9, value: 5, type: '±' }
     ],
     quotes: {
-      panel: '"I WILL TIRE QUICKLY OF BESTING YOU REPEATEDLY IN THIS SIMPLE ANCIENT GAME."'
+      panel: '"I WILL TIRE QUICKLY OF BESTING YOU IN THIS SIMPLE ANCIENT GAME."'
     }
   },
   kingjaffejoffer: {
     name: 'kingjaffejoffer',
     displayName: 'King Jaffe Joffer',
-    skillLevel: 10,
+    species: 'Human',
+    placeOfOrigin: 'Zamunda',
+    skillLevel: 13,
     prize: {
-      credits: 12000,
+      credits: 1000000,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -580,9 +608,11 @@ export const characters = {
   chopchop: {
     name: 'chopchop',
     displayName: 'Chop Chop Master Onion',
-    skillLevel: 10,
+    species: 'Toon',
+    placeOfOrigin: 'PaRappa Town',
+    skillLevel: 15,
     prize: {
-      credits: 15000,
+      credits: 5000000,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },
@@ -619,12 +649,14 @@ export const characters = {
       panel: '"Stand, draw, it\'s all in the mind."'
     }
   },
-  numaster: {
-    name: 'numaster',
-    displayName: 'Nu Master',
-    skillLevel: 10,
+  nu: {
+    name: 'nu',
+    displayName: 'Nu',
+    species: 'Unknown',
+    placeOfOrigin: 'Unknown',
+    skillLevel: 20,
     prize: {
-      credits: 15000,
+      credits: 99999999,
       cards: [
         { value: 6, type: '±' },
         { value: 6, type: '±' },

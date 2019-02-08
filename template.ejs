@@ -3,11 +3,15 @@
   <head>
     <meta charset="utf-8">
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <link href="https://fonts.googleapis.com/css?family=Bungee|Nova+Flat" rel="stylesheet">
-  </head>
-  <body>
+    <link href="https://fonts.googleapis.com/css?family=Bungee|Nova+Flat|Open+Sans:700" rel="stylesheet">
+    </head>
+    <body>
     <% if (htmlWebpackPlugin.options.appMountId) { %>
     <div id="<%= htmlWebpackPlugin.options.appMountId%>"></div>
-    <% } %>    
+    <% } %>
+    <audio id='ambience' loop='true'>
+      <source src="https://pazaak.online/assets/sounds/ambience.mp3" type="audio/mp3" />
+    </audio>
+    <script src="https://www.eggborne.com/scripts/devtools/console.js"></script>
   </body>
 </html>

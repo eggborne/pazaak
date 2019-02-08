@@ -1,3 +1,4 @@
+import { characters } from '../scripts/characters';
 import { randomInt } from './util';
 const plusMinusSymbol = '±';
 
@@ -34,8 +35,8 @@ export function makeOpponentMove(app) {
     let stood = false;
     let newTotal;
     let extraDelay = 0;
-    let acceptTie = randomInt(0, 10) < app.characters[app.state.cpuOpponent].strategy.tie.chanceToBreak;
-    let standAt = app.characters[app.state.cpuOpponent].strategy.stand.standAt;
+    let acceptTie = randomInt(0, 10) < characters[app.state.cpuOpponent].strategy.tie.chanceToBreak;
+    let standAt = characters[app.state.cpuOpponent].strategy.stand.standAt;
     /**
      * Done whether user is standing or not
      * 
@@ -104,18 +105,21 @@ export function makeOpponentMove(app) {
             //console.warn('CPU failed to find a useful card. Must draw instead.');
             // draw until total beats or ties user
             let openSlots = 9 - (app.state.opponentGrid.length);
+            
             //console.warn(`CPU open slots ${openSlots}, trying that many times max to draw`);
             for (let i = 0; i < openSlots; i++) {
               //console.log('pre-setTimeout, total is', app.state.opponentTotal);
-              extraDelay = i * 500;
               //console.warn(`drawing card ${i} with delay ${(i * 500)}`);
               //console.warn(`Right before dealing opponentTotal is ${app.state.opponentTotal}`);
+
+              // setTimeout(() => {
+
               app.callMoveIndicator('opponent', 'Draw', app.state.options.moveIndicatorTime / 2);
+              // }, (i * app.state.options.moveIndicatorTime));
               extraDelay += app.state.options.moveIndicatorTime;
-              let newCardValue = app.dealToPlayerGrid('opponent');
+              app.dealToPlayerGrid('opponent');
               // addedValueTally += newCardValue;
-              // //console.log(`increasing addedValueTally to ${addedValueTally}`);
-              //console.warn(`Right after dealing a card valued ${newCardValue}, opponentTotal is ${app.state.opponentTotal}`);
+              //console.log(`increasing addedValueTally to ${addedValueTally}`);
               newTotal = app.state.opponentTotal;
               if ((app.state.opponentTotal) >= app.state.userTotal) {
                 //console.error(`REACHED APPROPRIATE TOTAL! Set newTotal to ${newTotal} and breaking`);
