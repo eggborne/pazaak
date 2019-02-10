@@ -1,10 +1,9 @@
-import { displayError } from '../components/App';
+
 
 export const getPageLoadInfo = () => {
   let perfEntries = performance.getEntriesByType('navigation');
-  perfEntries.map((p, i) => {
+  perfEntries.map((p) => {
     document.getElementById('debug-display').innerHTML += ('connect duration = ' + (p.connectEnd - p.connectStart).toPrecision(6) + '<br />');
-
     document.getElementById('debug-display').innerHTML += ('domainLookupStart = ' + (p.domainLookupStart).toPrecision(6) + '<br />');
     document.getElementById('debug-display').innerHTML += ('domContentLoadedEventStart = ' + (p.domContentLoadedEventStart).toPrecision(6) + '<br />');
     document.getElementById('debug-display').innerHTML += ('loadEventStart = ' + (p.loadEventStart).toPrecision(6) + '<br />');
@@ -12,15 +11,12 @@ export const getPageLoadInfo = () => {
     document.getElementById('debug-display').innerHTML += ('domComplete = ' + (p.domComplete).toPrecision(6) + '<br />');
     document.getElementById('debug-display').innerHTML += ('domInteractive = ' + (p.domInteractive).toPrecision(6) + '<br />');
     document.getElementById('debug-display').innerHTML += ('duration = ' + (p.duration).toPrecision(6) + '<br />');
-
     document.getElementById('debug-display').innerHTML += ('loadEvent = ' + (p.loadEventEnd - p.loadEventStart).toPrecision(6) + '<br />');
     document.getElementById('debug-display').innerHTML += ('unloadEvent = ' + (p.unloadEventEnd - p.unloadEventStart).toPrecision(6) + '<br />');
     document.getElementById('debug-display').innerHTML += ('domainLookup = ' + (p.domainLookupEnd - p.domainLookupStart).toPrecision(6) + '<br />');
-
     document.getElementById('debug-display').innerHTML += ('transferSize = ' + p.transferSize + '<br />');
     document.getElementById('debug-display').innerHTML += ('encodedBodySize = ' + p.encodedBodySize + '<br />');
     document.getElementById('debug-display').innerHTML += ('decodedBodySize = ' + p.decodedBodySize + '<br />');
-
     document.getElementById('debug-display').innerHTML += ('redirectCount = ' + p.redirectCount + '<br />');
     document.getElementById('debug-display').innerHTML += ('time now = ' + (window.performance.now()) + '<br />');
     document.getElementById('debug-display').innerHTML += ('type = ' + p.type + '<br />');
@@ -80,8 +76,9 @@ export const checkCookie = (app) => {
     });
     document.getElementById('avatar-row').style.opacity = 1;
     console.error('No cookie found. Leaving state.userStatus.cookieId undefined. Animating starfield.');
-    document.getElementById('container').style.backgroundImage = 'url(https://pazaak.online/assets/images/starfield.png)';
+    // document.getElementById('container').style.backgroundImage = 'url(https://pazaak.online/assets/images/starfield.png)';
     document.getElementById('player-name-input').disabled = false;
+    document.getElementById('starfield').play();
     // document.getElementById('initial-loading-message').innerHTML += `<br />User not recognized.`;
   }
 };
@@ -127,9 +124,63 @@ export const getTimeSinceFromSeconds = sessionLengthInSeconds => {
   return output;
 };
 
+export function getColorValues(color) {
+  let values = { r:null, g:null, b:null, a:null };
+  if( typeof color == 'string' ){
+    /* hex */
+    if( color.indexOf('#') === 0 ){
+      color = color.substr(1);
+      if( color.length == 3 )
+        values = {
+          r:   parseInt( color[0]+color[0], 16),
+          g: parseInt( color[1]+color[1], 16),
+          b:  parseInt( color[2]+color[2], 16),
+          a: 1
+        };
+      else
+        values = {
+          r:   parseInt( color.substr(0,2), 16),
+          g: parseInt( color.substr(2,2), 16),
+          b:  parseInt( color.substr(4,2), 16),
+          a: 1
+        };
+      /* rgb */
+    }else if( color.indexOf('rgb(') === 0 ){
+      let pars = color.indexOf(',');
+      values = {
+        r:   parseInt(color.substr(4,pars)),
+        g: parseInt(color.substr(pars+1,color.indexOf(',',pars))),
+        b:  parseInt(color.substr(color.indexOf(',',pars+1)+1,color.indexOf(')'))),
+        a: 1
+      };
+      /* rgba */
+    }else if( color.indexOf('rgba(') === 0 ){
+      let pars = color.indexOf(','),
+        repars = color.indexOf(',',pars+1);
+      values = {
+        r:   parseInt(color.substr(5,pars)),
+        g: parseInt(color.substr(pars+1,repars)),
+        b:  parseInt(color.substr(color.indexOf(',',pars+1)+1,color.indexOf(',',repars))),
+        a: parseFloat(color.substr(color.indexOf(',',repars+1)+1,color.indexOf(')')))
+      };
+      /* verbous */
+    } else {
+      let stdCol = {
+        acqua: '#0ff', teal: '#008080', blue: '#00f', navy: '#000080',
+        yellow: '#ff0', olive: '#808000', lime: '#0f0', green: '#008000',
+        fuchsia: '#f0f', purple: '#800080', red: '#f00', maroon: '#800000',
+        white: '#fff', gray: '#808080', silver: '#c0c0c0', black: '#000'
+      };
+      if (stdCol[color] != undefined) {
+        values = getColorValues(stdCol[color]);
+      }
+    }
+  }
+  return values;
+}
+
 function fullScreenCall() {
-  var root = document.documentElement;
-  // var root = document.getElementById('container');
+  let root = document.documentElement;
   return root.requestFullscreen || root.webkitRequestFullscreen || root.mozRequestFullScreen || root.msRequestFullscreen;
 }
 function exitFullScreenCall() {
