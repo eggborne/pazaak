@@ -19,6 +19,7 @@ function CardBack(props) {
     <div className='card'>
       <style jsx>{`
         .card {
+          border-color: var(--card-border-color);
           width: ${cardWidth};
           height: ${cardHeight};
           border-radius: ${cardRadius};
