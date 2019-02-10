@@ -112,8 +112,7 @@ function ControlFooter(props) {
           border-color: rgba(0, 0, 0, 0.5);
         }
         #footer-contents {
-          font-family: var(--secondary-font);
-          
+          font-family: var(--secondary-font);          
           color: var(--main-text-color);
           display: inline-flex;
           align-items: flex-start;
@@ -121,6 +120,16 @@ function ControlFooter(props) {
           justify-content: space-around;
           width: 100%;
           font-size: calc(var(--menu-border-width) * 2.25);
+        }
+        #get-ready-message {
+          font-family: var(--title-font);
+          line-height: 100%; 
+          font-size: var(--medium-font-size);
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .throbbing {
           animation: throb 1000ms infinite;
@@ -168,6 +177,9 @@ function ControlFooter(props) {
         <button {...{ [props.clickFunction]: props.onClickPlay }} className='footer-button disabled-button' id='deck-ready-button'>Start!</button>
         <button {...{ [props.clickFunction]: props.onClickRandomize }} className='shadowed-text' id='randomize-button'>Random</button><div></div>
       </div>
+      }
+      {props.phase === 'versusScreen' &&
+        <div id='get-ready-message' className='shadowed-text'>Get Ready...</div>
       }
       {props.phase === 'gameStarted' &&
           <>
