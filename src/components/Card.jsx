@@ -39,7 +39,6 @@ function Card(props) {
     ? (event) => props.onClickCard(event, props.value, props.type, props.inDeck)
     : () => console.log('no click for this');
   
-  
   let animated = (props.context !== 'deck-selection-option')
     && (props.context !== 'opponent-prize');
   if (animated) {
@@ -52,14 +51,15 @@ function Card(props) {
     <div id={`${props.context}-card-${props.id}`} {...{ [props.clickFunction]: clickAction }} className='card'>
       <style jsx>{`
         .card {
+          border-color: var(--card-border-color);
           width: ${cardWidth};
           height: ${cardHeight};
           border-radius: ${cardRadius};
           border-width: ${cardBorderSize};
           opacity: ${animated && 0.1};
           transform: ${animated && 'scale(1.25)'};
-          transition: transform 300ms ease, opacity 300ms ease;
-          will-change: transform;
+          transition: ${animated && 'transform 300ms ease, opacity 300ms ease'};
+          will-change: ${animated && 'transform, opacity'};
         }        
         .inner-band {
           background-color: ${color};
@@ -106,6 +106,7 @@ function Card(props) {
         }
         .number-badge {
           border-radius: ${badgeRadius};
+          color: var(--card-text-color);
         }
       `}</style>
       <div className='inner-band'>
