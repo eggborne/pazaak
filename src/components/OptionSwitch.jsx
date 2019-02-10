@@ -13,20 +13,21 @@ function OptionSwitch(props) {
     toggleSize = 'calc(var(--mini-card-width) * 0.9)';
   }
   return (
-    <div id={`${props.type}-toggle`} {...{ [clickFunction]: props.onClick }} className={`option-switch inner-red-panel ${toggled ? 'toggle-on' : 'toggle-off'}`}>
+    <div id={`${props.type}-toggle`} {...{ [clickFunction]: props.onClick }} className={`option-switch inner-red-panel ${toggled ? 'toggle-on' : 'toggle-off'} ${props.disabled && 'switch-disabled'}`}>
       <style jsx>{`
         .option-switch {
-          //position: relative;
           --toggle-size: ${toggleSize};
           --groove-width: calc(var(--toggle-size));
-          box-sizing: border-box;
+          box-sizing: content-box;
           min-width: calc(var(--toggle-size) * 2);
-          height: 100%;
+          height: var(--toggle-size);
+          max-height: 100%;
           display: flex;
           flex-direction: column;
           align-items: center;
           padding: 0;
-          justify-content: center;    
+          justify-content: center; 
+          background-color: var(--trans-black-bg-color);   
         }
         .option-groove {
           box-sizing: border-box;
@@ -75,6 +76,16 @@ function OptionSwitch(props) {
         .toggle-off > .option-groove {
           background-color: #222 !important;
         }
+        .switch-disabled {
+          background-color: rgba(35,35,35,0.2);
+          pointer-events: none;
+        }
+        .switch-disabled > .option-toggle {
+          background-color: #555;
+        }
+        .switch-disabled > .option-groove {
+          background-color: #555 !important;
+        }
       `}</style>
       <div className={'option-toggle'} />
       <div className={'option-groove'} />
@@ -83,20 +94,22 @@ function OptionSwitch(props) {
 }
 
 OptionSwitch.defaultProps = {
-  toggled: false
+  toggled: false,
+  disabled: false
 };
 
 OptionSwitch.propTypes = {
   home: PropTypes.string,
   type: PropTypes.string,
   toggled: PropTypes.bool,
+  disabled: PropTypes.bool,
   onClick: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
-function areEqual(prevProps, nextProps) {
-  return prevProps.toggled == nextProps.toggled;
-}
+// function areEqual(prevProps, nextProps) {
+//   return prevProps.toggled == nextProps.toggled;
+// }
 
 export default OptionSwitch;
 // export default React.memo(OptionSwitch, areEqual);

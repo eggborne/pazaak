@@ -10,13 +10,6 @@ function OptionsScreen(props) {
       document.getElementById('options-screen').style.opacity = 1;
     });
   }
-  // if (document.getElementById('options-screen')) {
-  //   transitionIn(document.getElementById('options-screen'), {
-  //     property: 'transform',
-  //     preValue: 'scale(1.05)',
-  //     transition: 'transform 300ms ease'
-  //   });
-  // }
   let obscured = props.phase !== 'showingOptions';
   return (
     <div id="options-screen">
@@ -35,16 +28,19 @@ function OptionsScreen(props) {
           justify-content: space-between;
           height: var(--inner-height);
           min-width: var(--min-width);
+          padding-bottom: 3vh;
           transition: opacity var(--shift-duration) ease-out, transform var(--shift-duration) ease-out;
           will-change: transform, opacity;
         }
         #lower-options-screen {
           font-size: var(--small-font-size);
-          flex-grow: 1;
+          //flex-grow: 1;
+          height: calc(var(--inner-height));
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
+          background: green !important;
         }
         #options-screen-panel {
           box-sizing: border-box;
@@ -54,14 +50,9 @@ function OptionsScreen(props) {
         }               
       `}</style>
       <div className="options-instructions-title shadowed-text">Options</div>
-      {/* <div id="options-panel" className="shadowed-text"> */}
-      <div id="lower-options-screen">
-        <div id='options-screen-panel' className="red-panel">
-          <OptionsPanel id={'options-screen'} currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} />
-        </div>
-        
+      <div id='options-screen-panel' className="red-panel">
+        <OptionsPanel id={'options-screen'} currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} changeSliderValue={props.changeSliderValue}/>
       </div>
-      {/* </div> */}
     </div>
   );
 }
@@ -70,8 +61,8 @@ OptionsScreen.propTypes = {
   currentOptions: PropTypes.object,
   onToggleOption: PropTypes.func,
   onClickBack: PropTypes.func,
-  onClickLessOptions: PropTypes.func,
-  onClickMoreOptions: PropTypes.func,
+  onChangeBackgroundColor: PropTypes.func,
+  changeSliderValue: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
