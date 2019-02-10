@@ -32,7 +32,7 @@ function PlayingAsIndicator(props) {
           flex-direction: column;
           justify-content: flex-end;
           color: #bfb;
-          line-height: 150%;
+          line-height: 175%;
           flex-grow: 1;
           height: 100%;
           font-size: ${nameSize};
