@@ -1,16 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { portraitSources } from '../scripts/db';
+import { randomInt } from '../scripts/util';
 
 function PlayerPortrait(props) {
-  console.error('rendering PlayerPortrait', props);
+  console.big('rendering PlayerPortrait');
+  if (!props.hidden) {
+    setTimeout(() => {
+      document.getElementById(`opponent-select-portrait-cover-${props.spriteIndex}`).style.opacity =  0;
+    },2);
+  }
+  let unhiddenStatic = 0.4 + randomInt(-2, 1) / 10;
+  let staticFadeTime = 500 + randomInt(-200, 1000);  
   let portraitSize = props.size;
   let sheetWidth = portraitSize * 8;
   let sheetHeight = portraitSize * 3;
   let labelFontSize = portraitSize / 6;
   let wordsInName = props.displayName.split(' ').length;
   let totalLength = props.displayName.length;
-
   if (!props.hidden && wordsInName <= 2 && totalLength > 9
     || wordsInName > 2 && totalLength > 12) {
     labelFontSize = portraitSize / 8;
@@ -32,36 +39,39 @@ function PlayerPortrait(props) {
       backgroundPositionY = (-portraitSize * 2) + 'px';
     }
   }
-  let nullIndex = spriteIndex === null;
   let source = props.cpu ? portraitSources.opponent : portraitSources.user;
-  let backgroundSize = `${sheetWidth}px ${sheetHeight}px`;
-  if (props.hidden) {
-    backgroundSize = '100%';
+  let coverId = '';
+  if (props.type === 'opponent-panel') {
+    coverId = `opponent-select-portrait-cover-${props.spriteIndex}`;
   }
   return (
     <div className={'player-portrait'} style={ props.style }>
       <style jsx>{`
-        .player-portrait, .portrait-cover {
+        .player-portrait {
           box-sizing: border-box;
-          border-radius: ${props.type === 'header' ? '0' : '10%' };
-          border: ${borderWidth}px solid #333;
+          border-radius: 10%;
+          border: ${borderWidth}px solid var(--dark-red-bg-color);
           display: flex;
           align-items: flex-end;
           background-image: url(${source});
           background-size: ${sheetWidth}px ${sheetHeight}px;
           width: ${portraitSize}px;
+          max-width: ${portraitSize}px;
           height: ${portraitSize}px;
           max-height: ${portraitSize}px;
           background-position-x: ${backgroundPositionX};
           background-position-y: ${backgroundPositionY};
         }
         .portrait-cover {
+          box-sizing: border-box;
+          background-clip: padding-box;
+          border-radius: 10%;
           position: absolute;
-          opacity: 0.9;
-          display: ${props.hidden || 'none'};
-          width: ${portraitSize}px;
-          height: ${portraitSize}px;
-          z-index: 200;
+          opacity: ${props.hidden ? 0.9 : props.type === 'opponent-panel' ? unhiddenStatic : 0};
+          //display: ${props.hidden || 'none'};
+          z-index: 12;
+          width: ${portraitSize - (borderWidth)}px;
+          transform: translate(-1px, 1px);
         }
         .player-portrait-label {
           width: 100%;
@@ -75,12 +85,17 @@ function PlayerPortrait(props) {
           align-items: center;
           border-radius: 0 0 10% 10%;
         }
+        video {
+          transition: opacity ${staticFadeTime}ms ease;
+          transition-delay: 500ms;
+
+        }
       `}
       </style>
+      <video id={coverId} autoPlay loop src='https://pazaak.online/assets/images/statictv.webm' className='portrait-cover'/>
       {props.displayName &&
         <div className={'player-portrait-label'}>{props.displayName}</div>
       }
-      <img src='https://pazaak.online/assets/images/tvstatic.gif' className='portrait-cover'/>
     </div>
   );
 }
