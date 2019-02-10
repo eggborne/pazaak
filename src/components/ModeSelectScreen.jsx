@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isFullScreen } from '../scripts/util';
 
 function ModeSelectScreen(props) {
   requestAnimationFrame(() => {
@@ -28,10 +27,9 @@ function ModeSelectScreen(props) {
           justify-content: space-between;
         }
         #mode-select-choices {
-          margin-top: 7vmin;
+          //margin-top: var(--control-footer-height);
           display: flex;
           flex-direction: column;
-          align-items: center;
           flex-grow: 1;
         }
         .mode-panel {
@@ -41,20 +39,21 @@ function ModeSelectScreen(props) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          margin-bottom: 3vh;
           opacity: 0.8;
           transition: border 300ms ease,  opacity 300ms ease, transform 200ms ease;
           will-change: transform, opacity, border;
         }
+        .mode-panel:first-of-type {
+          margin-top: 3vh;
+          margin-bottom: 3vh;
+        }
         .mode-panel > div {
-          width: 100%;
-          
+          width: 100%;          
         }
         .mode-button {
           line-height: 100%;
           box-sizing: border-box;
-          //width: 100%;
-          height: 12vh;
+          height: 10vh;
           display: flex;
           justify-content: center;
           align-items: center;
