@@ -16,7 +16,7 @@ function InstructionsScreen(props) {
   //   });
   // }
   return (
-    <div id="instructions-screen">
+    <div id="instructions-screen" className='shadowed-text'>
       <style jsx>{`
         #instructions-screen {
           position: absolute;
@@ -26,7 +26,6 @@ function InstructionsScreen(props) {
           transition: opacity var(--shift-duration) ease-out, transform var(--shift-duration) ease-out;
           will-change: opacity, transform;
           font-size: var(--small-font-size);
-          flex-grow: 1;
           height: var(--inner-height);
           overflow-y: scroll;
           pointer-events: ${props.phase === 'showingInstructions' || 'none'};
@@ -37,11 +36,8 @@ function InstructionsScreen(props) {
           padding: var(--micro-card-width);
           padding-top: 0;
           padding-bottom: 0;
-          flex-grow: 1;
-          //min-height: 100%;
           overflow-y: scroll;
           min-height: 0;
-          //padding-bottom: var(--header-height);
         }
         #instructions > p {
           padding-bottom: calc(var(--header-height) / 2);
@@ -53,7 +49,7 @@ function InstructionsScreen(props) {
           color: var(--house-card-color);
         }
       `}</style>
-      <div className="options-instructions-title shadowed-text">How to play</div>
+      <div className="options-instructions-title">How to play</div>
       <div id="instructions">
         <h3>It looks like an Imperial cruiser.</h3>
         <p>
