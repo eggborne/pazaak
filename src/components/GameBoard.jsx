@@ -119,9 +119,6 @@ class GameBoard extends React.PureComponent {
     if (cardsPerWidth >= 6.4) {
       console.info('okay for medium - cardsPerWidth', cardsPerWidth);
       handCardSize = 'medium';
-      if (cardsPerWidth) {
-
-      }
     } else {
       portraitSize =  parseFloat(actualCardWidth) * 0.9;
       handCardSize = 'mini';
@@ -138,10 +135,6 @@ class GameBoard extends React.PureComponent {
     });
     let handCardWidth = `var(--${handCardSize}-card-width)`;
     let handCardHeight = `var(--${handCardSize}-card-height)`;
-    let handGridWidth = handCardWidth;
-    let handGridHeight = handCardHeight;
-    
-    // let portraitSize = Math.round(parseInt(handCardSize.width * 1.75));
     let opponentPortraitIndex = this.props.opponentNames.indexOf(this.props.cpuOpponent);
 
     return (
@@ -168,10 +161,9 @@ class GameBoard extends React.PureComponent {
           justify-content: center;
           width: 100%;
           flex-grow: 1;
-          padding-top: var(--menu-border-width);
-          padding-bottom: var(--menu-border-width);
-          //background: plum !important;
-          //transition: background-color 800ms ease;
+          //padding-top: var(--menu-border-width);
+          //padding-bottom: var(--menu-border-width);
+          transition: background-color 1000ms ease;
         }
         .player-hand-area {
           box-sizing: border-box;
@@ -182,9 +174,7 @@ class GameBoard extends React.PureComponent {
           flex-grow: 1;
           padding-top: var(--menu-border-width);
           padding-bottom: var(--menu-border-width);
-          transition: background-color 800ms ease;
-
-          //background: purple !important;
+          transition: background-color 1000ms ease;
         }        
         #user-area, #user-hand {
           background-color: ${this.readyToStart && 'var(--trans-blue-bg-color)'};
@@ -193,10 +183,12 @@ class GameBoard extends React.PureComponent {
           background-color: ${this.readyToStart && 'var(--trans-red-bg-color)'};
         }
         #opponent-area {
+          padding-bottom: var(--menu-border-width);
           border-bottom: calc(var(--menu-border-width) / 6) solid #222;
           //border-bottom: 1px solid red;
         }
         #user-area {
+          padding-top: var(--menu-border-width);
           border-top: calc(var(--menu-border-width) / 6) solid #333;
           //border-top: 1px solid #5f5;
           //background: green !important;
@@ -285,8 +277,8 @@ class GameBoard extends React.PureComponent {
           border-color: green !important;
         }
         .turn-indicator-area, .portrait-area {
-          width: ${handGridHeight};
-          height: ${handGridHeight};
+          width: ${handCardHeight};
+          height: ${handCardHeight};
           display: flex;          
           align-items: center;
           justify-content: center;
