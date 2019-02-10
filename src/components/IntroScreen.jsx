@@ -10,7 +10,6 @@ function IntroScreen(props) {
       document.documentElement.style.setProperty('--main-opacity', 1);
       document.getElementById('intro-screen-body').style.transform = 'none';
       document.getElementById('intro-screen-body').style.opacity = 1;
-      //document.getElementById('intro-screen-body').style.opacity = 1;
     });
   } else if (props.readyToShow && props.phase === 'splashScreen') {
     requestAnimationFrame(() => {
@@ -147,7 +146,6 @@ IntroScreen.propTypes = {
 
 function areEqual(prevProps, nextProps) {
   if (prevProps.phase == 'splashScreen' && nextProps.phase != 'splashScreen') {
-    // document.documentElement.style.setProperty('--main-opacity', 0);
     document.getElementById('intro-screen-body').style.transform = 'scale(0.9)';
     document.getElementById('intro-screen-body').style.opacity = 0;
     document.getElementById('intro-screen-body').style.pointerEvents = 'none';
