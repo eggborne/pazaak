@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import OptionsPanel from './OptionsPanel';
-import { isFullScreen } from '../scripts/util';
 
 function HamburgerMenu(props) {
   return (
@@ -12,7 +11,6 @@ function HamburgerMenu(props) {
           box-sizing: border-box;
           right: 0;
           bottom: calc(var(--control-footer-height) - var(--menu-border-radius));
-          //bottom: calc(var(--control-footer-height));
           font-size: var(--small-font-size);
           font-family: var(--main-font);
           padding-bottom: calc(var(--menu-border-width) * 3);       
@@ -20,7 +18,6 @@ function HamburgerMenu(props) {
           border-bottom: 0;
           z-index: 0;
           transform: translateX(100%);
-          //transform: var(--hamburger-off-state);
           transition: transform 400ms ease;
           display: flex;
           flex-direction: column;
@@ -53,7 +50,7 @@ function HamburgerMenu(props) {
           transform: none !important;
         }
       `}</style>
-      <OptionsPanel id='hamburger' currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} />
+      <OptionsPanel id='hamburger' currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} />
       <div id='hamburger-button-area'>
         <button {...{ [props.clickFunction]: props.onClickHamburgerQuit }} id="hamburger-quit-button" className="hamburger-button">
           Quit Match
@@ -66,6 +63,7 @@ HamburgerMenu.propTypes = {
   currentOptions: PropTypes.object,
   onClickHamburgerQuit: PropTypes.func,
   onToggleOption: PropTypes.func,
+  onChangeBackgroundColor: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
