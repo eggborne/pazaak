@@ -11,19 +11,19 @@ function OpponentPanel(props) {
   if (props.character.skillLevel > 10) {
     maxSkill = props.character.skillLevel;
   }
-  let skillArray = Array.apply(null, Array(maxSkill)).map(function() {});
+  let skillArray = Array.apply(null, Array(maxSkill)).map(function () { });
   let portraitSize = window.innerWidth * 0.35;
   let wordsInName = props.character.displayName.split(' ').length;
   let totalLength = props.character.displayName.length;
   let nameFontSize = 'var(--medium-font-size)';
   let quoteLength = props.character.quotes.panel.length;
-  let quoteTextSize;
+  let quoteTextSize = 'calc(var(--medium-font-size) / 1.25)';
   if (props.available) {
-    if (quoteLength > 25) {
+    if (quoteLength > 50) {
       // quoteTextSize = '1rem';
       quoteTextSize = 'var(--small-font-size)';
     }
-    if (quoteLength > 50) {
+    if (quoteLength > 70) {
       quoteTextSize = 'calc(var(--small-font-size) * 0.8)';
     }
     if ((wordsInName <= 2 && totalLength > 8) || (wordsInName > 2 && totalLength > 12)) {
@@ -37,13 +37,14 @@ function OpponentPanel(props) {
   }
   if (document.getElementById(`${charName}-panel`) && document.getElementById(`${charName}-panel`).style.opacity) {
     document.getElementById(`${charName}-panel`).style.opacity = 0;
-    document.getElementById(`${charName}-panel`).style.transform = `translateX(${props.slideAmount}%)  scale(0.9)`;
+    // document.getElementById(`${charName}-panel`).style.transform = `translateX(${props.slideAmount}%)`;
+    document.getElementById(`${charName}-panel`).style.transform = `translateX(${props.slideAmount}%)`;
   }
   setTimeout(() => {
     document.getElementById(`${charName}-panel`).style.opacity = 1;
     document.getElementById(`${charName}-panel`).style.transform = 'none';
   }, 1);
-  let panelQuote = props.available ? props.character.quotes.panel : '** unavailable **';
+  let panelQuote = props.available ? props.character.quotes.panel : '(transmission unavailable)';
   return (
     <div id={`${charName}-panel`} className={`opponent-select-entry red-panel ${props.available || 'unavailable'}`}>
       <style jsx>
@@ -57,7 +58,7 @@ function OpponentPanel(props) {
             will-change: transform;
             width: 90%;
             display: ${props.selected || 'none'};
-            transition: transform 200ms ease-out, opacity 200ms ease-out;
+            transition: transform 210ms linear, opacity 210ms ease;
             will-change: transform, opacity;
           }
           .left-opponent-panel {
@@ -75,9 +76,13 @@ function OpponentPanel(props) {
             align-self: flex-start;
             display: flex;
             align-items: center;
+            justify-content: center;
             padding-left: var(--opponent-panel-padding);
             padding-right: var(--opponent-panel-padding);
-            height: 100%;
+            height: var(--normal-card-height);
+            min-height: var(--normal-card-height);
+            text-align: ${props.available || 'center'};
+            width: ${props.available || '100%'};
           }
           .opponent-name-area {
             grid-column-start: 1;
@@ -211,7 +216,7 @@ function OpponentPanel(props) {
           }
           .big-throbbing {
             animation: big-throb 1200ms infinite;
-          }
+          }   
         `}
       </style>
       <div className='left-opponent-panel'>
@@ -219,7 +224,7 @@ function OpponentPanel(props) {
           {/* {props.character.displayName} */}
         </div>
         {props.selected &&
-          <PlayerPortrait hidden={!props.available} size={portraitSize} cpu={true} spriteIndex={props.index} displayName={''} />
+          <PlayerPortrait type='opponent-panel' hidden={!props.available} size={portraitSize} cpu={true} spriteIndex={props.index} displayName={''} />
         }
         <div id={`${charName}-quote`} className='opponent-quote'>
           {panelQuote}
@@ -280,7 +285,7 @@ OpponentPanel.propTypes = {
 };
 
 function areEqual(prevProps, nextProps) {
-  return prevProps.selected === nextProps.selected;
+  return prevProps.selected == nextProps.selected;
 }
 
 // export default OpponentPanel;
