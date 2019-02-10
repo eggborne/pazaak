@@ -12,7 +12,7 @@
   --medium-font-size: 3vh;
   --med-large-font-size: 4.5vh;
   --large-font-size: 6vh;
-  --main-bg-color: rgb(107, 121, 138);
+  --main-bg-color: rgba(107, 121, 138, 1);
   --main-text-color: rgb(255, 247, 213);
   --option-on-color: rgb(94, 128, 94);
   --option-on-color: rgb(113, 151, 113);
@@ -24,7 +24,6 @@
   --trans-black-bg-color: rgba(0, 0, 0, 0.1);
 
   --button-bg-color: rgb(15, 14, 17);
-  --disabled-button-bg-color: #352222;
   --disabled-button-bg-color: #312e2e;
 
   --button-text-color: #5cb3ff;
@@ -41,13 +40,14 @@
   --medium-red-bg-color: #490000;
   --dark-red-bg-color: #380000;
 
-  --card-text-color: #ffffff;
   --card-bg-color: #ccc;
+  --card-text-color: #ffffff;
   --house-card-color: #d3d300;
   --plus-card-color: #0c00b2;
   --minus-card-color: #a70003;
   --card-back-color: #ccc;
   --card-back-bg-color: gray;
+  --card-border-color: black;
   --card-back-border-color: #444;
   --card-spot-border-color: #222;
   /* --card-spot-bg-color: rgba(0, 0, 0, 0.05); */
@@ -96,8 +96,6 @@
 
   --card-buffer-size: 0.5vw;
 
-  --hamburger-off-state: translateX(100%);
-
   --shift-duration: 400ms;
   --shift-duration-out: 300ms;
   --shift-distance: 5%;
@@ -110,6 +108,10 @@
 
 .no-transition {
   transition: unset !important;
+}
+
+video::-internal-media-controls-overlay-cast-button {
+  display: none;
 }
 
 @media screen and (orientation: landscape) {
@@ -170,6 +172,7 @@ body {
   margin: 0 auto;
   /* background-color: var(--main-bg-color); */
   color: var(--main-text-color);
+  transition: background-color 300ms ease;
 }
 #content-area {
   width: 100%;
@@ -380,13 +383,14 @@ li:before {
   flex-grow: 2;
 } */
 .options-instructions-title {
+  text-align: center;
   font-family: var(--title-font);
   box-sizing: border-box;
   font-size: var(--large-font-size);
+  height: var(--control-footer-height);
+  min-height: var(--control-footer-height);
   line-height: 100%;
   width: 100vw;
-  height: calc(var(--control-footer-height));
-  min-height: calc(var(--control-footer-height));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -671,9 +675,6 @@ li:before {
 /* Desktop landscape */
 
 @media screen and (orientation: landscape) and (min-device-width: 1200px) and (max-device-width: 1600px) and (-webkit-min-device-pixel-ratio: 1) {
-  #container {
-    /* max-width: 500px; */
-  }
   button {
     min-width: 0 !important;
     min-height: 0 !important;
@@ -690,9 +691,6 @@ li:before {
     border-radius: 0.5rem;
     margin-top: 1vh;
     margin-bottom: 1vh;
-  }
-  #intro-screen-body {
-    /* max-width: 500px; */
   }
   body {
     /* box-sizing: border-box; */
