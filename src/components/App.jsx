@@ -13,6 +13,7 @@ import GameBoard from './GameBoard';
 import ResultModal from './modals/ResultModal';
 import ConfirmModal from './modals/ConfirmModal';
 import ModeSelectScreen from './ModeSelectScreen';
+import VersusScreen from './VersusScreen';
 import Footer from './Footer';
 import Toast from './modals/Toast';
 let DB = require('../scripts/db');
@@ -153,9 +154,17 @@ class App extends React.Component {
       toastMessage: 'Suck a cock.',
       options: {
         sound: false,
+        soundVolume: 1,
         ambience: false,
-        quickMode: false,
+        ambienceVolume: 1,
+        music: false,
+        musicVolume: 1,
+        quickTurns: false,
         darkTheme: false,
+        solidBackground: false,
+        backgroundColor: null,
+        autoStand: false,
+        darkCards: false,
         fullScreen: false,
         turnInterval: 800,
         gameStartDelay: 2000,
@@ -275,7 +284,7 @@ class App extends React.Component {
     window.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
     window.addEventListener('msfullscreenchange', this.handleFullscreenChange);
 
-    // window.addEventListener('resize', this.sizeCards);
+    window.addEventListener('resize', this.sizeCards);
 
     //debug ? document.getElementById('debug-display').addEventListener('click', hideDebug) : null;
   }
@@ -290,7 +299,7 @@ class App extends React.Component {
     // let perfectWidth = window.innerWidth / 5.6;
     let perfectWidth = window.innerWidth / 5.55;
     // let perfectHeight = window.innerHeight / 7.65;
-    let perfectHeight = window.innerHeight / 7.65;
+    let perfectHeight = window.innerHeight / 7.8;
     //console.info('perfectWidth', perfectWidth);
     let proposedRatio = perfectHeight / perfectWidth;
     //console.info('perfectHeight', perfectHeight);
@@ -520,7 +529,7 @@ class App extends React.Component {
   }
   getPlayerRecords() {
     let sinceLastGot = Date.now() - lastGotRecords;
-    console.warn('--------- since got ----', sinceLastGot);
+    console.warn('--------- since got ' + sinceLastGot);
     if (sinceLastGot >= 60000) {
       console.big('RETRIEVING HIGH SCORES FROM DB', 'brown');
       return new Promise((resolve, reject) => {
@@ -533,7 +542,6 @@ class App extends React.Component {
             playerRecordArray.map((playerScore, i) => {
               playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated);
               playerScore.preferences = JSON.parse(playerScore.preferences);
-              playerScore.messages = JSON.parse(playerScore.messages);
             });
           }
           this.setState(
@@ -685,7 +693,13 @@ class App extends React.Component {
       let defaultOptions = {
         sound: false,
         ambience: false,
+        music: false,
         darkTheme: false,
+        quickTurns: false,
+        darkCards: false,
+        autoStand: false,
+        solidBackground: false,
+        backgroundColor: null,
         animatedStarfield: true,
         turnInterval: 300,
         flashInterval: 90,
@@ -741,6 +755,15 @@ class App extends React.Component {
     }
     let optionsCopy = Object.assign({}, this.state.options);
     if (forceDirection === 'on' || (!forceDirection && el.classList.contains('toggle-off'))) {
+      if (eventId === 'solid-background-toggle' || eventId === 'hamburger-solid-background-toggle') {
+        optionsCopy.solidBackground = true;
+        document.getElementById('starfield').style.display = 'none';
+        console.big(this.state.options.backgroundColor);
+        document.getElementById('container').style.backgroundColor = this.state.options.backgroundColor;
+      }
+      if (eventId === 'auto-stand-toggle' || eventId === 'hamburger-auto-stand-toggle') {
+        optionsCopy.autoStand = true;
+      }
       if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = true;
       }
@@ -748,11 +771,15 @@ class App extends React.Component {
         optionsCopy.ambience = true;
         document.getElementById('ambience').play();
       }
-      if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {       
+      if (eventId === 'music-toggle' || eventId === 'hamburger-music-toggle') {
+        optionsCopy.music = true;
+        // document.getElementById('music').play();
+      }
+      if (eventId === 'quick-turns-toggle' || eventId === 'hamburger-quick-turns-toggle') {       
         ROOT.style.setProperty('--pulse-speed', '500ms');
         optionsCopy.turnInterval = 200;
         optionsCopy.opponentMoveWaitTime = 300;
-        optionsCopy.quickMode = true;
+        optionsCopy.quickTurns = true;
       }
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {      
         ROOT.style.setProperty('--main-text-color', '#ababbb');
@@ -765,6 +792,17 @@ class App extends React.Component {
         ROOT.style.setProperty('--special-button-text-color', '#e49f51');
         optionsCopy.darkTheme = true;
       }
+      if (eventId === 'dark-cards-toggle' || eventId === 'hamburger-dark-cards-toggle') {
+        ROOT.style.setProperty('--card-bg-color', '#010101');
+        ROOT.style.setProperty('--house-card-color', '#313100');
+        ROOT.style.setProperty('--plus-card-color', '#02001f');
+        ROOT.style.setProperty('--minus-card-color', '#240001');
+        ROOT.style.setProperty('--card-back-color', '#252525');
+        ROOT.style.setProperty('--card-back-bg-color', '#111');
+        ROOT.style.setProperty('--card-border-color', '#151515');
+        ROOT.style.setProperty('--card-text-color', '#666');
+        optionsCopy.darkCards = true;
+      }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
         // el.classList.add('disabled-button');
         Util.toggleFullScreen(this);
@@ -772,12 +810,19 @@ class App extends React.Component {
       }
       if (eventId === 'animated-starfield-toggle' || eventId === 'hamburger-animated-starfield-toggle') {
         console.pink('anim star ON')
-        // document.getElementById('container').style.backgroundImage = 'none',
         document.getElementById('starfield').play();
         optionsCopy.animatedStarfield = true;
       }
     }
     if (forceDirection === 'off' || (!forceDirection && el.classList.contains('toggle-on'))) {
+      if (eventId === 'solid-background-toggle' || eventId === 'hamburger-solid-background-toggle') {
+        optionsCopy.solidBackground = false;
+        document.getElementById('starfield').style.display = 'block';
+        document.getElementById('container').style.backgroundColor = 'transparent';
+      }
+      if (eventId === 'auto-stand-toggle' || eventId === 'hamburger-auto-stand-toggle') {
+        optionsCopy.autoStand = false;
+      }
       if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = false;
       }
@@ -785,11 +830,15 @@ class App extends React.Component {
         optionsCopy.ambience = false;
         document.getElementById('ambience').pause();
       }
-      if (eventId === 'quick-mode-toggle' || eventId === 'hamburger-quick-mode-toggle') {
+      if (eventId === 'music-toggle' || eventId === 'hamburger-music-toggle') {
+        optionsCopy.music = false;
+        // document.getElementById('music').pause();
+      }
+      if (eventId === 'quick-turns-toggle' || eventId === 'hamburger-quick-turns-toggle') {
         ROOT.style.setProperty('--pulse-speed', '900ms');
         optionsCopy.turnInterval = 800;
         optionsCopy.opponentMoveWaitTime = 1600;
-        optionsCopy.quickMode = false;
+        optionsCopy.quickTurns = false;
       }
       if (eventId === 'dark-theme-toggle' || eventId === 'hamburger-dark-theme-toggle') {
         ROOT.style.setProperty('--main-text-color', 'rgb(255, 247, 213)');
@@ -801,6 +850,17 @@ class App extends React.Component {
         ROOT.style.setProperty('--button-text-color', '#5cb3ff');
         ROOT.style.setProperty('--special-button-text-color', '#529e4b');
         optionsCopy.darkTheme = false;
+      }
+      if (eventId === 'dark-cards-toggle' || eventId === 'hamburger-dark-cards-toggle') {
+        ROOT.style.setProperty('--card-bg-color', '#ccc');
+        ROOT.style.setProperty('--house-card-color', '#d3d300');
+        ROOT.style.setProperty('--plus-card-color', '#0c00b2');
+        ROOT.style.setProperty('--minus-card-color', '#a70003');
+        ROOT.style.setProperty('--card-back-color', '#ccc');
+        ROOT.style.setProperty('--card-back-bg-color', 'gray');
+        ROOT.style.setProperty('--card-border-color', 'black');
+        ROOT.style.setProperty('--card-text-color', '#ffffff');
+        optionsCopy.darkCards = false;
       }
       if (eventId === 'full-screen-toggle' || eventId === 'hamburger-full-screen-toggle') {
         // el.classList.add('disabled-button');
@@ -858,8 +918,18 @@ class App extends React.Component {
   applyStateOptions = forceDirection => {
     let optionsCopy = Object.assign({}, this.state.options);
     let optionsArray = Object.keys(optionsCopy);
+    let changeableOptions = [
+      'sound',
+      'ambience',
+      'darkTheme',
+      'darkCards',
+      'quickTurns',
+      'animatedStarfield',
+      'solidBackground',
+      'autoStand',
+    ] 
     optionsArray.map((option, i) => {
-      if (i <= 3 || option === 'animatedStarfield') {
+      if (changeableOptions.indexOf(option) > -1) {
         let eventId;
         if (option === 'sound') {
           eventId = 'sound-fx-toggle';
@@ -870,14 +940,24 @@ class App extends React.Component {
         if (option === 'darkTheme') {
           eventId = 'dark-theme-toggle';
         }
-        if (option === 'quickMode') {
-          eventId = 'quick-mode-toggle';
+        if (option === 'darkCards') {
+          eventId = 'dark-cards-toggle';
+        }
+        if (option === 'quickTurns') {
+          eventId = 'quick-turns-toggle';
         }
         if (option === 'animatedStarfield') {
           eventId = 'animated-starfield-toggle';
         }
+        if (option === 'solidBackground') {
+          eventId = 'solid-background-toggle';
+        }
+        if (option === 'autoStand') {
+          eventId = 'auto-stand-toggle';
+        }
         if (forceDirection === 'on') {
           if (optionsCopy[option]) {
+            console.log('toggling ', option, eventId)
             this.handleToggleOption(eventId, forceDirection);
           } 
         } else {          
@@ -938,18 +1018,27 @@ class App extends React.Component {
             // document.getElementById('initial-loading-message').innerHTML += `<div class='loading-event-text'>User recognized as</div><div class='loading-event-text green-text'>${enteredName}</div>`;
 
             let playerObj = Object.assign({}, response.data[playerIndex]);
-            let oldOptionsArr = Object.values(this.state.options);
-            let newOptionsArr = Object.values(JSON.parse(playerObj.preferences));
+            let oldOptionsArr = this.state.options;
+            let newOptionsArr = JSON.parse(playerObj.preferences);
             console.warn('GOT playerObj', newOptionsArr);
             console.warn('already had', oldOptionsArr);
             let nonDefaultOptions = false;
 
-            newOptionsArr.map((option, i) => {
-              if (oldOptionsArr[i] !== option) {
-                console.log(`${Object.keys(JSON.parse(playerObj.preferences))[i]} ${option} don't match no ${oldOptionsArr[i]}`);
+            // newOptionsArr.map((option, i) => {
+            //   if (oldOptionsArr[i] !== option) {
+            //     console.log(`${Object.keys(JSON.parse(playerObj.preferences))[i]} ${option} don't match no ${oldOptionsArr[i]}`);
+            //     nonDefaultOptions = true;
+            //   }
+            // });
+
+            for (let option in newOptionsArr) {
+              console.log('option', option)
+              if (oldOptionsArr[option] !== newOptionsArr[option]) {
                 nonDefaultOptions = true;
+                console.log(`new option ${option} ${newOptionsArr[option]} don't match no old ${option} ${oldOptionsArr[option]}`);
+
               }
-            });
+            }
 
             console.log('DB options different than default?', nonDefaultOptions);
             playerObj.cpuDefeated = JSON.parse(playerObj.cpuDefeated);
@@ -964,10 +1053,17 @@ class App extends React.Component {
               console.green('non-default options found! Setting options from DB.');
               if (this.state.sounds === null && playerObj.preferences.sound) {
                 this.loadSounds();
-              }
-           
+              }              
               playerObj.preferences = JSON.parse(playerObj.preferences);
-
+              playerObj.preferences.fullScreen = false;
+              ROOT.style.setProperty('--main-bg-color', playerObj.preferences.backgroundColor);
+              console.log('GOT BG COLOR ---------->', playerObj.preferences.backgroundColor);
+              if (playerObj.preferences.solidBackground) {
+                // document.getElementById('container').style.backgroundColor = playerObj.preferences.backgroundColor;
+              }
+              playerObj.preferences.ambienceVolume = parseFloat(playerObj.preferences.ambienceVolume);
+              console.info('final prefoptions to send to state from db:')
+              console.info(playerObj.preferences)
               this.setState(
                 {
                   userStatus: playerObj,
@@ -981,6 +1077,7 @@ class App extends React.Component {
             } else {
               console.green('NOT setting options from DB.');
               // document.getElementById('container').style.backgroundImage = `url('https://pazaak.online/assets/images/starfield.png')`;
+              document.getElementById('starfield').play();
               this.setState({
                 userStatus: playerObj,
                 checkedCookie: true
@@ -1206,11 +1303,21 @@ class App extends React.Component {
   initiateGame = () => {
     this.getNewPlayerHands();
     this.setState({
-      phase: 'gameStarted'
-    });
-    setTimeout(() => {
-      this.dealToPlayerGrid(this.state.turn);
-    }, this.state.options.gameStartDelay);
+      // phase: 'gameStarted'
+      phase: 'versusScreen'
+    }, () => {
+        setTimeout(() => {
+          document.getElementById('versus-screen').classList.add('leaving');
+        }, 1500);
+        setTimeout(() => {
+          this.setState({
+            phase: 'gameStarted'
+          });
+        }, 1800);
+      });
+    // setTimeout(() => {
+    //   this.dealToPlayerGrid(this.state.turn);
+    // }, this.state.options.gameStartDelay);
   }
   handleClickPlay = event => {
     // this.playSound('click');
@@ -2100,6 +2207,54 @@ class App extends React.Component {
     });
   };
 
+  handleChangeBackgroundColor = (newColor) => {
+    console.info('App.handleChangeBackgroundColor took in newColor');
+    console.info(newColor);
+    let newOptions = { ...this.state.options };
+    // newColor.a = parseFloat(newColor.a);
+    // if (newColor.a > 0) {
+    //   let decimalSplit = newColor.a.toString().split('.');
+    //   if (decimalSplit[0].length > 1) {
+    //     newColor.a = decimalSplit[0][0].toString() + '.' + decimalSplit[1];
+    //     newColor.a = parseFloat(newColor.a);
+    //   } 
+    // }
+    let finalColorString = `rgba(${newColor.r}, ${newColor.g}, ${newColor.b}, ${newColor.a})`;
+    console.info('sending finalColorString', finalColorString)
+    newOptions.backgroundColor = finalColorString;
+    this.setState({
+      options: newOptions
+    }, () => {
+      ROOT.style.setProperty('--main-bg-color', finalColorString);
+      if (newOptions.solidBackground) {
+        document.getElementById('container').style.backgroundColor = 'var(--main-bg-color)';
+      }
+      let optionsCopy = {...this.state.options};
+      let optionsString = JSON.stringify(optionsCopy);
+      DB.updatePreferences(this.state.userStatus.cookieId, optionsString).then((response) => {
+        console.log('updatePreferences', response);
+        if (this.state.phase === 'showingOptions' || this.state.phase === 'gameStarted')
+        this.callToast(`${finalColorString} saved.`, 'vertical');
+      });
+    })
+  }
+
+  handleSliderChange = (type, newValue) => {
+    if (type === 'ambience-volume') {
+      let newOptions = { ...this.state.options };
+      document.getElementById('ambience').volume = newValue;
+      newOptions.ambienceVolume = newValue;
+      let optionsCopy = {...this.state.options};
+      let optionsString = JSON.stringify(optionsCopy);
+      DB.updatePreferences(this.state.userStatus.cookieId, optionsString).then((response) => {
+        console.log('updatePreferences', response);
+      });
+      // this.setState({
+      //   options: newOptions
+      // });    
+    }
+    //this.callToast(`Ambience volume ${newValue} saved.`, 'vertical')
+  }
   render() {
     console.green('APP RENDERING ----');
     let phase = this.state.phase;
@@ -2122,8 +2277,11 @@ class App extends React.Component {
           <div id="debug-touch-display" />
         </div> */}
         <video id='starfield' loop={true} muted={true}>
-          <source src="https://pazaak.online/assets/images/starfield.mp4" type="video/mp4" />
-        </video>        
+          <source src="https://pazaak.online/assets/images/starfieldlq2.mp4" type="video/mp4" />
+        </video>   
+        <audio id='ambience' loop={true}>
+          <source src="https://pazaak.online/assets/sounds/ambience.mp3" type="audio/mp3" />
+        </audio>
         {domLoaded && (
           <HeaderMenu
             playerObject={this.state.userStatus}
@@ -2146,7 +2304,7 @@ class App extends React.Component {
           clickFunction={clickFunction}
         />
         <div id="content-area">
-          {(phase === 'splashScreen' || onIntroPhase) && (
+          {(this.state.checkedCookie && phase === 'splashScreen' || onIntroPhase) && (
             <>
             <IntroScreen
               phase={phase}
@@ -2168,6 +2326,8 @@ class App extends React.Component {
               onClickBack={event => {
                 this.handleClickBack(event, 'splashScreen');
               }}
+              onChangeBackgroundColor={this.handleChangeBackgroundColor}
+              changeSliderValue={this.handleSliderChange}
               clickFunction={clickFunction}
             />
             <InstructionsScreen
@@ -2310,7 +2470,12 @@ class App extends React.Component {
         <div {...{ [clickFunction]: this.handleShadeClick }} id="shade" />
         {/* {this.state.checkedCookie && phase === 'gameStarted' && ( */}
         {this.state.checkedCookie && (
-          <HamburgerMenu currentOptions={this.state.options} onClickHamburgerQuit={this.handleClickHamburgerQuit} onToggleOption={this.handleToggleOption} clickFunction={clickFunction} />
+          <HamburgerMenu
+            currentOptions={this.state.options}
+            onClickHamburgerQuit={this.handleClickHamburgerQuit}
+            onToggleOption={this.handleToggleOption}            
+            onChangeBackgroundColor={this.handleChangeBackgroundColor}
+            clickFunction={clickFunction} />
         )}
         {this.state.checkedCookie && (
           <ConfirmModal
@@ -2322,8 +2487,9 @@ class App extends React.Component {
             clickFunction={clickFunction}
           />
         )}
-        
-        {phase === 'splashScreen2' && <Footer readyToShow={this.state.checkedCookie} />}
+        {pageLoaded && (phase === 'versusScreen' || phase === 'gameStarted') &&
+          <VersusScreen phase={phase} userData={this.state.userStatus} opponentData={characters[this.state.cpuOpponent]} opponentAvatarIndex={characterArray.indexOf(characters[this.state.cpuOpponent])} />
+        }
         {/* <img id='avatar-sheet' src='https://pazaak.online/assets/images/avatarsheetlq.jpg' style='display: none' /> */}
       </div>
     );
