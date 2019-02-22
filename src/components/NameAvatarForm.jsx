@@ -16,7 +16,6 @@ class NameAvatarForm extends React.PureComponent {
   }
   handleInputChange(event) {
     let checkbox = document.getElementById('remember-checkbox');
-    console.log('event', event);
     if (event.target.value.length < 3) {
       if (!checkbox.disabled) {
         checkbox.disabled = true;
@@ -30,17 +29,14 @@ class NameAvatarForm extends React.PureComponent {
     }
   }
   render() {
-    console.error('----------------- NameAvatarForm rendered -------------');
+    console.big('NameAvatarForm rendering');
     let imageSource = this.state.imageSource;
     let avatarArray = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
     let avatarSize = window.innerHeight / 10;
     let avatarBorderSize = 1;
     let avatarPlusBorderSize = avatarSize + 1;
-    let playLabelSize = avatarSize / 2;
-    console.warn('avatarBorderSize', avatarBorderSize);
-    console.warn('avatarPlusBorderSize', avatarPlusBorderSize);
     let remembered = '';
-    if (this.props.userStatus.cookieId) {
+    if (this.props.userStatus.loggedInAs && this.props.userStatus.loggedInAs !== 'Guest') {
       remembered = 'remembered';
     }
     let avatarIndex = this.props.userAvatarIndex;
@@ -65,21 +61,14 @@ class NameAvatarForm extends React.PureComponent {
             box-sizing: border-box;
             display: flex;
             flex-direction: column;            
-            //border-radius: 0.5rem 0.5rem 0 0;
-            //border-radius: ${remembered && '0 0 0.5rem 0.5rem'};
             width: var(--intro-width);
-            //border: 1px solid #444;
             border-top: none;
             border-top-left-radius: 0;
             border-top-right-radius: 0;
-            //padding: var(--menu-border-width);
             padding: var(--menu-border-radius);
-
           }
           .input-area {
             border-top: 0;
-            
-            //padding-top: 0;           
           }         
           .input-label {
             box-sizing: border-box;
@@ -151,9 +140,8 @@ class NameAvatarForm extends React.PureComponent {
           }
           #unlogged-panel {
             display: flex;
-            flex-direction column;
-            align-items: stretch;
-            //background: plum !important;
+            flex-direction: column;
+            align-items: center;
           }
           #player-name-input {
             font-family: var(--main-font);
@@ -168,13 +156,13 @@ class NameAvatarForm extends React.PureComponent {
             user-select: text;
             display: ${remembered && 'none'};
             border-radius: var(--menu-border-width);
-            width: calc(100vw - var(--normal-card-height));           
+            width: 100%;        
           }
           #name-input-label {
-            //display: inline-flex;
-            //align-items: flex-start;
+            width: 100%;
+            display: inline-flex;
+            align-items: flex-start;
             justify-content: space-between;
-            //height: var(--header-height);
             border: 0;
             padding: 0;
           }
@@ -222,18 +210,14 @@ class NameAvatarForm extends React.PureComponent {
             margin-right: 0.5rem;
             margin-left: 0;
           }
-          #remember-check-area::after {
-            content: 'Remember me';
-          }
-          .remembered::after {
-            content: 'Remembered' !important;
-            color: var(--option-on-color);
+          #name-input-area {
+            width: 100%;
+            padding: calc(var(--menu-border-width) * 2);
           }
           #avatar-area {
             width: ${avatarPlusBorderSize * 3.5}px;
-            width: 72vw;
-            
-            z-index: 12;
+            width: 72vw;            
+            z-index: 0;
           }
           #avatar-select-area {
             height: ${avatarPlusBorderSize}px;
@@ -243,9 +227,7 @@ class NameAvatarForm extends React.PureComponent {
           #avatar-row {
             width: 100%;
             display: flex;
-            //justify-content: flex-start;
             overflow-x: scroll;
-            opacity: 0;
             padding-top: var(--menu-border-width);
             padding-bottom: var(--menu-border-width);
           }
@@ -280,10 +262,8 @@ class NameAvatarForm extends React.PureComponent {
             animation: fade 3000ms forwards ease;
           }
           #start-button {
-            //min-width: 68vw;
             font-size: 6vh;
             width: 100%;
-            //max-width: 68vw;
             height: 14vh;
             min-height: 12vh;
             align-self: center;
@@ -323,12 +303,7 @@ class NameAvatarForm extends React.PureComponent {
             100% {
               opacity: 0;
             }
-          }
-          @media (orientation: portrait) {
-            #avatar-area {
-              //max-width: 90vw;
-            }
-          }
+          }         
         `}</style>
         {remembered && (
           <>
@@ -365,16 +340,21 @@ class NameAvatarForm extends React.PureComponent {
           <>
             <div id='unlogged-panel' className="red-panel">
               <div id="name-input-label" className="input-label">
-                <div>Enter name</div>
+                Name
               </div>
-              <input type='text' onChange={this.handleInputChange} name="player-name" id="player-name-input" maxLength="24" placeholder="Guest" />
-              <div id="remember-check-area" className={`shadowed-text ${remembered}`}>
-                <input disabled defaultChecked={false} id="remember-checkbox" type="checkbox" />
-                <div id="name-input-message" />
+              <div id='name-input-area' className='inner-red-panel'>
+                <form onSubmit={this.props.onClickStart} className='pointer' id='name-avatar-input-form'>
+                  <input type='text' onChange={this.handleInputChange} name="player-name" id="player-name-input" maxLength="24" placeholder="Guest" />
+                </form>
+                <div id="remember-check-area" className={`shadowed-text ${remembered}`}>
+                  <input disabled defaultChecked={false} id="remember-checkbox" type="checkbox" />
+                Remember me
+                  <div id="name-input-message" />
+                </div>
               </div>
               <div id="avatar-area">
                 <div id="avatar-label" className="input-label inner-red-panel">
-                Select avatar
+                Avatar
                 </div>
                 <div id="avatar-select-area" className='inner-red-panel'>
                   <span id="avatar-row">
@@ -405,12 +385,13 @@ class NameAvatarForm extends React.PureComponent {
                     })}
                   </span>
                 </div>
-                <button {...{ [this.props.clickFunction]: this.props.onClickStart }} className="intro-button" id="start-button">
+                <button form='name-avatar-input-form' className="intro-button" id="start-button">
                   <div id="start-button-label" className="button-label">
-                  Play!
+                    Play!
                   </div>
                 </button>
               </div>
+              {/* </form> */}
             </div>
 
           </>
