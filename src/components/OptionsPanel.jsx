@@ -1,26 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import OptionSwitch from './OptionSwitch';
+import ButtonRange from './ButtonRange';
 import SliderKnob from './SliderKnob';
 import Slider from './Slider';
 import { HuePicker } from 'react-color';
-import PropTypes from 'prop-types';
-import { isFullScreen, getColorValues } from '../scripts/util';
-
-const sliderStyle = {  // Give the slider some width
-  position: 'relative',
-  width: '100%',
-  height: 80,
-  border: '1px solid steelblue',
-}
-
-const railStyle = { 
-  position: 'absolute',
-  width: '100%',
-  height: 10,
-  marginTop: 35,
-  borderRadius: 5,
-  backgroundColor: '#8B9CB6',
-}
+import { getColorValues, shadeRGBAColor } from '../scripts/util';
 
 class OptionsPanel extends React.PureComponent {
   constructor(props) {
@@ -28,53 +13,28 @@ class OptionsPanel extends React.PureComponent {
     this.state = {
       totalPages: 3,
       pageShowing: 0,
-      alphaLevelSelected: 2,
-      colorChoices: ['blue','red','green', 'purple']
+      alphaLevelSelected: getColorValues(this.props.currentOptions.backgroundColor).a,
+      panelBgColorSelected: this.props.currentOptions.panelColor,
+      panelShadeLevelSelected: this.props.currentOptions.panelShade,
+      editingElementColor: 'panel',
+      colorChoices: ['blue','red','green','purple']
     };
     this.pages = ['game-options', 'video-options', 'sound-options'];
   }
 
   componentDidMount() {
-    console.big('OptionsPanel MOUNTED', 'white');
-    this.forceUpdate();
-    let currentBgColor = this.props.currentOptions.backgroundColor;
-    let currentValues = getColorValues(currentBgColor);
-    if (currentValues.a === 1) {
-      this.state.alphaLevelSelected = 3
-    }
-    if (currentValues.a === 0.6) {
-      this.state.alphaLevelSelected = 2
-    }
-    if (currentValues.a === 0.3) {
-      this.state.alphaLevelSelected = 1
-    }
-    if (currentValues.a === 0.1) {
-      this.state.alphaLevelSelected = 0
-    }
-    if (currentBgColor != 'var(--main-bg-color)') {
-      console.log('sucka is', currentBgColor)
-      let rgbaColor = this.props.currentOptions.backgroundColor;
-      console.orange('componentDidMount -------------- rgbaColor ')
-      console.info(rgbaColor)
-      //this.onChangeBackgroundColor(rgbaColor);
-    }
+    console.big('OptionsPanel mounted')
+    this.forceUpdate();    
   }
-  componentDidUpdate() {
-    console.big('OptionsPanel updating', 'green');
-    console.pink('using ' + this.props.currentOptions.backgroundColor);
-  }
-  handleClickOptionTab = () => {
+  handleClickOptionTab = (event) => {
     this.setState({
       pageShowing: this.pages.indexOf(event.target.name)
     });
-    event.preventDefault();
   }
   getAlpha = (rgbaString) => {
-    console.log('slicedn is ' + rgbaString.slice(0, rgbaString.length))
     return parseFloat(rgbaString.slice(0, rgbaString.length-3));
   }
   getRGBAFromString = (str) => {
-    console.info('getrgbafromsdtr took in', str)
     let arr = str.slice(5, str.length-3).split(', ');
     let color = {};
     color.rgb = {};
@@ -82,8 +42,6 @@ class OptionsPanel extends React.PureComponent {
     color.rgb.g = parseInt(arr[1]);
     color.rgb.b = parseInt(arr[2]);
     color.rgb.a = parseFloat(arr[3]);
-    console.big('rgb')
-    console.info(color.rgb)
     return color;
   }
   onChangeBackgroundColor = (rgbaColor) => {
@@ -92,73 +50,76 @@ class OptionsPanel extends React.PureComponent {
     } else {
       rgbaColor = getColorValues(rgbaColor);
     }
-    console.info(' onChangeBackgroundColor TOOK IN');
-    console.info(rgbaColor);
-    let newColorChoices = [ ...this.state.colorChoices ];
-    newColorChoices.map((colorChoice, i) => {
-      let alpha = 0.1;
-      if (i === 1) {
-        alpha = 0.3;
-      }
-      if (i === 2) {
-        alpha = 0.6;
-      }
-      if (i === 3) {
-        alpha = 1;
-      }
-      let sampleColor = {r: rgbaColor.r, g: rgbaColor.g, b: rgbaColor.b, a: parseFloat(alpha)}
-      newColorChoices[i] = sampleColor;
-    });
-    console.info('newColorChoices')
-    console.info(newColorChoices)
-    this.setState({
-      colorChoices: newColorChoices
-    }, () => {      
-      console.info(newColorChoices[this.state.alphaLevelSelected])
-      this.props.onChangeBackgroundColor(newColorChoices[this.state.alphaLevelSelected]);
-    });
+    if (this.state.editingElementColor === 'background') {
+      rgbaColor = `rgba(${rgbaColor.r}, ${rgbaColor.g}, ${rgbaColor.b}, ${this.state.alphaLevelSelected})`;
+      this.props.onChangeBackgroundColor(rgbaColor, this.state.editingElementColor);
+    } else {
+      rgbaColor = `rgba(${rgbaColor.r}, ${rgbaColor.g}, ${rgbaColor.b}, ${rgbaColor.a})`;
+      this.setState({
+        panelBgColorSelected: rgbaColor
+      }, () => {
+        this.props.onChangeBackgroundColor([rgbaColor, this.state.panelShadeLevelSelected], this.state.editingElementColor);
+      })
+    }
   }
   onChangeAlphaLevel = () => {
     let level = Array.from(event.target.parentElement.parentElement.children).indexOf(event.target.parentElement);
-    console.log('bgColor?', this.state.colorChoices[level]);
-    // let baseBgColor = this.props.currentOptions.backgroundColor.slice(0, this.props.currentOptions.backgroundColor.length - 3);
-    // let newColor = baseBgColor + ((level + 1) / 5) + ')';
     this.setState({
       alphaLevelSelected: level
     }, () => {
-      this.props.onChangeBackgroundColor(this.state.colorChoices[level]);
+      this.onChangeBackgroundColor(this.state.colorChoices[level]);
     })
   }
   handleSliderChange = (type, newValue) => {
-    console.info('log', event);
-    console.info('newValue', newValue.toPrecision(2));
-    if (newValue < 0.1) { 
-      newalue = 0;
+    if (type === 'panel-size') {
+      this.props.changeSliderValue(type, newValue);       
     }
-    newValue = newValue.toPrecision(2);
-    this.props.changeSliderValue(type, newValue);
+    if (type === 'bg-alpha-control') {
+      this.setState({
+        alphaLevelSelected: newValue
+      }, () => {
+        let bgColor = getColorValues(this.props.currentOptions.backgroundColor);
+        newValue = `rgba(${bgColor.r}, ${bgColor.g}, ${bgColor.b}, ${newValue})`;
+        this.props.changeSliderValue(type, newValue);          
+      })
+    }
+    if (type === 'panel-alpha-control') {
+      this.setState({
+        panelShadeLevelSelected: newValue
+      }, () => {
+        let bgColor = this.state.panelBgColorSelected;
+        this.props.changeSliderValue(type, [this.state.panelBgColorSelected, newValue]);
+      })
+    }
+    if (type.split('-')[1] === 'volume') {
+      this.props.changeSliderValue(type, newValue, true);  
+    }
+  }
+  handleClickColorControlTab = (event) => {
+    this.setState({
+      editingElementColor: (event.target.id).split('-')[0]
+    });
   }
   render() {
-    let rowHeight = 'calc(var(--micro-card-height) * 1.1)';
+    console.big('OptionsPanel rendering');
+    console.info(this.props)
+    let rowHeight = 'calc(var(--micro-card-height) * 1.05)';
     if (this.props.id === 'hamburger') {
       rowHeight = 'calc(var(--micro-card-height) * 0.9)';
     }
-    console.pink('rendering ' + this.props.id + ' OptionsPanel options ');
-    let fullScreen = isFullScreen() !== undefined;
-    console.big(fullScreen, 'pink');
     let currentPage = `on-page-${this.state.pageShowing + 1}`;
-    console.info(this.props.currentOptions)
     let colorChoice0 = `rgba(${this.state.colorChoices[0].r}, ${this.state.colorChoices[0].g}, ${this.state.colorChoices[0].b}, ${this.state.colorChoices[0].a})`;
     let colorChoice1 = `rgba(${this.state.colorChoices[1].r}, ${this.state.colorChoices[1].g}, ${this.state.colorChoices[1].b}, ${this.state.colorChoices[1].a})`;
     let colorChoice2 = `rgba(${this.state.colorChoices[2].r}, ${this.state.colorChoices[2].g}, ${this.state.colorChoices[2].b}, ${this.state.colorChoices[2].a})`;
     let colorChoice3 = `rgba(${this.state.colorChoices[3].r}, ${this.state.colorChoices[3].g}, ${this.state.colorChoices[3].b}, ${this.state.colorChoices[3].a})`;
     let solidBg = this.props.currentOptions.solidBackground;
+    let bgColorObj = getColorValues(this.props.currentOptions.backgroundColor);
+    let panelColorObj = getColorValues(this.props.currentOptions.panelColor);
+    let fullAlphaBg = `rgba(${bgColorObj.r}, ${bgColorObj.g}, ${bgColorObj.b}, 1)`;
+    let fullAlphaPanel = `rgba(${panelColorObj.r}, ${panelColorObj.g}, ${panelColorObj.b}, 1)`;
     return (
       <div id={`${this.props.id}-options-panel`} className='options-panel shadowed-text'>
         <style jsx>{`
-          .pickr {
-            width: 50vw !important;
-          }
           .options-panel {            
             box-sizing: border-box;
             display: flex;
@@ -178,25 +139,25 @@ class OptionsPanel extends React.PureComponent {
             min-width: 100%;
             display: flex;
             flex-direction: column;
-            //justify-content: space-between;
-            padding: calc(var(--menu-border-width) * 2);
             transition: transform 300ms ease;
-          }
-          .option-label {
-            box-sizing: border-box;
-            margin-right: calc(var(--menu-border-width) * 1.5);
           }
           .option-row {
             box-sizing: border-box;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: calc(var(--menu-border-width) * 2);
-            padding-bottom: calc(var(--menu-border-width) * 2);
-            height: ${rowHeight};
+            padding: calc(var(--menu-border-width));
+            margin-bottom: calc(${rowHeight} * 0.1); 
           }
-          .option-row:first-child {
-            padding-top: 0;
+          .option-label {
+            box-sizing: border-box;
+            margin-left: calc(var(--menu-border-width) * 1.5);
+            margin-right: calc(var(--menu-border-width) * 1.5);
+          }
+          .option-row.button-row {
+            margin-top: calc(var(--menu-border-width));
+            padding-left: calc(var(--menu-border-width));
+            padding-right: calc(var(--menu-border-width));
           }
           .more-panel {
             box-sizing: border-box;
@@ -205,8 +166,7 @@ class OptionsPanel extends React.PureComponent {
             justify-content: space-between;
             width: 100%;
             align-self: center;
-            padding-top: calc(var(--small-font-size) / 2);
-            padding-bottom: calc(var(--small-font-size) / 4);
+            padding: 1%;
           }
           .option-tab-button {            
             font-family: var(--main-font);            
@@ -221,18 +181,42 @@ class OptionsPanel extends React.PureComponent {
             display: flex;
             flex-direction: column;
             justify-content: space-evenly;
+            height: calc(${rowHeight} * 1.75);
             width: 100%;
-            margin-top: calc(var(--menu-border-width) * 2);
-            padding: calc(var(--micro-card-width) * 0.45);
-            opacity: ${solidBg || 0};
-            transition: opacity 300ms ease;        
+            padding-left: calc(var(--menu-border-width) * 4);
+            padding-right: calc(var(--menu-border-width) * 4);
+            margin-bottom: calc(var(--menu-border-width));
+            border-top-left-radius: 0;
+            transition: opacity 300ms ease;  
+            z-index: 1;
           }
-          .page-indicator {
-            font-family: var(--title-font);            
+          .color-controls > div {
+            transform: translateY(12.5%);
+            border-radius: 0;
           }
-          .option-tab-button.selected-tab {
-            //border-color: var(--option-on-color);
-            border-width: var(--menu-border-width);
+          .color-controls-tab-area {
+            display: flex;
+          }
+          .color-controls-tab.inner-red-panel {
+            margin: 0;
+            padding: 0;
+            border-bottom: 0;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            padding-top: calc(var(--small-font-size) / 2);
+            padding-bottom: calc((var(--small-font-size) / 2) + 2px);
+            width: 40%;
+            text-align: center;
+            background-color: var(--red-bg-color);
+            transform: translateY(2px);
+            z-index: 0;
+          }
+          .color-controls-tab.inner-red-panel:first-child {
+            margin-right: var(--small-font-size);
+          }
+          .color-controls-tab.selected-color-control {
+            background-color: var(--medium-red-bg-color);
+            z-index: 2;
           }
           .option-tab-button.selected-tab > .tab-button-label {
             opacity: 1;
@@ -242,12 +226,12 @@ class OptionsPanel extends React.PureComponent {
           }
           .option-tab-button {
             width: calc(33.33% - (var(--menu-border-width) / 1.5));
-            padding: calc(var(--small-font-size) / 1.5);
+            padding: calc(var(--small-font-size));
             display: flex;
             border-color: var(--dark-red-bg-color);
             flex-direction: column;
             justify-content: center;
-            align-items: center;  
+            align-items: center;
           }
           .tab-button-label {
             font-size: var(--main-text-size);
@@ -270,7 +254,8 @@ class OptionsPanel extends React.PureComponent {
             display: flex;
             justify-content: space-between;
             width: 100%;
-            height: calc(var(--micro-card-width) * 1.5);
+            //height: calc(var(--micro-card-width) * 1.5);
+            height: calc(${rowHeight} * 0.75);
             padding-top: calc(var(--micro-card-width) * 0.45);
           }
           .selection-backing {
@@ -280,7 +265,7 @@ class OptionsPanel extends React.PureComponent {
             display: flex;
             align-items: center;
             justify-content:center;
-            background-color: black;
+            background-color: black !important;
             border: 1px solid black;
             border-radius: var(--menu-border-width);
             z-index: 3;
@@ -292,17 +277,17 @@ class OptionsPanel extends React.PureComponent {
             border-radius: inherit;
             opacity: 1;
           }          
-          .alpha-selection-row > div:first-child {
+          .selection-backing:first-child > div {
             margin-left: 0;
             background-color: ${colorChoice0};
           }
-          .alpha-selection-row > div:nth-child(2) {
+          .selection-backing:nth-child(2) > div {
             background-color: ${colorChoice1};
           }
-          .alpha-selection-row > div:nth-child(3) {
+          .selection-backing:nth-child(3) > div {
             background-color: ${colorChoice2};
           }
-          .alpha-selection-row > div:last-child {
+          .selection-backing:last-child > div {
             background-color: ${colorChoice3};
             margin-right: 0;
           }
@@ -310,107 +295,174 @@ class OptionsPanel extends React.PureComponent {
             border-color: white;
             border-width: 2px;            
           }
-          
+          .slider-row {
+            align-items: center;    
+            height: var(--micro-card-height);        
+          }        
+          .special-area {
+            width: calc(100% - 1px);
+            box-sizing: border-box;            
+            padding: calc(var(--mini-card-height) / 12);
+            margin-bottom: 0;
+            margin-bottom: calc(var(--mini-card-height) / 12);
+          }
+          .special-area > div {
+            box-sizing: border-box;   
+            margin: 0;
+            padding: 0;
+          }
+          .special-area > .slider-row {
+            height: auto;
+          }
+          .special-area > div:first-child {
+            margin-bottom: calc(${rowHeight} * 0.1); 
+          }
+           
         `}</style>
         <div id={`${this.props.id}-options-page-area`} className={`option-page-area ${currentPage}`}>
-          <div id={`${this.props.id}-options-page-0`} className={`option-page inner-red-panel`}>            
-            <div className='option-row'>
-              <div className='option-label'>Quick Turns</div>
-              <OptionSwitch home={this.props.id} type={'quick-turns'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.quickTurns} clickFunction={this.props.clickFunction} />
-            </div>
-            <div className='option-row'>
+          <div id={`${this.props.id}-options-page-0`} className={`option-page`}>               
+            <div className='option-row inner-red-panel'>
+                <div className='option-label'>Quick Turns</div>
+                <OptionSwitch home={this.props.id} type={'quick-turns'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.quickTurns} clickFunction={this.props.clickFunction} />
+           </div>
+            <div className='option-row inner-red-panel'>
               <div className='option-label'>Auto Stand at 20</div>
+              <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />          
+           </div>
+            <div className='option-row inner-red-panel'>
+              <div className='option-label'>Option</div>
+              <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />             
+              </div> 
+            <div className='option-row inner-red-panel'>
+              <div className='option-label'>Other Option</div>
               <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />
             </div> 
-            
-            {/* <div className='option-row'>
-              <div className='option-label'>Dark Cards</div>
-              <OptionSwitch home={this.props.id} type={'dark-cards'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.darkCards} clickFunction={this.props.clickFunction} />
-            </div>                */}
-            <div className='option-row'></div>               
-            <div className='option-row'></div>             
+            <div className='option-row inner-red-panel'>
+              <div className='option-label'>Another Option</div>
+              <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />
+            </div>            
+            <div className='option-row inner-red-panel'>
+              <div className='option-label'>Yet Another Option</div>
+              <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />
+            </div>                       
           </div>
-          <div id={`${this.props.id}-options-page-1`} className={`option-page inner-red-panel`}>
-            <div className='option-row'>
+          <div id={`${this.props.id}-options-page-1`} className={`option-page`}>
+            <div className='option-row inner-red-panel'>
               <div className='option-label'>Full Screen</div>
               <OptionSwitch home={this.props.id} type={'full-screen'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.fullScreen} clickFunction={this.props.clickFunction} />
             </div>
-            <div className='option-row'>
-              <div className='option-label'>Dark Theme</div>
-              <OptionSwitch home={this.props.id} type={'dark-theme'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.darkTheme} clickFunction={this.props.clickFunction} />
+            <div className='option-row inner-red-panel'>
+              <div className='option-label'>Header</div>
+              <OptionSwitch home={this.props.id} type={'header-visible'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.headerVisible} clickFunction={this.props.clickFunction} />
             </div>
-            <div className='option-row'>
-              <div className='option-label'>Animated<br />Starfield</div>
-              <OptionSwitch home={this.props.id} type={'animated-starfield'} onClick={this.props.onToggleOption} disabled={this.props.currentOptions.solidBackground} toggled={this.props.currentOptions.animatedStarfield} clickFunction={this.props.clickFunction} />
-            </div> 
-            <div className='option-row'>
-              <div className='option-label'>Solid Background</div>
-              <OptionSwitch home={this.props.id} type={'solid-background'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.solidBackground} clickFunction={this.props.clickFunction} />
+            <div className='option-row inner-red-panel'>
+              <div className='option-label'>Starfield</div>
+              <OptionSwitch home={this.props.id} type={'starfield'} onClick={this.props.onToggleOption} toggled={!this.props.currentOptions.solidBackground} clickFunction={this.props.clickFunction} />
+            </div>           
+            <div className='color-controls-tab-area'>
+              <div id={`background-color-control`}  {...{ [this.props.clickFunction]: this.handleClickColorControlTab }} className={`color-controls-tab inner-red-panel ${this.state.editingElementColor === 'background' && 'selected-color-control'}`}>{this.props.id === 'options-screen' ? 'Background' : 'BG'}</div>
+              <div id={`panel-control`} {...{ [this.props.clickFunction]: this.handleClickColorControlTab }} className={`color-controls-tab inner-red-panel ${this.state.editingElementColor === 'panel' && 'selected-color-control'}`}>Menus</div>
             </div>
-            <div id={`${this.props.id}-color-controls`} className='color-controls inner-red-panel'>
-              <HuePicker
-                pointer={SliderKnob}
-                width={'100%'}
-                height={'calc(var(--micro-card-width) * 0.45)'}
-                color={this.props.currentOptions.backgroundColor || '#fff'}
-                onChangeComplete={this.onChangeBackgroundColor}
-              /> 
-              <div id={`${this.props.id}-alpha-selection-row`} className='alpha-selection-row'>
-                <div className={`selection-backing ${this.state.alphaLevelSelected === 0 && 'selected'}`}>
-                  <div {...{ [this.props.clickFunction]: this.onChangeAlphaLevel }} className={`alpha-selection`}>
+              {this.state.editingElementColor === 'background' ?
+              <div id={`${this.props.id}-hue-color-controls`} className='color-controls inner-red-panel'>
+                <div>
+                    <HuePicker
+                    id={'background-hue-control'}
+                    pointer={SliderKnob}
+                    width={'100%'}
+                    height={'calc(var(--micro-card-width) * 0.45)'}
+                    color={this.props.currentOptions.backgroundColor || '#fff'}
+                    onChangeComplete={this.onChangeBackgroundColor}
+                  />
+                </div>
+                <div>
+                  <Slider type='bg-alpha-control'
+                    id='bg-alpha-slider'
+                    steps={100}
+                    showing={true}
+                    bgColor={fullAlphaBg}
+                    value={getColorValues(this.props.currentOptions.backgroundColor).a}
+                    home={this.props.id}
+                    changeSliderValue={this.handleSliderChange} />
                   </div>
                 </div>
-                <div className={`selection-backing ${this.state.alphaLevelSelected === 1 && 'selected'}`}>
-                  <div {...{ [this.props.clickFunction]: this.onChangeAlphaLevel }} className={`alpha-selection`}>
+                :
+                <div id={`${this.props.id}-panel-color-controls`} className='color-controls inner-red-panel'>
+                  <div>
+                      <HuePicker
+                      id={'panel-hue-control'}
+                      pointer={SliderKnob}
+                      width={'100%'}
+                      height={'calc(var(--micro-card-width) * 0.45)'}
+                      color={this.props.currentOptions.panelColor || '#fff'}
+                      onChangeComplete={this.onChangeBackgroundColor}
+                    />
+                  </div>
+                  <div>
+                    <Slider type='panel-alpha-control'
+                      id='panel-alpha-slider'
+                      steps={100}
+                      showing={true}
+                      bgColor={fullAlphaPanel}
+                      value={this.state.panelShadeLevelSelected}
+                      home={this.props.id}
+                      changeSliderValue={this.handleSliderChange} />
                   </div>
                 </div>
-                <div className={`selection-backing ${this.state.alphaLevelSelected === 2 && 'selected'}`}>
-                  <div {...{ [this.props.clickFunction]: this.onChangeAlphaLevel }} className={`alpha-selection`}>
-                  </div>
-                </div>                          
-                <div className={`selection-backing ${this.state.alphaLevelSelected === 3 && 'selected'}`}>
-                  <div {...{ [this.props.clickFunction]: this.onChangeAlphaLevel }} className={`alpha-selection`}>
-                  </div>
-                </div>                          
-              </div>
-            </div>
+              }
+              <div className='option-row button-row'>
+                <div className='option-label'>Bottom Panel Size</div>
+                <ButtonRange home={this.props.id}
+                  type={'panel-size'} labels={['SM', 'MED', 'LG']}
+                  onClickRangeButton={this.handleSliderChange}
+                  toggledButton={this.props.currentOptions.panelSize / 0.5}
+                  clickFunction={this.props.clickFunction}
+                />                
+              </div>             
           </div>
 
-          <div id={`${this.props.id}-options-page-2`} className={`option-page inner-red-panel`}>
-            <div className='option-row'>
-              <div className='option-label'>Sound FX</div>
-              <OptionSwitch home={this.props.id} type={'sound-fx'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.sound} clickFunction={this.props.clickFunction} />
+          <div id={`${this.props.id}-options-page-2`} className={`option-page`}>
+            <div className='special-area inner-red-panel'>
+              <div className='option-row slider-row'>
+                <div className='option-label'>Sound FX</div>
+                <OptionSwitch home={this.props.id} type={'sound-fx'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.sound} clickFunction={this.props.clickFunction} />
+              </div>
+              <div id='sound-slider-area' className='option-row slider-row'>
+                <Slider type='sound-volume' id='sound-volume-slider' steps={100} showing={true} value={this.props.currentOptions.soundVolume} home={this.props.id} height={rowHeight + 'px'} changeSliderValue={this.handleSliderChange} />
+              </div>
             </div>
-            <div className='option-row'>
-              <Slider type='ambience-volume' id='ambience-volume-slider' value={this.props.currentOptions.ambienceVolume} home={this.props.id} height={rowHeight+'px'} changeSliderValue={this.handleSliderChange} /> 
+            <div className='special-area inner-red-panel'>
+              <div className='option-row slider-row'>
+                <div className='option-label'>Ambience</div>
+                <OptionSwitch home={this.props.id} type={'ambience'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.ambience} clickFunction={this.props.clickFunction} />
+              </div>
+              <div id='ambience-slider-area' className='option-row slider-row'>
+                <Slider type='ambience-volume' id='ambience-volume-slider' steps={100} showing={true} value={this.props.currentOptions.ambienceVolume} home={this.props.id} height={rowHeight + 'px'} changeSliderValue={this.handleSliderChange} />
+              </div>
             </div>
-            <div className='option-row'>
-              <div className='option-label'>Ambience</div>
-              <OptionSwitch home={this.props.id} type={'ambience'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.ambience} clickFunction={this.props.clickFunction} />
-            </div>                                         
-            <div className='option-row'>
-              <div className='option-label'>Music</div>
-              <OptionSwitch home={this.props.id} type={'music'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.music} clickFunction={this.props.clickFunction} />
-            </div>                                         
+            <div className='special-area inner-red-panel'>
+              <div className='option-row slider-row'>
+                <div className='option-label'>Music</div>
+                <OptionSwitch home={this.props.id} type={'music'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.music} clickFunction={this.props.clickFunction} />
+              </div>
+              <div id='music-slider-area' className='option-row slider-row'>
+                <Slider type='music-volume' id='music-volume-slider' steps={100} showing={true} value={this.props.currentOptions.musicVolume} home={this.props.id} height={rowHeight + 'px'} changeSliderValue={this.handleSliderChange} />
+              </div>
+            </div>
           </div>
 
         </div>
         {this.state.totalPages > 1 &&
           <div className='more-panel'>
           <button {...{ [this.props.clickFunction]: this.handleClickOptionTab }} name='game-options' id={`${this.props.id}-game-option-tab-button`} className={`option-tab-button ${this.state.pageShowing === 0 && 'selected-tab'}`}>
-          {/* <button {...{ [this.props.clickFunction]: this.handleClickOptionTab }} name='game-options' id={`${this.props.id}-game-option-tab-button`} className={`option-tab-button ${this.state.pageShowing > 0 || 'disabled-button'}`}> */}
               <i className='material-icons'>settings</i>
               <div className='tab-button-label'>General</div>
             </button>
-            {/* <div className='page-indicator'>
-              {this.state.pageShowing + 1} / {this.state.totalPages}
-            </div> */}
             <button {...{ [this.props.clickFunction]: this.handleClickOptionTab }} name='video-options' id={`${this.props.id}-video-option-tab-button`} className={`option-tab-button ${this.state.pageShowing === 1 && 'selected-tab'}`}>
               <i className='material-icons'>personal_video</i>
               <div className='tab-button-label'>Display</div>
             </button>
             <button {...{ [this.props.clickFunction]: this.handleClickOptionTab }} name='sound-options' id={`${this.props.id}-sound-option-tab-button`} className={`option-tab-button ${this.state.pageShowing === 2 && 'selected-tab'}`}>
-            {/* <button {...{ [this.props.clickFunction]: this.handleClickOptionTab }} name='sound-options' id={`${this.props.id}-sound-option-tab-button`} className={`option-tab-button ${this.state.pageShowing > 0 || 'disabled-button'}`}> */}
               <i className='material-icons'>volume_up</i>
               <div className='tab-button-label'>Sound</div>
             </button>
@@ -426,6 +478,7 @@ OptionsPanel.propTypes = {
   currentOptions: PropTypes.object,
   onToggleOption: PropTypes.func,
   onChangeBackgroundColor: PropTypes.func,
+  onChangePanelColor: PropTypes.func,
   changeSliderValue: PropTypes.func,
   clickFunction: PropTypes.string,
 };
