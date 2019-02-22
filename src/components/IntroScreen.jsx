@@ -3,26 +3,25 @@ import PropTypes from 'prop-types';
 import NameAvatarForm from './NameAvatarForm';
 
 function IntroScreen(props) {
-  console.orange('INTROSCREEN RENDERING ----');
+  console.big('IntroScreen RENDERING')
   let mainOpacity = document.documentElement.style.getPropertyValue('--main-opacity');
   if (props.readyToShow && !mainOpacity) {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       document.documentElement.style.setProperty('--main-opacity', 1);
       document.getElementById('intro-screen-body').style.transform = 'none';
       document.getElementById('intro-screen-body').style.opacity = 1;
-    });
+    },1);
   } else if (props.readyToShow && props.phase === 'splashScreen') {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       document.getElementById('intro-screen-body').style.transform = 'none';
       document.getElementById('intro-screen-body').style.opacity = 1;
       document.getElementById('intro-screen-body').style.pointerEvents = 'all';
-    });
+    },1);
   }
   return (
     <div id="intro-screen">
       <style jsx>{`
         #intro-screen {
-          //display: ${props.phase === 'splashScreen' ? 'flex' : 'none'};
           position: absolute;
           flex-direction: column;
           justify-content: center;
@@ -34,19 +33,17 @@ function IntroScreen(props) {
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
-          
+          justify-content: center;          
           pointer-events: ${props.readyToShow && 'all'};
-          //flex-grow: 1;
-          height: 100%;
+          height: calc(100% + var(--footer-retract-amount));
           transform: scale(0.9);
           opacity: 0;
+          transition: opacity 300ms ease, transform 300ms ease;
         }
         .intro-button {
           display: flex;
           justify-content: center;
           align-items: center;
-          /* min-width: 64vw; */
           border-radius: var(--button-radius);
           margin-top: 1vh;
           margin-bottom: 1vh;
@@ -105,28 +102,35 @@ function IntroScreen(props) {
           content: 'Retrieving...' !important;
         }
       `}</style>
-      <div id="intro-screen-body">
-        {/* <form onSubmit={(event) => event.preventDefault()} action='https://www.eggborne.com/scripts/upload.php' method='post' id='avatar-form' encType='multipart/form-data'> */}
-        <NameAvatarForm
-          userStatus={props.userStatus}
-          userAvatarIndex={props.userStatus.avatarIndex}
-          onClickAvatar={props.onClickAvatar}
-          onClickStart={props.onClickStart}
-          onClickLogOut={props.onClickLogOut}
-          clickFunction={props.clickFunction}
-        />
-        <div id="small-button-area">
-          <button {...{ [props.clickFunction]: props.onClickOptions }} className="intro-button small-intro-button" id="options-button">
-            <div className="button-label">Options</div>
-          </button>
-          <button {...{ [props.clickFunction]: props.onClickHow }} className="intro-button small-intro-button" id="how-button">
-            <div className="button-label">How to Play</div>
+
+
+      {props.readyToShow &&
+        <div id="intro-screen-body">
+          {/* <form onSubmit={(event) => event.preventDefault()} action='https://www.eggborne.com/scripts/upload.php' method='post' id='avatar-form' encType='multipart/form-data'> */}
+          <NameAvatarForm
+            userStatus={props.userStatus}
+            userAvatarIndex={props.userStatus.avatarIndex}
+            onClickAvatar={props.onClickAvatar}
+            onClickStart={props.onClickStart}
+            onClickLogOut={props.onClickLogOut}
+            clickFunction={props.clickFunction}
+          />
+          <div id="small-button-area">
+            <button {...{ [props.clickFunction]: props.onClickOptions }} className="intro-button small-intro-button" id="options-button">
+              <div className="button-label">Options</div>
+            </button>
+            <button {...{ [props.clickFunction]: props.onClickHow }} className="intro-button small-intro-button" id="how-button">
+              <div className="button-label">How to Play</div>
+            </button>
+          </div>
+          <button {...{ [props.clickFunction]: props.onClickHallOfFame }} className="intro-button" id="hall-of-fame-button">
+            <div className="button-label" />
           </button>
         </div>
-        <button {...{ [props.clickFunction]: props.onClickHallOfFame }} className="intro-button" id="hall-of-fame-button">
-          <div className="button-label" />
-        </button>
-      </div>
+      }
+
+
+
     </div>
   );
 }
@@ -154,9 +158,7 @@ function areEqual(prevProps, nextProps) {
     prevProps.readyToShow == nextProps.readyToShow &&
     prevProps.userAvatarIndex == nextProps.userAvatarIndex &&
     prevProps.phase == nextProps.phase;
-  console.warn('---------------------------- IntroScreen equalTest', equalTest);
   return equalTest;
 }
 
-// export default IntroScreen;
 export default React.memo(IntroScreen, areEqual);
