@@ -43,8 +43,10 @@ function Card(props) {
     && (props.context !== 'opponent-prize');
   if (animated) {
     setTimeout(() => {
-      document.getElementById(`${props.context}-card-${props.id}`).style.opacity = 1;
-      document.getElementById(`${props.context}-card-${props.id}`).style.transform = 'none';
+      if (document.getElementById(`${props.context}-card-${props.id}`)) {
+        document.getElementById(`${props.context}-card-${props.id}`).style.opacity = 1;
+        document.getElementById(`${props.context}-card-${props.id}`).style.transform = 'none';
+      }
     },50);
   }
   return (
