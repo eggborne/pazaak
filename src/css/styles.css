@@ -2,7 +2,10 @@
   --min-width: 300px;
   --max-width: 100vh;
   --main-opacity: 0;
-  --inner-height: calc(100% - (var(--header-height) + var(--control-footer-height)));
+  --header-height: 7vh;
+  --intro-width: 76vw;
+  --top-margin: var(--header-height);
+  --inner-height: calc(100% - (var(--top-margin) + var(--control-footer-height)));
   /* --inner-height: calc(100vh - (var(--header-height) * 3)); */
   --title-font: 'Bungee';
   --main-font: 'Nova Flat';
@@ -22,6 +25,10 @@
   --trans-red-bg-color: rgba(255, 0, 0, 0.05);
   --trans-blue-bg-color: rgba(0, 0, 255, 0.05);
   --trans-black-bg-color: rgba(0, 0, 0, 0.1);
+
+  --options-screen-width: 80vw;
+  --hamburger-menu-width: calc(var(--normal-card-width) * 4);
+
 
   --button-bg-color: rgb(15, 14, 17);
   --disabled-button-bg-color: #312e2e;
@@ -57,15 +64,13 @@
   --main-text-size: 1rem;
   --header-text-size: calc(var(--header-height) / 2.5);
 
-  --header-height: 7vh;
-  --intro-width: 76vw;
 
   --menu-border-width: calc(var(--normal-card-width) / 14);
   --button-border-width: calc(var(--normal-card-width) / 15);
   --menu-border-radius: calc(var(--normal-card-width) / 8);
-
-  --control-footer-height: 11vh;
-  --hamburger-height: calc(var(--control-footer-height) - (var(--menu-border-width) * 3));
+  --control-footer-height: 11vmax;
+  --full-hamburger-height: calc(var(--control-footer-height) - (var(--menu-border-width)) - (var(--control-footer-height) / 10));
+  --hamburger-height: var(--full-hamburger-height);
   --inner-hamburger-height: calc(var(--hamburger-height) - var(--menu-border-width) * 2);
   --hamburger-bar-height: calc((var(--inner-hamburger-height) / 7));
   --hamburger-bar-color: var(--button-text-color);
@@ -101,9 +106,17 @@
   --shift-distance: 5%;
   --starting-opacity: 0;
 
-  --footer-retracted-amount: calc(var(--control-footer-height) - var(--header-height));
+  --footer-retract-amount: calc(var(--control-footer-height) - var(--header-height));
+  --footer-retracted-amount: calc(var(--control-footer-height) - var(--top-margin));
 
   --transition-off: inherit;
+}
+
+@media screen and (max-width: 360px) {
+  :root {
+    --large-font-size: 5vh;
+    --header-text-size: calc(var(--header-height) / 3)
+  }
 }
 
 .no-transition {
@@ -151,12 +164,14 @@ body {
   left: 50vw;
   /* transform-origin: center; */
   transform: translateX(-50%);
-  top: var(--header-height);  
-  height: calc(var(--inner-height) + var(--header-height));
+  top: var(--top-margin);  
+  /* height: calc(var(--inner-height)); */
+  min-height: calc(var(--inner-height) + var(--footer-retract-amount));
+  
+  /* height: 100%; */
   background-position: center;
   opacity: 0;
-  transition: opacity 1000ms ease;
-  z-index: 0;
+  transition: opacity 500ms ease;
 }
 #container {
   overflow: hidden;
@@ -175,21 +190,24 @@ body {
   transition: background-color 300ms ease;
 }
 #content-area {
+  box-sizing: border-box;
   width: 100%;
   position: absolute;
-  top: var(--header-height);
-  top: 0;
-  height: 100%;
+  top: var(--top-margin);
+  /* top: 0; */
+  width: 100%;
+  height: var(--inner-height);
   /* height: calc(100% - var(--header-height) - var(--control-footer-height)); */
   /* max-height: calc(100% - var(--header-height) - var(--control-footer-height)); */
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* background: salmon; */
 }
 #intro-screen-body {
   opacity: var(--main-opacity);
   /* transform: scale(1.05); */
-  transition: transform 400ms ease-out, opacity 200ms ease-out;
+  /* transition: transform 400ms ease-out, opacity 200ms ease-out; */
 }
 #shade {
   position: absolute;
@@ -386,14 +404,15 @@ li:before {
   text-align: center;
   font-family: var(--title-font);
   box-sizing: border-box;
+  min-height: calc(var(--large-font-size) * 1.5);
+  max-height: calc(var(--large-font-size) * 1.5);
   font-size: var(--large-font-size);
-  height: var(--control-footer-height);
-  min-height: var(--control-footer-height);
   line-height: 100%;
   width: 100vw;
-  display: flex;
-  justify-content: center;
+  display: flex;          
   align-items: center;
+  justify-content: center;
+  flex-grow: 1;
 }
 #instructions-screen,
 #hall-of-fame-screen,
@@ -466,7 +485,7 @@ li:before {
   font-family: sans-serif;
   box-sizing: border-box;
   position: fixed;
-  top: var(--header-height);
+  top: var(--top-margin);
   font-size: 0.65rem !important;
   display: flex;
   flex-direction: column;
@@ -481,7 +500,7 @@ li:before {
 #debug-touch-display {
   background: rgba(0, 0, 0, 0.75);
   color: white;
-  top: var(--header-height);
+  top: var(--top-margin);
   pointer-events: none;
   z-index: 12;
   display: block;
@@ -490,8 +509,12 @@ li:before {
 .pre-header {
   font-family: 'Bungee';
   line-height: 100%;
-  height: var(--header-height);
-  min-height: var(--header-height);
+  /* height: var(--header-height);
+  min-height: var(--header-height); */
+
+  min-height: calc(var(--large-font-size) * 1.5);
+  max-height: calc(var(--large-font-size) * 1.5);
+
   font-size: var(--medium-font-size);
   display: flex;
 }
