@@ -21,6 +21,7 @@ function Toast(props) {
             padding-right: var(--menu-border-radius);
             border-radius: var(--menu-border-width);
             transition: transform 300ms ease, opacity 300ms ease;
+            text-align: center;
           }
           .toast-on {
             opacity: 1;
@@ -47,4 +48,5 @@ Toast.propTypes = {
   position: PropTypes.object,
 };
 
-export default Toast;
+// export default Toast;
+export default React.memo(Toast);
