@@ -1,3 +1,18 @@
+const defaultStrategy =
+{
+  stand: {
+    description: '???',
+    standAt: 16
+  },
+  handCards: {
+    description: '???'
+  },
+  tie: {
+    description: '???',
+    chanceToAccept: 1
+  }
+};
+
 export const characters = {
   jarjarbinks: {
     name: 'jarjarbinks',
@@ -301,7 +316,7 @@ export const characters = {
     name: 'thet1000',
     displayName: 'The T-1000',
     species: 'Cyborg',
-    placeOfOrigin: 'Los Angeles',
+    placeOfOrigin: 'Earth',
     skillLevel: 9,
     prize: {
       credits: 5000,
@@ -565,7 +580,7 @@ export const characters = {
     name: 'kingjaffejoffer',
     displayName: 'King Jaffe Joffer',
     species: 'Human',
-    placeOfOrigin: 'Zamunda',
+    placeOfOrigin: 'Earth',
     skillLevel: 13,
     prize: {
       credits: 1000000,
@@ -690,7 +705,47 @@ export const characters = {
       { id: 9, value: 5, type: '±' }
     ],
     quotes: {
-      panel: '"All life begins and ends with Nu. I know this to be true."'
+      panel: '"All matches begin with Nu and end with Nu."'
     }
-  }
+  },
+  random: {
+    name: 'random',
+    displayName: 'random',
+    strategy: defaultStrategy
+  },
+  random2: {
+    name: 'random2',
+    displayName: 'random2',
+    strategy: defaultStrategy
+  },
+  bennett: {
+    name: 'bennett',
+    displayName: 'Bennett from Commando',
+    strategy: defaultStrategy
+  },
+  masan: {
+    name: 'masan',
+    displayName: 'Ma-san',
+    strategy: defaultStrategy
+  },  
+  acarrot: {
+    name: 'acarrot',
+    displayName: 'A Carrot',
+    strategy: defaultStrategy
+  },
+  davidbowie1970s: {
+    name: 'davidbowie1970s',
+    displayName: '1970s David Bowie',
+    strategy: defaultStrategy
+  },
+  iliketurleskid: {
+    name: 'iliketurleskid',
+    displayName: '"I like turtles" kid',
+    strategy: defaultStrategy
+  },
+  poochie: {
+    name: 'poochie',
+    displayName: 'Poochie',
+    strategy: defaultStrategy
+  },
 };
