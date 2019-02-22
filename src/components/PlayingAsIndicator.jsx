@@ -49,6 +49,7 @@ function PlayingAsIndicator(props) {
         #header-credits-display {
           color: #afa;
           font-size: calc(var(--header-height) / 3);
+          display: ${props.playerName || 'none'};
         }
       `}</style>
       <div id='playing-as-name'>{displayName}</div>
