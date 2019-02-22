@@ -14,8 +14,9 @@ function ModeSelectScreen(props) {
         #mode-select-screen {
           position: absolute;
           //height: 100vh;
-          height: var(--inner-height);
-          top: var(--header-height);
+          //height: var(--inner-height);
+          height: 100%;
+          //top: var(--top-margin);
           font-family: var(--title-font);
           line-height: 100%;
           align-items: center;
@@ -30,6 +31,7 @@ function ModeSelectScreen(props) {
           //margin-top: var(--control-footer-height);
           display: flex;
           flex-direction: column;
+          justify-content: center;
           flex-grow: 1;
         }
         .mode-panel {
