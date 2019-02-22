@@ -4,37 +4,33 @@ import Hamburger from './Hamburger';
 
 function ControlFooter(props) {
   // let onIntroPhase = (props.phase === 'showingOptions' || props.phase === 'showingInstructions' || props.phase === 'showingHallOfFame');
-  requestAnimationFrame(() => {
-    if (props.phase === 'splashScreen') {
+  console.big('ControlFooter rendering');
+  
+  setTimeout(() => {
+    if (props.readyToShow && props.phase === 'splashScreen') {
       document.getElementById('control-footer').classList.add('retracted');
-
-    // } else if (onIntroPhase) {
-      // document.getElementById('control-footer').style.transform = 'translateY(20%)';
     } else {
-      document.getElementById('control-footer').classList.remove('retracted');
+      if (document.getElementById('control-footer').classList.contains('retracted')) {
+        document.getElementById('control-footer').classList.remove('retracted');
+      }
     }
-  });
+  }, 1);
   let backButtonOnly = (props.phase === 'showingOptions' || props.phase === 'showingHallOfFame' || props.phase === 'showingInstructions');
   return (
-    <div id='control-footer' className={'red-panel'}>
+    <div id='control-footer' className={`red-panel ${props.readyToShow || 'hidden'}` }>
       <style jsx>{`
         #control-footer {         
+          --control-footer-padding: calc(var(--control-footer-height) / 20);
           box-sizing: border-box;
           position: fixed;
           bottom: 0;
           width: 100%;
           height: var(--control-footer-height);
-          min-height: var(--normal-card-width);
           max-height: var(--control-footer-height);
-          //max-height: var(--mini-card-height);
-          //max-height: var(--control-footer-height);
           min-width: var(--min-width);
-          padding: var(--menu-border-width);
+          padding: var(--control-footer-padding);
           display: inline-flex;          
           justify-content: space-between;
-          //background-color: var(--red-bg-color);
-          //border: var(--menu-border);
-          //border-radius: var(--menu-border-radius) var(--menu-border-radius) 0 0;
           border-bottom-left-radius: 0 !important;
           border-bottom-right-radius: 0 !important;
           border-bottom: 0 !important;
@@ -43,28 +39,29 @@ function ControlFooter(props) {
           z-index: 1;
         }
         #control-footer.hidden {
-          transform: translateY(100%);
+          transform: translateY(100%) !important;
         }
         #control-footer.retracted {
-          transform: translateY(var(--footer-retracted-amount)) !important;
+          transform: translateY(var(--footer-retract-amount)) !important;
         }
         #control-footer-button-area {
-          display: inline-flex;
-          justify-content: center;
-          flex-grow: 1;          
+          flex-grow: 1;
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr var(--hamburger-height);
+          grid-template-rows: 1fr;                
         }
         .move-button {
-          width: 50%;
-          font-size: 3vmax;
+          //width: 40%;
+          font-size: calc(var(--micro-card-width) / 2);
         }
         #stand-button {
-          margin-left: var(--menu-border-width);
-          margin-right: var(--menu-border-width);
+          margin-left: var(--control-footer-padding);
+          margin-right: var(--control-footer-padding);
         }
         #switch-sign-button {
           width: 20%;
-          font-size: 1rem;
-          margin-left: var(--menu-border-width);
+          //font-size: 1rem;
+          margin-left: var(--control-footer-padding);
         }
         #pre-button-area {
           box-sizing: border-box;
@@ -141,7 +138,7 @@ function ControlFooter(props) {
           50% {
             transform: scale(1.05);
           }
-        }
+        }        
       `}</style>
       {(backButtonOnly) &&
       <div className='back-footer'>
@@ -187,10 +184,10 @@ function ControlFooter(props) {
               <button {...{ [props.clickFunction]: props.onClickEndTurn }} className='move-button' id='end-turn-button'>End Turn</button>
               <button {...{ [props.clickFunction]: props.onClickSwitchSign }} className='move-button disabled-button hidden-button' id='switch-sign-button'>+/-</button>
               <button {...{ [props.clickFunction]: props.onClickStand }} className='move-button' id='stand-button'>Stand</button>
+              <Hamburger onClickHamburger={props.onClickHamburger}
+                clickFunction={props.clickFunction}
+              />
             </div>
-            <Hamburger onClickHamburger={props.onClickHamburger}
-              clickFunction={props.clickFunction}
-            />
           </>
       }
 
@@ -201,9 +198,9 @@ function ControlFooter(props) {
 
 ControlFooter.propTypes = {
   phase: PropTypes.string,
+  readyToShow: PropTypes.bool,
   cardSize: PropTypes.object,
   currentOptions: PropTypes.object,
-  onClickHamburgerQuit: PropTypes.func,
   onToggleOption: PropTypes.func,
   style: PropTypes.object,
   onClickEndTurn: PropTypes.func,
@@ -219,4 +216,8 @@ ControlFooter.propTypes = {
 };
 
 
-export default ControlFooter;
+// export default ControlFooter;
+function areEqual(prevProps, nextProps) {
+  return prevProps.phase == nextProps.phase && prevProps.readyToShow == nextProps.readyToShow;
+}
+export default React.memo(ControlFooter, areEqual);
