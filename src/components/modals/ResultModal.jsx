@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function ResultModal(props) {
-  console.error('<:<:<:<: ResultModal rendered :>:>:>');
+  console.big('ResultModal rendering');
   let userScoreStyle = { color: 'white' };
   let opponentScoreStyle = { color: 'white' };
   let winnerStyle = { display: 'none' };
@@ -103,5 +103,5 @@ function areEqual(prevProps, nextProps) {
   return prevProps.matchOver === nextProps.matchOver;
 }
 
-// export default ResultModal;
-export default React.memo(ResultModal, areEqual);
+export default ResultModal;
+// export default React.memo(ResultModal, areEqual);
