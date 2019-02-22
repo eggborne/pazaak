@@ -11,46 +11,24 @@ class GameBoard extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      // playerNames: { user: this.props.playerNames.user, opponent: this.props.playerNames.opponent },
-      // userHand: [],
-      // opponentHand: [],
-      // userGrid: [],
-      // opponentGrid: [],
-      // handCardSize: 0,
+
     };        
-    this.readyToStartGame = false;
-    console.error('CONSTRUCTED GAMEBOARD');
   }
 
-  componentDidMount() {
-    // document.getElementById('hamburger-menu').addEventListener('transitionend', () => {
-    //   document.getElementById('hamburger-menu').transition = 'none';
-    //   console.log('transition ended!');      
-    // });
+  componentDidMount() {    
     setTimeout(() => {
       document.getElementById('game-board').style.opacity = 1;
       document.getElementById('game-board').style.transform = 'none';
     }, 10);
     setTimeout(() => {
       this.readyToStart = true;
-      this.forceUpdate();
-    }, 600);
+    }, 600);    
+    console.info('gameboard mounted with')
+    console.info(this.props.cpuOpponent)
   }
 
-  // shouldComponentUpdate(nextProps) {
-  //   return (
-  //     nextProps.turn != this.props.turn
-  //     || nextProps.grids.user.length != this.props.grids.user.length
-  //     || nextProps.grids.opponent.length != this.props.grids.opponent.length
-  //     || nextProps.hands.user.length != this.props.hands.user.length
-  //     || nextProps.hands.opponent.length != this.props.hands.opponent.length
-  //     || nextProps.totals.user != this.props.totals.user
-  //     || nextProps.totals.opponent != this.props.totals.opponent
-  //   );
-  // }
-
   render() {
-    console.big('Rendering GameBoard', 'forestgreen');
+    console.big('GameBoard rendering');
     let userWins = ['', '', ''];
     let opponentWins = ['', '', ''];
     if (this.props.wins.user === 1) {
@@ -110,24 +88,18 @@ class GameBoard extends React.PureComponent {
 
     let gridWidth = cardWidth;
     let gridHeight = cardHeight;
-    let handCardSize = 'medium';
-
-    let actualCardWidth = window.getComputedStyle(document.documentElement).getPropertyValue('--normal-card-width');
-    let cardsPerWidth = (window.innerWidth * 0.9) / (parseFloat(actualCardWidth) * 0.875);
-    console.log('cardsPerWidth', cardsPerWidth);
-    let portraitSize =  parseFloat(actualCardWidth) * 1.1;
-    if (cardsPerWidth >= 6.4) {
-      console.info('okay for medium - cardsPerWidth', cardsPerWidth);
-      handCardSize = 'medium';
-    } else {
-      portraitSize =  parseFloat(actualCardWidth) * 0.9;
-      handCardSize = 'mini';
-      console.info('too big - cardsPerWidth', cardsPerWidth);
+    // let handCardSize = 'medium';
+    let handCardSize = 'mini';
+    let actualCardHeight = parseInt(window.getComputedStyle(document.documentElement).getPropertyValue('--normal-card-height'));
+    let portraitSize = window.innerWidth * 0.175;
+    if (portraitSize > actualCardHeight * 0.75) {
+      portraitSize = actualCardHeight * 0.75;
     }
     let userHand = [];
     let opponentHand = [];
     this.props.hands.opponent.map((card, i) => {
-      opponentHand.push(<CardBack key={i} context={'opponent-hand'} size={handCardSize} />);
+      // opponentHand.push(<CardBack key={i} context={'opponent-hand'} size={handCardSize} />);
+      opponentHand.push(<Card key={i} id={card.id} context={'opponent-hand'} size={handCardSize} value={card.value} type={card.type} />);
     });
     this.props.hands.user.map((card, i) => {
       userHand.push(<Card key={i} id={card.id} context={'user-hand'} size={handCardSize} value={card.value} type={card.type}
@@ -136,18 +108,16 @@ class GameBoard extends React.PureComponent {
     let handCardWidth = `var(--${handCardSize}-card-width)`;
     let handCardHeight = `var(--${handCardSize}-card-height)`;
     let opponentPortraitIndex = this.props.opponentNames.indexOf(this.props.cpuOpponent);
-
     return (
       <div id='game-board'>
         <style jsx>{`
         #game-board {
           box-sizing: border-box;
           position: absolute;
-          top: var(--header-height);
           flex-direction: column;
           justify-content: space-between;
           width: 100%;
-          height: var(--inner-height);
+          height: 100%;
           z-index: 0;          
           transform: scale(0.4);
           opacity: 0;
@@ -161,8 +131,6 @@ class GameBoard extends React.PureComponent {
           justify-content: center;
           width: 100%;
           flex-grow: 1;
-          //padding-top: var(--menu-border-width);
-          //padding-bottom: var(--menu-border-width);
           transition: background-color 1000ms ease;
         }
         .player-hand-area {
@@ -185,13 +153,10 @@ class GameBoard extends React.PureComponent {
         #opponent-area {
           padding-bottom: var(--menu-border-width);
           border-bottom: calc(var(--menu-border-width) / 6) solid #222;
-          //border-bottom: 1px solid red;
         }
         #user-area {
           padding-top: var(--menu-border-width);
           border-top: calc(var(--menu-border-width) / 6) solid #333;
-          //border-top: 1px solid #5f5;
-          //background: green !important;
         }
         .deal-grid {
           box-sizing: border-box;
@@ -292,7 +257,6 @@ class GameBoard extends React.PureComponent {
           align-items: center;
           width: 90%;
           margin-top: ${gridWidth * 0.2}px;
-          //justify-self: center;
         }
         .win-symbol-bg {
           box-sizing: border-box;
