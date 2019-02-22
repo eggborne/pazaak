@@ -23,7 +23,7 @@ function HamburgerMenu(props) {
           flex-direction: column;
           will-change: transform;
           padding-right: calc(var(--menu-border-width) * 1.5);
-          max-width: calc(var(--normal-card-width) * 3.5);
+          width: var(--hamburger-menu-width);
         }
         #hamburger-menu {
           border-top-right-radius: 0;
@@ -50,7 +50,7 @@ function HamburgerMenu(props) {
           transform: none !important;
         }
       `}</style>
-      <OptionsPanel id='hamburger' currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} />
+      <OptionsPanel id='hamburger-menu' currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} changeSliderValue={props.changeSliderValue}/>
       <div id='hamburger-button-area'>
         <button {...{ [props.clickFunction]: props.onClickHamburgerQuit }} id="hamburger-quit-button" className="hamburger-button">
           Quit Match
@@ -64,8 +64,13 @@ HamburgerMenu.propTypes = {
   onClickHamburgerQuit: PropTypes.func,
   onToggleOption: PropTypes.func,
   onChangeBackgroundColor: PropTypes.func,
+  changeSliderValue: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
 // export default HamburgerMenu;
-export default React.memo(HamburgerMenu);
+function areEqual(prevProps, nextProps) {
+
+}
+export default HamburgerMenu;
+// export default React.memo(HamburgerMenu);
