@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function OptionSwitch(props) {
-  console.warn('rendering OptionSwitch', props);
+  console.pink('OptionSwitch rendering - ' + props.home + ' ' + props.type);
   let clickFunction = props.clickFunction;
   let toggled = props.toggled;
   if (props.type === 'full-screen') {
@@ -27,7 +27,7 @@ function OptionSwitch(props) {
           align-items: center;
           padding: 0;
           justify-content: center; 
-          background-color: var(--trans-black-bg-color);   
+          background-color: var(--trans-black-bg-color);
         }
         .option-groove {
           box-sizing: border-box;
@@ -49,7 +49,7 @@ function OptionSwitch(props) {
           background-color: var(--option-on-color);
           font-size: calc(var(--toggle-size) / 3);
           width: var(--toggle-size);
-          min-height: var(--toggle-size);
+          height: var(--toggle-size);
           border-radius: var(--menu-border-width);
           z-index: 1;
           transition: transform 150ms ease-out;
@@ -107,9 +107,10 @@ OptionSwitch.propTypes = {
   clickFunction: PropTypes.string
 };
 
-// function areEqual(prevProps, nextProps) {
-//   return prevProps.toggled == nextProps.toggled;
-// }
+function areEqual(prevProps, nextProps) {
+  return (prevProps.toggled == nextProps.toggled)
+    && (prevProps.disabled == nextProps.disabled);
+}
 
-export default OptionSwitch;
-// export default React.memo(OptionSwitch, areEqual);
+// export default OptionSwitch;
+export default React.memo(OptionSwitch, areEqual);
