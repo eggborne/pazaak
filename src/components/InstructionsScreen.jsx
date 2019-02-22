@@ -66,8 +66,8 @@ function InstructionsScreen(props) {
         </p>
         <h3>Where are those transmissions you intercepted?</h3>
         <p>
-          The Death Star plans are not in the main computer. What have you done with those plans? We intercepted no transmissions. Aaah....This is a
-          consular ship. Were on a diplomatic mission. If this is a consular ship...were is the Ambassador? Commander, tear this ship apart until you've found those plans and bring me the Ambassador.
+          The Death Star plans are not in the main computer. What have you done with those plans? We intercepted no transmissions. This is a
+          consular ship. We're on a diplomatic mission. If this is a consular ship... where is the Ambassador? Commander, tear this ship apart until you've found those plans and bring me the Ambassador.
           I want her alive! There she is! Set for stun! She'll be all right. Inform Lord Vader we have a prisoner.
         </p>
         <h3>This ground sure feels strange.</h3>

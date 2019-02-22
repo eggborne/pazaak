@@ -23,10 +23,10 @@ export function makeOpponentMove(app) {
     if (app.state.turnStatus.user.standing) {
       console.warn('User STANDING.');
       if (userTotal > 20) {
-        console.warn('userTotal was over 20!')
+        console.warn('userTotal was over 20!');
         standCPU(app);
       } else {
-        console.warn('userTotal was under 20!')
+        console.warn('userTotal was under 20!');
         if (opponentTotal < userTotal) {
           //app.dealToPlayerGrid('opponent');
           //newTotal = app.state.opponentTotal;
@@ -39,7 +39,7 @@ export function makeOpponentMove(app) {
           setTimeout(() => {
             app.changeTurn('user');
           }, app.state.options.moveIndicatorTime);
-        }, 2000)
+        }, 2000);
       }
 
     } else {
@@ -49,7 +49,7 @@ export function makeOpponentMove(app) {
           setTimeout(() => {
             app.changeTurn('user');
           }, app.state.options.moveIndicatorTime);
-        }, 2000)
+        }, 2000);
 
       } else {
         if (cpuTotal >= standAt) {
@@ -59,12 +59,12 @@ export function makeOpponentMove(app) {
             setTimeout(() => {
               app.changeTurn('user');
             }, app.state.options.moveIndicatorTime);
-          }, 2000)
+          }, 2000);
         }
       }
     }
 
-  }, app.state.options.dealWaitTime)
+  }, app.state.options.dealWaitTime);
 
 }
 
@@ -98,8 +98,8 @@ export function makeOpponentMove2(app) {
    */
 
   setTimeout(() => {
-    console.log('char is ')
-    console.log(characters[app.state.cpuOpponent])
+    console.log('char is ');
+    console.log(characters[app.state.cpuOpponent]);
     let stood = false;
     let newTotal;
     let extraDelay = 0;

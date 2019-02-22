@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 function Slider(props) {
   console.pink('Slider rendering - ' + props.home + ' ' + props.type + ' value: ' + props.value);
   if (typeof props.value !== 'number') {
-    console.orange( props.home + ' ' + props.type + ' had not a number')
+    console.orange( props.home + ' ' + props.type + ' had not a number');
   }
   const handleTouch = (event) => {
     let touches = event;

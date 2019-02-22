@@ -23,8 +23,8 @@ class GameBoard extends React.PureComponent {
     setTimeout(() => {
       this.readyToStart = true;
     }, 600);    
-    console.info('gameboard mounted with')
-    console.info(this.props.cpuOpponent)
+    console.info('gameboard mounted with');
+    console.info(this.props.cpuOpponent);
   }
 
   render() {

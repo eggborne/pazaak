@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import NameAvatarForm from './NameAvatarForm';
 
 function IntroScreen(props) {
-  console.big('IntroScreen RENDERING')
+  console.big('IntroScreen RENDERING');
   let mainOpacity = document.documentElement.style.getPropertyValue('--main-opacity');
   if (props.readyToShow && !mainOpacity) {
     setTimeout(() => {

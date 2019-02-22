@@ -11,7 +11,7 @@ export const getStarWarsName = () => {
   firstName = `${randomConsonant().toUpperCase()}${randomVowel()}${randomConsonant()}`;
   lastName = `${randomConsonant().toUpperCase()}${randomVowel()}${randomConsonant()}${randomConsonant()}${randomVowel()}${randomConsonant()}`;
   return `${firstName} ${lastName}`;
-}
+};
 
 
 export const getPageLoadInfo = () => {
