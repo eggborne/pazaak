@@ -3,6 +3,72 @@ import { randomInt } from './util';
 const plusMinusSymbol = '±';
 
 export function makeOpponentMove(app) {
+  setTimeout(() => {
+
+
+    let stood = false;
+    let newTotal;
+    let extraDelay = 0;
+    let acceptTie = randomInt(0, 10) < characters[app.state.cpuOpponent].strategy.tie.chanceToAccept;
+    let standAt = characters[app.state.cpuOpponent].strategy.stand.standAt;
+
+    let safeToDraw = isSafeToDraw(app, getHighestMinusValue(app));
+
+    let userTotal = app.state.userTotal;
+    let cpuTotal = app.state.opponentTotal;
+
+    console.warn('CPU turn started. Totals', userTotal, cpuTotal);
+    console.warn('CPU safeToDraw?', safeToDraw);
+
+    if (app.state.turnStatus.user.standing) {
+      console.warn('User STANDING.');
+      if (userTotal > 20) {
+        console.warn('userTotal was over 20!')
+        standCPU(app);
+      } else {
+        console.warn('userTotal was under 20!')
+        if (opponentTotal < userTotal) {
+          //app.dealToPlayerGrid('opponent');
+          //newTotal = app.state.opponentTotal;
+        } else {
+
+        }
+        standCPU(app);
+        setTimeout(() => {
+          app.callMoveIndicator('opponent', 'Stand', app.state.options.moveIndicatorTime);
+          setTimeout(() => {
+            app.changeTurn('user');
+          }, app.state.options.moveIndicatorTime);
+        }, 2000)
+      }
+
+    } else {
+      if (safeToDraw) {
+        setTimeout(() => {
+          app.callMoveIndicator('opponent', 'End Turn', app.state.options.moveIndicatorTime);
+          setTimeout(() => {
+            app.changeTurn('user');
+          }, app.state.options.moveIndicatorTime);
+        }, 2000)
+
+      } else {
+        if (cpuTotal >= standAt) {
+          standCPU(app);
+          setTimeout(() => {
+            app.callMoveIndicator('opponent', 'Stand', app.state.options.moveIndicatorTime);
+            setTimeout(() => {
+              app.changeTurn('user');
+            }, app.state.options.moveIndicatorTime);
+          }, 2000)
+        }
+      }
+    }
+
+  }, app.state.options.dealWaitTime)
+
+}
+
+export function makeOpponentMove2(app) {
 
   /**
    * WORKING:
@@ -32,10 +98,12 @@ export function makeOpponentMove(app) {
    */
 
   setTimeout(() => {
+    console.log('char is ')
+    console.log(characters[app.state.cpuOpponent])
     let stood = false;
     let newTotal;
     let extraDelay = 0;
-    let acceptTie = randomInt(0, 10) < characters[app.state.cpuOpponent].strategy.tie.chanceToBreak;
+    let acceptTie = randomInt(0, 10) < characters[app.state.cpuOpponent].strategy.tie.chanceToAccept;
     let standAt = characters[app.state.cpuOpponent].strategy.stand.standAt;
     /**
      * Done whether user is standing or not
@@ -388,7 +456,7 @@ function isSafeToDraw(app, highestMinusValue) {
 }
 
 function standCPU(app) {
-  //console.warn('calling standCPU');
+  console.warn('calling standCPU');
   let turnStatusCopy = Object.assign({}, app.state.turnStatus);
   turnStatusCopy.opponent.standing = true;
   app.setState({
