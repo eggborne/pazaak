@@ -2,33 +2,28 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function InstructionsScreen(props) {
+  console.big('InstructionsScreen rendering');
   if (props.phase === 'showingInstructions') {
     requestAnimationFrame(() => {
       document.getElementById('instructions-screen').style.transform = 'none';
       document.getElementById('instructions-screen').style.opacity = 1;
     });
   }
-  // if (props.phase === 'showingInstructions') {
-  //   transitionIn(document.getElementById('instructions-screen'), {
-  //     property: 'transform',
-  //     preValue: 'scale(1.05)',
-  //     transition: 'transform 300ms ease'
-  //   });
-  // }
   return (
     <div id="instructions-screen" className='shadowed-text'>
       <style jsx>{`
         #instructions-screen {
           position: absolute;
-          top: var(--header-height);
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
           opacity: var(--starting-opacity);
           transform: translateX(var(--shift-distance));
           transition: opacity var(--shift-duration) ease-out, transform var(--shift-duration) ease-out;
           will-change: opacity, transform;
           font-size: var(--small-font-size);
-          height: var(--inner-height);
-          overflow-y: scroll;
-          pointer-events: ${props.phase === 'showingInstructions' || 'none'};
+          height: 100%;
+          pointer-events: ${props.phase === 'showingInstructions' || 'none'};          
         }
         #instructions {
           font-family: var(--main-font);
@@ -40,10 +35,10 @@ function InstructionsScreen(props) {
           min-height: 0;
         }
         #instructions > p {
-          padding-bottom: calc(var(--header-height) / 2);
+          padding-bottom: calc(var(--top-margin) / 2);
         }
         #instructions > h3 {
-          padding-top: calc(var(--header-height) / 4);
+          padding-top: calc(var(--top-margin) / 4);
         }
         h3 {
           color: var(--house-card-color);
@@ -69,9 +64,9 @@ function InstructionsScreen(props) {
           What the...? Aw, we've come out of hyperspace into a meteor shower. Some kind of asteroid collision. It's not on any of the charts. What's going on? Our position is correct, except...no,
           Alderaan! What do you mean? Where is it? Thats what I'm trying to tell you, kid. It ain't there. It's been totally blown away. What? How?
         </p>
-        <h3>The Death Star plans are not in the main computer.</h3>
+        <h3>Where are those transmissions you intercepted?</h3>
         <p>
-          The Death Star plans are not in the main computer. Where are those transmissions you intercepted? What have you done with those plans? We intercepted no transmissions. Aaah....This is a
+          The Death Star plans are not in the main computer. What have you done with those plans? We intercepted no transmissions. Aaah....This is a
           consular ship. Were on a diplomatic mission. If this is a consular ship...were is the Ambassador? Commander, tear this ship apart until you've found those plans and bring me the Ambassador.
           I want her alive! There she is! Set for stun! She'll be all right. Inform Lord Vader we have a prisoner.
         </p>
@@ -94,20 +89,16 @@ function areEqual(prevProps, nextProps) {
   let leaving = prevProps.phase == 'showingInstructions' && nextProps.phase != 'showingInstructions';
   let entering = prevProps.phase != 'showingInstructions' && nextProps.phase == 'showingInstructions';
   if (leaving) {
-    console.green('instructions leaving');
     document.getElementById('instructions-screen').style.transitionDuration = 'var(--shift-duration-out)';
     document.getElementById('instructions-screen').style.opacity = 0;
     setTimeout(() => {
-      console.pink('reset InstructionsScreen to pre-enter state');
       document.getElementById('instructions-screen').style.transform = 'translateX(var(--shift-distance))';
     }, 300);
   }
   if (entering) {
-    console.green('instructions entering');
     document.getElementById('instructions-screen').style.transitionDuration = 'var(--shift-duration)';
     document.getElementById('instructions-screen').style.opacity = 1;
   }
 }
 
-// export default InstructionsScreen;
 export default React.memo(InstructionsScreen, areEqual);
