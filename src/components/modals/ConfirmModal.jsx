@@ -26,7 +26,7 @@ function ConfirmModal(props) {
             width: 70vw;
             min-height: 50vh;
             min-width: 300px;
-            font-size: 3vmin;
+            font-size: var(--main-font-size);
             transform: scale(0.95);
             opacity: 0;
             transition: all 300ms ease;
@@ -61,10 +61,10 @@ function ConfirmModal(props) {
           .confirm-button, #confirm-body {
             justify-self: center;
             text-align: center;
-            height: var(--control-footer-height)
+            height: 11vmax;
           }
           #confirm-body {
-            min-height: var(--control-footer-height);
+            min-height: 11vmax;
             display: flex;
             justify-content: center;
             align-items: center;
