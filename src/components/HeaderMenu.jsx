@@ -3,22 +3,16 @@ import PropTypes from 'prop-types';
 import UserCard from './UserCard';
 
 function HeaderMenu(props) {
-  console.error('((((((((((((((((((  HEADER MENU - RENDERING');
-
+  console.big('HeaderMenu rendering');
   return (
     <div id='user-info-panel' className='red-panel user-info-panel-off shadowed-text'>
       <style jsx>{`
-      #user-info-panel {
+        #user-info-panel {
           position: absolute;
           box-sizing: border-box;
           width: 100%;
-          //min-width: 100vw;
-          //max-height: 50vh;
           left: 0;
           top: calc(var(--header-height) - var(--menu-border-width) - var(--menu-border-width));
-          //background-color: var(--red-bg-color);
-          //border: var(--menu-border);
-          //border-radius: 0 0 var(--menu-border-radius) var(--menu-border-radius);
           border-top-left-radius: 0 !important;   
           border-top-right-radius: 0 !important;   
           border-top: 0 !important;   
@@ -32,7 +26,7 @@ function HeaderMenu(props) {
         .user-info-panel-off {
           transform: translateY(calc(-100% + var(--menu-border-width) + var(--menu-border-width))) !important;
         }           
-        `}</style>
+      `}</style>
       <UserCard playerObj={props.playerObject}
         onClickCloseButton={props.onClickCloseButton}
         onClickLogOut={props.onClickLogOut}
