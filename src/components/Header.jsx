@@ -3,17 +3,12 @@ import PropTypes from 'prop-types';
 import PlayingAsIndicator from './PlayingAsIndicator';
 
 function Header(props) {
-  console.warn('((((((((((((((((((  HHEEEAAAADDDDEEERRRRRR RENDERING');
+  console.big('Header rendering');
   return (
     <div id='header-container'>
       <style jsx>{`
         #header-container {       
-          //position: relative; 
           opacity: ${props.readyToFill && '1'};
-          //opacity: 1;                        
-          //transition: opacity 300ms ease;
-          //will-change: opacity;
-          //z-index: 2;
         }
         #header {
           position: absolute;
@@ -34,7 +29,6 @@ function Header(props) {
           border-top: 0 !important;
           border-top-left-radius: 0 !important;   
           border-top-right-radius: 0 !important;
-          //border-bottom: 0;
           border-bottom-color: transparent;
           z-index: 1;
         }
@@ -70,8 +64,6 @@ function Header(props) {
           border-bottom-left-radius: var(--menu-border-width);
           border-top-left-radius: var(--menu-border-width);
           position: absolute;
-          //background: salmon;
-          //margin-right: 10px;
           right: var(--menu-border-width);
           top: 0;
           z-index: 2;
@@ -118,15 +110,13 @@ Header.propTypes = {
   onClickLogOut: PropTypes.func,
   clickFunction: PropTypes.string
 };
-// export default Header;
 
 function areEqual(prevProps, nextProps) {
   let equalTest = (
     prevProps.readyToFill === nextProps.readyToFill
     && prevProps.avatarIndex === nextProps.avatarIndex
   );
-  console.warn('Header equalTest ------------- ', equalTest);
   return equalTest;
 }
-export default React.memo(Header);
+export default React.memo(Header, areEqual);
 // export default Header;
