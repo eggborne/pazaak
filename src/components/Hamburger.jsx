@@ -2,6 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function Hamburger(props) {
+  // setTimeout(() => {
+  //   if (document.getElementById('hamburger').getBoundingClientRect().width !== document.getElementById('hamburger').getBoundingClientRect().height) {
+  //     document.getElementById('hamburger').style.width = document.getElementById('hamburger').getBoundingClientRect().height + 'px';
+  //   }
+  // }, 1);
   return (
     <div {...{[props.clickFunction]: props.onClickHamburger}} className='balls' id='hamburger'>
       <style jsx>{`
@@ -11,22 +16,17 @@ function Hamburger(props) {
           flex-direction: column;
           align-items: center;
           justify-content: space-evenly;
-          width: var(--hamburger-height);
           height: var(--hamburger-height);
-          min-width: var(--hamburger-height);
-          min-height: var(--hamburger-height);
+          max-height: 100%;
           background-color: var(--button-bg-color);
           border: solid var(--hamburger-border-color);
           cursor: pointer;
           border-radius: var(--button-radius);
           border-width: var(--button-border-width);
-          padding-top: calc(var(--menu-border-width) / 2);
-          padding-bottom: calc(var(--menu-border-width) / 2);
-          //z-index: 3;
         }
         .hamburger-bar {
           box-sizing: border-box;
-          width: calc(var(--inner-hamburger-height) - var(--menu-border-width) * 3);
+          width: calc(var(--inner-hamburger-height) * 0.8);
           height: var(--hamburger-bar-height);
           background-color: var(--hamburger-bar-color);
           transition: transform 150ms ease;
