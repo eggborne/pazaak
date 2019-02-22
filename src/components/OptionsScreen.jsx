@@ -17,7 +17,6 @@ function OptionsScreen(props) {
         #options-screen {
           --shift-x-distance: calc(-1 * var(--shift-distance));
           position: absolute;
-          top: var(--header-height);
           font-family: var(--main-font);
           opacity: var(--starting-opacity);
           transform: translateX(var(--shift-x-distance));
@@ -25,33 +24,32 @@ function OptionsScreen(props) {
           width: 100vw;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
           height: var(--inner-height);
+          height: 100%;
           min-width: var(--min-width);
-          padding-bottom: 3vh;
           transition: opacity var(--shift-duration) ease-out, transform var(--shift-duration) ease-out;
           will-change: transform, opacity;
         }
         #lower-options-screen {
           font-size: var(--small-font-size);
-          //flex-grow: 1;
-          height: calc(var(--inner-height));
+          flex-grow: 1;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          background: green !important;
         }
         #options-screen-panel {
           box-sizing: border-box;
-          width: 80vw;
-          //max-width: calc(var(--mini-card-width) * 5);
-          font-size: calc(var(--medium-font-size) * 0.9);
+          width: var(--options-screen-width);
+          min-width: var(--options-screen-width);
+          max-width: var(--options-screen-width);
         }               
       `}</style>
       <div className="options-instructions-title shadowed-text">Options</div>
-      <div id='options-screen-panel' className="red-panel">
-        <OptionsPanel id={'options-screen'} currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} changeSliderValue={props.changeSliderValue}/>
+      <div id='lower-options-screen'>
+        <div id='options-screen-panel' className="red-panel">
+          <OptionsPanel id='options-screen' currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} onChangePanelColor={props.onChangePanelColor} changeSliderValue={props.changeSliderValue}/>
+        </div>
       </div>
     </div>
   );
@@ -62,6 +60,7 @@ OptionsScreen.propTypes = {
   onToggleOption: PropTypes.func,
   onClickBack: PropTypes.func,
   onChangeBackgroundColor: PropTypes.func,
+  onChangePanelColor: PropTypes.func,
   changeSliderValue: PropTypes.func,
   clickFunction: PropTypes.string
 };
@@ -70,7 +69,6 @@ function areEqual(prevProps, nextProps) {
   let leaving = prevProps.phase == 'showingOptions' && nextProps.phase != 'showingOptions';
   let entering = prevProps.phase != 'showingOptions' && nextProps.phase == 'showingOptions';
   if (leaving) {
-    console.orange('optionsscreen leaving');
     document.getElementById('options-screen').style.transitionDuration = 'var(--shift-duration-out)';
     document.getElementById('options-screen').style.opacity = 0;
     setTimeout(() => {
@@ -79,7 +77,6 @@ function areEqual(prevProps, nextProps) {
     }, 300);
   }
   if (entering) {
-    console.orange('optionsscreen entering');
     document.getElementById('options-screen').style.transitionDuration = 'var(--shift-duration)';
     document.getElementById('options-screen').style.opacity = 1;
   }
