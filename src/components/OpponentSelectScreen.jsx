@@ -14,27 +14,24 @@ class OpponentSelectScreen extends React.Component {
   componentDidMount() {
     document.getElementById('prev-opponent-button').addEventListener('touchstart', () => {
       document.getElementById('prev-opponent-button').style.backgroundColor = '#080808';
-      document.getElementById('prev-opponent-button').style.transform = 'scale(0.95)';
-    });
+      document.getElementById('prev-opponent-button').style.transform = 'scale(0.9)';
+    }, true);
     document.getElementById('prev-opponent-button').addEventListener('touchend', () => {
       document.getElementById('prev-opponent-button').style.backgroundColor =
         'var(--button-bg-color)';
       document.getElementById('prev-opponent-button').style.transform = 'scale(1)';
-    });
+    }, true);
     document.getElementById('next-opponent-button').addEventListener('touchstart', () => {
       document.getElementById('next-opponent-button').style.backgroundColor = '#080808';
-      document.getElementById('next-opponent-button').style.transform = 'scale(0.95)';
-    });
+      document.getElementById('next-opponent-button').style.transform = 'scale(0.9)';
+    }, true);
     document.getElementById('next-opponent-button').addEventListener('touchend', () => {
-      document.getElementById('next-opponent-button').style.backgroundColor =
-        'var(--button-bg-color)';
+      document.getElementById('next-opponent-button').style.backgroundColor = 'var(--button-bg-color)';
       document.getElementById('next-opponent-button').style.transform = 'scale(1)';
-    });
+    }, true);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    // console.log('now', this.props);
-    // console.log('nextProps', nextProps);
     if (this.props.phase != 'selectingOpponent' && nextProps.phase == 'selectingOpponent') {
       requestAnimationFrame(() => {
         document.getElementById('opponent-select-screen').style.transform = 'none';
@@ -53,10 +50,8 @@ class OpponentSelectScreen extends React.Component {
 
   onClickPrev = () => {
     if (this.state.selectedOpponent > 0) {
-      document.getElementById(
-        `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
-      document.getElementById(
-        `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `translateX(25%) scale(0.9)`;
+      document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
+      document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `scale(0.85)`;
       setTimeout(() => {
         this.setState(
           {
@@ -65,17 +60,16 @@ class OpponentSelectScreen extends React.Component {
           },
           () => {
             this.props.onClickPanel(this.props.characterArray[this.state.selectedOpponent].name);
+            document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).classList.add('flickering');
           }
         );
-      }, 200);
+      }, 210);
     }
   };
   onClickNext = () => {
     if (this.state.selectedOpponent < this.props.characterArray.length - 1) {
-      document.getElementById(
-        `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
-      document.getElementById(
-        `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `translateX(-25%) scale(0.9)`;
+      document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
+      document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `scale(0.85)`;
       setTimeout(() => {
         this.setState(
           {
@@ -84,21 +78,22 @@ class OpponentSelectScreen extends React.Component {
           },
           () => {
             this.props.onClickPanel(this.props.characterArray[this.state.selectedOpponent].name);
+            document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).classList.add('flickering');
           }
         );
-      }, 200);
+      }, 210);
     }
   };
 
   render() {
-    console.orange('----------------- OpponentSelectScreen rendering');
+    console.big('OpponentSelectScreen rendering');
     let opponentIndex = this.state.selectedOpponent;
     let opponentList = this.props.characterArray;
     let opponentArray = [];
-    for (var i = 0; i < opponentList.length; i++) {
+    for (var i = 0; i < 16; i++) {
       let character = opponentList[i];
       let available = this.props.userCredits >= character.prize.credits;
-      let slideAmount = this.state.selectedOpponent > this.state.lastSelectedOpponent ? 25 : -25;
+      let slideAmount = this.state.selectedOpponent > this.state.lastSelectedOpponent ? 50 : -50;
       opponentArray.push(
         <OpponentPanel
           key={i}
@@ -120,8 +115,6 @@ class OpponentSelectScreen extends React.Component {
         document.getElementById('opponent-ready-button').classList.remove('disabled-button');
       }
     }
-    // opponentArray = opponentArray.slice(this.state.listRange.min, this.state.listRange.max);
-    // console.info('made array', opponentArray);
     return (
       <div
         id='opponent-select-screen'
@@ -129,14 +122,12 @@ class OpponentSelectScreen extends React.Component {
       >
         <style jsx>{`
           #opponent-select-screen {
-            margin-top: var(--header-height);
-            margin-bottom: var(--control-footer-height);
             font-size: 1.25rem;
             font-family: var(--main-font);
             display: flex;
             flex-direction: column;
             align-items: center;
-            flex-grow: 1;
+            height: 100%;
             transform: translateY(calc(var(--shift-distance) / 4));
             transition: transform 300ms ease, opacity 300ms ease;
           }
@@ -148,7 +139,7 @@ class OpponentSelectScreen extends React.Component {
           }
           #opponent-select-area {
             width: 100%;
-            flex-grow: 1;
+            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
