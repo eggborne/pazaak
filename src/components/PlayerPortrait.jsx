@@ -3,9 +3,11 @@ import PropTypes from 'prop-types';
 import { portraitSources } from '../scripts/db';
 import { randomInt } from '../scripts/util';
 
+const staticSource = 'https://pazaak.online/assets/images/statictv.webm';
+
 function PlayerPortrait(props) {
-  console.big('rendering PlayerPortrait');
-  if (!props.hidden) {
+  console.orange('PlayerPortrait rendering - ' + props.displayName);
+  if (props.type === 'opponent-panel' && !props.hidden) {
     setTimeout(() => {
       document.getElementById(`opponent-select-portrait-cover-${props.spriteIndex}`).style.opacity =  0;
     },2);
@@ -18,7 +20,7 @@ function PlayerPortrait(props) {
   let labelFontSize = portraitSize / 6;
   let wordsInName = props.displayName.split(' ').length;
   let totalLength = props.displayName.length;
-  if (!props.hidden && wordsInName <= 2 && totalLength > 9
+  if (!props.hidden && wordsInName <= 2 && totalLength > 10
     || wordsInName > 2 && totalLength > 12) {
     labelFontSize = portraitSize / 8;
     if (totalLength > 18) {
@@ -88,11 +90,10 @@ function PlayerPortrait(props) {
         video {
           transition: opacity ${staticFadeTime}ms ease;
           transition-delay: 500ms;
-
         }
       `}
       </style>
-      <video id={coverId} autoPlay loop src='https://pazaak.online/assets/images/statictv.webm' className='portrait-cover'/>
+      <video id={coverId} autoPlay loop src={staticSource} className='portrait-cover'/>
       {props.displayName &&
         <div className={'player-portrait-label'}>{props.displayName}</div>
       }
