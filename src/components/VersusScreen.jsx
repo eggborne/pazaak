@@ -6,14 +6,14 @@ function VersusScreen(props) {
   console.orange('Rendering VersusScreen');
   let portraitSize = window.innerHeight * 0.15;
   if (props.phase === 'versusScreen') {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       document.getElementById('versus-screen').style.transform = 'none';
       document.getElementById('versus-screen').style.opacity = 1;
       document.getElementById('user-versus-area').style.transform = 'none';
       document.getElementById('user-versus-area').style.opacity = 1;
       document.getElementById('opponent-versus-area').style.transform = 'none';
       document.getElementById('opponent-versus-area').style.opacity = 1;
-    });
+    }, 1);
   }
   return (
     <div id="versus-screen">
@@ -22,8 +22,9 @@ function VersusScreen(props) {
           display: ${(props.phase === 'versusScreen' || props.phase === 'gameStarted') ? 'flex' : 'none'};
           position: absolute;
           width: 100vw;
-          height: var(--inner-height);
-          margin-top: var(--header-height);
+          max-height: var(--inner-height);
+          margin-top: var(--top-margin);
+          height: 100%;
           flex-direction: column;
           align-items: center;
           justify-content: center;
@@ -34,10 +35,11 @@ function VersusScreen(props) {
           will-change: transform, opacity;
           z-index: 100;
           font-size: var(--medium-font-size);
-          pointer-events: none; 
+          pointer-events: none;
         }
         #user-versus-area, #opponent-versus-area {
           color: yellow;
+          width: ${portraitSize * 2.25}px;
           height: ${portraitSize}px;
           display: grid;
           grid-template-rows: 1fr;
@@ -66,8 +68,8 @@ function VersusScreen(props) {
         }
         #versus-text-area {
           font-family: var(--title-font);
-          font-size: var(--med-large-font-size);
-          height: var(--control-footer-height);
+          font-size: var(--large-font-size);
+          height: 13vh;
           display: flex;
           align-items: center;
           transition: transform 600ms ease;
@@ -101,12 +103,6 @@ VersusScreen.propTypes = {
 };
 
 function areEqual(prevProps, nextProps) {
-  if (prevProps.phase == 'versusScreen' && nextProps.phase != 'versusScreen') {
-    // document.documentElement.style.setProperty('--main-opacity', 0);
-    // document.getElementById('versus-screen').style.transform = 'scale(1.1)';
-    // document.getElementById('versus-screen').style.opacity = 0;
-    // document.getElementById('versus-screen').style.pointerEvents = 'none';
-  }
   let equalTest = prevProps.phase == nextProps.phase;
   return equalTest;
 }
