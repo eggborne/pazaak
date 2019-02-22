@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import Card from './Card';
 
 function DeckSelectionScreen(props) {
+  console.big('DeckSelectionScreen rendering');
   setTimeout(() => {
     document.getElementById('deck-select-screen').style.opacity = 1;
     document.getElementById('deck-select-screen').style.transform = 'none';
   }, 1);
 
-  console.error('------------------------------------------- DeckSelectionScreen rendering', props);
   let selectionCardSize = 'medium';
   let selectedCardSize = 'normal';
   let cardsLeft = 10 - props.userDeck.length;
@@ -69,13 +69,12 @@ function DeckSelectionScreen(props) {
       <style jsx>
         {`
           #deck-select-screen {
-            margin-top: var(--header-height);
-            margin-bottom: var(--control-footer-height);
+            
             font-size: calc(var(--header-height) / 2);
             font-family: var(--main-font);
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
+            height: 100%;
             justify-content: space-between;
             align-items: center;
             opacity: 0.5;
