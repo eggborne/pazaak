@@ -7,10 +7,10 @@ class OpponentSelectScreen extends React.Component {
     super(props);
     this.state = {
       selectedOpponent: 0,
-      lastSelectedOpponent: 0
+      lastSelectedOpponent: 0,
+      lastChanged: 0
     };
   }
-
   componentDidMount() {
     document.getElementById('prev-opponent-button').addEventListener('touchstart', () => {
       document.getElementById('prev-opponent-button').style.backgroundColor = '#080808';
@@ -30,33 +30,41 @@ class OpponentSelectScreen extends React.Component {
       document.getElementById('next-opponent-button').style.transform = 'scale(1)';
     }, true);
   }
-
   shouldComponentUpdate(nextProps, nextState) {
     if (this.props.phase != 'selectingOpponent' && nextProps.phase == 'selectingOpponent') {
+      if (this.props.phase == 'selectingMode') {
+        this.state.selectedOpponent = 0;
+      }
       requestAnimationFrame(() => {
         document.getElementById('opponent-select-screen').style.transform = 'none';
       });
     }
     if (this.props.phase == 'selectingOpponent' && nextProps.phase != 'selectingOpponent') {
-      document.getElementById('opponent-select-screen').style.transform =
-        'translateY(calc(var(--shift-distance)/2))';
+      // document.getElementById('opponent-select-screen').style.transform = 'translateY(calc(var(--shift-distance)/2))';
+      document.getElementById('opponent-select-screen').style.transform = 'scale(0.95)';
+      if (nextProps.phase != 'selectingDeck') {
+        this.state.selectedOpponent = 0;
+      }
     }
+    
     return (
       (this.props.phase != 'selectingOpponent' && nextProps.phase == 'selectingOpponent') ||
       (this.props.phase == 'selectingOpponent' && nextProps.phase != 'selectingOpponent') ||
       this.state.selectedOpponent != nextState.selectedOpponent
     );
   }
-
   onClickPrev = () => {
-    if (this.state.selectedOpponent > 0) {
+    if (this.state.selectedOpponent > 0 && Date.now() - this.state.lastChanged > 210) {
       document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
-      document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `scale(0.85)`;
+      document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `scale(0.85)`;
+      this.setState({
+        lastChanged: Date.now()
+      });
       setTimeout(() => {
         this.setState(
           {
             selectedOpponent: this.state.selectedOpponent - 1,
-            lastSelectedOpponent: this.state.selectedOpponent
+            lastSelectedOpponent: this.state.selectedOpponent,            
           },
           () => {
             this.props.onClickPanel(this.props.characterArray[this.state.selectedOpponent].name);
@@ -67,9 +75,12 @@ class OpponentSelectScreen extends React.Component {
     }
   };
   onClickNext = () => {
-    if (this.state.selectedOpponent < this.props.characterArray.length - 1) {
+    if (this.state.selectedOpponent < 15 && Date.now() - this.state.lastChanged > 210) {
       document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
-      document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `scale(0.85)`;
+      document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `scale(0.85)`;
+      this.setState({
+        lastChanged: Date.now()
+      });
       setTimeout(() => {
         this.setState(
           {
@@ -98,6 +109,7 @@ class OpponentSelectScreen extends React.Component {
         <OpponentPanel
           key={i}
           selected={this.state.selectedOpponent === i}
+          defeated={this.props.userDefeated.indexOf(character.name) > -1}
           available={available}
           slideAmount={slideAmount}
           portraitSource={this.props.portraitSources.opponent}
@@ -128,7 +140,8 @@ class OpponentSelectScreen extends React.Component {
             flex-direction: column;
             align-items: center;
             height: 100%;
-            transform: translateY(calc(var(--shift-distance) / 4));
+            //transform: translateY(calc(var(--shift-distance) / 4));
+            transform: scale(0.95);
             transition: transform 300ms ease, opacity 300ms ease;
           }
           #opponent-select-title {
@@ -160,14 +173,15 @@ class OpponentSelectScreen extends React.Component {
             height: var(--normal-card-width);
             padding-left: calc(var(--menu-border-width) * 2);
             padding-right: calc(var(--menu-border-width) * 2);
+            transition: all 150ms ease;
           }
           #prev-opponent-button {
             opacity: ${this.state.selectedOpponent > 0 || '0.25'};
             pointer-events: ${this.state.selectedOpponent > 0 || 'none'};
           }
           #next-opponent-button {
-            opacity: ${this.state.selectedOpponent < this.props.characterArray.length - 1 || '0.25'};
-            pointer-events: ${this.state.selectedOpponent < this.props.characterArray.length - 1 ||
+            opacity: ${this.state.selectedOpponent < 15 || '0.25'};
+            pointer-events: ${this.state.selectedOpponent < 15 ||
               'none'};
           }
           #index-display {
@@ -216,6 +230,7 @@ class OpponentSelectScreen extends React.Component {
 OpponentSelectScreen.propTypes = {
   phase: PropTypes.string,
   userCredits: PropTypes.number,
+  userDefeated: PropTypes.array,
   readyToList: PropTypes.bool,
   listRange: PropTypes.object,
   portraitSources: PropTypes.object,
