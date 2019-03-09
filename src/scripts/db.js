@@ -5,8 +5,6 @@ export const portraitSources = {
   opponent: 'https://pazaak.online/assets/images/opponentsheet.jpg'
 };
 
-
-
 export function deleteUserRecord(userId) {
   return axios({
     method: 'post',
@@ -152,7 +150,8 @@ export const incrementSetWins = (playerName) => {
     }
   });
 };
-export const incrementRoundWins = (playerName) => {
+export const incrementMatchWins = (amount, playerName, newDefeatedArray, newCredits, wonCards) => {
+  console.log('sending new credits', newCredits)
   return axios({
     method: 'post',
     url: 'https://www.eggborne.com/scripts/updatepazaakroundwins.php',
@@ -160,7 +159,11 @@ export const incrementRoundWins = (playerName) => {
       'Content-type': 'application/x-www-form-urlencoded'
     },
     params: {
+      amount: amount,
       user: playerName,
+      newDefeated: newDefeatedArray,
+      newCredits: newCredits,
+      wonCards: wonCards
     }
   });
 };
@@ -176,7 +179,7 @@ export const incrementSets = (playerName) => {
     }
   });
 };
-export const incrementRounds = (playerName) => {
+export const incrementMatches = (playerName) => {
   return axios({
     method: 'post',
     url: 'https://www.eggborne.com/scripts/updatepazaaktotalrounds.php',
