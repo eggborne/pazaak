@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PlayerPortrait from './PlayerPortrait';
-import { characters } from '../scripts/characters';
+import Card from './Card';
+import { characters, prizeCards } from '../scripts/characters';
 
 function UserCard(props) {
+  console.info(props.playerObj);
   let portraitSize = window.innerWidth / 3;
   let nameSize = '1.4rem';
   let loggedIn = true;
@@ -20,6 +22,14 @@ function UserCard(props) {
   let defeatedArray = props.playerObj.cpuDefeated;
   if (!defeatedArray) {
     defeatedArray = [];
+  }
+  let wonArray = props.wonCards;
+  console.info(wonArray)
+  if (wonArray.toString() === '') {
+    wonArray = [];
+  } else {
+    console.green('splitting')
+    wonArray = wonArray.toString().split(',');
   }
   return (
     <div id='user-info-grid' className='shadowed-text'>
@@ -83,11 +93,11 @@ function UserCard(props) {
           flex-direction: column;
           justify-content: space-between
         }
-        #defeated-list {
+        #defeated-list, #won-list {
           display: inline-flex;
           width: 100%;
         }
-        #defeated-list > div {
+        #defeated-list > div, #won-list > div {
           margin: 0.25rem !important;
           margin-left: 0 !important;
         }
@@ -95,11 +105,10 @@ function UserCard(props) {
           grid-column-start: 0;
           grid-column-end: span 2;
         }
-        #defeated-list {
+        #defeated-list, #won-list {
           padding: 0.25rem;
           display: inline-flex;
-          flex-wrap: wrap;
-          
+          flex-wrap: wrap;          
         }
         #user-info-button-area {
           
@@ -114,12 +123,12 @@ function UserCard(props) {
         <div id='id-display'>id #{props.playerObj.cookieId}</div>
       </div>
       <div>
-        Sets won: {props.playerObj.setWins}<br />
-        Sets played: {props.playerObj.totalSets}
+        Sets won: {props.setWins}<br />
+        Sets played: {props.totalSets}
       </div>
       <div>
-        Matches won: {props.playerObj.matchWins}<br />
-        Matches played: {props.playerObj.totalMatches}
+        Matches won: {props.matchWins}<br />
+        Matches played: {props.totalMatches}
       </div>
       <div id='defeated-area' className='user-area-lower'>
         CPU Opponents Defeated:
@@ -134,6 +143,21 @@ function UserCard(props) {
           {defeatedArray.length === 0 && <div>None</div>}
         </div>
       </div>
+      <div id='won-cards-area' className='user-area-lower'>
+        Cards won:
+        <div id='won-list' >
+          {wonArray.length > 0 && wonArray.map((cardIndex, i) => {
+            let card = prizeCards[cardIndex];
+            console.info('doing cardindex', cardIndex)
+            console.info('doing card', card)
+            return (
+              <div key={i}>
+                <Card id={i} context={'user-card-won'} size={'prize'} value={card.value} type={card.type} />
+              </div>);
+          })}
+          {wonArray.length === 0 && <div>None</div>}
+        </div>
+      </div>
       <div id='user-info-button-area' className={'user-area-lower'}>
         <div className={!logButtons && 'display-none'}>
           <button {...{ [props.clickFunction]: props.onClickLogOut }} className={!loggedIn && 'display-none'} id='user-info-log-out-button'>Log out</button>
@@ -146,13 +170,20 @@ function UserCard(props) {
 
 UserCard.propTypes = {
   playerObj: PropTypes.object,
+  totalSets: PropTypes.number,
+  totalMatches: PropTypes.number,
+  setWins: PropTypes.number,
+  matchWins: PropTypes.number,
+  wonCards: PropTypes.string,
   onClickLogOut: PropTypes.func,
   onClickSignIn: PropTypes.func,
   onClickCloseButton: PropTypes.func,
 };
 
 function areEqual(prevProps, nextProps) {
-  return prevProps.playerObj.cookieId == nextProps.cookieId;
+  let equalTest = prevProps.totalSets == nextProps.totalSets;
+  console.log('prevProps.totalSets == nextProps.totalSets', equalTest)
+  return equalTest;
 }
 
 export default UserCard;
