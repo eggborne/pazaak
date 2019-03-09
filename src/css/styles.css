@@ -22,8 +22,8 @@
   --option-off-color: rgb(151, 113, 113);
   --name-input-color: #ccc;
   --name-input-text-color: black;
-  --trans-red-bg-color: rgba(255, 0, 0, 0.05);
-  --trans-blue-bg-color: rgba(0, 0, 255, 0.05);
+  --trans-red-bg-color: rgba(255, 0, 0, 0.025);
+  --trans-blue-bg-color: rgba(0, 0, 255, 0.025);
   --trans-black-bg-color: rgba(0, 0, 0, 0.1);
 
   --options-screen-width: 80vw;
@@ -35,12 +35,13 @@
 
   --button-text-color: #5cb3ff;
   --special-button-text-color: #e4c951;
+  --special-button-text-color: #e4c951;
   --button-border-color: rgb(25, 24, 39);
   --button-text-size: calc(var(--normal-card-width) / 2.5);
 
-  --green-move-color: rgba(7, 107, 12, 0.1);
-  --yellow-move-color: rgba(89, 107, 7, 0.1);
-  --red-move-color: rgba(107, 7, 7, 0.1);
+  --green-move-color: rgba(7, 107, 12, 0.3);
+  --yellow-move-color: rgba(89, 107, 7, 0.3);
+  --red-move-color: rgba(107, 7, 7, 0.3);
 
   --red-bg-color: #560000;
   /* --red-bg-color: rgba(86, 0, 0, 0.0); */
@@ -59,7 +60,7 @@
   --card-spot-border-color: #222;
   /* --card-spot-bg-color: rgba(0, 0, 0, 0.05); */
   --card-spot-bg-color: rgba(175, 169, 169, 0.1);
-  /* --pulse-speed: 900ms; */
+  --pulse-speed: 1200ms;
 
   --main-text-size: 1rem;
   --header-text-size: calc(var(--header-height) / 2.5);
@@ -69,6 +70,7 @@
   --button-border-width: calc(var(--normal-card-width) / 15);
   --menu-border-radius: calc(var(--normal-card-width) / 8);
   --control-footer-height: 11vmax;
+  --control-footer-padding: calc(var(--control-footer-height) / 20);
   --full-hamburger-height: calc(var(--control-footer-height) - (var(--menu-border-width)) - (var(--control-footer-height) / 10));
   --hamburger-height: var(--full-hamburger-height);
   --inner-hamburger-height: calc(var(--hamburger-height) - var(--menu-border-width) * 2);
@@ -109,7 +111,6 @@
   --footer-retract-amount: calc(var(--control-footer-height) - var(--header-height));
   --footer-retracted-amount: calc(var(--control-footer-height) - var(--top-margin));
 
-  --transition-off: inherit;
 }
 
 @media screen and (max-width: 360px) {
@@ -118,11 +119,6 @@
     --header-text-size: calc(var(--header-height) / 3)
   }
 }
-
-.no-transition {
-  transition: unset !important;
-}
-
 video::-internal-media-controls-overlay-cast-button {
   display: none;
 }
@@ -675,7 +671,7 @@ li:before {
   opacity: 1 !important;
 }
 .modal-on {
-  transform: none !important;
+  transform: scale(1) translateY(-50%) !important;
   pointer-events: all !important;
   opacity: 1 !important;
 }
