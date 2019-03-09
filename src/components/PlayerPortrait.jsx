@@ -17,6 +17,9 @@ function PlayerPortrait(props) {
   let portraitSize = props.size;
   let sheetWidth = portraitSize * 8;
   let sheetHeight = portraitSize * 3;
+  if (props.cpu) {
+    sheetHeight = portraitSize * 4;
+  }
   let labelFontSize = portraitSize / 6;
   let wordsInName = props.displayName.split(' ').length;
   let totalLength = props.displayName.length;
@@ -39,6 +42,9 @@ function PlayerPortrait(props) {
     backgroundPositionY = -portraitSize + 'px';
     if (spriteIndex > 15) {
       backgroundPositionY = (-portraitSize * 2) + 'px';
+    }
+    if (spriteIndex > 23) {
+      backgroundPositionY = (-portraitSize * 3) + 'px';
     }
   }
   let source = props.cpu ? portraitSources.opponent : portraitSources.user;
@@ -93,7 +99,9 @@ function PlayerPortrait(props) {
         }
       `}
       </style>
-      <video id={coverId} autoPlay loop src={staticSource} className='portrait-cover'/>
+      {props.type === 'opponent-panel' &&
+        <video id={coverId} autoPlay loop src={staticSource} className='portrait-cover' />
+      }
       {props.displayName &&
         <div className={'player-portrait-label'}>{props.displayName}</div>
       }
@@ -115,4 +123,4 @@ function areEqual(prevProps, nextProps) {
   return (prevProps.spriteIndex == nextProps.spriteIndex && prevProps.size == nextProps.size && prevProps.hidden == nextProps.hidden);
 }
 // export default PlayerPortrait;
-export default React.memo(PlayerPortrait, areEqual);
+export default React.memo(PlayerPortrait);
