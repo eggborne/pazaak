@@ -48,13 +48,14 @@ function OptionsScreen(props) {
       <div className="options-instructions-title shadowed-text">Options</div>
       <div id='lower-options-screen'>
         <div id='options-screen-panel' className="red-panel">
-          <OptionsPanel id='options-screen' currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} onChangePanelColor={props.onChangePanelColor} changeSliderValue={props.changeSliderValue}/>
+          <OptionsPanel id='options-screen' readyToShow={props.readyToShow} currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} onChangePanelColor={props.onChangePanelColor} changeSliderValue={props.changeSliderValue}/>
         </div>
       </div>
     </div>
   );
 }
 OptionsScreen.propTypes = {
+  readyToShow: PropTypes.bool,
   phase: PropTypes.string,
   currentOptions: PropTypes.object,
   onToggleOption: PropTypes.func,
