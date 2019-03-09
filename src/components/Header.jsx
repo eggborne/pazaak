@@ -31,6 +31,7 @@ function Header(props) {
           border-top-right-radius: 0 !important;
           border-bottom-color: transparent;
           z-index: 1;
+          
         }
         #header.intact {          
           border-radius: 0 0 var(--menu-border-radius) var(--menu-border-radius);
@@ -113,8 +114,9 @@ Header.propTypes = {
 
 function areEqual(prevProps, nextProps) {
   let equalTest = (
-    prevProps.readyToFill === nextProps.readyToFill
-    && prevProps.avatarIndex === nextProps.avatarIndex
+    prevProps.readyToFill == nextProps.readyToFill
+    && prevProps.avatarIndex == nextProps.avatarIndex
+    && prevProps.playerCredits == nextProps.playerCredits
   );
   return equalTest;
 }
