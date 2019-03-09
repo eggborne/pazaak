@@ -20,7 +20,6 @@ function Card(props) {
     cornerSymbol = '';
     valueDisplay = props.value;
   }
-
   let cardSize = props.size;
   if (typeof cardSize !== 'string') {
     cardSize = 'normal';
@@ -60,7 +59,7 @@ function Card(props) {
           border-width: ${cardBorderSize};
           opacity: ${animated && 0.1};
           transform: ${animated && 'scale(1.25)'};
-          transition: ${animated && 'transform 300ms ease, opacity 300ms ease'};
+          transition: ${animated && 'transform 210ms ease, opacity 210ms ease'};
           will-change: ${animated && 'transform, opacity'};
         }        
         .inner-band {
@@ -143,18 +142,12 @@ Card.propTypes = {
 };
 
 function areEqual(prevProps, nextProps) {
-  /*
-  return true if passing nextProps to render would return
-  the same result as passing prevProps to render,
-  otherwise return false
-  */
   let equalTest = (
     prevProps.inDeck === nextProps.inDeck
     && prevProps.value === nextProps.value
     && prevProps.size.height === nextProps.size.height
   );
   return equalTest;
-  // return false;
 }
-export default React.memo(Card, areEqual);
-// export default Card;
+// export default React.memo(Card, areEqual);
+export default Card;
