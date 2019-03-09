@@ -13,10 +13,7 @@ function ModeSelectScreen(props) {
       <style jsx>{`
         #mode-select-screen {
           position: absolute;
-          //height: 100vh;
-          //height: var(--inner-height);
           height: 100%;
-          //top: var(--top-margin);
           font-family: var(--title-font);
           line-height: 100%;
           align-items: center;
@@ -28,15 +25,15 @@ function ModeSelectScreen(props) {
           justify-content: space-between;
         }
         #mode-select-choices {
-          //margin-top: var(--control-footer-height);
           display: flex;
           flex-direction: column;
           justify-content: center;
+          align-items: center;
           flex-grow: 1;
         }
         .mode-panel {
           box-sizing: border-box;
-          width: 80vmin;
+          max-width: 70vmin;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -55,8 +52,10 @@ function ModeSelectScreen(props) {
         .mode-button {
           line-height: 100%;
           box-sizing: border-box;
-          height: 10vh;
+          min-height: 10vh;
+          padding: var(--menu-border-radius);
           display: flex;
+          flex-direction: column;
           justify-content: center;
           align-items: center;
           font-size: calc(var(--header-height) / 2);
@@ -68,13 +67,12 @@ function ModeSelectScreen(props) {
           transition: background-color 300ms ease, color 300ms ease;
         }
         .mode-description {
-          margin: var(--menu-border-radius);
+          box-sizing: border-box;
+          padding: var(--menu-border-radius);
           font-family: var(--main-font);
-          font-size: 1.8vh;
+          font-size: var(--small-font-size);
           width: 100%;
           display: flex;
-          align-items: flex-end;
-          justify-content: center;
           padding-top: var(--small-font-size);
           padding-bottom: var(--small-font-size);
         }
@@ -88,13 +86,21 @@ function ModeSelectScreen(props) {
           border: var(--menu-border-width) double var(--option-on-color) !important;
         }
         ul {
+          position: relative;
           list-style: square;
-          margin: 0;
-          padding-inline-start: 0;
+          padding-inline-start: calc(var(--menu-border-width) * 5);
           margin-block-start: 0;
           margin-block-end: 0;
         }
-
+        .progress-message {
+          font-family: var(--main-font);
+          font-size: var(--small-font-size);
+          color: yellow;
+          line-height: 150%;
+        }
+        .progress-message:first-of-type {
+          margin-top: var(--menu-border-width);
+        }
       `}</style>
       <div className="options-instructions-title">Game Mode</div>
       <div id="mode-select-choices">
@@ -103,6 +109,8 @@ function ModeSelectScreen(props) {
           <div className='inner-red-panel'>
             <div className={`mode-button ${modeSelected === 'campaign' && 'mode-selected-button'}`} id="campaign-button">
               Campaign
+              <div className='progress-message'>{props.cpuDefeated} opponent{props.cpuDefeated !== 1 && 's'} defeated</div>
+              <div className='progress-message'>{props.cardsWon} card{props.cardsWon !== 1 && 's'} won</div>
             </div>
             <div className="mode-description">
               <ul>
@@ -130,6 +138,8 @@ function ModeSelectScreen(props) {
 }
 ModeSelectScreen.propTypes = {
   phase: PropTypes.string,
+  cpuDefeated: PropTypes.number,
+  cardsWon: PropTypes.number,
   modeSelected: PropTypes.string,
   onClickCampaign: PropTypes.func,
   onClickQuickMatch: PropTypes.func,
