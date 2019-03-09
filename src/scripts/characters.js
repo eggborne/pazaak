@@ -13,6 +13,24 @@ const defaultStrategy =
   }
 };
 
+export const prizeCards = [
+  { id: 87, value: -1, type: '-' },
+  { id: 86, value: -2, type: '-' },
+  { id: 85, value: -3, type: '-' },
+  { id: 84, value: -4, type: '-' },
+  { id: 83, value: -5, type: '-' },
+  { id: 82, value: -6, type: '-' },
+
+  { id: 81, value: 1, type: '±' },
+  { id: 80, value: 2, type: '±' },
+  { id: 79, value: 3, type: '±' },
+  { id: 78, value: 4, type: '±' },
+  { id: 77, value: 5, type: '±' },
+  { id: 76, value: 6, type: '±' },
+  
+  { id: 75, value: 0, type: 'D' }
+]
+
 export const characters = {
   jarjarbinks: {
     name: 'jarjarbinks',
@@ -22,9 +40,7 @@ export const characters = {
     skillLevel: 1,
     prize: {
       credits: 25,
-      cards: [
-        { value: 1, type: '±' }
-      ]
+      cards: [0]
     },
     strategy: {
       stand: {
@@ -63,10 +79,7 @@ export const characters = {
     skillLevel: 2,
     prize: {
       credits: 75,
-      cards: [
-        { value: 2, type: '±' },
-        { value: 3, type: '±' },
-      ]
+      cards: [7,8]
     },
     strategy: {
       stand: {
@@ -105,10 +118,7 @@ export const characters = {
     skillLevel: 3,
     prize: {
       credits: 150,
-      cards: [
-        { value: 3, type: '±' },
-        { value: 4, type: '±' },
-      ]
+      cards: [8,9]
     },
     strategy: {
       stand: {
@@ -147,10 +157,7 @@ export const characters = {
     skillLevel: 5,
     prize: {
       credits: 300,
-      cards: [
-        { value: 4, type: '±' },
-        { value: 5, type: '±' },
-      ]
+      cards: [8,9]
     },
     strategy: {
       stand: {
@@ -189,11 +196,7 @@ export const characters = {
     skillLevel: 7,
     prize: {
       credits: 600,
-      cards: [
-        { value: 4, type: '±' },
-        { value: 5, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [10,11]
     },
     strategy: {
       stand: {
@@ -232,12 +235,7 @@ export const characters = {
     skillLevel: 8,
     prize: {
       credits: 1200,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [10,11]
     },
     strategy: {
       stand: {
@@ -276,12 +274,7 @@ export const characters = {
     skillLevel: 9,
     prize: {
       credits: 2400,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -320,12 +313,7 @@ export const characters = {
     skillLevel: 9,
     prize: {
       credits: 5000,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -364,12 +352,7 @@ export const characters = {
     skillLevel: 9,
     prize: {
       credits: 12000,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -408,12 +391,7 @@ export const characters = {
     skillLevel: 10,
     prize: {
       credits: 15000,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -448,16 +426,11 @@ export const characters = {
     name: 'caiaphas',
     displayName: 'Caiaphas',
     species: 'Human',
-    placeOfOrigin: 'Jerusalem',
+    placeOfOrigin: 'Earth',
     skillLevel: 10,
     prize: {
       credits: 40000,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -496,12 +469,7 @@ export const characters = {
     skillLevel: 11,
     prize: {
       credits: 100000,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -540,12 +508,7 @@ export const characters = {
     skillLevel: 12,
     prize: {
       credits: 500000,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -584,12 +547,7 @@ export const characters = {
     skillLevel: 13,
     prize: {
       credits: 1000000,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -628,12 +586,7 @@ export const characters = {
     skillLevel: 15,
     prize: {
       credits: 5000000,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -672,12 +625,7 @@ export const characters = {
     skillLevel: 20,
     prize: {
       credits: 99999999,
-      cards: [
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-        { value: 6, type: '±' },
-      ]
+      cards: [12]
     },
     strategy: {
       stand: {
@@ -716,6 +664,36 @@ export const characters = {
   random2: {
     name: 'random2',
     displayName: 'random2',
+    strategy: defaultStrategy
+  },
+  random3: {
+    name: 'random3',
+    displayName: 'random3',
+    strategy: defaultStrategy
+  },
+  random4: {
+    name: 'random4',
+    displayName: 'random4',
+    strategy: defaultStrategy
+  },
+  random5: {
+    name: 'random5',
+    displayName: 'random5',
+    strategy: defaultStrategy
+  },
+  random6: {
+    name: 'random6',
+    displayName: 'random6',
+    strategy: defaultStrategy
+  },
+  random7: {
+    name: 'random7',
+    displayName: 'random7',
+    strategy: defaultStrategy
+  },
+  random8: {
+    name: 'random8',
+    displayName: 'random8',
     strategy: defaultStrategy
   },
   bennett: {
