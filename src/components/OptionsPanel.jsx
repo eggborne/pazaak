@@ -141,13 +141,25 @@ class OptionsPanel extends React.PureComponent {
             flex-direction: column;
             transition: transform 300ms ease;
           }
-          .option-row {
+          .option-row, .option-column {
             box-sizing: border-box;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: calc(var(--menu-border-width));
             margin-bottom: calc(${rowHeight} * 0.1); 
+          }
+          .double-row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+          }
+          .option-column {
+            flex-direction: column;
+            width: calc(50% - (var(--menu-border-width) / 1.5));
+          }
+          .option-column > .option-label {
+            margin-bottom: var(--menu-border-width);
           }
           .option-label {
             box-sizing: border-box;
@@ -316,80 +328,90 @@ class OptionsPanel extends React.PureComponent {
           }
           .special-area > div:first-child {
             margin-bottom: calc(${rowHeight} * 0.1); 
-          }
-           
+          }           
         `}</style>
-        <div id={`${this.props.id}-options-page-area`} className={`option-page-area ${currentPage}`}>
-          <div id={`${this.props.id}-options-page-0`} className={`option-page`}>               
-            <div className='option-row inner-red-panel'>
+        {this.props.readyToShow &&
+          <div id={`${this.props.id}-options-page-area`} className={`option-page-area ${currentPage}`}>
+            <div id={`${this.props.id}-options-page-0`} className={`option-page`}>
+              <div className='option-row inner-red-panel'>
                 <div className='option-label'>Quick Turns</div>
                 <OptionSwitch home={this.props.id} type={'quick-turns'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.quickTurns} clickFunction={this.props.clickFunction} />
-           </div>
-            <div className='option-row inner-red-panel'>
-              <div className='option-label'>Auto Stand at 20</div>
-              <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />          
-           </div>
-            <div className='option-row inner-red-panel'>
-              <div className='option-label'>Option</div>
-              <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />             
-              </div> 
-            <div className='option-row inner-red-panel'>
-              <div className='option-label'>Other Option</div>
-              <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />
-            </div> 
-            <div className='option-row inner-red-panel'>
-              <div className='option-label'>Another Option</div>
-              <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />
-            </div>            
-            <div className='option-row inner-red-panel'>
-              <div className='option-label'>Yet Another Option</div>
-              <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />
-            </div>                       
-          </div>
-          <div id={`${this.props.id}-options-page-1`} className={`option-page`}>
-            <div className='option-row inner-red-panel'>
-              <div className='option-label'>Full Screen</div>
-              <OptionSwitch home={this.props.id} type={'full-screen'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.fullScreen} clickFunction={this.props.clickFunction} />
+              </div>
+              <div className='option-row inner-red-panel'>
+                <div className='option-label'>Auto Stand at 20</div>
+                <OptionSwitch home={this.props.id} type={'auto-stand'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoStand} clickFunction={this.props.clickFunction} />
+              </div>
+              <div className='option-row inner-red-panel'>
+                <div className='option-label'>Auto End at Bust</div>
+                <OptionSwitch home={this.props.id} type={'auto-end'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.autoEnd} clickFunction={this.props.clickFunction} />
+              </div>
+              <div className='option-row inner-red-panel'>
+                <div className='option-label'>Other Option</div>
+                <OptionSwitch home={this.props.id} type={null} onClick={this.props.onToggleOption} toggled={null} clickFunction={this.props.clickFunction} />
+              </div>
+              <div className='option-row inner-red-panel'>
+                <div className='option-label'>Another Option</div>
+                <OptionSwitch home={this.props.id} type={null} onClick={this.props.onToggleOption} toggled={null} clickFunction={this.props.clickFunction} />
+              </div>
+              <div className='option-row inner-red-panel'>
+                <div className='option-label'>Yet Another Option</div>
+                <OptionSwitch home={this.props.id} type={null} onClick={this.props.onToggleOption} toggled={null} clickFunction={this.props.clickFunction} />
+              </div>
             </div>
-            <div className='option-row inner-red-panel'>
-              <div className='option-label'>Header</div>
-              <OptionSwitch home={this.props.id} type={'header-visible'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.headerVisible} clickFunction={this.props.clickFunction} />
-            </div>
-            <div className='option-row inner-red-panel'>
-              <div className='option-label'>Starfield</div>
-              <OptionSwitch home={this.props.id} type={'starfield'} onClick={this.props.onToggleOption} toggled={!this.props.currentOptions.solidBackground} clickFunction={this.props.clickFunction} />
-            </div>           
+            <div id={`${this.props.id}-options-page-1`} className={`option-page`}>
+              <div className='option-row inner-red-panel'>
+                <div className='option-label'>Full Screen</div>
+                <OptionSwitch home={this.props.id} type={'full-screen'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.fullScreen} clickFunction={this.props.clickFunction} />
+              </div>
+              <div className='option-row inner-red-panel'>
+                <div className='option-label'>Header</div>
+                <OptionSwitch home={this.props.id} type={'header-visible'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.headerVisible} clickFunction={this.props.clickFunction} />
+              </div>
+              <div className='option-row inner-red-panel'>
+                <div className='option-label'>Starfield</div>
+                <OptionSwitch home={this.props.id} type={'starfield'} onClick={this.props.onToggleOption} toggled={!this.props.currentOptions.solidBackground} clickFunction={this.props.clickFunction} />
+              </div>
+            {/* <div className='double-row'>
+              <div className='option-column inner-red-panel'>
+                <div className='option-label'>Starfield</div>
+                <OptionSwitch home={this.props.id} type={'starfield'} onClick={this.props.onToggleOption} toggled={!this.props.currentOptions.solidBackground} clickFunction={this.props.clickFunction} />
+              </div>
+              <div className='option-column inner-red-panel'>
+                <div className='option-label'>Animations</div>
+                <OptionSwitch home={this.props.id} type={'animations'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.animations} clickFunction={this.props.clickFunction} />
+              </div>
+            </div> */}
             <div className='color-controls-tab-area'>
               <div id={`background-color-control`}  {...{ [this.props.clickFunction]: this.handleClickColorControlTab }} className={`color-controls-tab inner-red-panel ${this.state.editingElementColor === 'background' && 'selected-color-control'}`}>{this.props.id === 'options-screen' ? 'Background' : 'BG'}</div>
               <div id={`panel-control`} {...{ [this.props.clickFunction]: this.handleClickColorControlTab }} className={`color-controls-tab inner-red-panel ${this.state.editingElementColor === 'panel' && 'selected-color-control'}`}>Menus</div>
             </div>
               {this.state.editingElementColor === 'background' ?
-              <div id={`${this.props.id}-hue-color-controls`} className='color-controls inner-red-panel'>
-                <div>
+                <div id={`${this.props.id}-hue-color-controls`} className='color-controls inner-red-panel'>
+                  <div>
                     <HuePicker
-                    id={'background-hue-control'}
-                    pointer={SliderKnob}
-                    width={'100%'}
-                    height={'calc(var(--micro-card-width) * 0.45)'}
-                    color={this.props.currentOptions.backgroundColor || '#fff'}
-                    onChangeComplete={this.onChangeBackgroundColor}
-                  />
-                </div>
-                <div>
-                  <Slider type='bg-alpha-control'
-                    id='bg-alpha-slider'
-                    steps={100}
-                    showing={true}
-                    bgColor={fullAlphaBg}
-                    value={getColorValues(this.props.currentOptions.backgroundColor).a}
-                    home={this.props.id}
-                    changeSliderValue={this.handleSliderChange} />
+                      id={'background-hue-control'}
+                      pointer={SliderKnob}
+                      width={'100%'}
+                      height={'calc(var(--micro-card-width) * 0.45)'}
+                      color={this.props.currentOptions.backgroundColor || '#fff'}
+                      onChangeComplete={this.onChangeBackgroundColor}
+                    />
+                  </div>
+                  <div>
+                    <Slider type='bg-alpha-control'
+                      id='bg-alpha-slider'
+                      steps={100}
+                      showing={true}
+                      bgColor={fullAlphaBg}
+                      value={getColorValues(this.props.currentOptions.backgroundColor).a}
+                      home={this.props.id}
+                      changeSliderValue={this.handleSliderChange} />
                   </div>
                 </div>
                 :
                 <div id={`${this.props.id}-panel-color-controls`} className='color-controls inner-red-panel'>
                   <div>
-                      <HuePicker
+                    <HuePicker
                       id={'panel-hue-control'}
                       pointer={SliderKnob}
                       width={'100%'}
@@ -417,41 +439,42 @@ class OptionsPanel extends React.PureComponent {
                   onClickRangeButton={this.handleSliderChange}
                   toggledButton={this.props.currentOptions.panelSize / 0.5}
                   clickFunction={this.props.clickFunction}
-                />                
-              </div>             
-          </div>
+                />
+              </div>
+            </div>
 
-          <div id={`${this.props.id}-options-page-2`} className={`option-page`}>
-            <div className='special-area inner-red-panel'>
-              <div className='option-row slider-row'>
-                <div className='option-label'>Sound FX</div>
-                <OptionSwitch home={this.props.id} type={'sound-fx'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.sound} clickFunction={this.props.clickFunction} />
+            <div id={`${this.props.id}-options-page-2`} className={`option-page`}>
+              <div className='special-area inner-red-panel'>
+                <div className='option-row slider-row'>
+                  <div className='option-label'>Sound FX</div>
+                  <OptionSwitch home={this.props.id} type={'sound-fx'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.sound} clickFunction={this.props.clickFunction} />
+                </div>
+                <div id='sound-slider-area' className='option-row slider-row'>
+                  <Slider type='sound-volume' id='sound-volume-slider' steps={100} showing={true} value={this.props.currentOptions.soundVolume} home={this.props.id} height={rowHeight + 'px'} changeSliderValue={this.handleSliderChange} />
+                </div>
               </div>
-              <div id='sound-slider-area' className='option-row slider-row'>
-                <Slider type='sound-volume' id='sound-volume-slider' steps={100} showing={true} value={this.props.currentOptions.soundVolume} home={this.props.id} height={rowHeight + 'px'} changeSliderValue={this.handleSliderChange} />
+              <div className='special-area inner-red-panel'>
+                <div className='option-row slider-row'>
+                  <div className='option-label'>Ambience</div>
+                  <OptionSwitch home={this.props.id} type={'ambience'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.ambience} clickFunction={this.props.clickFunction} />
+                </div>
+                <div id='ambience-slider-area' className='option-row slider-row'>
+                  <Slider type='ambience-volume' id='ambience-volume-slider' steps={100} showing={true} value={this.props.currentOptions.ambienceVolume} home={this.props.id} height={rowHeight + 'px'} changeSliderValue={this.handleSliderChange} />
+                </div>
+              </div>
+              <div className='special-area inner-red-panel'>
+                <div className='option-row slider-row'>
+                  <div className='option-label'>Music</div>
+                  <OptionSwitch home={this.props.id} type={'music'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.music} clickFunction={this.props.clickFunction} />
+                </div>
+                <div id='music-slider-area' className='option-row slider-row'>
+                  <Slider type='music-volume' id='music-volume-slider' steps={100} showing={true} value={this.props.currentOptions.musicVolume} home={this.props.id} height={rowHeight + 'px'} changeSliderValue={this.handleSliderChange} />
+                </div>
               </div>
             </div>
-            <div className='special-area inner-red-panel'>
-              <div className='option-row slider-row'>
-                <div className='option-label'>Ambience</div>
-                <OptionSwitch home={this.props.id} type={'ambience'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.ambience} clickFunction={this.props.clickFunction} />
-              </div>
-              <div id='ambience-slider-area' className='option-row slider-row'>
-                <Slider type='ambience-volume' id='ambience-volume-slider' steps={100} showing={true} value={this.props.currentOptions.ambienceVolume} home={this.props.id} height={rowHeight + 'px'} changeSliderValue={this.handleSliderChange} />
-              </div>
-            </div>
-            <div className='special-area inner-red-panel'>
-              <div className='option-row slider-row'>
-                <div className='option-label'>Music</div>
-                <OptionSwitch home={this.props.id} type={'music'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.music} clickFunction={this.props.clickFunction} />
-              </div>
-              <div id='music-slider-area' className='option-row slider-row'>
-                <Slider type='music-volume' id='music-volume-slider' steps={100} showing={true} value={this.props.currentOptions.musicVolume} home={this.props.id} height={rowHeight + 'px'} changeSliderValue={this.handleSliderChange} />
-              </div>
-            </div>
-          </div>
 
-        </div>
+          </div>
+        }
         {this.state.totalPages > 1 &&
           <div className='more-panel'>
           <button {...{ [this.props.clickFunction]: this.handleClickOptionTab }} name='game-options' id={`${this.props.id}-game-option-tab-button`} className={`option-tab-button ${this.state.pageShowing === 0 && 'selected-tab'}`}>
@@ -475,6 +498,7 @@ class OptionsPanel extends React.PureComponent {
 
 OptionsPanel.propTypes = {
   id: PropTypes.string,
+  readyToShow: PropTypes.bool,
   currentOptions: PropTypes.object,
   onToggleOption: PropTypes.func,
   onChangeBackgroundColor: PropTypes.func,
