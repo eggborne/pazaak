@@ -35,6 +35,7 @@ function HallOfFameEntry(props) {
           font-size: 1.65vh;
           transition: opacity 300ms ease;
           will-change: opacity;
+          border: ${isSelf && '5px groove white'};
         }
         .main-body {
           box-sizing: border-box;
@@ -100,6 +101,7 @@ function HallOfFameEntry(props) {
           border: 1px solid var(--dark-red-bg-color);
           border-left: 0;
           padding: var(--menu-border-width);
+          color: var(--special-button-text-color);
         }
         .cpu-opponents-header {
           grid-column-end: span 3;
