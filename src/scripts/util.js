@@ -1,15 +1,143 @@
 
-const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
-const vowels = ['a', 'e', 'i', 'o', 'u'];
 
-const randomConsonant = () => consonants[randomInt(0, consonants.length - 1)];
+
+const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
+const syllableStarters = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'q\'', 'qu', 'r', 's', 'sh', 't', 'th', 'v', 'w', 'wh', 'y', 'z'];
+const syllableEnders = ['b', 'bb', 'c', 'd', 'f', 'ff', 'g', 'gg', 'gh', 'j', 'k', 'l', 'll', 'm', 'mm', 'n', 'nn', 'nt', 'p', 'r', 's', 'ss', 't', 'tt', 'w', 'x', 'y', 'z', 'zz'];
+const vowels = ['a', 'ai', 'e', 'ee', 'i', 'o', 'oi', 'oo', 'u'];
+const invalidVowelFollowers = {
+  a: [],
+  ai: ['j'],
+  e: ['c', 'j'],
+  ee: ['c'],
+  i: ['j', 'w', 'y'],
+  o: ['j'],
+  oo: ['j', 'w', 'y'],
+  oi: ['j', 'x', 'y'],
+  u: ['j', 'w'],
+};
+const bannedStrings = ['fuck', 'cunt', 'piss', 'fag', 'gay', 'ass', 'shit'];
+const randomType = (typeArr) => typeArr[randomInt(0, typeArr.length - 1)];
 const randomVowel = () => vowels[randomInt(0, vowels.length - 1)];
 
 export const getStarWarsName = () => {
+  let mode = 'shortLong';
   let firstName;
   let lastName;
-  firstName = `${randomConsonant().toUpperCase()}${randomVowel()}${randomConsonant()}`;
-  lastName = `${randomConsonant().toUpperCase()}${randomVowel()}${randomConsonant()}${randomConsonant()}${randomVowel()}${randomConsonant()}`;
+  if (!randomInt(0, 1)) {
+    mode = 'longShort';
+  }
+  if (!randomInt(0, 8)) {
+    let rand = randomInt(0, 2);
+    if (rand === 0) {
+      mode = 'hutt';
+    }
+    if (rand === 1) {
+      mode = 'jar jar';
+    }
+    if (rand === 2) {
+      mode = 'qui-gon';
+    }
+  }
+  if (!randomInt(0, 16)) {
+    mode = 'cher';
+  }
+  if (mode === 'shortLong' || mode === 'cher') {
+    let firstName0 = randomType(syllableStarters);
+    let firstName1 = randomVowel();
+    let firstName2 = randomType(syllableEnders);
+    let lastName0 = randomType(syllableStarters);
+    let lastName1 = randomVowel();
+    let lastName2 = randomType(syllableEnders);
+    let lastName3 = randomType(syllableStarters);
+    let lastName4 = randomVowel();
+    let lastName5 = randomType(syllableEnders);
+    if (invalidVowelFollowers[firstName1].indexOf(firstName2) > -1) {
+      let filtered = syllableEnders.filter(letter => invalidVowelFollowers[firstName1].indexOf(letter) === -1);
+      firstName2 = filtered[randomInt(0, filtered.length - 1)];
+    }
+    if (invalidVowelFollowers[lastName1].indexOf(lastName2) > -1) {
+      let filtered = syllableEnders.filter(letter => invalidVowelFollowers[lastName1].indexOf(letter) === -1);
+
+      lastName2 = filtered[randomInt(0, filtered.length - 1)];
+    }
+    if (invalidVowelFollowers[lastName4].indexOf(lastName5) > -1) {
+      let filtered = syllableEnders.filter(letter => invalidVowelFollowers[lastName4].indexOf(letter) === -1);
+      lastName5 = filtered[randomInt(0, filtered.length - 1)];
+    }
+    if (lastName1.length > 1 && lastName2.length > 1) {
+      lastName2 = lastName2[0];
+    }
+    if (lastName4.length > 1 && lastName5.length > 1) {
+      lastName5 = lastName5[0];
+    }
+    if (firstName0.length > 1) {
+      firstName0 = firstName0[0].toUpperCase() + firstName0.slice(1, firstName0.length);
+    } else {
+      firstName0 = firstName0.toUpperCase();
+    }
+    if (lastName0.length > 1) {
+      lastName0 = lastName0[0].toUpperCase() + lastName0.slice(1, lastName0.length);
+    } else {
+      lastName0 = lastName0.toUpperCase();
+    }
+    firstName = `${firstName0}${firstName1}${firstName2}`;
+    lastName = `${lastName0}${lastName1}${lastName2}${lastName3}${lastName4}${lastName5}`;
+    if (bannedStrings.indexOf(firstName.toLowerCase()) > -1) {
+      firstName = firstName + ' (banned)';
+    }
+    if (mode === 'cher') {
+      firstName = `${firstName0}${firstName1}${lastName0.toLowerCase()}${lastName1}`;
+      lastName = '';
+    }
+  } else if (mode === 'longShort' || mode === 'hutt' || mode === 'jar jar' || mode === 'qui-gon') {
+    let firstName0 = randomType(syllableStarters);
+    let firstName1 = randomVowel();
+    let firstName2 = randomType(syllableStarters);
+    let firstName3 = randomVowel();
+    let lastName0 = randomType(syllableStarters);
+    let lastName1 = randomVowel();
+    let lastName2 = randomType(syllableEnders);
+    if (invalidVowelFollowers[lastName1].indexOf(lastName2) > -1) {
+      let filtered = syllableEnders.filter(letter => invalidVowelFollowers[lastName1].indexOf(letter) === -1);
+      lastName2 = filtered[randomInt(0, filtered.length - 1)];
+    }
+    if (firstName0.length > 1) {
+      firstName0 = firstName0[0].toUpperCase() + firstName0.slice(1, firstName0.length);
+    } else {
+      firstName0 = firstName0.toUpperCase();
+    }
+    if (lastName0.length > 1) {
+      lastName0 = lastName0[0].toUpperCase() + lastName0.slice(1, lastName0.length);
+    } else {
+      lastName0 = lastName0.toUpperCase();
+    }
+    if (lastName1.length > 1 && lastName2.length > 1) {
+      lastName2 = lastName2[0];
+    }
+    firstName = `${firstName0}${firstName1}${firstName2}${firstName3}`;
+    lastName = `${lastName0}${lastName1}${lastName2}`;
+    if (bannedStrings.indexOf(firstName.toLowerCase()) > -1) {
+      firstName = firstName + ' (banned)';
+    }
+    if (mode === 'hutt') {
+      firstName += ' the'
+    }
+    if (mode === 'qui-gon') {
+      if (firstName2.length > 1) {
+        firstName2 = firstName2[0].toUpperCase() + firstName2.slice(1, firstName2.length);
+      } else {
+        firstName2 = firstName2.toUpperCase();
+      }
+      firstName = `${firstName0}${firstName1}-${firstName2}${firstName3}`;
+    }
+    if (mode === 'jar jar') {
+      firstName = `${firstName0}${firstName1} ${firstName0}${firstName1}`;
+      if (lastName2 !== 'x' && lastName2 !== 's') {
+        lastName += 's';
+      }
+    }
+  }
   return `${firstName} ${lastName}`;
 };
 
@@ -119,7 +247,7 @@ export const getTimeSinceFromSeconds = sessionLengthInSeconds => {
     }
     if (wholeHours >= 24) {
       let dayPlural = 's';
-      let wholeDays = Math.floor(sessionMinutes / 60);
+      let wholeDays = Math.floor(wholeHours / 24);
       if (wholeDays === 1) {
         dayPlural = '';
       }
