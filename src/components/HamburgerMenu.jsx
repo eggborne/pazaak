@@ -50,7 +50,7 @@ function HamburgerMenu(props) {
           transform: none !important;
         }
       `}</style>
-      <OptionsPanel id='hamburger-menu' currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} changeSliderValue={props.changeSliderValue}/>
+      <OptionsPanel id='hamburger-menu' readyToShow={true} currentOptions={props.currentOptions} clickFunction={props.clickFunction} onToggleOption={props.onToggleOption} onChangeBackgroundColor={props.onChangeBackgroundColor} changeSliderValue={props.changeSliderValue}/>
       <div id='hamburger-button-area'>
         <button {...{ [props.clickFunction]: props.onClickHamburgerQuit }} id="hamburger-quit-button" className="hamburger-button">
           Quit Match
