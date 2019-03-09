@@ -4,7 +4,7 @@ import Hamburger from './Hamburger';
 
 function ControlFooter(props) {
   // let onIntroPhase = (props.phase === 'showingOptions' || props.phase === 'showingInstructions' || props.phase === 'showingHallOfFame');
-  console.big('ControlFooter rendering');
+  console.big('ControlFooter rendering ' + props.currentOptions.panelSize);
   
   setTimeout(() => {
     if (props.readyToShow && props.phase === 'splashScreen') {
@@ -19,8 +19,7 @@ function ControlFooter(props) {
   return (
     <div id='control-footer' className={`red-panel ${props.readyToShow || 'hidden'}` }>
       <style jsx>{`
-        #control-footer {         
-          --control-footer-padding: calc(var(--control-footer-height) / 20);
+        #control-footer {                   
           box-sizing: border-box;
           position: fixed;
           bottom: 0;
@@ -47,21 +46,28 @@ function ControlFooter(props) {
         #control-footer-button-area {
           flex-grow: 1;
           display: grid;
-          grid-template-columns: 1.1fr 0.9fr var(--hamburger-height);
+          grid-template-columns: 1.1fr auto 0.9fr var(--hamburger-height);
           grid-template-rows: 1fr;                
         }
         .move-button {
           //width: 40%;
           font-size: calc(var(--micro-card-width) / 2);
+         
+        }
+        #end-turn-button {
+          border-top-right-radius: ${props.currentOptions.panelSize == 0 && '0'};
+          border-bottom-right-radius: ${props.currentOptions.panelSize == 0 && '0'};
+        }
+        #switch-sign-button {
+          margin-left: var(--control-footer-padding);
+          border-radius: ${props.currentOptions.panelSize == 0 && '0'};
+          height: 100%;
         }
         #stand-button {
           margin-left: var(--control-footer-padding);
           margin-right: var(--control-footer-padding);
-        }
-        #switch-sign-button {
-          width: 20%;
-          //font-size: 1rem;
-          margin-left: var(--control-footer-padding);
+          border-top-left-radius: ${props.currentOptions.panelSize == 0 && '0'};
+          border-bottom-left-radius: ${props.currentOptions.panelSize == 0 && '0'};
         }
         #pre-button-area {
           box-sizing: border-box;
@@ -91,15 +97,15 @@ function ControlFooter(props) {
         .footer-button {
           width: 100%;
           height: 85%;
-          //font-size: calc(var(--control-footer-height) / 4);
-          font-size:var(--button-text-size);
+          font-size: calc(var(--micro-card-width) / 2);
+          //font-size:var(--button-text-size);
         }
         .footer-back-button {
           font-size: calc(var(--control-footer-height) / 4);
           background-color: rgba(0, 0, 0, 0.6);
           border-color: rgba(0, 0, 0, 0.5);
           width: 50%;
-          height: 65%;
+          height: 75%;
         }
         #randomize-button {
           font-size: 1.5vmax;
@@ -182,7 +188,9 @@ function ControlFooter(props) {
           <>
             <div id='control-footer-button-area'>
               <button {...{ [props.clickFunction]: props.onClickEndTurn }} className='move-button' id='end-turn-button'>End Turn</button>
-              <button {...{ [props.clickFunction]: props.onClickSwitchSign }} className='move-button disabled-button hidden-button' id='switch-sign-button'>+/-</button>
+              <div>
+                <button {...{ [props.clickFunction]: props.onClickSwitchSign }} className='move-button disabled-button hidden-button' id='switch-sign-button'>+/-</button>
+              </div>
               <button {...{ [props.clickFunction]: props.onClickStand }} className='move-button' id='stand-button'>Stand</button>
               <Hamburger onClickHamburger={props.onClickHamburger}
                 clickFunction={props.clickFunction}
@@ -218,6 +226,6 @@ ControlFooter.propTypes = {
 
 // export default ControlFooter;
 function areEqual(prevProps, nextProps) {
-  return prevProps.phase == nextProps.phase && prevProps.readyToShow == nextProps.readyToShow;
+  return prevProps.phase == nextProps.phase && prevProps.readyToShow == nextProps.readyToShow && prevProps.currentOptions.panelSize == nextProps.currentOptions.panelSize;
 }
 export default React.memo(ControlFooter, areEqual);
