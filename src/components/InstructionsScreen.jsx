@@ -4,17 +4,17 @@ import PropTypes from 'prop-types';
 function InstructionsScreen(props) {
   console.big('InstructionsScreen rendering');
   if (props.phase === 'showingInstructions') {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       document.getElementById('instructions-screen').style.transform = 'none';
       document.getElementById('instructions-screen').style.opacity = 1;
-    });
+    },1);
   }
   return (
     <div id="instructions-screen" className='shadowed-text'>
       <style jsx>{`
         #instructions-screen {
           position: absolute;
-          display: flex;
+          display: ${props.readyToShow ? 'flex' : 'none'};
           flex-direction: column;
           justify-content: flex-end;
           opacity: var(--starting-opacity);
@@ -81,6 +81,7 @@ function InstructionsScreen(props) {
 }
 InstructionsScreen.propTypes = {
   phase: PropTypes.string,
+  readyToShow: PropTypes.bool,
   onClickBack: PropTypes.func,
   clickFunction: PropTypes.string
 };
@@ -99,6 +100,9 @@ function areEqual(prevProps, nextProps) {
     document.getElementById('instructions-screen').style.transitionDuration = 'var(--shift-duration)';
     document.getElementById('instructions-screen').style.opacity = 1;
   }
+  return (prevProps.readyToShow == nextProps.readyToShow
+    && !leaving
+    && !entering);
 }
 
 export default React.memo(InstructionsScreen, areEqual);
