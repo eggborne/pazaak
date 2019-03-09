@@ -63,5 +63,8 @@ PlayingAsIndicator.propTypes = {
   playerCredits: PropTypes.number,
   uniqueId: PropTypes.number,
 };
-
-export default React.memo(PlayingAsIndicator);
+function areEqual(prevProps, nextProps) {
+  return prevProps.playerCredits == nextProps.playerCredits
+    && prevProps.playerName == nextProps.playerName;
+}
+export default React.memo(PlayingAsIndicator, areEqual);
