@@ -36,17 +36,14 @@ function ResultModal(props) {
           align-items: center;
           justify-content: center;
           line-height: 2.5rem;
-          transform: translateY(-95vw);
+          transform: scale(0.75) translateY(-67.5%);
           opacity: 0;
           transition: transform 600ms ease, opacity 300ms ease;
           will-change: transform, opacity;
           padding: 2vh;
-          pointer-events: none;
-          box-shadow:
-          -2px -2px 0 #000,  
-          2px -2px 0 #000,
-          -2px 2px 0 #000,
-            1px 1px 2px #000;
+          pointer-events: none;   
+          top: calc(50vh - (var(--control-footer-height) /2) + var(--top-margin));
+          transform-origin: center center;
         }
         #result-title {
           font-size: 1.75rem;
@@ -66,7 +63,7 @@ function ResultModal(props) {
           font-size: 1rem;
           text-align: center;
         }
-        #result-ok-button {
+        #result-ok-button, #result-main-menu-button {
           box-sizing: border-box;
           font-size: 1.25rem;
           padding: 1.5rem 2rem 1.5rem 2rem;
@@ -83,7 +80,10 @@ function ResultModal(props) {
           {props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span><br />{props.playerNames.opponent}: <span style={opponentScoreStyle}>{props.finalScores.opponent}</span>
         </div>
       </div>
-      <button {...{[props.clickFunction]: props.onClickOKButton}} className='balls' id='result-ok-button'>{props.buttonText}</button>
+      <button {...{ [props.clickFunction]: props.onClickResultButton1 }} className='pointer' id='result-ok-button'>{props.buttonText}</button>
+      {props.matchOver &&
+        <button {...{ [props.clickFunction]: props.onClickResultButton2 }} className='pointer' id='result-main-menu-button'>{props.buttonText2}</button>
+      }
     </div>
   );
 }
@@ -95,7 +95,9 @@ ResultModal.propTypes = {
   matchOver: PropTypes.bool,
   finalScores: PropTypes.object,
   buttonText: PropTypes.string,
-  onClickOKButton: PropTypes.func,
+  buttonText2: PropTypes.string,
+  onClickResultButton1: PropTypes.func,
+  onClickResultButton2: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
