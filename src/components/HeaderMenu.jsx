@@ -28,6 +28,11 @@ function HeaderMenu(props) {
         }           
       `}</style>
       <UserCard playerObj={props.playerObject}
+        totalSets={props.playerObject.totalSets}
+        totalMatches={props.playerObject.totalMatches}
+        setWins={props.playerObject.setWins}
+        matchWins={props.playerObject.matchWins}
+        wonCards={props.playerObject.wonCards}
         onClickCloseButton={props.onClickCloseButton}
         onClickLogOut={props.onClickLogOut}
         onClickSignIn={props.onClickSignIn}
@@ -46,9 +51,10 @@ HeaderMenu.propTypes = {
 function areEqual(prevProps, nextProps) {
   let equalTest = (
     prevProps.playerObject.avatarIndex == nextProps.playerObject.avatarIndex &&
-    prevProps.playerObject.loggedInAs == nextProps.playerObject.loggedInAs
+    prevProps.playerObject.loggedInAs == nextProps.playerObject.loggedInAs &&
+    prevProps.playerObject.totalSets == nextProps.playerObject.totalSets 
   );
-  return equalTest;
+  return false;
 }
 
-export default React.memo(HeaderMenu, areEqual);
+export default HeaderMenu;
