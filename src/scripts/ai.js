@@ -2,66 +2,161 @@ import { characters } from '../scripts/characters';
 import { randomInt } from './util';
 const plusMinusSymbol = '±';
 
+function checkHandPluses(app, standAt) {
+  let winnerCard;
+  for (let i = 0; i < app.state.opponentHand.length; i++) {
+    let card = app.state.opponentHand[i];
+    //console.log(`${app.state.playerNames.opponent} is considering card ${card.id} value ${card.value} type ${card.type}...`);
+    if (app.state.opponentHand[i].type === '+' || app.state.opponentHand[i].type === plusMinusSymbol) {
+      let potentialScore = app.state.opponentTotal + card.value;
+      if (!app.state.turnStatus.opponent.playedCard && potentialScore >= standAt && potentialScore <= 20) {
+        console.warn('FOUND a winning card!')
+        winnerCard = { id: card.id, value: card.value, type: card.type };
+        break;
+      } else {
+        console.warn(`CPU looked at card ${i} (#card-${card.id} ${card.value} ${card.type}), but potentialScore ${potentialScore} is too low!`);
+      }
+    } else if (card) {
+      console.warn(`CPU looked at card ${i} (#card-${card.id} ${card.value} ${card.type}), but it can't help because it's a ${card.type} type!`);
+    }
+  }
+  console.warn('returning', winnerCard)
+  return winnerCard;
+}
+
 export function makeOpponentMove(app) {
+
+  // working: 
+  // - cpu ends turn until !safeToDraw, user stands with losing score
+  // - cpu ends turn until !safeToDraw, user stands with losing score
+  // 
+
   setTimeout(() => {
 
 
     let stood = false;
+    let busted = false;
+    let emptyGridSlots = 9 - app.state.opponentGrid.length;
+    let autoStand = app.state.options.autoStand;
+    let autoEnd = app.state.options.autoEnd;
     let newTotal;
     let extraDelay = 0;
     let acceptTie = randomInt(0, 10) < characters[app.state.cpuOpponent].strategy.tie.chanceToAccept;
     let standAt = characters[app.state.cpuOpponent].strategy.stand.standAt;
-
-    let safeToDraw = isSafeToDraw(app, getHighestMinusValue(app));
+    let highestMinusValue = getHighestMinusValue(app);
+    let safeToDraw = isSafeToDraw(app, highestMinusValue);
 
     let userTotal = app.state.userTotal;
     let cpuTotal = app.state.opponentTotal;
-
-    console.warn('CPU turn started. Totals', userTotal, cpuTotal);
+    console.warn('------------------------');
+    console.warn(`CPU turn started. Totals: User - ${userTotal} | CPU - ${cpuTotal}`);
+    console.warn('CPU emptyGridSlots', emptyGridSlots);
     console.warn('CPU safeToDraw?', safeToDraw);
+    console.warn('CPU highestMinusValue?', highestMinusValue);
+    console.warn('------------------------');
 
     if (app.state.turnStatus.user.standing) {
-      console.warn('User STANDING.');
+      console.warn('User is STANDING.');
       if (userTotal > 20) {
         console.warn('userTotal was over 20!');
         standCPU(app);
+        stood = true;
       } else {
-        console.warn('userTotal was under 20!');
-        if (opponentTotal < userTotal) {
-          //app.dealToPlayerGrid('opponent');
-          //newTotal = app.state.opponentTotal;
+        console.warn('userTotal was <= 20!');
+        if (cpuTotal < userTotal) {
+          console.warn('opponentTotal < userTotal.')
+          standAt = userTotal + 1;
+          if (standAt > 20) {
+            standAt = 20;
+          }
+          console.warn('standAt changed to', standAt)
+          // search hand for winning card
+          let cardToPlay = checkHandPluses(app, standAt);
+          if (cardToPlay) {
+            app.playHandCard('opponent', cardToPlay);
+            emptyGridSlots--;
+            app.callMoveIndicator('opponent', 'Play Card', app.state.options.moveIndicatorTime / 2);
+            standCPU(app);
+            stood = true;
+          } else {
+            console.warn(`No good card found to play. Drawing instead (max ${emptyGridSlots} more times)...`);
+            if (emptyGridSlots > 0) {
+              extraDelay += 1000;
+              setTimeout(() => {
+                app.callMoveIndicator('opponent', 'Draw', app.state.options.moveIndicatorTime / 2);
+                app.dealToPlayerGrid('opponent').then((newTotal) => {
+                  console.warn('dealToPlayerGrid promise returned', newTotal);
+                });
+              }, extraDelay);
+            }
+            console.warn('after draw, opponentTotal is', app.state.opponentTotal);
+            if (app.state.opponentTotal > 20) {
+              if (autoEnd) {
+                busted = true;
+                console.warn('cpu busted while autoEnd is on');
+
+              }
+            } else {
+              console.warn('Did not bust after drawing. Standing');
+              standCPU(app);
+              stood = true;
+            }
+            // if (app.state.opponentTotal < standAt) {
+            //   console.warn('Total still too low. Drawing again.')
+            //   app.dealToPlayerGrid('opponent');
+            //   app.callMoveIndicator('opponent', 'Draw', app.state.options.moveIndicatorTime / 2);
+            //   console.warn('after second draw, opponentTotal is', app.state.opponentTotal);
+            //   standCPU(app);
+            //   stood = true;
+            // }
+          }
         } else {
-
+          console.warn('CPU score already beats user score. Standing.');
+          standCPU(app);
+          stood = true;
         }
-        standCPU(app);
-        setTimeout(() => {
-          app.callMoveIndicator('opponent', 'Stand', app.state.options.moveIndicatorTime);
-          setTimeout(() => {
-            app.changeTurn('user');
-          }, app.state.options.moveIndicatorTime);
-        }, 2000);
       }
-
     } else {
+      console.warn('User is still in play.');
       if (safeToDraw) {
-        setTimeout(() => {
-          app.callMoveIndicator('opponent', 'End Turn', app.state.options.moveIndicatorTime);
-          setTimeout(() => {
-            app.changeTurn('user');
-          }, app.state.options.moveIndicatorTime);
-        }, 2000);
+        console.warn('safeToDraw = true. Ending turn.')
+        
 
       } else {
+        console.warn('safeToDraw = false.');
+        console.warn('userTotal is', userTotal);
+        
         if (cpuTotal >= standAt) {
+          console.warn('cpuTotal >= standAt. CPU Standing.', cpuTotal, standAt)
           standCPU(app);
-          setTimeout(() => {
-            app.callMoveIndicator('opponent', 'Stand', app.state.options.moveIndicatorTime);
-            setTimeout(() => {
-              app.changeTurn('user');
-            }, app.state.options.moveIndicatorTime);
-          }, 2000);
+          stood = true;
+        } else {
+          console.warn('cpuTotal < standAt. Draw a card?');
+
         }
       }
+    }
+    if (stood) {
+      setTimeout(() => {
+        app.callMoveIndicator('opponent', 'Stand', app.state.options.moveIndicatorTime);
+        setTimeout(() => {
+          app.changeTurn('user');
+        }, app.state.options.moveIndicatorTime);
+      }, app.state.options.opponentMoveWaitTime + extraDelay);
+    } else if (busted) {
+      setTimeout(() => {
+        app.callMoveIndicator('opponent', 'BUST', app.state.options.moveIndicatorTime);
+        setTimeout(() => {
+          app.changeTurn('user');
+        }, app.state.options.moveIndicatorTime);
+      }, app.state.options.opponentMoveWaitTime + extraDelay);
+    } else {
+      setTimeout(() => {
+        app.callMoveIndicator('opponent', 'End Turn', app.state.options.moveIndicatorTime);
+        setTimeout(() => {
+          app.changeTurn('user');
+        }, app.state.options.moveIndicatorTime);
+      }, app.state.options.opponentMoveWaitTime + extraDelay);
     }
 
   }, app.state.options.dealWaitTime);
