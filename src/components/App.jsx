@@ -19,7 +19,7 @@ let DB = require('../scripts/db');
 // import * as DB from '../scripts/db';
 import * as AI from '../scripts/ai';
 import * as Util from '../scripts/util';
-import { characters } from '../scripts/characters';
+import { characters, prizeCards } from '../scripts/characters';
 import { EventEmitter } from 'events';
 
 let clickFunction = window.PointerEvent ? 'onPointerDown' : window.TouchEvent ? 'onTouchStart' : 'onClick';
@@ -69,25 +69,51 @@ class App extends React.Component {
       },
       phase: 'splashScreen',
       deck: [],
+      // cardSelection: [
+      //   { id: 99, value: 1, type: '+' },
+      //   { id: 98, value: 1, type: '+' },
+      //   { id: 97, value: 2, type: '+' },
+      //   { id: 96, value: 2, type: '+' },
+      //   { id: 94, value: 3, type: '+' },
+      //   { id: 93, value: 3, type: '+' },
+        // { id: 92, value: -1, type: '-' },
+        // { id: 91, value: -1, type: '-' },
+        // { id: 90, value: -2, type: '-' },
+        // { id: 89, value: -2, type: '-' },
+        // { id: 88, value: -3, type: '-' },
+        // { id: 87, value: -3, type: '-' },
+      //   { id: 86, value: 1, type: '±' },
+      //   { id: 85, value: 2, type: '±' },
+      //   { id: 84, value: 3, type: '±' },
+      //   { id: 83, value: 4, type: '±' },
+      //   { id: 82, value: 5, type: '±' },
+      //   { id: 81, value: 6, type: '±' }
+      // ],
       cardSelection: [
         { id: 99, value: 1, type: '+' },
         { id: 98, value: 1, type: '+' },
-        { id: 97, value: 2, type: '+' },
-        { id: 96, value: 2, type: '+' },
-        { id: 94, value: 3, type: '+' },
-        { id: 93, value: 3, type: '+' },
-        { id: 92, value: -1, type: '-' },
-        { id: 91, value: -1, type: '-' },
-        { id: 90, value: -2, type: '-' },
-        { id: 89, value: -2, type: '-' },
-        { id: 88, value: -3, type: '-' },
-        { id: 87, value: -3, type: '-' },
-        { id: 86, value: 1, type: '±' },
-        { id: 85, value: 2, type: '±' },
-        { id: 84, value: 3, type: '±' },
-        { id: 83, value: 4, type: '±' },
-        { id: 82, value: 5, type: '±' },
-        { id: 81, value: 6, type: '±' }
+        { id: 97, value: 1, type: '+' },
+        { id: 96, value: 1, type: '+' },
+        { id: 95, value: 1, type: '+' },
+        { id: 94, value: 2, type: '+' },
+        { id: 93, value: 2, type: '+' },
+        { id: 92, value: 2, type: '+' },
+        { id: 91, value: 2, type: '+' },
+        { id: 90, value: 2, type: '+' },
+        { id: 89, value: 3, type: '+' },
+        { id: 88, value: 3, type: '+' },
+        // { id: 89, value: -1, type: '-' },
+        // { id: 91, value: -1, type: '-' },
+        // { id: 90, value: -2, type: '-' },
+        // { id: 89, value: -2, type: '-' },
+        // { id: 88, value: -3, type: '-' },
+        // { id: 87, value: -3, type: '-' },
+        // { id: 86, value: 1, type: '±' },
+        // { id: 85, value: 2, type: '±' },
+        // { id: 84, value: 3, type: '±' },
+        // { id: 83, value: 4, type: '±' },
+        // { id: 82, value: 5, type: '±' },
+        // { id: 81, value: 6, type: '±' }
       ],
       userDeck: [],
       opponentDeck: [],
@@ -116,6 +142,7 @@ class App extends React.Component {
         totalMatches: 0,
         credits: 200,
         cpuDefeated: [],
+        wonCards: '',
         messages: [],
         unreadMessages: 0
       },
@@ -153,7 +180,7 @@ class App extends React.Component {
           cancel: ''
         }
       },
-      toastMessage: 'Suck a cock.',
+      toastMessage: '',
       options: {
         sound: false,
         soundVolume: 1,
@@ -171,6 +198,7 @@ class App extends React.Component {
         panelColor: 'rgba(255, 0, 0, 1)',
         panelShade: 0.4,
         autoStand: false,
+        autoEnd: false,
         darkCards: false,
         fullScreen: false,
         turnInterval: 800,
@@ -180,6 +208,7 @@ class App extends React.Component {
         moveIndicatorTime: 900,
         dealWaitTime: 600,
         animatedStarfield: true,
+        animations: true,
       },
       inputHasFocus: true,
       keyboardShowing: false,
@@ -257,11 +286,6 @@ class App extends React.Component {
       console.big('LAZY 2', 'lightgreen');      
       
     }, this.postLoadDelayTimes[2]);
-
-    
-
-    
-
     if (document.readyState === 'loading') {
       // Loading hasn't finished yet
       
@@ -394,8 +418,8 @@ class App extends React.Component {
     return deck;
   }
   getRandomOpponent = () => {
-    let upperLimit = 18;
-    if (!Util.randomInt(0, 4)) {
+    let upperLimit = 24;
+    if (!Util.randomInt(0, 8)) {
       upperLimit = Object.keys(characters).length - 1;
     }
     let characterArray = Object.keys(characters).slice(16, upperLimit);
@@ -486,7 +510,7 @@ class App extends React.Component {
       let randomDeck = this.createRandomDeck();
       let randomOpponent = this.getRandomOpponent();
       let namesCopy = { ...this.state.playerNames };
-      if (randomOpponent === 'random' || randomOpponent === 'random2') {
+      if (randomOpponent.slice(0,6) === 'random') {
         let randomName = Util.getStarWarsName();
         characters[randomOpponent].name = randomOpponent;
         characters[randomOpponent].displayName = randomName;
@@ -504,7 +528,6 @@ class App extends React.Component {
   getPlayerRecords() {
     let sinceLastGot = Date.now() - lastGotRecords;
     if (lastGotRecords === 0 || sinceLastGot >= 60000) {
-      console.big('RETRIEVING HIGH SCORES FROM DB', 'brown');
       return new Promise((resolve, reject) => {
         DB.getScores().then(response => {
           let playerRecordArray = response.data.slice();
@@ -514,15 +537,19 @@ class App extends React.Component {
           } else {
             playerRecordArray.map((playerScore, i) => {
               playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated);
-              playerScore.preferences = JSON.parse(playerScore.preferences);
+              playerScore.preferences = JSON.parse(playerScore.preferences);        
+              playerScore.cpuDefeated = playerScore.cpuDefeated.filter((elem, pos, arr) => {
+                return arr.indexOf(elem) == pos;
+              });
             });
           }
           this.setState(
             {
-              highScores: playerRecordArray
+              highScores: playerRecordArray,
             },
             () => {
               lastGotRecords = Date.now();
+              console.info('got player records! ', playerRecordArray);
               resolve(playerRecordArray);
             }
           );
@@ -538,18 +565,30 @@ class App extends React.Component {
 
   incrementPlayerTotalGames = (playerName, type) => {
     console.log('type?', type)
+    if (type === 'matches') {
+      DB.incrementMatches(playerName);
+    }
+    if (type === 'sets') {
+      DB.incrementSets(playerName);
+    }
     let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
-    console.log('trying to call funcName', funcName);
+    console.log('trying to call funcName?', funcName);
 
-    eval(funcName)(playerName);
+    // eval(funcName)(playerName);
   };
 
   incrementPlayerScore = (playerName, type) => {
     console.log('type?', type)
+    if (type === 'matches') {
+      DB.incrementMatchWins(playerName);
+    }
+    if (type === 'sets') {
+      DB.incrementSetWins(playerName);
+    }
     let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
-    console.log('tryiong to call funcName', funcName);
+    console.log('trying to call funcName?', funcName);
 
-    eval(funcName)(playerName);
+    // eval(funcName)(playerName);
   };
 
   playSound = sound => {
@@ -661,14 +700,16 @@ class App extends React.Component {
         darkTheme: false,
         quickTurns: false,
         turnSpeed: 0.5,
-        panelSize: 1,
+        panelSize: 0.5,
         darkCards: false,
         autoStand: false,
+        autoEnd: false,
         solidBackground: false,
         backgroundColor: null,
         panelColor: 'rgba(255, 0, 0, 1)',
         panelShade: 0.4,
         animatedStarfield: true,
+        animations: true,
         headerVisible: true,
         turnInterval: 300,
         flashInterval: 90,
@@ -736,6 +777,9 @@ class App extends React.Component {
       if (eventId === 'auto-stand-toggle' || eventId === 'hamburger-auto-stand-toggle') {
         optionsCopy.autoStand = true;
       }
+      if (eventId === 'auto-end-toggle' || eventId === 'hamburger-auto-end-toggle') {
+        optionsCopy.autoEnd = true;
+      }
       if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = true;
       }
@@ -748,7 +792,7 @@ class App extends React.Component {
         document.getElementById('music').play();
       }
       if (eventId === 'quick-turns-toggle' || eventId === 'hamburger-quick-turns-toggle') {       
-        ROOT.style.setProperty('--pulse-speed', '500ms');
+        ROOT.style.setProperty('--pulse-speed', '800ms');
         optionsCopy.turnInterval = 200;
         optionsCopy.opponentMoveWaitTime = 300;
         optionsCopy.quickTurns = true;
@@ -788,6 +832,9 @@ class App extends React.Component {
         document.getElementById('starfield').play();
         optionsCopy.animatedStarfield = true;
       }
+      if (eventId === 'animations-toggle' || eventId === 'hamburger-animations-toggle') {
+        optionsCopy.animations = true;
+      }
     }
     if (forceDirection === 'off' || (!forceDirection && el.classList.contains('toggle-on'))) {
       if (eventId === 'solid-background-toggle' || eventId === 'hamburger-solid-background-toggle') {
@@ -803,6 +850,9 @@ class App extends React.Component {
       if (eventId === 'auto-stand-toggle' || eventId === 'hamburger-auto-stand-toggle') {
         optionsCopy.autoStand = false;
       }
+      if (eventId === 'auto-end-toggle' || eventId === 'hamburger-auto-end-toggle') {
+        optionsCopy.autoEnd = false;
+      }
       if (eventId === 'sound-fx-toggle' || eventId === 'hamburger-sound-fx-toggle') {
         optionsCopy.sound = false;
       }
@@ -815,7 +865,7 @@ class App extends React.Component {
         document.getElementById('music').pause();
       }
       if (eventId === 'quick-turns-toggle' || eventId === 'hamburger-quick-turns-toggle') {
-        ROOT.style.setProperty('--pulse-speed', '900ms');
+        ROOT.style.setProperty('--pulse-speed', '1200ms');
         optionsCopy.turnInterval = 800;
         optionsCopy.opponentMoveWaitTime = 1600;
         optionsCopy.quickTurns = false;
@@ -854,6 +904,9 @@ class App extends React.Component {
       if (eventId === 'animated-starfield-toggle' || eventId === 'hamburger-animated-starfield-toggle') {
         document.getElementById('starfield').pause();
         optionsCopy.animatedStarfield = false;
+      }
+      if (eventId === 'animations-toggle' || eventId === 'hamburger-animations-toggle') {
+        optionsCopy.animations = false;
       }
     }
     if (changeState) {
@@ -904,8 +957,10 @@ class App extends React.Component {
     let togglableOptions = [
       'darkTheme',
       'animatedStarfield',
+      'animations',
       'solidBackground',
       'autoStand',
+      'autoEnd'
     ] 
     optionsArray.map((option, i) => {
       if (togglableOptions.indexOf(option) > -1) {
@@ -916,11 +971,17 @@ class App extends React.Component {
         if (option === 'animatedStarfield') {
           eventId = 'animated-starfield-toggle';
         }
+        if (option === 'animations') {
+          eventId = 'animations-toggle';
+        }
         if (option === 'solidBackground') {
           eventId = 'solid-background-toggle';
         }
         if (option === 'autoStand') {
           eventId = 'auto-stand-toggle';
+        }
+        if (option === 'autoEnd') {
+          eventId = 'auto-end-toggle';
         }
         if (forceDirection === 'on') {
           if (optionsCopy[option]) {
@@ -931,6 +992,9 @@ class App extends React.Component {
             this.handleToggleOption(eventId, forceDirection);
           }
           if (eventId === 'animated-starfield-toggle' && optionsCopy[option]) {
+            this.handleToggleOption(eventId, 'on')
+          }
+          if (eventId === 'animations-toggle' && optionsCopy[option]) {
             this.handleToggleOption(eventId, 'on')
           }
         }
@@ -958,6 +1022,9 @@ class App extends React.Component {
 
     if (uniqueId) {
       DB.getDataForPlayer(enteredName).then(response => {
+        console.big('playerData')
+        console.info(response)
+        console.big('playerData')
         if (response.data) {
           // NAME IN DB
           let playerIndex;
@@ -978,13 +1045,16 @@ class App extends React.Component {
               }
             }
             playerObj.cpuDefeated = JSON.parse(playerObj.cpuDefeated);
+            playerObj.cpuDefeated = playerObj.cpuDefeated.filter((elem, pos, arr) => {
+              return arr.indexOf(elem) == pos;
+            });
             playerObj.loggedInAs = playerObj.playerName;
             playerObj.cookieId = playerObj.id;
             console.log('checkedCookie at 00000000000000000000000000000000000------------ ', Date.now());
             if (nonDefaultOptions) {
               if (sounds === {} && playerObj.preferences.sound) {
                 this.loadSounds();
-              }              
+              }
               playerObj.preferences = JSON.parse(playerObj.preferences);
               console.info('got preferences', playerObj.preferences)
               playerObj.preferences.fullScreen = false;
@@ -1000,15 +1070,22 @@ class App extends React.Component {
               playerObj.preferences.musicVolume = parseFloat(playerObj.preferences.musicVolume);
               playerObj.preferences.turnSpeed = parseFloat(playerObj.preferences.turnSpeed);
               playerObj.preferences.panelSize = parseFloat(playerObj.preferences.panelSize);
-              console.info(playerObj.preferences)
+              console.info(playerObj.preferences);
+              let newCardSelection = [...this.state.cardSelection];
+              console.log('playerObj.wonCards.split()');
+              console.log(playerObj.wonCards);
+              let indexArr = playerObj.wonCards.toString().split(',');
+              indexArr.map(index => {
+                newCardSelection.push(prizeCards[index]);
+              })
               this.setState({
-                  userStatus: playerObj,
-                  checkedCookie: true,
-                  options: playerObj.preferences
-                }, () => {                  
-                  this.applyStateOptions('on');
-                }
-              );
+                userStatus: playerObj,
+                checkedCookie: true,
+                options: playerObj.preferences,
+                cardSelection: newCardSelection
+              }, () => {                  
+                this.applyStateOptions('on');
+              });
             } else {
               document.getElementById('starfield').play();
               this.setState({
@@ -1214,7 +1291,7 @@ class App extends React.Component {
             }, 600);
           this.sizeCards();
         });
-      }, 2500);
+      }, 2800);
     });
   }
   handleClickPlay = event => {
@@ -1237,6 +1314,10 @@ class App extends React.Component {
     event.preventDefault();
   };
   handleClickOptions = event => {
+    this.callToast(Util.getStarWarsName(), 'vertical')
+    for (var i = 0; i < 20; i++) {
+      console.info(Util.getStarWarsName())
+    }
   // this.playSound('click');
     this.setState({
       phase: 'showingOptions'
@@ -1305,6 +1386,7 @@ class App extends React.Component {
       setTimeout(() => {
         this.changeTurn('opponent');
       }, this.state.options.moveIndicatorTime);
+      this.callMoveIndicator('user', 'Stand', this.state.options.moveIndicatorTime);
     } else if (buttonText === 'Cancel') {
       this.state.turnStatus.user.highlightedCard.element.classList.remove('highlighted-card');
       turnStatusCopy.user.highlightedCard.element = null;
@@ -1316,7 +1398,6 @@ class App extends React.Component {
     this.setState({
       turnStatus: turnStatusCopy
     });
-    this.callMoveIndicator('user', 'Stand', this.state.options.moveIndicatorTime);
   };
   handleClickCard = (event, value, type, inDeck) => {
     let target = event.target;
@@ -1340,7 +1421,7 @@ class App extends React.Component {
               inDeck: true
             };
             deckCopy.push(newCardObj);
-            target.style.opacity = 0.1;
+            target.style.display = 'none';
             this.setState({
               userDeck: deckCopy
             });
@@ -1348,10 +1429,10 @@ class App extends React.Component {
         }
       } else {
         // it's already in the player deck, so take it out
-        let deckCopy = this.state.userDeck.slice();
-        let indexToRemove = this.getCardIndexById(deckCopy, cardId);
+        let deckCopy = [...this.state.userDeck];
+        let indexToRemove = this.getCardIndexById(deckCopy, cardId);        
         let selectionHomeId = 'deck-selection-option-card-' + cardId;
-        document.getElementById(selectionHomeId).style.opacity = 1;
+        document.getElementById(selectionHomeId).style.display = 'flex';
         deckCopy.splice(indexToRemove, 1);
         this.setState({
           userDeck: deckCopy
@@ -1421,15 +1502,20 @@ class App extends React.Component {
     return contains;
   };
   dealToPlayerGrid = player => {
-    console.log('DEALING TO PLAYER', player)
-    this.playSound('draw');
-    
-    let deckCopy = [ ...this.state.deck ];
-    let newCard = Util.shuffle(deckCopy)[0];
-    this.addCardToGrid(player, newCard.value, newCard.type);
-    let newTotal = 0;
-    newTotal += this.state[`${player}Total`] + newCard.value;
-    this.changeCardTotal(player, newTotal);
+    let promise = new Promise((resolve, reject) => {
+      console.log('DEALING TO PLAYER', player)
+      this.playSound('draw');
+      
+      let deckCopy = [...this.state.deck];
+      let newCard = Util.shuffle(deckCopy)[0];
+      this.addCardToGrid(player, newCard.value, newCard.type);
+      let newTotal = 0;
+      newTotal += this.state[`${player}Total`] + newCard.value;
+      this.changeCardTotal(player, newTotal).then((newTotal) => {
+        resolve(newTotal)
+      });
+    });
+    return promise;
   };
   playHandCard = (player, cardObject) => {
     this.removeCardFromHand(player, cardObject.id);
@@ -1472,21 +1558,28 @@ class App extends React.Component {
     });
   };
   changeCardTotal = (player, newTotal) => {
-    if (newTotal === 20) {
-      document.getElementById(`${player}-total`).classList.add('green-total');
-    } else if (newTotal > 20) {
-      document.getElementById(`${player}-total`).classList.add('red-total');
-    } else {
-      document.getElementById(`${player}-total`).classList.remove('red-total');
-      document.getElementById(`${player}-total`).classList.remove('green-total');
-    }
-    this.setState({
-      [`${player}Total`]: newTotal
+    let promise = new Promise((resolve) => {
+      if (newTotal === 20) {
+        document.getElementById(`${player}-total`).classList.add('green-total');
+      } else if (newTotal > 20) {
+        document.getElementById(`${player}-total`).classList.add('red-total');
+      } else {
+        document.getElementById(`${player}-total`).classList.remove('red-total');
+        document.getElementById(`${player}-total`).classList.remove('green-total');
+      }
+      this.setState({
+        [`${player}Total`]: newTotal
+      }, () => {
+        resolve(newTotal);
+      });
     });
+    return promise;
   };
   getCardIndexById = (arr, id) => {
+    console.log('searching for id', id);
     let match = -1;
     arr.forEach((card, i) => {
+      console.log('checking', card.id, id)
       if (card.id === id) {
         match = i;
       }
@@ -1494,20 +1587,50 @@ class App extends React.Component {
     return match;
   };
   declareWinner = winner => {
+    let newUserStatus = { ...this.state.userStatus };   
+    let newCardSelection = [...this.state.cardSelection];   
     if (winner !== 'TIE') {
       let newWins = this.state[`${winner}Wins`] + 1;
       if (this.state.playerNames.user !== 'Guest' && this.state.userStatus.loggedInAs) {
         let playerName = this.state.userStatus.loggedInAs;
-        this.incrementPlayerTotalGames(playerName, 'sets');
+        // this.incrementPlayerTotalGames(playerName, 'sets');
+        DB.incrementSets(playerName);
+        newUserStatus.totalSets++;
         if (winner === 'user') {
-          this.incrementPlayerScore(playerName, 'setWins');
+          // USER won
+          DB.incrementSetWins(playerName);
           if (newWins === 3) {
-            this.incrementPlayerScore(playerName, 'matchWins');
-            this.incrementPlayerTotalGames(playerName, 'matches');
+            if (this.state.gameMode === 'campaign') {
+              newUserStatus.cpuDefeated.push(this.state.cpuOpponent);
+              newUserStatus.credits += characters[this.state.cpuOpponent].prize.credits;
+              console.info('adding', characters[this.state.cpuOpponent].prize.cards)
+              characters[this.state.cpuOpponent].prize.cards.map((cardIndex) => {
+                newUserStatus.wonCards += ',' + cardIndex.toString()
+              });
+              if (newUserStatus.wonCards[0] === ',') {
+                newUserStatus.wonCards = newUserStatus.wonCards.slice(1, newUserStatus.length - 1);
+              }
+            }
+            if (newUserStatus.wonCards.length) {
+              console.pink('USER WON NEW CARDS!');              
+              let indexArr = newUserStatus.wonCards.toString().split(',');
+              indexArr.map(index => {
+                newCardSelection.push(prizeCards[index]);
+              })
+            }
+            console.info('sending', newUserStatus.wonCards)
+            DB.incrementMatchWins(1, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, newUserStatus.wonCards);
+            DB.incrementMatches(playerName);
+            newUserStatus.matchWins++;
+            newUserStatus.totalMatches++;
           }
         } else {
+          // CPU won
           if (newWins === 3) {
-            this.incrementPlayerTotalGames(playerName, 'matches');
+            newUserStatus.credits -= characters[this.state.cpuOpponent].prize.credits;
+            DB.incrementMatchWins(0, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, newUserStatus.wonCards);
+            DB.incrementMatches(playerName);
+            newUserStatus.totalMatches++;
           }
         }
       }
@@ -1515,7 +1638,9 @@ class App extends React.Component {
         {
           turn: null,
           [`${winner}Wins`]: newWins,
-          lastWinner: winner
+          lastWinner: winner,
+          userStatus: newUserStatus,
+          cardSelection: newCardSelection
         },
         () => {
           this.callResultModal(winner);
@@ -1526,12 +1651,14 @@ class App extends React.Component {
       // TIE
       if (this.state.playerNames.user !== 'Guest' && this.state.userStatus.loggedInAs) {
         let playerName = this.state.userStatus.loggedInAs;
-        this.incrementPlayerTotalGames(playerName, 'sets');
+        DB.incrementSets(playerName);
+        newUserStatus.totalSets++;
       }
       this.setState(
         {
           turn: null,
-          lastWinner: null
+          lastWinner: null,
+          userStatus: newUserStatus
         },
         () => {
           this.callResultModal('tie');
@@ -1592,6 +1719,10 @@ class App extends React.Component {
           if (this.state.opponentTotal > 20) {
             // opponent over 20
             console.warn('Opponent is over 20!');
+            if (this.state.options.autoEnd) {
+              console.warn('autoEnd was ON');
+
+            }
             if (this.state.userTotal <= 20) {
               console.warn('Only opponent is over 20! User wins!');
               this.declareWinner('user');
@@ -1604,6 +1735,10 @@ class App extends React.Component {
             console.warn('opponent under 20');
             if (this.state.userTotal > 20) {
               console.warn('user is over 20! Opponent wins!');
+              if (this.state.options.autoEnd) {
+                console.warn('autoEnd was ON');
+  
+              }
               this.declareWinner('opponent');
             } else {
               console.warn('Both players have stood and are <= 20! Comparing scores to determine winner.');
@@ -1613,7 +1748,7 @@ class App extends React.Component {
         } else {
           console.error('OPPONENT STANDING, USER STILL IN PLAY!');
           // OPPONENT STANDING, USER STILL IN PLAY
-          console.warn('swapping turns and dealing card to user after delay', this.state.options.dealWaitTime);
+          console.warn('swapping turns and dealing card to user after options.dealWaitTime', this.state.options.dealWaitTime);
           // this.playSound('click');
           let newTurn = this.swapTurn();
           setTimeout(() => {
@@ -1683,6 +1818,7 @@ class App extends React.Component {
     let title;
     let winnerDisplay = winner;
     let buttonText = 'Next Set';
+    let buttonText2 = '';
     if (winner === 'user') {
       this.playSound('win');
       title = 'YOU WIN';
@@ -1694,11 +1830,29 @@ class App extends React.Component {
       title = "It's a tie";
       bgColor = 'var(--main-bg-color)';
     }
+    let postMatch = false;
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
+      postMatch = true;
       bgColor = 'var(--house-card-color)';
       title = 'MATCH\nWINNER';
       winnerDisplay = this.state.playerNames[winner];
-      buttonText = 'New Match';
+      if (this.state.gameMode === 'campaign') {
+        if (winner === 'opponent') {
+          buttonText = 'Rematch';
+        } else {
+          buttonText = 'New Match';
+          // DB.incrementMatchWins(this.state.userStatus.loggedInAs);
+        }
+        buttonText2 = 'Main Menu';
+      } else if (this.state.gameMode === 'quick') {
+        if (winner === 'opponent') {
+          buttonText = 'Rematch';
+        } else {
+          buttonText = 'New Match';
+          // DB.incrementMatchWins(this.state.userStatus.loggedInAs);
+        }
+        buttonText2 = 'Main Menu';
+      }
     }
     let modal = document.getElementById('result-modal');
     modal.style.backgroundColor = bgColor;
@@ -1707,7 +1861,8 @@ class App extends React.Component {
       resultMessage: {
         title: title,
         winner: winnerDisplay,
-        buttonText: buttonText
+        buttonText: buttonText,
+        buttonText2: buttonText2
       }
     });
   };
@@ -1796,16 +1951,16 @@ class App extends React.Component {
       };
       if (i < 10) {
         newRandomDeck.push(newCard);
-        document.getElementById(`deck-selection-option-card-${newCard.id}`).style.opacity = 0.1;
+        document.getElementById(`deck-selection-option-card-${newCard.id}`).style.display = 'none';
       } else {
-        document.getElementById(`deck-selection-option-card-${newCard.id}`).style.opacity = 1;
+        document.getElementById(`deck-selection-option-card-${newCard.id}`).style.display = 'flex';
       }
     });
     this.setState({
       userDeck: newRandomDeck
     });
   };
-  handleClickOKButton = event => {
+  handleClickResultButton1 = event => {
     event.preventDefault();
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
       this.getNewPlayerHands();
@@ -1840,6 +1995,10 @@ class App extends React.Component {
         }
       }, this.state.options.turnInterval);
     }, this.state.options.turnInterval);
+  };
+  handleClickResultButton2 = event => {
+    event.preventDefault();
+    this.resetBoard('user', true);
   };
   toggleHamburgerAppearance = position => {
     let topBar = document.getElementById('top-hamburger-bar');
@@ -1982,16 +2141,19 @@ class App extends React.Component {
     });
     if (total) {
       // only disable if clearing player deck
-      // document.getElementById('play-button').classList.add('disabled-button');
+      let userDeck = [...this.state.userDeck];
+      let cpuOpponent = this.state.cpuOpponent;
+      if (this.state.gameMode === 'quick') {
+        userDeck = [];
+      }
       this.getNewPlayerHands();
       this.setState({
         phase: 'splashScreen',
         userWins: 0,
         opponentWins: 0,
         lastFirstTurn: 'user',
-        lastWinner: null
-        // must disable button if this is reset
-        // userDeck: []
+        lastWinner: null,
+        userDeck: userDeck,
       });
       if (document.getElementById('starfield').style.display !== 'none') {
         document.getElementById('starfield').play();
@@ -2119,14 +2281,17 @@ class App extends React.Component {
     if (newValue === 0) {
       newHeight = 'var(--header-height)';
       ROOT.style.setProperty('--control-footer-height', newHeight);
-      ROOT.style.setProperty('--hamburger-height', 'var(--full-hamburger-height)');      
+      ROOT.style.setProperty('--control-footer-padding', '0');
+      ROOT.style.setProperty('--hamburger-height', 'calc(var(--full-hamburger-height) + var(--menu-border-width))');      
     } else if (newValue === 0.5) {
       newHeight = '10.5vh'
       ROOT.style.setProperty('--control-footer-height', newHeight);
+      ROOT.style.setProperty('--control-footer-padding', 'calc(var(--control-footer-height) / 20)');
       ROOT.style.setProperty('--hamburger-height', 'var(--full-hamburger-height)');
     } else if (newValue === 1) {
       newHeight = '13vh';
       ROOT.style.setProperty('--control-footer-height', newHeight);
+      ROOT.style.setProperty('--control-footer-padding', 'calc(var(--control-footer-height) / 20)');
       ROOT.style.setProperty('--hamburger-height', 'calc(var(--control-footer-height) * 0.65)');      
     }
     setTimeout(this.sizeCards, 10);      
@@ -2179,6 +2344,7 @@ class App extends React.Component {
       })
     // }
   }
+  
   render() {
     console.big('APP RENDERING', 'green');
     let phase = this.state.phase;
@@ -2245,6 +2411,7 @@ class App extends React.Component {
             />
             <OptionsScreen
               phase={phase}
+              readyToShow={lazyTime2}
               currentOptions={this.state.options}
               onToggleOption={this.handleToggleOption}
               onClickBack={event => {
@@ -2257,6 +2424,7 @@ class App extends React.Component {
             />
             <InstructionsScreen
               phase={phase}
+              readyToShow={pageLoaded}
               onClickBack={this.handleClickBack}
               clickFunction={clickFunction} />
             </>
@@ -2264,6 +2432,8 @@ class App extends React.Component {
           {pageLoaded && this.state.checkedCookie && phase === 'selectingMode' && (
             <ModeSelectScreen
               phase={phase}
+              cpuDefeated={this.state.userStatus.cpuDefeated.length}
+              cardsWon={this.state.userStatus.wonCards.toString().split(',').length}
               modeSelected={this.state.gameMode}
               onClickCampaign={this.handleClickCampaign}
               onClickQuickMatch={this.handleClickQuickMatch}
@@ -2293,7 +2463,7 @@ class App extends React.Component {
               clickFunction={clickFunction}
             />
           )}
-          {pageLoaded && (
+          {(lazyTime3 || phase === 'selectingMode' || phase === 'selectingOpponent') && (
             <OpponentSelectScreen
               phase={phase}
               readyToList={false}
@@ -2302,6 +2472,7 @@ class App extends React.Component {
                 end: characterArray.length
               }}
               userCredits={this.state.userStatus.credits}
+              userDefeated={this.state.userStatus.cpuDefeated}
               portraitSources={this.state.portraitSources}
               characters={characters}
               characterArray={characterArray}
@@ -2364,7 +2535,8 @@ class App extends React.Component {
         />
         {phase === 'gameStarted' && (
           <ResultModal
-            onClickOKButton={this.handleClickOKButton}
+            onClickResultButton1={this.handleClickResultButton1}
+            onClickResultButton2={this.handleClickResultButton2}
             titleText={this.state.resultMessage.title}
             playerNames={this.state.playerNames}
             winner={this.state.resultMessage.winner}
@@ -2374,6 +2546,7 @@ class App extends React.Component {
               opponent: this.state.opponentTotal
             }}
             buttonText={this.state.resultMessage.buttonText}
+            buttonText2={this.state.resultMessage.buttonText2}
             clickFunction={clickFunction}
           />
         )}
