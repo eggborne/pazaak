@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import PlayerPortrait from './PlayerPortrait';
 import Card from './Card';
 import CardBack from './CardBack';
+import { characters, prizeCards } from '../scripts/characters';
 
 function OpponentPanel(props) {
   console.error('OpponentPanel rendering ---', props);
@@ -20,7 +21,6 @@ function OpponentPanel(props) {
   let quoteTextSize = 'calc(var(--medium-font-size) / 1.25)';
   if (props.available) {
     if (quoteLength > 50) {
-      // quoteTextSize = '1rem';
       quoteTextSize = 'var(--small-font-size)';
     }
     if (quoteLength > 70) {
@@ -37,7 +37,6 @@ function OpponentPanel(props) {
   }
   if (document.getElementById(`${charName}-panel`) && document.getElementById(`${charName}-panel`).style.opacity) {
     document.getElementById(`${charName}-panel`).style.opacity = 0;
-    // document.getElementById(`${charName}-panel`).style.transform = `translateX(${props.slideAmount}%)`;
     document.getElementById(`${charName}-panel`).style.transform = `translateX(${props.slideAmount}%)`;
   }
   setTimeout(() => {
@@ -130,6 +129,7 @@ function OpponentPanel(props) {
             border: 1px solid var(--dark-red-bg-color);
             border-top: 0;
             border-radius: 0 0 var(--menu-border-width) var(--menu-border-width);
+            min-height: var(--prize-card-height)
           }
           .opponent-prize-cards > .card {
             transform: scale(0.5) !important;
@@ -160,7 +160,6 @@ function OpponentPanel(props) {
           }
           .difficulty-bar-segment:nth-child(1) {
             margin-left: 0;
-            //border-left: 0.35vw solid #111;
           }
           .difficulty-bar-segment:nth-last-child(1) {
             margin-right: 0;
@@ -217,6 +216,20 @@ function OpponentPanel(props) {
           .big-throbbing {
             animation: big-throb 1200ms infinite;
           }   
+          #portrait-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10%;      
+            opacity: ${props.defeated && '0.75'};      
+          }
+          #defeated-message {
+            position: absolute;
+            font-family:var(--title-font);
+            font-size: var(--medium-font-size);
+            color: red;
+            display: ${!props.defeated && 'none'};
+          }
         `}
       </style>
       <div className='left-opponent-panel'>
@@ -224,7 +237,10 @@ function OpponentPanel(props) {
           {/* {props.character.displayName} */}
         </div>
         {props.selected &&
-          <PlayerPortrait type='opponent-panel' hidden={!props.available} size={portraitSize} cpu={true} spriteIndex={props.index} displayName={''} />
+          <div id='portrait-area'>
+          <div id='defeated-message'>DEFEATED</div>
+            <PlayerPortrait type='opponent-panel' hidden={!props.available} size={portraitSize} cpu={true} spriteIndex={props.index} displayName={''} />
+          </div>
         }
         <div id={`${charName}-quote`} className='opponent-quote'>
           {panelQuote}
@@ -256,9 +272,13 @@ function OpponentPanel(props) {
           </div>
           <div className='opponent-prize-area'>
             <div className='opponent-prize-label inner-red-panel'>Prize</div>
-            {props.selected &&
+            {(props.selected && !props.defeated) ?                            
               <div className='opponent-prize-cards'>
-                {props.character.prize.cards.map((card, i) => {
+              {props.character.prize.cards.map((card, i) => {
+                console.info('card')
+                console.info(card)
+                console.info('card')
+                card = prizeCards[card];
                   let key = i * (props.index + 1);
                   let displayCard = (<Card key={key} id={key} context={'opponent-prize'} size={'prize'} value={card.value} type={card.type} clickFunction={props.clickFunction} />);
                   if (!props.available) {
@@ -266,6 +286,9 @@ function OpponentPanel(props) {
                   }
                   return displayCard;
                 })}
+              </div>
+              :
+              <div className='opponent-prize-cards'>              
               </div>
             }
           </div>
@@ -278,6 +301,7 @@ function OpponentPanel(props) {
 OpponentPanel.propTypes = {
   index: PropTypes.number,
   selected: PropTypes.bool,
+  defeated: PropTypes.bool,
   available: PropTypes.bool,
   slideAmount: PropTypes.number,
   character: PropTypes.object,
