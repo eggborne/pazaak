@@ -1072,12 +1072,12 @@ class App extends React.Component {
               playerObj.preferences.panelSize = parseFloat(playerObj.preferences.panelSize);
               console.info(playerObj.preferences);
               let newCardSelection = [...this.state.cardSelection];
-              console.log('playerObj.wonCards.split()');
-              console.log(playerObj.wonCards);
-              let indexArr = playerObj.wonCards.toString().split(',');
-              indexArr.map(index => {
-                newCardSelection.push(prizeCards[index]);
-              })
+              // console.log('playerObj.wonCards.split()');
+              // console.log(playerObj.wonCards);
+              // let indexArr = playerObj.wonCards.toString().split(',');
+              // indexArr.map(index => {
+              //   newCardSelection.push(prizeCards[index]);
+              // })
               this.setState({
                 userStatus: playerObj,
                 checkedCookie: true,
@@ -1275,9 +1275,13 @@ class App extends React.Component {
     });
   };
   initiateGame = () => {
+    let newOptions = { ...this.state.options };
+    newOptions.headerVisible = false;
+    this.setHeaderVisible(false);
     this.getNewPlayerHands();
     this.setState({
-      phase: 'versusScreen'
+      phase: 'versusScreen',
+      options: newOptions
     }, () => {
       setTimeout(() => {
         document.getElementById('versus-screen').classList.add('leaving');
@@ -2163,13 +2167,15 @@ class App extends React.Component {
   handleClickHamburgerQuit = event => {
     this.callConfirmModal('Quit match?', 'You will forfeit and your progress will be lost.', { confirm: 'Do it', cancel: 'Never mind' }, () => {
       document.getElementById('hamburger-menu').classList.remove('hamburger-on');
+      this.setHeaderVisible(true);
+      let newOptions = { ...this.state.options };
+      newOptions.headerVisible = true;
+      this.setState({
+        options: newOptions
+      });
       this.resetBoard('user', true);
       this.dismissConfirmModal();
       document.getElementById('shade').classList.remove('shade-on');
-      
-      // setTimeout(() => {
-      // this.toggleHamburgerAppearance('hamburger');
-      // }, 400);
     });
   };
   callMoveIndicator = (player, message, duration) => {
@@ -2379,8 +2385,9 @@ class App extends React.Component {
             clickFunction={clickFunction}
           />
         )}
-        {this.state.options.headerVisible &&
+        {/* {this.state.options.headerVisible && */}
           <Header
+            showing={this.state.options.headerVisible}
             readyToFill={this.state.checkedCookie}
             userStatus={this.state.userStatus}
             playerName={this.state.userStatus.playerName}
@@ -2392,7 +2399,7 @@ class App extends React.Component {
             onClickLogOut={this.handleClickLogOut}
             clickFunction={clickFunction}
           />
-        }
+        {/* } */}
         <div id="content-area">
           {this.state.checkedCookie && (phase === 'splashScreen' || onIntroPhase) && (
             <>

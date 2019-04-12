@@ -8,7 +8,7 @@ function Header(props) {
     <div id='header-container'>
       <style jsx>{`
         #header-container {       
-          opacity: ${props.readyToFill && '1'};
+          opacity: ${props.readyToFill && '1'};          
         }
         #header {
           position: absolute;
@@ -31,6 +31,8 @@ function Header(props) {
           border-top-right-radius: 0 !important;
           border-bottom-color: transparent;
           z-index: 1;
+          transform: ${props.showing || 'translateY(calc(var(--header-height) * -1))'};
+          transition: transform 300ms ease;
           
         }
         #header.intact {          
@@ -75,6 +77,7 @@ function Header(props) {
           fill: var(--main-text-color);
           stroke: #333;
           stroke-width: 1;
+          display: ${props.showing || 'none'};
         }
         .corner-button-on {
           background-color: var(--dark-red-bg-color);
@@ -99,6 +102,7 @@ function Header(props) {
 }
 
 Header.propTypes = {
+  showing: PropTypes.bool,
   readyToFill: PropTypes.bool,
   userStatus: PropTypes.object,
   characterNames: PropTypes.array,
@@ -117,6 +121,7 @@ function areEqual(prevProps, nextProps) {
     prevProps.readyToFill == nextProps.readyToFill
     && prevProps.avatarIndex == nextProps.avatarIndex
     && prevProps.playerCredits == nextProps.playerCredits
+    && prevProps.showing == nextProps.showing
   );
   return equalTest;
 }

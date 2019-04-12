@@ -353,20 +353,20 @@ class OptionsPanel extends React.PureComponent {
                 <div className='option-label'>Another Option</div>
                 <OptionSwitch home={this.props.id} type={null} onClick={this.props.onToggleOption} toggled={null} clickFunction={this.props.clickFunction} />
               </div>
-              <div className='option-row inner-red-panel'>
+              {/* <div className='option-row inner-red-panel'>
                 <div className='option-label'>Yet Another Option</div>
                 <OptionSwitch home={this.props.id} type={null} onClick={this.props.onToggleOption} toggled={null} clickFunction={this.props.clickFunction} />
-              </div>
+              </div> */}
             </div>
             <div id={`${this.props.id}-options-page-1`} className={`option-page`}>
               <div className='option-row inner-red-panel'>
                 <div className='option-label'>Full Screen</div>
                 <OptionSwitch home={this.props.id} type={'full-screen'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.fullScreen} clickFunction={this.props.clickFunction} />
               </div>
-              <div className='option-row inner-red-panel'>
+              {/* <div className='option-row inner-red-panel'>
                 <div className='option-label'>Header</div>
                 <OptionSwitch home={this.props.id} type={'header-visible'} onClick={this.props.onToggleOption} toggled={this.props.currentOptions.headerVisible} clickFunction={this.props.clickFunction} />
-              </div>
+              </div> */}
               <div className='option-row inner-red-panel'>
                 <div className='option-label'>Starfield</div>
                 <OptionSwitch home={this.props.id} type={'starfield'} onClick={this.props.onToggleOption} toggled={!this.props.currentOptions.solidBackground} clickFunction={this.props.clickFunction} />

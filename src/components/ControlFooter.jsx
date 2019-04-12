@@ -33,7 +33,7 @@ function ControlFooter(props) {
           border-bottom-left-radius: 0 !important;
           border-bottom-right-radius: 0 !important;
           border-bottom: 0 !important;
-          transition: transform 400ms ease;
+          transition: transform 400ms ease, all 300ms ease;
           will-change: transform;
           z-index: 1;
         }
