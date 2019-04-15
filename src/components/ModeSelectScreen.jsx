@@ -61,23 +61,23 @@ function ModeSelectScreen(props) {
           font-size: calc(var(--header-height) / 2);
           border: var(--inner-menu-border);
           border-radius: var(--menu-border-width);
-          margin: var(--menu-border-radius);
           background-color: var(--trans-black-bg-color);
-          color: gray;
+          color: grey;
           transition: background-color 300ms ease, color 300ms ease;
         }
         .mode-description {
           box-sizing: border-box;
           padding: var(--menu-border-radius);
           font-family: var(--main-font);
-          font-size: var(--small-font-size);
           width: 100%;
           display: flex;
-          padding-top: var(--small-font-size);
-          padding-bottom: var(--small-font-size);
+        }
+        .mode-description li {
+          margin-top: 1vh;
+          margin-bottom: 1vh;
         }
         .mode-selected-button {          
-          background-color: var(--option-on-color);
+          //background-color: var(--option-on-color);
           color: white;
         }
         .mode-panel.mode-selected-panel {    
@@ -88,13 +88,13 @@ function ModeSelectScreen(props) {
         ul {
           position: relative;
           list-style: square;
-          padding-inline-start: calc(var(--menu-border-width) * 5);
+          padding-inline-start: calc(var(--menu-border-width) * 4);
           margin-block-start: 0;
           margin-block-end: 0;
         }
         .progress-message {
           font-family: var(--main-font);
-          font-size: var(--small-font-size);
+          font-size: calc(var(--small-font-size) / 1.25);
           color: yellow;
           line-height: 150%;
         }
@@ -114,7 +114,7 @@ function ModeSelectScreen(props) {
             </div>
             <div className="mode-description">
               <ul>
-                <li>Defeat a roster of crafty AI opponents</li>
+                <li>Climb a roster of crafty AI opponents</li>
                 <li>Win credits / special cards to progress</li>
               </ul>
             </div>
@@ -128,6 +128,7 @@ function ModeSelectScreen(props) {
             <div className="mode-description">
               <ul>
                 <li>Single match with a random opponent</li>
+                <li>Wager up to 2000 credits</li>
               </ul>
             </div>
           </div>
