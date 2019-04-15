@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import UserCard from './UserCard';
 
 function HeaderMenu(props) {
-  console.big('HeaderMenu rendering');
+  console.info('HeaderMenu rendering', props);
   return (
     <div id='user-info-panel' className='red-panel user-info-panel-off shadowed-text'>
       <style jsx>{`
@@ -22,6 +22,9 @@ function HeaderMenu(props) {
           transition: transform 300ms ease;
           will-change: transform;
           z-index: 1;
+          border-left: 0;
+          border-right: 0;
+          border-radius: 0;
         }
         .user-info-panel-off {
           transform: translateY(calc(-100% + var(--menu-border-width) + var(--menu-border-width))) !important;
