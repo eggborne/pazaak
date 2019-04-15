@@ -55,6 +55,14 @@ export function updateLastLoginTime(userId) {
     }
   });
 }
+export const getNameRules = () =>
+  axios({
+    method: 'get',
+    url: 'https://www.eggborne.com/scripts/pazaakgetnamerules.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    }
+  });
 export const getScores = () =>
   axios({
     method: 'get',
