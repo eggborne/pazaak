@@ -29,14 +29,17 @@ function Header(props) {
           border-top: 0 !important;
           border-top-left-radius: 0 !important;   
           border-top-right-radius: 0 !important;
+          border-left: 0;
+          border-right: 0;
+          border-radius: 0;
           border-bottom-color: transparent;
           z-index: 1;
-          transform: ${props.showing || 'translateY(calc(var(--header-height) * -1))'};
+          transform: ${props.showing || 'translateY(calc((var(--header-height) - var(--menu-border-width)) * -1))'};
           transition: transform 300ms ease;
           
         }
         #header.intact {          
-          border-radius: 0 0 var(--menu-border-radius) var(--menu-border-radius);
+          //border-radius: 0 0 var(--menu-border-radius) var(--menu-border-radius);
           border-bottom-color: var(--dark-red-bg-color);
           border-top-color: transparent;
           clip-path: none;
