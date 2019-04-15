@@ -20,7 +20,6 @@ let DB = require('../scripts/db');
 import * as AI from '../scripts/ai';
 import * as Util from '../scripts/util';
 import { characters, prizeCards } from '../scripts/characters';
-import { EventEmitter } from 'events';
 
 let clickFunction = window.PointerEvent ? 'onPointerDown' : window.TouchEvent ? 'onTouchStart' : 'onClick';
 
@@ -142,7 +141,7 @@ class App extends React.Component {
         totalMatches: 0,
         credits: 200,
         cpuDefeated: [],
-        wonCards: '',
+        wonCards: [],
         messages: [],
         unreadMessages: 0
       },
@@ -218,7 +217,8 @@ class App extends React.Component {
         }),
       lastWidth: window.innerWidth,
       lastHeight: window.innerHeight,
-      lastChangedSlider: 0
+      lastChangedSlider: 0,
+      nameRules: []
     };
 
     this.delayEvents = {
@@ -259,6 +259,16 @@ class App extends React.Component {
     //   document.getElementById('ambience').play();
     // }
     console.big('App MOUNTED.', 'white');    
+    DB.getNameRules().then(response => {
+      for (let list in response.data[0]) {
+        if (response.data[0][list][0] === '[' || response.data[0][list][0] === '{') {
+          response.data[0][list] = JSON.parse(response.data[0][list]);
+        }
+      }
+      this.setState({
+        nameRules: response.data[0]
+      })
+    });
     this.lazyTimeouts = [];
     this.lazyTimeouts[0] = setTimeout(() => {
       // document.getElementById('footer').style.transform = 'none';
@@ -511,7 +521,7 @@ class App extends React.Component {
       let randomOpponent = this.getRandomOpponent();
       let namesCopy = { ...this.state.playerNames };
       if (randomOpponent.slice(0,6) === 'random') {
-        let randomName = Util.getStarWarsName();
+        let randomName = Util.getStarWarsName(this.state.nameRules, 'random');
         characters[randomOpponent].name = randomOpponent;
         characters[randomOpponent].displayName = randomName;
       }
@@ -691,7 +701,11 @@ class App extends React.Component {
         totalSetWins: 0,
         matchWins: 0,
         totalSetsPlayed: 0,
-        matchesPlayed: 0
+        matchesPlayed: 0,
+        wonCards: [],
+        cpuDefeated: [],
+        totalMatches: 0,
+        credits: 200,
       };
       let defaultOptions = {
         sound: false,
@@ -1044,6 +1058,10 @@ class App extends React.Component {
                 nonDefaultOptions = true;
               }
             }
+            console.green('state won', this.state.userStatus.wonCards, 'data won', playerObj.wonCards)
+            if (this.state.userStatus.wonCards !== playerObj.wonCards) {
+              nonDefaultOptions = true;
+            }
             playerObj.cpuDefeated = JSON.parse(playerObj.cpuDefeated);
             playerObj.cpuDefeated = playerObj.cpuDefeated.filter((elem, pos, arr) => {
               return arr.indexOf(elem) == pos;
@@ -1051,6 +1069,7 @@ class App extends React.Component {
             playerObj.loggedInAs = playerObj.playerName;
             playerObj.cookieId = playerObj.id;
             console.log('checkedCookie at 00000000000000000000000000000000000------------ ', Date.now());
+            console.green('nondefault?', nonDefaultOptions)
             if (nonDefaultOptions) {
               if (sounds === {} && playerObj.preferences.sound) {
                 this.loadSounds();
@@ -1072,12 +1091,15 @@ class App extends React.Component {
               playerObj.preferences.panelSize = parseFloat(playerObj.preferences.panelSize);
               console.info(playerObj.preferences);
               let newCardSelection = [...this.state.cardSelection];
+              playerObj.wonCards = JSON.parse(playerObj.wonCards);
+              console.log('playerObj.wonCards', playerObj.wonCards);
               // console.log('playerObj.wonCards.split()');
-              // console.log(playerObj.wonCards);
               // let indexArr = playerObj.wonCards.toString().split(',');
-              // indexArr.map(index => {
-              //   newCardSelection.push(prizeCards[index]);
-              // })
+              playerObj.wonCards.map(index => {
+                newCardSelection.push(prizeCards[index]);
+              });
+              console.info('newcardselection', newCardSelection)
+              playerObj.preferences.headerVisible = true;
               this.setState({
                 userStatus: playerObj,
                 checkedCookie: true,
@@ -1318,10 +1340,6 @@ class App extends React.Component {
     event.preventDefault();
   };
   handleClickOptions = event => {
-    this.callToast(Util.getStarWarsName(), 'vertical')
-    for (var i = 0; i < 20; i++) {
-      console.info(Util.getStarWarsName())
-    }
   // this.playSound('click');
     this.setState({
       phase: 'showingOptions'
@@ -1607,13 +1625,9 @@ class App extends React.Component {
             if (this.state.gameMode === 'campaign') {
               newUserStatus.cpuDefeated.push(this.state.cpuOpponent);
               newUserStatus.credits += characters[this.state.cpuOpponent].prize.credits;
-              console.info('adding', characters[this.state.cpuOpponent].prize.cards)
               characters[this.state.cpuOpponent].prize.cards.map((cardIndex) => {
-                newUserStatus.wonCards += ',' + cardIndex.toString()
-              });
-              if (newUserStatus.wonCards[0] === ',') {
-                newUserStatus.wonCards = newUserStatus.wonCards.slice(1, newUserStatus.length - 1);
-              }
+                newUserStatus.wonCards.push(cardIndex);
+              });              
             }
             if (newUserStatus.wonCards.length) {
               console.pink('USER WON NEW CARDS!');              
@@ -1623,7 +1637,7 @@ class App extends React.Component {
               })
             }
             console.info('sending', newUserStatus.wonCards)
-            DB.incrementMatchWins(1, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, newUserStatus.wonCards);
+            DB.incrementMatchWins(1, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, JSON.stringify(newUserStatus.wonCards));
             DB.incrementMatches(playerName);
             newUserStatus.matchWins++;
             newUserStatus.totalMatches++;
@@ -1632,7 +1646,7 @@ class App extends React.Component {
           // CPU won
           if (newWins === 3) {
             newUserStatus.credits -= characters[this.state.cpuOpponent].prize.credits;
-            DB.incrementMatchWins(0, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, newUserStatus.wonCards);
+            DB.incrementMatchWins(0, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, JSON.stringify(newUserStatus.wonCards));
             DB.incrementMatches(playerName);
             newUserStatus.totalMatches++;
           }
@@ -2440,7 +2454,7 @@ class App extends React.Component {
             <ModeSelectScreen
               phase={phase}
               cpuDefeated={this.state.userStatus.cpuDefeated.length}
-              cardsWon={this.state.userStatus.wonCards.toString().split(',').length}
+              cardsWon={this.state.userStatus.wonCards.length}
               modeSelected={this.state.gameMode}
               onClickCampaign={this.handleClickCampaign}
               onClickQuickMatch={this.handleClickQuickMatch}
