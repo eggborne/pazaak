@@ -5,7 +5,7 @@ import Card from './Card';
 import { characters, prizeCards } from '../scripts/characters';
 
 function UserCard(props) {
-  console.info(props.playerObj);
+  console.info('userccard rnderein', props);
   let portraitSize = window.innerWidth / 3;
   let nameSize = '1.4rem';
   let loggedIn = true;
@@ -25,12 +25,14 @@ function UserCard(props) {
   }
   let wonArray = props.wonCards;
   console.info(wonArray)
-  if (wonArray.toString() === '') {
-    wonArray = [];
-  } else {
-    console.green('splitting')
-    wonArray = wonArray.toString().split(',');
-  }
+  // if (wonArray.toString() === '') {
+  //   wonArray = [];
+  // } else {
+  //   console.green('splitting')
+  //   wonArray = wonArray.toString().split(',');
+  // }
+  console.log('wonArray', wonArray)
+  console.log('wonArray.length', wonArray.length)
   return (
     <div id='user-info-grid' className='shadowed-text'>
       <style jsx>{`
