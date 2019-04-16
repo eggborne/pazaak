@@ -275,15 +275,12 @@ function OpponentPanel(props) {
             {(props.selected && !props.defeated) ?                            
               <div className='opponent-prize-cards'>
               {props.character.prize.cards.map((card, i) => {
-                console.info('card')
-                console.info(card)
-                console.info('card')
                 card = prizeCards[card];
                   let key = i * (props.index + 1);
                   let displayCard = (<Card key={key} id={key} context={'opponent-prize'} size={'prize'} value={card.value} type={card.type} clickFunction={props.clickFunction} />);
-                  if (!props.available) {
-                    displayCard = (<CardBack key={key} id={key} context={'opponent-prize'} size={'prize'} />);
-                  }
+                  // if (!props.available) {
+                  //   displayCard = (<CardBack key={key} id={key} context={'opponent-prize'} size={'prize'} />);
+                  // }
                   return displayCard;
                 })}
               </div>

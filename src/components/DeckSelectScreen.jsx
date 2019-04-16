@@ -4,7 +4,8 @@ import Card from './Card';
 
 function DeckSelectionScreen(props) {
   console.big('DeckSelectionScreen rendering');
-  console.info(props.userDeck);
+  console.info(props);
+  console.big('DeckSelectionScreen rendering');
   setTimeout(() => {
     document.getElementById('deck-select-screen').style.opacity = 1;
     document.getElementById('deck-select-screen').style.transform = 'none';
@@ -41,6 +42,7 @@ function DeckSelectionScreen(props) {
   }
   let cardSelectionGrid = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
   props.cardSelection.map((card, i) => {
+    console.log('card', i, 'is', card)
     cardSelectionGrid[i] = (
       <Card
         id={card.id}
@@ -171,7 +173,9 @@ function DeckSelectionScreen(props) {
           <div id='available-deck-title' className="smaller shadowed-text">AVAILABLE CARDS</div>
           <div id="deck-selection-grid">
             {cardSelectionGrid.map((card, i) => {
-              return <div key={i}>{card}</div>;
+              let cardKey = card.props ? card.props.id : i;
+              console.log('laying cardSelectionGrid card', cardKey);
+              return <div key={'selection-'+cardKey}>{card}</div>;
             })}
           </div>
         </div>
@@ -181,7 +185,9 @@ function DeckSelectionScreen(props) {
           </div>
           <div id="preview-deck-grid">
             {userSelectedGrid.map((card, i) => {
-              return <div key={i}>{card}</div>;
+              let cardKey = card.props ? card.props.id : i;
+              console.log('laying userSelectedGrid card', cardKey);
+              return <div key={'selected-'+cardKey}>{card}</div>;
             })}
           </div>
         

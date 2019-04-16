@@ -20,7 +20,7 @@ function ResultModal(props) {
     scoresStyle = { display: 'none' };
   }
   return (
-    <div id='result-modal'>
+    <div id='result-modal' className='red-panel'>
       <style jsx>{`
         #result-modal {
           font-family: var(--title-font);
@@ -44,6 +44,7 @@ function ResultModal(props) {
           pointer-events: none;   
           top: calc(50vh - (var(--control-footer-height) /2) + var(--top-margin));
           transform-origin: center center;
+          border-color: var(--trans-black-bg-color) !important;
         }
         #result-title {
           font-size: 1.75rem;

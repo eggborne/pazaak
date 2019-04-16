@@ -125,6 +125,7 @@ function areEqual(prevProps, nextProps) {
     && prevProps.avatarIndex == nextProps.avatarIndex
     && prevProps.playerCredits == nextProps.playerCredits
     && prevProps.showing == nextProps.showing
+    && prevProps.playerName == nextProps.playerName
   );
   return equalTest;
 }

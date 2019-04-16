@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import NameAvatarForm from './NameAvatarForm';
 
 function IntroScreen(props) {
-  console.big('IntroScreen RENDERING');
+  console.info('IntroScreen RENDERING', props);
   let mainOpacity = document.documentElement.style.getPropertyValue('--main-opacity');
   if (props.readyToShow && !mainOpacity) {
     setTimeout(() => {
@@ -18,6 +18,9 @@ function IntroScreen(props) {
       document.getElementById('intro-screen-body').style.pointerEvents = 'all';
     },1);
   }
+  // let registering = document.getElementById('unlogged-panel') && document.getElementById('unlogged-panel').classList.contains('registering');
+  let registering = props.mode === 'registering';
+  console.pink('registering?', registering)
   return (
     <div id="intro-screen">
       <style jsx>{`
@@ -55,7 +58,7 @@ function IntroScreen(props) {
         }
         #small-button-area {
           width: 72vw;
-          display: inline-flex;
+          display: flex;
           justify-content: space-between;
           margin-top: 1vh;
         }
@@ -108,11 +111,16 @@ function IntroScreen(props) {
         <div id="intro-screen-body">
           {/* <form onSubmit={(event) => event.preventDefault()} action='https://www.eggborne.com/scripts/upload.php' method='post' id='avatar-form' encType='multipart/form-data'> */}
           <NameAvatarForm
+            // mode={props.mode}
+            checkUsername={props.checkUsername}
             userStatus={props.userStatus}
-            userAvatarIndex={props.userStatus.avatarIndex}
+          userAvatarIndex={props.userStatus.avatarIndex}
+          loggedInAs={props.loggedInAs}
             onClickAvatar={props.onClickAvatar}
             onClickStart={props.onClickStart}
             onClickLogOut={props.onClickLogOut}
+            onClickLogIn={props.onClickLogIn}
+            onClickRegister={props.onClickRegister}
             clickFunction={props.clickFunction}
           />
           <div id="small-button-area">
@@ -136,6 +144,8 @@ function IntroScreen(props) {
 }
 IntroScreen.propTypes = {
   phase: PropTypes.string,
+  mode: PropTypes.string,
+  checkUsername: PropTypes.func,
   userStatus: PropTypes.object,
   readyToShow: PropTypes.bool,
   userAvatarIndex: PropTypes.number,
@@ -145,6 +155,7 @@ IntroScreen.propTypes = {
   onClickOptions: PropTypes.func,
   onClickHallOfFame: PropTypes.func,
   onClickLogOut: PropTypes.func,
+  loggedInAs: PropTypes.string,
   clickFunction: PropTypes.string
 };
 
@@ -157,8 +168,13 @@ function areEqual(prevProps, nextProps) {
   let equalTest =
     prevProps.readyToShow == nextProps.readyToShow &&
     prevProps.userAvatarIndex == nextProps.userAvatarIndex &&
-    prevProps.phase == nextProps.phase;
+    prevProps.phase == nextProps.phase &&
+    prevProps.mode == nextProps.mode &&
+    prevProps.loggedInAs == nextProps.loggedInAs;
+  
+  console.orange('introscreen equal?', equalTest)
   return equalTest;
 }
 
 export default React.memo(IntroScreen, areEqual);
+// export default IntroScreen;

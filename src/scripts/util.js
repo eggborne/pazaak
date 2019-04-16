@@ -49,7 +49,19 @@ export const setCookie = (cname, cvalue, exdays) => {
   var expires = 'expires=' + d.toUTCString();
   document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
 };
-const getCookie = (cname) => {
+const getCookie = (cookieName) => {
+  let cookieObj;
+  let name = cookieName + '=';
+  let decodedCookie = decodeURIComponent(document.cookie).split('; ');
+  cookieObj = decodedCookie.filter(str => str.split('=')[0] === cookieName);
+  if (cookieObj.length) {
+    cookieObj = JSON.parse(cookieObj[0].split('=')[1]);
+  } else {
+    cookieObj = undefined;
+  }
+  return cookieObj;
+};
+const getCookie2 = (cname) => {
   var name = cname + '=';
   var decodedCookie = decodeURIComponent(document.cookie);
   var ca = decodedCookie.split(';');
@@ -66,36 +78,32 @@ const getCookie = (cname) => {
 };
 export const checkCookie = (app) => {
   let startTime = window.performance.now();
-  let response = getCookie('username');
+  let cookieResponse = getCookie('pazaak');
+  console.log('cookie??', cookieResponse);
   console.warn('checked cookie in', window.performance.now() - startTime);
-  let userStatusCopy = Object.assign({}, app.state.userStatus);
-  let playerName;
-  let uniqueId;
-  if (response != '') {
-    playerName = response.split('||')[0];
-    uniqueId = response.split('||')[1];
-    userStatusCopy.cookieId = parseInt(uniqueId);
-    userStatusCopy.id = parseInt(uniqueId);
-    userStatusCopy.loggedInAs = playerName;
-    console.big(`Recognized user as ${response}`, 'green');
+  let userStatusCopy = { ...app.state.userStatus };
+  if (cookieResponse && cookieResponse.cookieID) {
+    console.log('cookie response!', cookieResponse);
+    userStatusCopy.cookieID = cookieResponse.cookieID
+    console.big(`Recognized user as ${cookieResponse}`, 'green');
     app.setState({
       userStatus: userStatusCopy,
+      // checkedCookie: true,
     }, () => {         
-      app.evaluatePlayerName(playerName);
+        document.getElementById('starfield').play();
+        app.getUserRecordWithCookie(cookieResponse);
     });
   } else {
     userStatusCopy.loggedInAs = 'Guest';
     app.setState({
+      loggedInAs: 'Guest',
+      userID: undefined,
       checkedCookie: true,
       userStatus: userStatusCopy
     });
-    //document.getElementById('avatar-row').style.opacity = 1;
-    console.error('No cookie found. Leaving state.userStatus.cookieId undefined. Animating starfield.');
-    // document.getElementById('container').style.backgroundImage = 'url(https://pazaak.online/assets/images/starfield.png)';
+    console.error('No cookie found. Leaving state.userStatus.cookieID undefined. Animating starfield.');
     document.getElementById('player-name-input').disabled = false;
     document.getElementById('starfield').play();
-
-    // document.getElementById('initial-loading-message').innerHTML += `<br />User not recognized.`;
   }
 };
 

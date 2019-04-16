@@ -225,3 +225,48 @@ export const updateCPUDefeated = (playerName, newDefeated) => {
     }
   });
 };
+
+export const checkUsername = (username) => {
+  return axios({
+    method: 'post',
+    url: 'https://www.eggborne.com/scripts/pazaakcheckusername.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    },
+    data: {
+      username: username
+    }
+  });
+}
+export const attemptUserCreation = (loginObj) => {
+  return axios({
+    method: 'post',
+    url: 'https://www.eggborne.com/scripts/pazaakcreateuser.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    },
+    data: JSON.stringify(loginObj)
+  });
+}
+export const getUserWithCookie = (cookieObj) => {
+  console.log('sending', cookieObj)
+  return axios({
+    method: 'post',
+    url: 'https://www.eggborne.com/scripts/pazaakgetuserwithtoken.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    },
+    data: JSON.stringify(cookieObj)
+  });
+}
+export const getUserWithPass = (loginObj) => {
+  console.log('logging in with', loginObj)
+  return axios({
+    method: 'post',
+    url: 'https://www.eggborne.com/scripts/pazaakgetuserwithpass.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    },
+    data: JSON.stringify(loginObj)
+  });
+}

@@ -8,16 +8,12 @@ function UserCard(props) {
   console.info('userccard rnderein', props);
   let portraitSize = window.innerWidth / 3;
   let nameSize = '1.4rem';
-  let loggedIn = true;
+  let loggedIn = false;
   let logButtons = true;
-  let displayName;
-  if (props.playerObj.loggedInAs) {
-    loggedIn = props.playerObj.loggedInAs;
+  let displayName = props.loggedInAs;
+  if (props.loggedInAs !== 'Guest') {
+    loggedIn = props.loggedInAs;
     logButtons = true;
-    displayName = props.playerObj.loggedInAs;
-  }
-  if (props.playerObj.playerName) {
-    displayName = props.playerObj.playerName;
   }
   let defeatedArray = props.playerObj.cpuDefeated;
   if (!defeatedArray) {
@@ -85,6 +81,7 @@ function UserCard(props) {
           text-align: center;
           text-shadow: none;
           color: #ddd;
+          display: ${props.loggedInAs !== 'Guest' || 'none'};
         }
         #large-user-portrait {
           grid-row-start: 0;
@@ -122,7 +119,7 @@ function UserCard(props) {
       <div id='large-user-portrait'>
         <PlayerPortrait size={portraitSize} spriteIndex={props.playerObj.avatarIndex} displayName={''} type={'mini'} />
         <div id='credits'></div>
-        <div id='id-display'>id #{props.playerObj.cookieId}</div>
+        <div id='id-display'>id #{props.userID}</div>
       </div>
       <div>
         Sets won: {props.setWins}<br />
@@ -163,7 +160,7 @@ function UserCard(props) {
       <div id='user-info-button-area' className={'user-area-lower'}>
         <div className={!logButtons && 'display-none'}>
           <button {...{ [props.clickFunction]: props.onClickLogOut }} className={!loggedIn && 'display-none'} id='user-info-log-out-button'>Log out</button>
-          <button {...{ [props.clickFunction]: props.onClickSignIn }} className={loggedIn && 'display-none'} id='user-info-sign-in-button'>Sign in</button>
+          <button {...{ [props.clickFunction]: props.onClickSignIn }} className={loggedIn && 'display-none'} id='user-info-sign-in-button'>Log in</button>
         </div>
       </div>
     </div>
@@ -176,7 +173,7 @@ UserCard.propTypes = {
   totalMatches: PropTypes.number,
   setWins: PropTypes.number,
   matchWins: PropTypes.number,
-  wonCards: PropTypes.string,
+  wonCards: PropTypes.array,
   onClickLogOut: PropTypes.func,
   onClickSignIn: PropTypes.func,
   onClickCloseButton: PropTypes.func,

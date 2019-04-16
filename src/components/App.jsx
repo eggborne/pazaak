@@ -12,6 +12,7 @@ import DeckSelectScreen from './DeckSelectScreen';
 import GameBoard from './GameBoard';
 import ResultModal from './modals/ResultModal';
 import ConfirmModal from './modals/ConfirmModal';
+import LoginModal from './modals/LoginModal';
 import ModeSelectScreen from './ModeSelectScreen';
 import VersusScreen from './VersusScreen';
 import Toast from './modals/Toast';
@@ -49,6 +50,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      userID: undefined,
+      loggedInAs: 'Guest',
       debug: false,
       checkedCookie: false,
       lazyTime: [],
@@ -127,14 +130,13 @@ class App extends React.Component {
       turn: 'user',
       userStatus: {
         phase: 'splashScreen',
-        loggedInAs: '',
         playerName: undefined,
         lastLogin: undefined,
-        cookieId: undefined,
+        cookieID: undefined,
         initialValues: {
-          avatarIndex: null
+          avatarIndex: 0
         },
-        avatarIndex: null,
+        avatarIndex: 0,
         setWins: 0,
         totalSets: 0,
         matchWins: 0,
@@ -218,7 +220,9 @@ class App extends React.Component {
       lastWidth: window.innerWidth,
       lastHeight: window.innerHeight,
       lastChangedSlider: 0,
-      nameRules: []
+      nameRules: [],
+      loggingIn: true,
+      registering: false
     };
 
     this.delayEvents = {
@@ -283,9 +287,9 @@ class App extends React.Component {
       this.setState({
         lazyTime: [true, true]
       });
-      if (this.state.headerVisible) {
+      // if (this.state.headerVisible) {
         document.getElementById('header').classList.remove('intact');
-      }
+      // }
       console.big('LAZY 1', 'orange');
     }, this.postLoadDelayTimes[1]);
     this.lazyTimeouts[2] = setTimeout(() => {
@@ -463,6 +467,38 @@ class App extends React.Component {
     });
   };
 
+  // getUserRecordWithPassword = (loginObj) => {
+  //   console.log('getuserwithpass got loginObj', loginObj)
+  //   DB.getUserWithPass(loginObj).then(response => {
+  //     console.log('getUserRecordWithCookie responded!', response);
+  //     let userData = response.data[0];
+  //     newToken = response.data[1];
+  //     for (let entry in userData) {
+  //       if (userData[entry][0] === '[' || userData[entry][0] === '{') {
+  //         userData[entry] = JSON.parse(userData[entry])
+  //       } else {
+  //         userData[entry] = parseInt(userData[entry]);
+  //       }
+  //     }
+  //     console.log('respons userData', userData);
+  //     console.log('respons newToken', newToken);
+  //     // let stateData = {...this.state.userStatus}
+  //     let newUserData = { ...this.state.userStatus, ...userData }
+  //     newUserData.playerName = cookieObj.username;
+  //     newUserData.cookieID = newToken;
+  //     console.log('respons newUserData', newUserData);
+  //     let newPlayerNames = { ...this.state.playerNames };
+  //     newPlayerNames.user = cookieObj.username;
+  //     this.setState({
+  //       userStatus: newUserData,
+  //       options: newUserData.preferences,
+  //       playerNames: newPlayerNames
+  //     }, () => {
+  //       Util.setCookie('pazaak', JSON.stringify({ username: this.state.loggedInAs, userID: this.state.userID, cookieID: this.state.cookieID }), 365);
+  //     })
+  //   });
+  // }
+
   checkIfViewHeightChangedInMs = waitTime => {
     fullScreenAttempts--;
     let attempt = new Promise(resolve => {
@@ -540,14 +576,15 @@ class App extends React.Component {
     if (lastGotRecords === 0 || sinceLastGot >= 60000) {
       return new Promise((resolve, reject) => {
         DB.getScores().then(response => {
-          let playerRecordArray = response.data.slice();
+          let playerRecordArray = response.data;
           if (!response.data) {
             playerRecordArray = [];
             reject('No records.');
           } else {
+            console.log('raw resp', response.data)
             playerRecordArray.map((playerScore, i) => {
               playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated);
-              playerScore.preferences = JSON.parse(playerScore.preferences);        
+              // playerScore.preferences = JSON.parse(playerScore.preferences);        
               playerScore.cpuDefeated = playerScore.cpuDefeated.filter((elem, pos, arr) => {
                 return arr.indexOf(elem) == pos;
               });
@@ -685,15 +722,14 @@ class App extends React.Component {
     if (event) {
       event.preventDefault();
     }
-    this.callConfirmModal('Log out?', `This will log you out permanently and delete all records of ${this.state.userStatus.loggedInAs}.`, { confirm: 'Do it', cancel: 'Never mind' }, () => {
+    this.callConfirmModal('Log out?', `Do you really want to log ${this.state.loggedInAs} out?`, { confirm: 'Do it', cancel: 'Never mind' }, () => {
       // setting time limit to 0 destroys cookie
-      let doomedId = this.state.userStatus.cookieId;
-      Util.setCookie('username', `${this.state.userStatus.loggedInAs}||${doomedId}`, 0);
+      Util.setCookie('pazaak', null, 0);
       console.big('Cookie destroyed!');
-      let userStatusCopy = Object.assign({}, this.state.userStatus);
+      let userStatusCopy = { ...this.state.userStatus };
       userStatusCopy = {
         loggedInAs: '',
-        cookieId: undefined,
+        cookieID: undefined,
         initialValues: {
           avatarIndex: 0
         },
@@ -729,10 +765,26 @@ class App extends React.Component {
         flashInterval: 90,
         opponentMoveWaitTime: 1600,
         moveIndicatorTime: 900,
-        dealWaitTime: 600
+        dealWaitTime: 600,
+        cardSelection: [
+          { id: 99, value: 1, type: '+' },
+          { id: 98, value: 1, type: '+' },
+          { id: 97, value: 1, type: '+' },
+          { id: 96, value: 1, type: '+' },
+          { id: 95, value: 1, type: '+' },
+          { id: 94, value: 2, type: '+' },
+          { id: 93, value: 2, type: '+' },
+          { id: 92, value: 2, type: '+' },
+          { id: 91, value: 2, type: '+' },
+          { id: 90, value: 2, type: '+' },
+          { id: 89, value: 3, type: '+' },
+          { id: 88, value: 3, type: '+' }
+        ]
       };
       this.setState(
         {
+          loggedInAs: 'Guest',
+          userID: undefined,
           userStatus: userStatusCopy,
           options: defaultOptions,
           phase: 'splashScreen'
@@ -740,13 +792,15 @@ class App extends React.Component {
         () => {
           this.dismissConfirmModal();
           this.applyStateOptions('off');
-          DB.deleteUserRecord(doomedId).then(response => {
-            console.big('DELETED ' + doomedId);
-          });
-          // roll up header menu
-          setTimeout(() => {
-            this.handleClickAccountInfo();
-          },1)
+          // DB.deleteUserRecord(doomedId).then(response => {
+          //   console.big('DELETED ' + doomedId);
+          // });
+          // roll up header menu, if down
+          if (!document.getElementById('user-info-panel').classList.contains('user-info-panel-off')) {            
+            setTimeout(() => {
+              this.handleClickAccountInfo();
+            }, 1);
+          }
         }
       );
     });
@@ -932,9 +986,10 @@ class App extends React.Component {
           options: optionsCopy
         },
         () => {
-          if (this.state.userStatus.cookieId) {
+          if (this.state.userStatus.cookieID) {
+          // if (this.state.userStatus.cookieID) {
             let optionsString = JSON.stringify(optionsCopy);
-            DB.updatePreferences(this.state.userStatus.cookieId, optionsString).then((response) => {
+            DB.updatePreferences(this.state.userStatus.cookieID, optionsString).then((response) => {
               if (this.state.phase === 'showingOptions' || this.state.phase === 'gameStarted') {
                 this.callToast('Setting saved.', 'vertical');
               }
@@ -1029,121 +1084,129 @@ class App extends React.Component {
     });
   };
 
-  evaluatePlayerName = enteredName => {
-    console.warn('calling evaluatePlayerName -------------------------------------->');
-    let uniqueId = this.state.userStatus.cookieId;
-    let userStatusCopy = Object.assign({}, this.state.userStatus);
+  // evaluatePlayerName = enteredName => {
+  //   console.warn('calling evaluatePlayerName -------------------------------------->');
+  //   let uniqueId = this.state.userStatus.cookieID;
+  //   let userStatusCopy = Object.assign({}, this.state.userStatus);
 
-    if (uniqueId) {
-      DB.getDataForPlayer(enteredName).then(response => {
-        console.big('playerData')
-        console.info(response)
-        console.big('playerData')
-        if (response.data) {
-          // NAME IN DB
-          let playerIndex;
-          if (parseInt(response.data[0].id) === parseInt(uniqueId)) {
-            playerIndex = 0;
-          }
-          if (playerIndex === undefined) {
-            console.error('USERNAME TAKEN, and no match found in DB for username/id combination (so you is not him!)');
-          } else {
-            // document.getElementById('initial-loading-message').innerHTML += `<div class='loading-event-text'>User recognized as</div><div class='loading-event-text green-text'>${enteredName}</div>`;
-            let playerObj = Object.assign({}, response.data[playerIndex]);
-            let oldOptionsArr = this.state.options;
-            let newOptionsArr = JSON.parse(playerObj.preferences);
-            let nonDefaultOptions = false;
-            for (let option in newOptionsArr) {
-              if (oldOptionsArr[option] !== newOptionsArr[option]) {
-                nonDefaultOptions = true;
-              }
-            }
-            console.green('state won', this.state.userStatus.wonCards, 'data won', playerObj.wonCards)
-            if (this.state.userStatus.wonCards !== playerObj.wonCards) {
-              nonDefaultOptions = true;
-            }
-            playerObj.cpuDefeated = JSON.parse(playerObj.cpuDefeated);
-            playerObj.cpuDefeated = playerObj.cpuDefeated.filter((elem, pos, arr) => {
-              return arr.indexOf(elem) == pos;
-            });
-            playerObj.loggedInAs = playerObj.playerName;
-            playerObj.cookieId = playerObj.id;
-            console.log('checkedCookie at 00000000000000000000000000000000000------------ ', Date.now());
-            console.green('nondefault?', nonDefaultOptions)
-            if (nonDefaultOptions) {
-              if (sounds === {} && playerObj.preferences.sound) {
-                this.loadSounds();
-              }
-              playerObj.preferences = JSON.parse(playerObj.preferences);
-              console.info('got preferences', playerObj.preferences)
-              playerObj.preferences.fullScreen = false;
-              ROOT.style.setProperty('--main-bg-color', playerObj.preferences.backgroundColor);
-              let newPanelColor = Util.shadeRGBAColor(playerObj.preferences.panelColor, -(1 - playerObj.preferences.panelShade));
-              ROOT.style.setProperty('--red-bg-color', newPanelColor);
-              ROOT.style.setProperty('--medium-red-bg-color', Util.shadeRGBAColor(newPanelColor, -0.2));
-              ROOT.style.setProperty('--dark-red-bg-color', Util.shadeRGBAColor(newPanelColor, -0.4));
-              let metaThemeColor = document.querySelector("meta[name=theme-color]");
-              metaThemeColor.setAttribute('content', newPanelColor);
-              playerObj.preferences.soundVolume = parseFloat(playerObj.preferences.soundVolume);
-              playerObj.preferences.ambienceVolume = parseFloat(playerObj.preferences.ambienceVolume);
-              playerObj.preferences.musicVolume = parseFloat(playerObj.preferences.musicVolume);
-              playerObj.preferences.turnSpeed = parseFloat(playerObj.preferences.turnSpeed);
-              playerObj.preferences.panelSize = parseFloat(playerObj.preferences.panelSize);
-              console.info(playerObj.preferences);
-              let newCardSelection = [...this.state.cardSelection];
-              playerObj.wonCards = JSON.parse(playerObj.wonCards);
-              console.log('playerObj.wonCards', playerObj.wonCards);
-              // console.log('playerObj.wonCards.split()');
-              // let indexArr = playerObj.wonCards.toString().split(',');
-              playerObj.wonCards.map(index => {
-                newCardSelection.push(prizeCards[index]);
-              });
-              console.info('newcardselection', newCardSelection)
-              playerObj.preferences.headerVisible = true;
-              this.setState({
-                userStatus: playerObj,
-                checkedCookie: true,
-                options: playerObj.preferences,
-                cardSelection: newCardSelection
-              }, () => {                  
-                this.applyStateOptions('on');
-              });
-            } else {
-              document.getElementById('starfield').play();
-              this.setState({
-                userStatus: playerObj,
-                checkedCookie: true
-              });
-            }
-          }
-        } else {
-          // would this ever occur??
-          console.error(`at evaluatePlayerName: No entry in DB for ${enteredName}.`);
-        }
-      });
-    } else {
-      let optionsString = JSON.stringify(this.state.options);
-      DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then(response => {
-        DB.getUserId(enteredName).then(response => {
-          let uniqueId = response.data[0].id;
-          if (enteredName !== 'Guest') {
-            Util.setCookie('username', `${enteredName}||${uniqueId}`, 365);
-          }
-          userStatusCopy.loggedInAs = enteredName;
-          userStatusCopy.cookieId = parseInt(uniqueId);
-          this.setState(
-            {
-              userStatus: userStatusCopy,
-              checkedCookie: true
-            },
-            () => {
-              this.evaluatePlayerName(enteredName);
-            }
-          );
-        });
-      });
-    }
-  };
+  //   if (uniqueId) {
+  //     DB.getDataForPlayer(enteredName).then(response => {
+  //       console.big('playerData')
+  //       console.info(response)
+  //       console.big('playerData')
+  //       if (response.data) {
+  //         // NAME IN DB
+  //         let playerIndex;
+  //         if (parseInt(response.data[0].id) === parseInt(uniqueId)) {
+  //           playerIndex = 0;
+  //         }
+  //         console.log('playerindex', playerIndex)
+  //         if (playerIndex === undefined) {
+  //           console.error('USERNAME TAKEN, and no match found in DB for username/id combination (so you is not him!)');
+  //         } else {
+  //           // document.getElementById('initial-loading-message').innerHTML += `<div class='loading-event-text'>User recognized as</div><div class='loading-event-text green-text'>${enteredName}</div>`;
+  //           let playerObj = Object.assign({}, response.data[playerIndex]);
+  //           console.info('playerObj is', playerObj)
+  //           let oldOptionsArr = this.state.options;
+  //           let newOptionsArr = JSON.parse(playerObj.preferences);
+  //           let nonDefaultOptions = false;
+  //           for (let option in newOptionsArr) {
+  //             if (oldOptionsArr[option] !== newOptionsArr[option]) {
+  //               nonDefaultOptions = true;
+  //             }
+  //           }
+  //           console.green('state won', this.state.userStatus.wonCards, 'data won', playerObj.wonCards)
+  //           if (this.state.userStatus.wonCards !== playerObj.wonCards) {
+  //             nonDefaultOptions = true;
+  //           }
+  //           playerObj.cpuDefeated = JSON.parse(playerObj.cpuDefeated);
+  //           playerObj.cpuDefeated = playerObj.cpuDefeated.filter((elem, pos, arr) => {
+  //             return arr.indexOf(elem) == pos;
+  //           });
+  //           playerObj.loggedInAs = playerObj.playerName;
+  //           playerObj.cookieID = playerObj.id;
+  //           console.log('checkedCookie at 00000000000000000000000000000000000------------ ', Date.now());
+  //           console.green('nondefault?', nonDefaultOptions)
+  //           if (nonDefaultOptions) {
+  //             if (sounds === {} && playerObj.preferences.sound) {
+  //               this.loadSounds();
+  //             }
+  //             playerObj.preferences = JSON.parse(playerObj.preferences);
+  //             console.info('got preferences', playerObj.preferences)
+  //             playerObj.preferences.fullScreen = false;
+  //             ROOT.style.setProperty('--main-bg-color', playerObj.preferences.backgroundColor);
+  //             let newPanelColor = Util.shadeRGBAColor(playerObj.preferences.panelColor, -(1 - playerObj.preferences.panelShade));
+  //             ROOT.style.setProperty('--red-bg-color', newPanelColor);
+  //             ROOT.style.setProperty('--medium-red-bg-color', Util.shadeRGBAColor(newPanelColor, -0.2));
+  //             ROOT.style.setProperty('--dark-red-bg-color', Util.shadeRGBAColor(newPanelColor, -0.4));
+  //             let metaThemeColor = document.querySelector("meta[name=theme-color]");
+  //             metaThemeColor.setAttribute('content', newPanelColor);
+  //             playerObj.preferences.soundVolume = parseFloat(playerObj.preferences.soundVolume);
+  //             playerObj.preferences.ambienceVolume = parseFloat(playerObj.preferences.ambienceVolume);
+  //             playerObj.preferences.musicVolume = parseFloat(playerObj.preferences.musicVolume);
+  //             playerObj.preferences.turnSpeed = parseFloat(playerObj.preferences.turnSpeed);
+  //             playerObj.preferences.panelSize = parseFloat(playerObj.preferences.panelSize);
+  //             console.info(playerObj.preferences);
+  //             let newCardSelection = [...this.state.cardSelection];
+  //             if (!playerObj.wonCards) {
+  //               playerObj.wonCards = [];
+  //             } else {
+  //               playerObj.wonCards = JSON.parse(playerObj.wonCards);
+  //             }
+  //             console.log('playerObj.wonCards', playerObj.wonCards);
+  //             // console.log('playerObj.wonCards.split()');
+  //             // let indexArr = playerObj.wonCards.toString().split(',');
+  //             playerObj.wonCards.map(index => {
+  //               newCardSelection.push(prizeCards[index]);
+  //             });
+  //             console.info('newcardselection', newCardSelection)
+  //             playerObj.preferences.headerVisible = true;
+  //             console.log('SETTING STATE TO', playerObj)
+  //             this.setState({
+  //               userStatus: playerObj,
+  //               checkedCookie: true,
+  //               options: playerObj.preferences,
+  //               cardSelection: newCardSelection
+  //             }, () => {                  
+  //               this.applyStateOptions('on');
+  //             });
+  //           } else {
+  //             console.log('SETTING STATE TO', playerObj)
+  //             document.getElementById('starfield').play();
+  //             this.setState({
+  //               userStatus: playerObj,
+  //               checkedCookie: true
+  //             });
+  //           }
+  //         }
+  //       } else {
+  //         // would this ever occur??
+  //         console.error(`at evaluatePlayerName: No entry in DB for ${enteredName}.`);
+  //       }
+  //     });
+  //   } else {
+  //     // let optionsString = JSON.stringify(this.state.options);
+  //     // DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then(response => {
+  //     //   DB.getUserId(enteredName).then(response => {
+  //     //     let uniqueId = response.data[0].id;
+  //     //     if (enteredName !== 'Guest') {
+  //     //       Util.setCookie('username', `${enteredName}||${uniqueId}`, 365);
+  //     //     }
+  //     //     userStatusCopy.loggedInAs = enteredName;
+  //     //     userStatusCopy.cookieID = parseInt(uniqueId);
+  //     //     this.setState(
+  //     //       {
+  //     //         userStatus: userStatusCopy,
+  //     //         checkedCookie: true
+  //     //       },
+  //     //       () => {
+  //     //         this.evaluatePlayerName(enteredName);
+  //     //       }
+  //     //     );
+  //     //   });
+  //     // });
+  //   }
+  // };
 
   handleClickAccountInfo = () => {
     let userPanel = document.getElementById('user-info-panel');
@@ -1173,10 +1236,13 @@ class App extends React.Component {
       this.delayEvents[event] = true;
     });
     // this.playSound('click');
-    let enteredName = document.getElementById('player-name-input').value;
-    let namesCopy = Object.assign({}, this.state.playerNames);
+    // let enteredName = document.getElementById('player-name-input').value;
+    let enteredName = this.state.loggedInAs;
+    let namesCopy = { ...this.state.playerNames };
     let userStatusCopy = Object.assign({}, this.state.userStatus);
-    if (!enteredName.length) {
+    userStatusCopy.playerName = enteredName;
+    if (!enteredName) {
+    // if (!enteredName.length) {
       // playing as Guest
       userStatusCopy.playerName = 'Guest';
       this.setState({
@@ -1186,13 +1252,14 @@ class App extends React.Component {
       });
       // });
     } else {
-      if (!this.state.userStatus.cookieId) {
+      if (!this.state.userStatus.cookieID) {
         // had no cookie at load
 
         userStatusCopy.loggedInAs = enteredName;
 
         // make sure it's not too short or too long
         let nameLength = enteredName.length;
+        console.log('namelength?', nameLength)
         let nameTooShort = false;
         let nameTooLong = false;
         let inputErrorText = '';
@@ -1230,35 +1297,36 @@ class App extends React.Component {
             document.getElementById('player-name-input').value = '';
           } else {
             // create a new user record and set cookie
-            namesCopy.user = enteredName;
-            let optionsString = JSON.stringify(this.state.options);
-            DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then(response => {
-              DB.getUserId(enteredName).then(response => {
-                Util.setCookie('username', `${enteredName}||${response.data[0].id}`, 365);
-                let uniqueId = response.data[0].id;
-                userStatusCopy.cookieId = parseInt(uniqueId);
-                DB.updateLastLoginTime(userStatusCopy.cookieId);
-                this.setState(
-                  {
-                    userStatus: userStatusCopy,
-                    playerNames: namesCopy,
-                    lazyTime: [true, true, true]
-                  },
-                  () => {
-                    this.evaluatePlayerName(enteredName);
-                    this.setState({
-                      // phase: 'selectingOpponent'
-                      phase: 'selectingMode'
-                    });
-                  }
-                );
-              });
-            });
+            // namesCopy.user = enteredName;
+            // let optionsString = JSON.stringify(this.state.options);
+            // DB.saveUser(enteredName, this.state.userStatus.avatarIndex, optionsString).then(response => {
+            //   DB.getUserId(enteredName).then(response => {
+            //     Util.setCookie('username', `${enteredName}||${response.data[0].id}`, 365);
+            //     let uniqueId = response.data[0].id;
+            //     userStatusCopy.cookieID = parseInt(uniqueId);
+            //     DB.updateLastLoginTime(userStatusCopy.cookieID);
+            //     this.setState(
+            //       {
+            //         userStatus: userStatusCopy,
+            //         playerNames: namesCopy,
+            //         lazyTime: [true, true, true]
+            //       },
+            //       () => {
+            //         this.evaluatePlayerName(enteredName);
+            //         this.setState({
+            //           // phase: 'selectingOpponent'
+            //           phase: 'selectingMode'
+            //         });
+            //       }
+            //     );
+            //   });
+            // });
           }
         });
       } else {
         // had cookie and matched in DB
-        namesCopy.user = enteredName;
+        console.big('had cookie and matched in db')
+        namesCopy.user = this.state.loggedInAs;
         this.setState(
           {
             phase: 'selectingMode',
@@ -1266,7 +1334,8 @@ class App extends React.Component {
             lazyTime: [true, true, true]
           },
           () => {
-            DB.updateLastLoginTime(userStatusCopy.cookieId).then(() => {});
+            console.log('set state to', this.state)
+            // DB.updateLastLoginTime(userStatusCopy.cookieID).then(() => {});
           }
         );
       }
@@ -1613,28 +1682,31 @@ class App extends React.Component {
     let newCardSelection = [...this.state.cardSelection];   
     if (winner !== 'TIE') {
       let newWins = this.state[`${winner}Wins`] + 1;
-      if (this.state.playerNames.user !== 'Guest' && this.state.userStatus.loggedInAs) {
-        let playerName = this.state.userStatus.loggedInAs;
+      if (this.state.playerNames.user !== 'Guest' && this.state.loggedInAs) {
+        let playerName = this.state.loggedInAs;
         // this.incrementPlayerTotalGames(playerName, 'sets');
         DB.incrementSets(playerName);
         newUserStatus.totalSets++;
         if (winner === 'user') {
           // USER won
           DB.incrementSetWins(playerName);
-          if (newWins === 3) {
+          if (newWins === 1) {
             if (this.state.gameMode === 'campaign') {
               newUserStatus.cpuDefeated.push(this.state.cpuOpponent);
               newUserStatus.credits += characters[this.state.cpuOpponent].prize.credits;
               characters[this.state.cpuOpponent].prize.cards.map((cardIndex) => {
                 newUserStatus.wonCards.push(cardIndex);
               });              
-            }
-            if (newUserStatus.wonCards.length) {
-              console.pink('USER WON NEW CARDS!');              
-              let indexArr = newUserStatus.wonCards.toString().split(',');
-              indexArr.map(index => {
-                newCardSelection.push(prizeCards[index]);
-              })
+              if (newUserStatus.wonCards.length) {
+                console.pink('USER WON NEW CARDS!');                              
+                newUserStatus.wonCards.map(index => {
+                  newCardSelection.push(prizeCards[index]);
+                });
+                // let indexArr = newUserStatus.wonCards.toString().split(',');
+                // indexArr.map(index => {
+                //   newCardSelection.push(prizeCards[index]);
+                // });
+              }
             }
             console.info('sending', newUserStatus.wonCards)
             DB.incrementMatchWins(1, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, JSON.stringify(newUserStatus.wonCards));
@@ -1667,8 +1739,8 @@ class App extends React.Component {
       );
     } else {
       // TIE
-      if (this.state.playerNames.user !== 'Guest' && this.state.userStatus.loggedInAs) {
-        let playerName = this.state.userStatus.loggedInAs;
+      if (this.state.playerNames.user !== 'Guest' && this.state.loggedInAs) {
+        let playerName = this.state.loggedInAs;
         DB.incrementSets(playerName);
         newUserStatus.totalSets++;
       }
@@ -1894,24 +1966,23 @@ class App extends React.Component {
     okButton.parentNode.prepend(newOkButton);
     okButton.parentNode.removeChild(okButton);
     newOkButton.innerHTML = buttonText.confirm;
-    this.setState(
-      {
-        confirmMessage: {
-          showing: true,
-          titleText: titleText,
-          bodyText: bodyText,
-          buttonText: buttonText
-        }
-      },
-      () => {
-        newOkButton.addEventListener('click', confirmAction);
-        if (noCancel) {
-          document.getElementById('confirm-cancel-button').style.display = 'none';
-        }
+    this.setState({
+      confirmMessage: {
+        showing: true,
+        titleText: titleText,
+        bodyText: bodyText,
+        buttonText: buttonText
       }
-      );
-    };
-    dismissConfirmModal = () => {
+    },
+    () => {
+      newOkButton.addEventListener('click', confirmAction);
+      if (noCancel) {
+        document.getElementById('confirm-cancel-button').style.display = 'none';
+      }
+    }
+    );
+  };
+  dismissConfirmModal = () => {
     document.getElementById('confirm-modal').classList.remove('confirm-modal-showing');
     this.setState({
       confirmMessage: {
@@ -1921,7 +1992,16 @@ class App extends React.Component {
         buttonText: {}
       }
     });
-  };
+  }
+
+  dismissLoginModal = () => {
+    // document.getElementById('confirm-modal').classList.remove('confirm-modal-showing');
+    this.setState({
+      loggingIn: false,
+      registering: false
+    });
+  }
+
   callUserInfoModal = selectedUserId => {
     this.setState(
       {
@@ -1944,10 +2024,10 @@ class App extends React.Component {
     });
   };
   handleClickAvatar = event => {
-    if (document.getElementsByClassName('selected-avatar')[0]) {
-      document.getElementsByClassName('selected-avatar')[0].classList.remove('selected-avatar');
-    }
-    event.target.classList.add('selected-avatar');
+    // if (document.getElementsByClassName('selected-avatar')[0]) {
+    //   document.getElementsByClassName('selected-avatar')[0].classList.remove('selected-avatar');
+    // }
+    // event.target.classList.add('selected-avatar');
     let userStatusCopy = Object.assign({}, this.state.userStatus);
     let columnNumber = parseInt(event.target.id.split('-')[2]);
     userStatusCopy.avatarIndex = columnNumber;
@@ -2114,6 +2194,10 @@ class App extends React.Component {
     event.preventDefault();
     this.dismissConfirmModal();
   };
+  handleClickCancelLoginButton = event => {
+    event.preventDefault();
+    this.dismissLoginModal();
+  };
   handleClickCloseButton = event => {
     event.preventDefault();
     this.dismissUserInfoModal();
@@ -2269,10 +2353,10 @@ class App extends React.Component {
           document.getElementById('container').style.backgroundColor = 'var(--main-bg-color)';
         }
         if (window.performance.now() - this.state.lastChangedSlider > 200) {
-          if (this.state.userStatus.cookieId) {
+          if (this.state.userStatus.cookieID) {
             let optionsCopy = { ...this.state.options };
             let optionsString = JSON.stringify(optionsCopy);
-            DB.updatePreferences(this.state.userStatus.cookieId, optionsString).then((response) => {
+            DB.updatePreferences(this.state.userStatus.cookieID, optionsString).then((response) => {
               if (this.state.phase === 'showingOptions' || this.state.phase === 'gameStarted') {
                this.callToast(`Color saved.`, 'vertical');
               }
@@ -2347,7 +2431,7 @@ class App extends React.Component {
             if (typeName === 'sound') {
               this.playSound('click');
             }
-            DB.updatePreferences(this.state.userStatus.cookieId, optionsString).then((response) => {
+            DB.updatePreferences(this.state.userStatus.cookieID, optionsString).then((response) => {
               if (type === 'panel-alpha-control') {
                 if (type === 'panel-alpha-control') {
                   this.handleChangeBackgroundColor([newOptions.panelColor, newOptions.panelShade], 'panel');
@@ -2364,9 +2448,94 @@ class App extends React.Component {
       })
     // }
   }
-  
+
+  showLoginModal = () => {
+    this.setState({
+      loggingIn: true
+    });
+  }
+
+  integrateLoggedInUser = (username, newData, newToken) => {
+    console.big('integrateLoggedInUser')
+    for (let entry in newData) {
+      if (newData[entry][0] === '[' || newData[entry][0] === '{') {
+        newData[entry] = JSON.parse(newData[entry])
+      } else if (!isNaN(parseInt(newData[entry]))) {
+        newData[entry] = parseInt(newData[entry]);
+      }
+    }
+    console.log('respons newData', newData);
+    let newUserData = { ...this.state.userStatus, ...newData }
+    newUserData.playerName = username;
+    newUserData.cookieID = newToken;
+    console.log('respons newUserData', newUserData);
+    let newPlayerNames = { ...this.state.playerNames };
+    newPlayerNames.user = username;
+    let newCardSelection = [...this.state.cardSelection];
+    newUserData.wonCards.map(prizeIndex => {
+      newCardSelection.push(prizeCards[prizeIndex]);
+    });
+    this.setState({
+      userID: newData.id,
+      loggedInAs: newData.playerName,
+      userStatus: newUserData,
+      options: newUserData.preferences,
+      playerNames: newPlayerNames,
+      cardSelection: newCardSelection,
+      checkedCookie: true,
+    }, () => {
+      Util.setCookie('pazaak', JSON.stringify({ username: this.state.loggedInAs, userID: this.state.userID, cookieID: this.state.userStatus.cookieID }), 365);
+      console.log('getUserRecordWithCookie set cookie to:', { username: this.state.loggedInAs, userID: this.state.userID, cookieID: this.state.userStatus.cookieID });
+    });
+  }
+
+  handleClickRegister = (loginObj) => {
+    console.log('APP GOT!', loginObj);
+    loginObj.initialOptions = {...this.state.options}
+    DB.attemptUserCreation(loginObj).then(response => {
+      let newUserID = response.data[0];
+      let newToken = response.data[1];
+      console.log('attemptUserCreation responded', response);
+      let newUserStatus = { ...this.state.userStatus };
+      newUserStatus.playerName = loginObj.username;
+      newUserStatus.cookieID = newToken;
+      let newPlayerNames = { ...this.state.playerNames };
+      newPlayerNames.user = loginObj.username;
+      this.setState({
+        userID: newUserID,
+        loggedInAs: loginObj.username,
+        checkedCookie: true,
+        userStatus: newUserStatus,
+        playerNames: newPlayerNames
+      }, () => {
+          Util.setCookie('pazaak', JSON.stringify({ username: this.state.loggedInAs, userID: this.state.userID, cookieID: this.state.userStatus.cookieID }), 365);
+          console.log('handleClickRegister set cookie to:', { username: this.state.loggedInAs, userID: this.state.userID, cookieID: this.state.userStatus.cookieID });       
+      });
+    });
+  }
+
+  handleClickLogIn = (loginObj) => {
+    DB.getUserWithPass(loginObj).then(response => {
+      let newData = response.data[0];
+      let newToken = response.data[1];
+      this.integrateLoggedInUser(loginObj.username, newData, newToken);
+    })
+  }
+
+  getUserRecordWithCookie = (cookieObj) => {
+    DB.getUserWithCookie(cookieObj).then(response => {
+      if (response.data[0] === null) {
+        Util.setCookie('pazaak', null, 0);
+        console.big('Cookie destroyed!');
+        window.location.reload();
+      }
+      let newData = response.data[0];
+      let newToken = response.data[1];
+      this.integrateLoggedInUser(cookieObj.username, newData, newToken)
+    });
+  }
+
   render() {
-    console.big('APP RENDERING', 'green');
     let phase = this.state.phase;
     let onIntroPhase = phase === 'showingOptions' || phase === 'showingInstructions' || phase === 'showingHallOfFame';
     let characterArray = [];
@@ -2378,6 +2547,12 @@ class App extends React.Component {
     let lazyTime1 = this.delayEvents.postLoad1;
     let lazyTime2 = this.delayEvents.postLoad2;
     let lazyTime3 = this.delayEvents.postLoad3;
+    let logMode = 'balls';
+    if (document.getElementById('unlogged-panel') && document.getElementById('unlogged-panel').classList.contains('registering')) {
+      logMode = 'registering';
+    }
+    console.orange('APP logMode?', logMode);
+    console.error('AT RENDER APP STATE is', this.state)
     return (      
       <div id="container">          
         <Toast message={this.state.toastMessage} />
@@ -2393,6 +2568,8 @@ class App extends React.Component {
         {domLoaded && this.state.options.headerVisible && (
           <HeaderMenu
             playerObject={this.state.userStatus}
+            loggedInAs={this.state.loggedInAs}
+            userID={this.state.userID}
             onClickSignIn={this.handleClickSignIn}
             onClickLogOut={this.handleClickLogOut}
             onClickCloseButton={this.handleClickCloseButton}
@@ -2406,48 +2583,55 @@ class App extends React.Component {
             userStatus={this.state.userStatus}
             playerName={this.state.userStatus.playerName}
             playerCredits={this.state.userStatus.credits}
-            uniqueId={this.state.userStatus.cookieId}
+            uniqueId={this.state.userStatus.cookieID}
             avatarIndex={this.state.userStatus.avatarIndex}
             onClickAccountArea={this.handleClickAccountInfo}
             onClickSignIn={this.handleClickSignIn}
             onClickLogOut={this.handleClickLogOut}
             clickFunction={clickFunction}
           />
+          
         {/* } */}
         <div id="content-area">
           {this.state.checkedCookie && (phase === 'splashScreen' || onIntroPhase) && (
             <>
-            <IntroScreen
-              phase={phase}
-              readyToShow={this.state.checkedCookie}
-              userAvatarIndex={this.state.userStatus.avatarIndex}
-              onClickAvatar={this.handleClickAvatar}
-              onClickStart={this.handleClickStart}
-              onClickHow={this.handleClickHow}
-              onClickOptions={this.handleClickOptions}
-              onClickHallOfFame={this.handleClickHallOfFame}
-              onClickLogOut={this.handleClickLogOut}
-              userStatus={this.state.userStatus}
-              clickFunction={clickFunction}
-            />
-            <OptionsScreen
-              phase={phase}
-              readyToShow={lazyTime2}
-              currentOptions={this.state.options}
-              onToggleOption={this.handleToggleOption}
-              onClickBack={event => {
-                this.handleClickBack(event, 'splashScreen');
-              }}
-              onChangeBackgroundColor={this.handleChangeBackgroundColor}
-              onChangePanelColor={this.handleChangePanelColor}
-              changeSliderValue={this.handleSliderChange}
-              clickFunction={clickFunction}
-            />
-            <InstructionsScreen
-              phase={phase}
-              readyToShow={pageLoaded}
-              onClickBack={this.handleClickBack}
-              clickFunction={clickFunction} />
+              <IntroScreen
+                phase={phase}
+                mode={logMode}
+                checkUsername={DB.checkUsername}
+                readyToShow={this.state.checkedCookie}
+                userAvatarIndex={this.state.userStatus.avatarIndex}
+                onClickAvatar={this.handleClickAvatar}
+                onClickStart={this.handleClickStart}
+                onClickHow={this.handleClickHow}
+                onClickOptions={this.handleClickOptions}
+                onClickHallOfFame={this.handleClickHallOfFame}
+                onClickLogIn={this.handleClickLogIn}
+                onClickLogOut={this.handleClickLogOut}
+                onClickRegister={this.handleClickRegister}                
+                userStatus={this.state.userStatus}
+                loggedInAs={this.state.loggedInAs}
+                clickFunction={clickFunction}
+              />
+              <OptionsScreen
+                phase={phase}
+                readyToShow={lazyTime2}
+                currentOptions={this.state.options}
+                onToggleOption={this.handleToggleOption}
+                onClickBack={event => {
+                  this.handleClickBack(event, 'splashScreen');
+                }}
+                onChangeBackgroundColor={this.handleChangeBackgroundColor}
+                onChangePanelColor={this.handleChangePanelColor}
+                changeSliderValue={this.handleSliderChange}
+                clickFunction={clickFunction}
+              />
+              <InstructionsScreen
+                phase={phase}
+                readyToShow={pageLoaded}
+                onClickBack={this.handleClickBack}
+                clickFunction={clickFunction}
+              />
             </>
           )}
           {pageLoaded && this.state.checkedCookie && phase === 'selectingMode' && (
@@ -2583,14 +2767,24 @@ class App extends React.Component {
             clickFunction={clickFunction} />
         )}
         {pageLoaded && (
-          <ConfirmModal
-            showing={this.state.confirmMessage.showing}
-            messageData={this.state.confirmMessage}
-            buttonText={this.state.confirmMessage.buttonText}
-            onClickConfirmButton={this.handleClickConfirmButton}
-            onClickCancelButton={this.handleClickCancelButton}
-            clickFunction={clickFunction}
-          />
+          <>
+            <ConfirmModal
+              showing={this.state.confirmMessage.showing}
+              messageData={this.state.confirmMessage}
+              buttonText={this.state.confirmMessage.buttonText}
+              onClickConfirmButton={this.handleClickConfirmButton}
+              onClickCancelButton={this.handleClickCancelButton}
+              clickFunction={clickFunction}
+            />
+            {/* <LoginModal
+              showing={this.state.loggingIn}
+              messageData={this.state.confirmMessage}
+              buttonText={this.state.confirmMessage.buttonText}
+              onClickConfirmButton={this.handleClickConfirmButton}
+              onClickCancelButton={this.handleClickCancelLoginButton}
+              clickFunction={clickFunction}
+            /> */}
+          </>
         )}
         {(phase === 'versusScreen' || phase === 'gameStarted') &&
           <VersusScreen phase={phase} userData={this.state.userStatus} opponentData={characters[this.state.cpuOpponent]} opponentAvatarIndex={characterArray.indexOf(characters[this.state.cpuOpponent])} />

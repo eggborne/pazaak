@@ -69,6 +69,7 @@ function PlayerPortrait(props) {
           max-height: ${portraitSize}px;
           background-position-x: ${backgroundPositionX};
           background-position-y: ${backgroundPositionY};
+          background-color: black;
         }
         .portrait-cover {
           box-sizing: border-box;

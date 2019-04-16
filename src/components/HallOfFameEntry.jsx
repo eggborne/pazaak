@@ -7,7 +7,7 @@ import { getTimeSinceFromSeconds } from '../scripts/util';
 let characters = require('../scripts/characters');
 
 function HallOfFameEntry(props) {
-  // console.warn('rendering HallOfFameEntry', props.entry)
+  console.warn('rendering HallOfFameEntry', props.entry)
   let bgColor = '#58717a';
   let isSelf = props.entry.playerName === props.loggedInAs;
   if (isSelf) {

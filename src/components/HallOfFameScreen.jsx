@@ -8,7 +8,7 @@ class HallOfFameScreen extends React.Component {
     this.state = {
       listRange: {
         min: 0,
-        max: 3
+        max: 16
       },
       recordList: this.props.highScores,
       lastCheckedScroll: 0
@@ -17,8 +17,9 @@ class HallOfFameScreen extends React.Component {
 
   componentDidMount() {
     let newRecordList = this.props.highScores;
+    console.info('HOFS got', newRecordList)
     // newRecordList = newRecordList.filter(record => record.playerName.slice(0, 5) !== 'Guest' && record.setWins >= 0);
-    newRecordList = newRecordList.slice(this.state.listRange.min, this.state.listRange.max);
+    // newRecordList = newRecordList.slice(this.state.listRange.min, this.state.listRange.max);
     this.setState({
       recordList: newRecordList
     });
@@ -59,7 +60,7 @@ class HallOfFameScreen extends React.Component {
   componentDidUpdate() {
     let newRecordList = this.props.highScores;
     // newRecordList = newRecordList.filter(record => record.playerName.slice(0, 5) !== 'Guest' && record.setWins >= 0);
-    newRecordList = newRecordList.slice(this.state.listRange.min, this.state.listRange.max);
+    // newRecordList = newRecordList.slice(this.state.listRange.min, this.state.listRange.max);
     this.setState({
       recordList: newRecordList
     });
@@ -68,7 +69,7 @@ class HallOfFameScreen extends React.Component {
     return (prevProps.phase != 'showingHallOfFame' && this.props.phase == 'showingHallOfFame') || prevProps.readyToList !== this.props.readyToList || this.state.listRange.max != nextState.listRange.max;
   }
   render() {
-    console.big('HallOfFameScreen rendering');
+    console.info('HallOfFameScreen rendering', this.state.recordList);
     let timeNow = Math.round(parseInt(Date.now()) / 1000).toString();
     let scoresExist = this.props.highScores.length ? true : false;
     let portraitSize = parseInt(window.getComputedStyle(document.documentElement).getPropertyValue('--normal-card-height'));

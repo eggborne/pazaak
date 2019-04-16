@@ -31,6 +31,8 @@ function HeaderMenu(props) {
         }           
       `}</style>
       <UserCard playerObj={props.playerObject}
+        loggedInAs={props.loggedInAs}
+        userID={props.userID}
         totalSets={props.playerObject.totalSets}
         totalMatches={props.playerObject.totalMatches}
         setWins={props.playerObject.setWins}
