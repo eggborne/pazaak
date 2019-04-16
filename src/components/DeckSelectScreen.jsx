@@ -1,14 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Card from './Card';
 
 function DeckSelectionScreen(props) {
+  const [scrolledToEnd, setScrolled] = useState(false);
   console.big('DeckSelectionScreen rendering');
   console.info(props);
   console.big('DeckSelectionScreen rendering');
   setTimeout(() => {
     document.getElementById('deck-select-screen').style.opacity = 1;
     document.getElementById('deck-select-screen').style.transform = 'none';
+    let selectionGrid = document.getElementById('deck-selection-grid');
+    // selectionGrid.addEventListener('onscroll', () => {
+    //   let scrolledToEnd = selectionGrid.scrollTop === selectionGrid.scrollHeight
+    //   console.log(`selectionGrid.scrollTop, selectionGrid.scrollHeight`, selectionGrid.scrollTop, selectionGrid.scrollHeight)
+    //   console.pink('scrolling!')
+    // })
+  
   }, 1);
 
   let selectionCardSize = 'mini';
@@ -40,7 +48,7 @@ function DeckSelectionScreen(props) {
       document.getElementById('deck-ready-button').classList.add('disabled-button');
     });
   }
-  let cardSelectionGrid = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+  let cardSelectionGrid = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
   props.cardSelection.map((card, i) => {
     console.log('card', i, 'is', card)
     cardSelectionGrid[i] = (
@@ -77,7 +85,9 @@ function DeckSelectionScreen(props) {
   let cardRadius = `calc(var(--${selectionCardSize}-card-width) / 18)`;
   let cardBorder = `calc(var(--${selectedCardSize}-card-height) / 100)`;
   console.info('userSelectedGrid')
-  console.info(userSelectedGrid)
+  console.info(userSelectedGrid);
+  let cardsOverflowing = props.cardSelection.length > 62;
+  console.log('overflowing?', cardsOverflowing)
   return (
     <div id="deck-select-screen">
       <style jsx>
@@ -109,12 +119,44 @@ function DeckSelectionScreen(props) {
             padding: calc(var(--menu-border-radius) * 2);
             padding-top: 0;
           }
+          #more-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--small-font-size);
+            //background-color: #000000aa;
+            color: #999;
+            padding: 0;
+            //opacity: ${(!cardsOverflowing || scrolledToEnd) ? 0 : 0.6};
+            opacity: ${(cardsOverflowing && scrolledToEnd) ? 0 : 0.6};
+            pointer-events: ${(cardsOverflowing && scrolledToEnd) ? 'none' : 'all'};
+            transition: opacity 210ms ease;
+            position: absolute;
+            width: calc((${cardWidth} * 6) + (var(--card-buffer-size) * 5) );
+            height: var(--medium-font-size);
+            transform: translateY(calc(-1 * var(--medium-font-size)));
+            border-bottom-left-radius: calc(${cardRadius} * 2);
+            border-bottom-right-radius: calc(${cardRadius} * 2);
+          }    
+          #deck-selection-area.overflowing #more-indicator {
+            background-color: var(--dark-red-bg-color);
+            color: white;
+          }    
+          #deck-selection-area #more-indicator:after {
+            content: 'defeat opponents to win cards';
+          }
+          #deck-selection-area.overflowing #more-indicator:after {
+            content: '\u2193 more \u2193';
+          }
           #deck-selection-grid {                            
             display: grid;
             grid-template-columns: ${cardWidth} ${cardWidth} ${cardWidth} ${cardWidth} ${cardWidth} ${cardWidth};
-            grid-template-rows: ${cardHeight} ${cardHeight} ${cardHeight} ${cardHeight};
+            grid-template-rows: ${cardHeight} ${cardHeight} ${cardHeight} ${cardHeight} ${cardHeight};
             grid-column-gap: var(--card-buffer-size);
             grid-row-gap: var(--card-buffer-size);
+            max-height: calc(${cardHeight} * 4);
+            overflow-y: auto;
+            scroll-behavior: smooth;
           }
           #deck-select-title {
             font-family: var(--title-font);height: calc(var(--header-height) / 1.5);
@@ -169,15 +211,39 @@ function DeckSelectionScreen(props) {
         {chooseText}
       </div>
       <div id="cards-area">
-        <div id="deck-selection-area">
+        <div id="deck-selection-area" className={cardsOverflowing ? 'overflowing' : undefined}>
           <div id='available-deck-title' className="smaller shadowed-text">AVAILABLE CARDS</div>
-          <div id="deck-selection-grid">
+          <div onScroll={(event) => {
+            let toEnd = (event.target.scrollHeight - event.target.scrollTop) === event.target.clientHeight;
+            let atEnd = event.target.scrollTop >= Math.abs(event.target.clientHeight - event.target.scrollHeight) - 1;
+            console.pink('END', toEnd)
+            console.pink('ATEND', atEnd)
+            console.info('is',  (event.target.scrollTop), '>=',(event.target.clientHeight - event.target.scrollHeight))
+            console.log(`selectionGrid.scrollTop, selectionGrid.scrollHeight, clientHeight`, event.target.scrollTop, event.target.scrollHeight, event.target.clientHeight)
+            console.info('scrolling!', event.target.scrollTop, toEnd);
+            if (atEnd && !scrolledToEnd) {
+              setScrolled(true);
+              console.orange('AT END! >>>>>>>>>>')
+            } else if (!atEnd && scrolledToEnd) {
+              setScrolled(false);
+            }
+          }}
+            id="deck-selection-grid">
             {cardSelectionGrid.map((card, i) => {
               let cardKey = card.props ? card.props.id : i;
-              console.log('laying cardSelectionGrid card', cardKey);
               return <div key={'selection-'+cardKey}>{card}</div>;
             })}
           </div>
+          <div onClick={(event) => {
+            console.log('clickaed bard!', event);
+            let selectionGrid = document.getElementById('deck-selection-grid');
+            console.info('top, height, clientheuigt', selectionGrid.scrollTop,selectionGrid.scrollHeight,selectionGrid.clientHeight)
+            selectionGrid.scrollTop = selectionGrid.scrollHeight - selectionGrid.clientHeight;
+            console.log('set scrolltop to', selectionGrid.scrollTop);
+            // setTimeout(() => {
+            //   setScrolled(true);
+            // },100);
+          }} id='more-indicator'></div>
         </div>
         <div id="preview-deck-area">
           <div id="preview-deck-title" className="smaller shadowed-text">
