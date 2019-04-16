@@ -27,7 +27,6 @@ export const prizeCards = [
   { id: 78, value: 4, type: '±' },
   { id: 77, value: 3, type: '±' },
   { id: 76, value: 4, type: '±' },
-  { id: 76, value: 6, type: '±' },
   
   { id: 75, value: 1, type: '±' },
   { id: 74, value: 2, type: '±' },
@@ -35,12 +34,14 @@ export const prizeCards = [
   { id: 72, value: 4, type: '±' },
   { id: 71, value: 2, type: '±' },
   { id: 70, value: 3, type: '±' },
+
   { id: 69, value: 4, type: '±' },
   { id: 68, value: 5, type: '±' },
   { id: 67, value: 3, type: '±' },
   { id: 66, value: 4, type: '±' },
   { id: 65, value: 5, type: '±' },
   { id: 64, value: 6, type: '±' },
+
   { id: 63, value: 4, type: '±' },
   { id: 62, value: 5, type: '±' },
   { id: 61, value: 6, type: '±' },
@@ -97,7 +98,7 @@ export const characters = {
     skillLevel: 2,
     prize: {
       credits: 75,
-      cards: [7,8]
+      cards: [1]
     },
     strategy: {
       stand: {
@@ -136,7 +137,7 @@ export const characters = {
     skillLevel: 3,
     prize: {
       credits: 150,
-      cards: [8,9]
+      cards: [2,3]
     },
     strategy: {
       stand: {
@@ -175,7 +176,7 @@ export const characters = {
     skillLevel: 5,
     prize: {
       credits: 300,
-      cards: [10,11]
+      cards: [4,5]
     },
     strategy: {
       stand: {
@@ -214,7 +215,7 @@ export const characters = {
     skillLevel: 7,
     prize: {
       credits: 600,
-      cards: [12,13]
+      cards: [6,7]
     },
     strategy: {
       stand: {
@@ -253,7 +254,7 @@ export const characters = {
     skillLevel: 8,
     prize: {
       credits: 1200,
-      cards: [14,15]
+      cards: [8,9]
     },
     strategy: {
       stand: {
@@ -292,7 +293,7 @@ export const characters = {
     skillLevel: 9,
     prize: {
       credits: 2400,
-      cards: [16]
+      cards: [10]
     },
     strategy: {
       stand: {
@@ -331,7 +332,7 @@ export const characters = {
     skillLevel: 9,
     prize: {
       credits: 5000,
-      cards: [17]
+      cards: [11,12]
     },
     strategy: {
       stand: {
@@ -370,7 +371,7 @@ export const characters = {
     skillLevel: 9,
     prize: {
       credits: 12000,
-      cards: [18]
+      cards: [13,14]
     },
     strategy: {
       stand: {
@@ -409,7 +410,7 @@ export const characters = {
     skillLevel: 10,
     prize: {
       credits: 15000,
-      cards: [19]
+      cards: [15,16]
     },
     strategy: {
       stand: {
@@ -448,7 +449,7 @@ export const characters = {
     skillLevel: 10,
     prize: {
       credits: 40000,
-      cards: [20,21]
+      cards: [17,18]
     },
     strategy: {
       stand: {
@@ -487,7 +488,7 @@ export const characters = {
     skillLevel: 11,
     prize: {
       credits: 100000,
-      cards: [22,23]
+      cards: [19,20]
     },
     strategy: {
       stand: {
@@ -526,7 +527,7 @@ export const characters = {
     skillLevel: 12,
     prize: {
       credits: 500000,
-      cards: [24]
+      cards: [21,22]
     },
     strategy: {
       stand: {
@@ -565,7 +566,7 @@ export const characters = {
     skillLevel: 13,
     prize: {
       credits: 1000000,
-      cards: [25]
+      cards: [23,24]
     },
     strategy: {
       stand: {
@@ -604,7 +605,7 @@ export const characters = {
     skillLevel: 15,
     prize: {
       credits: 5000000,
-      cards: [26]
+      cards: [25,26]
     },
     strategy: {
       stand: {
@@ -643,7 +644,7 @@ export const characters = {
     skillLevel: 20,
     prize: {
       credits: 99999999,
-      cards: [27,28,29,30]
+      cards: [27,28,29]
     },
     strategy: {
       stand: {
