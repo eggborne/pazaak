@@ -33,6 +33,25 @@ function UserCard(props) {
       entryDefeatCounts[opponentName] += 1;
     }    
   });
+  
+  let originalWonCardsList = [...props.wonCards];
+  let uniqueCardList = [];
+  let wonCardCounts = {};
+  let actualCardList = [];
+  originalWonCardsList.map((cardIndex, i, arr) => {
+    actualCardList.push(prizeCards[cardIndex]);      
+  });
+  actualCardList.map((cardObj, i, arr) => {
+    let copiesInArray = [...arr].filter(c => c.value === cardObj.value && c.type === cardObj.type).length;
+    let cardName = 'value|' + cardObj.value + ' type|' + cardObj.type;
+    if (![...uniqueCardList].filter(c => c.value === cardObj.value && c.type === cardObj.type).length) {
+      uniqueCardList.push(cardObj);
+    }
+    if (!wonCardCounts[cardName]) {
+      wonCardCounts[cardName] = copiesInArray;
+    }
+  });
+  console.info('originalWonCardsList',originalWonCardsList, 'uniqueCardList', uniqueCardList, 'wonCardCounts', wonCardCounts, 'actualCardList', actualCardList);
   return (
     <div id='user-info-grid' className='shadowed-text'>
       <style jsx>{`
@@ -149,16 +168,17 @@ function UserCard(props) {
       <div id='won-cards-area' className='user-area-lower'>
         Cards won:
         <div id='won-list' >
-          {wonArray.length > 0 && wonArray.map((cardIndex, i) => {
-            let card = prizeCards[cardIndex];
-            console.info('doing cardindex', cardIndex)
+          {uniqueCardList.length > 0 && uniqueCardList.map((card, i) => {
+            // let card = prizeCards[cardIndex];
+            console.info('doing cardindex', i)
             console.info('doing card', card)
+            let cardName = `value|${card.value} type|${card.type}`;
             return (
               <div key={i}>
-                <Card id={i} context={'user-card-won'} size={'prize'} value={card.value} type={card.type} />
+                <Card clickFunction={props.clickFunction} id={i} ownedCount={wonCardCounts[cardName]} context={'user-card-won'} size={'prize'} value={card.value} type={card.type} />
               </div>);
           })}
-          {wonArray.length === 0 && <div>None</div>}
+          {uniqueCardList.length === 0 && <div>None</div>}
         </div>
       </div>
       <div id='user-info-button-area' className={'user-area-lower'}>
