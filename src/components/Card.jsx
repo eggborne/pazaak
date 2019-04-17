@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function Card(props) {
-  console.error('RENDERING CARD ------------ ', props.context, props.id, props.value, props.type);
   let color;
   let altColor;
   let cornerSymbol = props.type;
@@ -37,7 +36,6 @@ function Card(props) {
   let clickAction = (props.context === 'deck-selected' || props.context === 'deck-selection-option' || props.context === 'user-hand')
     ? (event) => props.onClickCard(event, props.value, props.type, props.inDeck)
     : () => console.log('no click for this');
-  
   let animated = (props.context !== 'deck-selection-option')
     && (props.context !== 'opponent-prize');
   if (animated) {
@@ -109,6 +107,21 @@ function Card(props) {
           border-radius: ${badgeRadius};
           color: var(--card-text-color);
         }
+        .owned-card-count {
+          position: absolute;
+          width: var(--small-font-size);
+          height: var(--small-font-size);
+          font-size: var(--small-font-size);
+          background: #00000099;
+          color: white;
+        display: ${props.ownedCount > 1 ? 'flex' : 'none'};
+          align-content: center;
+          justify-content: center;
+          right: 0;
+          bottom: 0;
+          padding: calc(var(--small-font-size) / 6);
+          border-top-left-radius: calc(var(--small-font-size) / 3);
+        }
       `}</style>
       <div className='inner-band'>
         <div className='corner-bubble no-corner-border'>{cornerSymbol}</div>
@@ -122,7 +135,7 @@ function Card(props) {
       <div className='inner-band'>
       </div>
       <div className='number-badge'>{valueDisplay}</div>
-      {/* <div className='number-badge'>{(cardSize.slice(0,3))}</div> */}
+      <div className='owned-card-count'>{props.ownedCount}</div>
     </div>
   );
 }
@@ -130,6 +143,7 @@ function Card(props) {
 Card.propTypes = {
   id: PropTypes.number,
   context: PropTypes.string,
+  ownedCount: PropTypes.string,
   size: PropTypes.string,
   value: PropTypes.oneOfType([
     PropTypes.string,
