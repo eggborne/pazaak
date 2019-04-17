@@ -504,7 +504,7 @@ class NameAvatarForm extends React.PureComponent {
                   Log Out
                 </button>
               </div>
-              <input autoComplete type='text' name="player-name" id="player-name-input" maxLength="24" placeholder="Guest" defaultValue={this.props.loggedInAs} />                              
+              <input autoComplete='on' type='text' name="player-name" id="player-name-input" maxLength="24" placeholder="Guest" defaultValue={this.props.loggedInAs} />                              
               <button {...{ [this.props.clickFunction]: this.props.onClickStart }} className="intro-button" id="start-button">
                 <div id="start-button-label" className="button-label">
                 Play!
@@ -518,12 +518,12 @@ class NameAvatarForm extends React.PureComponent {
             <form onSubmit={(event) => submitAction(event)} className='pointer' id='name-avatar-input-form'>
               <div id='unlogged-panel' className={panelClass}>
                 <div id='name-input-area' className='inner-red-panel'>
-                  <input autoComplete type='text' onChange={this.handleInputChange} name="player-name" id="player-name-input" className={usernameClass} maxLength="24" placeholder="Username" />
+                  <input autoComplete='on' type='text' onChange={this.handleInputChange} name="player-name" id="player-name-input" className={usernameClass} maxLength="24" placeholder="Username" />
                   <div id='username-input-message' className={usernameMessageClass}></div>
-                  <input autoComplete type='password' onChange={this.handleInputChange} name="player-pass" id="player-pass-input" className={passClass} maxLength="24" placeholder="Password" />
+                  <input autoComplete='on' type='password' onChange={this.handleInputChange} name="player-pass" id="player-pass-input" className={passClass} maxLength="24" placeholder="Password" />
                   {mode === 'registering' &&
                     <>
-                    <input autoComplete type='password' onChange={this.handleInputChange} name="player-repeat-pass" id="player-repeat-pass-input" className={repeatPassClass} maxLength="24" placeholder="Repeat Password" />
+                    <input autoComplete='on' type='password' onChange={this.handleInputChange} name="player-repeat-pass" id="player-repeat-pass-input" className={repeatPassClass} maxLength="24" placeholder="Repeat Password" />
                     <div id='repeat-pass-input-message' className={repeatPassMessageClass}></div>
                     </>
                   }
