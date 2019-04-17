@@ -24,6 +24,18 @@ function HallOfFameEntry(props) {
   let characterArray = Object.keys(characters.characters);
   let lastLogin = getTimeSinceFromSeconds(parseInt(props.now) - parseInt(props.entry.lastLogin));
   let rowHeight = props.portraitSize / 3;
+  let originalDefeatedList = [...props.entry.cpuDefeated];
+  let entryCpuDefeated = [];
+  let entryDefeatCounts = {};
+  originalDefeatedList.map((opponentName, i, arr) => {
+    let isOriginal = arr.indexOf(opponentName) === i;
+    if (isOriginal) {
+      entryCpuDefeated.push(opponentName)
+      entryDefeatCounts[opponentName] = 1;
+    } else {
+      entryDefeatCounts[opponentName] += 1;
+    }    
+  });
   return (
     <div id={`high-score-entry-${props.entry.id}`} className='high-score-entry red-panel'>
       <style jsx>{`
@@ -118,8 +130,7 @@ function HallOfFameEntry(props) {
         }
         .obscured-entry {
           opacity: 0;
-
-        }
+        }        
       `}</style>
       <div className='name-header'>
         {props.entry.playerName}
@@ -144,11 +155,12 @@ function HallOfFameEntry(props) {
 
         <div className='cpu-opponents-header'>CPU opponents defeated: {props.entry.cpuDefeated.length === 0 &&  ' None'}</div>
         <div className='defeated-opponents-list'>
-          {props.entry.cpuDefeated.length > 0 && props.entry.cpuDefeated.map((cpuName, i) => {
-            let portraitIndex = characterArray.indexOf(cpuName);
-            return <PlayerPortrait key={i} isSelf={false} size={props.portraitSize/2} cpu={true} spriteIndex={portraitIndex} displayName={''} type={'mini'} />;
-          })}
-          
+          {entryCpuDefeated.length > 0 &&
+            entryCpuDefeated.map((cpuName, i) => {
+              let portraitIndex = characterArray.indexOf(cpuName);
+              return <PlayerPortrait key={i} isSelf={false} size={props.portraitSize / 2} cpu={true} spriteIndex={portraitIndex} countDisplay={entryDefeatCounts[cpuName]} displayName={''} type={'mini'} />;
+            })
+          }          
         </div>
       </div>
     </div>);

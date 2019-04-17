@@ -21,14 +21,18 @@ function UserCard(props) {
   }
   let wonArray = props.wonCards;
   console.info(wonArray)
-  // if (wonArray.toString() === '') {
-  //   wonArray = [];
-  // } else {
-  //   console.green('splitting')
-  //   wonArray = wonArray.toString().split(',');
-  // }
-  console.log('wonArray', wonArray)
-  console.log('wonArray.length', wonArray.length)
+  let originalDefeatedList = [...props.playerObj.cpuDefeated];
+  let entryCpuDefeated = [];
+  let entryDefeatCounts = {};
+  originalDefeatedList.map((opponentName, i, arr) => {
+    let isOriginal = arr.indexOf(opponentName) === i;
+    if (isOriginal) {
+      entryCpuDefeated.push(opponentName)
+      entryDefeatCounts[opponentName] = 1;
+    } else {
+      entryDefeatCounts[opponentName] += 1;
+    }    
+  });
   return (
     <div id='user-info-grid' className='shadowed-text'>
       <style jsx>{`
@@ -132,14 +136,14 @@ function UserCard(props) {
       <div id='defeated-area' className='user-area-lower'>
         CPU Opponents Defeated:
         <div id='defeated-list' >
-          {defeatedArray.length > 0 && defeatedArray.map((opponent, i) => {
+          {entryCpuDefeated.length > 0 && entryCpuDefeated.map((opponent, i) => {
             let opponentSpriteIndex = Object.keys(characters).indexOf(opponent);
             return (
               <div key={i}>
-                <PlayerPortrait size={portraitSize / 3.5} cpu={true} spriteIndex={opponentSpriteIndex} displayName={''} type={'mini'} />
+                <PlayerPortrait size={portraitSize / 3.5} cpu={true} spriteIndex={opponentSpriteIndex} countDisplay={entryDefeatCounts[opponent]} displayName={''} type={'mini'} />
               </div>);
           })}
-          {defeatedArray.length === 0 && <div>None</div>}
+          {entryCpuDefeated.length === 0 && <div>None</div>}
         </div>
       </div>
       <div id='won-cards-area' className='user-area-lower'>

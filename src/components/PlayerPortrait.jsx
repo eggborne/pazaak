@@ -56,6 +56,7 @@ function PlayerPortrait(props) {
     <div className={'player-portrait'} style={ props.style }>
       <style jsx>{`
         .player-portrait {
+          position: relative;
           box-sizing: border-box;
           border-radius: 10%;
           border: ${borderWidth}px solid var(--dark-red-bg-color);
@@ -94,6 +95,21 @@ function PlayerPortrait(props) {
           align-items: center;
           border-radius: 0 0 10% 10%;
         }
+        .opponent-defeat-count {
+          position: absolute;
+          width: var(--small-font-size);
+          height: var(--small-font-size);
+          font-size: var(--small-font-size);
+          background: #00000099;
+          color: white;
+          display: flex;
+          align-content: center;
+          justify-content: center;
+          right: 0;
+          bottom: 0;
+          padding: calc(var(--small-font-size) / 6);
+          border-top-left-radius: calc(var(--small-font-size) / 3);
+        }
         video {
           transition: opacity ${staticFadeTime}ms ease;
           transition-delay: 500ms;
@@ -106,6 +122,9 @@ function PlayerPortrait(props) {
       {props.displayName &&
         <div className={'player-portrait-label'}>{props.displayName}</div>
       }
+      {props.countDisplay && props.countDisplay > 1 && 
+        <div className='opponent-defeat-count'>{props.countDisplay}</div>
+      }
     </div>
   );
 }
@@ -116,6 +135,7 @@ PlayerPortrait.propTypes = {
   type: PropTypes.string,
   cpu: PropTypes.bool,
   spriteIndex: PropTypes.number,
+  countDisplay: PropTypes.number,
   displayName: PropTypes.string,
   readyToShow: PropTypes.bool
 };

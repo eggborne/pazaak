@@ -583,11 +583,7 @@ class App extends React.Component {
           } else {
             console.log('raw resp', response.data)
             playerRecordArray.map((playerScore, i) => {
-              playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated);
-              // playerScore.preferences = JSON.parse(playerScore.preferences);        
-              playerScore.cpuDefeated = playerScore.cpuDefeated.filter((elem, pos, arr) => {
-                return arr.indexOf(elem) == pos;
-              });
+              playerScore.cpuDefeated = JSON.parse(playerScore.cpuDefeated).sort(opponentName => characterArray.indexOf(opponentName));              
             });
           }
           this.setState(
@@ -1599,6 +1595,9 @@ class App extends React.Component {
       
       let deckCopy = [...this.state.deck];
       let newCard = Util.shuffle(deckCopy)[0];
+      if (player === 'opponent') {
+        newCard.value = 1;
+      }
       this.addCardToGrid(player, newCard.value, newCard.type);
       let newTotal = 0;
       newTotal += this.state[`${player}Total`] + newCard.value;
@@ -1692,14 +1691,23 @@ class App extends React.Component {
           DB.incrementSetWins(playerName);
           if (newWins === 1) {
             if (this.state.gameMode === 'campaign') {
+              let newCards = [];
               newUserStatus.cpuDefeated.push(this.state.cpuOpponent);
+              newUserStatus = newUserStatus.sort(opponentName => characterArray.indexOf(opponentName));
               newUserStatus.credits += characters[this.state.cpuOpponent].prize.credits;
               characters[this.state.cpuOpponent].prize.cards.map((cardIndex) => {
-                newUserStatus.wonCards.push(cardIndex);
+                // don't add prize cards if already won
+                // newUserStatus.wonCards.push(cardIndex);
+                if (!newUserStatus.wonCards.includes(cardIndex)) {
+                  newCards.push(cardIndex)
+                } else {
+                  console.green('wonCards already had card index', cardIndex)
+                }
               });              
-              if (newUserStatus.wonCards.length) {
+              if (newCards.length) {
                 console.pink('USER WON NEW CARDS!');                              
-                newUserStatus.wonCards.map(index => {
+                newCards.map(index => {
+                  newUserStatus.wonCards.push(index)
                   newCardSelection.push(prizeCards[index]);
                 });
                 // let indexArr = newUserStatus.wonCards.toString().split(',');
@@ -2637,7 +2645,7 @@ class App extends React.Component {
           {pageLoaded && this.state.checkedCookie && phase === 'selectingMode' && (
             <ModeSelectScreen
               phase={phase}
-              cpuDefeated={this.state.userStatus.cpuDefeated.length}
+              cpuDefeated={this.state.userStatus.cpuDefeated.filter((opponentName, i, arr) => arr.indexOf(opponentName) === i).length}
               cardsWon={this.state.userStatus.wonCards.length}
               modeSelected={this.state.gameMode}
               onClickCampaign={this.handleClickCampaign}
