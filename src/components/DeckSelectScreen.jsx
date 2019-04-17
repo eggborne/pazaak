@@ -10,15 +10,7 @@ function DeckSelectionScreen(props) {
   setTimeout(() => {
     document.getElementById('deck-select-screen').style.opacity = 1;
     document.getElementById('deck-select-screen').style.transform = 'none';
-    let selectionGrid = document.getElementById('deck-selection-grid');
-    // selectionGrid.addEventListener('onscroll', () => {
-    //   let scrolledToEnd = selectionGrid.scrollTop === selectionGrid.scrollHeight
-    //   console.log(`selectionGrid.scrollTop, selectionGrid.scrollHeight`, selectionGrid.scrollTop, selectionGrid.scrollHeight)
-    //   console.pink('scrolling!')
-    // })
-  
   }, 1);
-
   let selectionCardSize = 'mini';
   let selectedCardSize = 'mini';
   let cardsLeft = 10 - props.userDeck.length;
@@ -65,7 +57,6 @@ function DeckSelectionScreen(props) {
     );
   });
   let userSelectedGrid = ['', '', '', '', '', '', '', '', '', ''];
-  
   if (!props.userDeck) {
     props.userDeck = [];
   }
@@ -86,7 +77,7 @@ function DeckSelectionScreen(props) {
   let cardBorder = `calc(var(--${selectedCardSize}-card-height) / 100)`;
   console.info('userSelectedGrid')
   console.info(userSelectedGrid);
-  let cardsOverflowing = props.cardSelection.length > 62;
+  let cardsOverflowing = props.cardSelection.length > 18;
   console.log('overflowing?', cardsOverflowing)
   return (
     <div id="deck-select-screen">
@@ -128,21 +119,24 @@ function DeckSelectionScreen(props) {
             color: #999;
             padding: 0;
             //opacity: ${(!cardsOverflowing || scrolledToEnd) ? 0 : 0.6};
-            opacity: ${(cardsOverflowing && scrolledToEnd) ? 0 : 0.6};
+            opacity: ${(cardsOverflowing && scrolledToEnd) ? 0 : 0.75};
             pointer-events: ${(cardsOverflowing && scrolledToEnd) ? 'none' : 'all'};
             transition: opacity 210ms ease;
             position: absolute;
             width: calc((${cardWidth} * 6) + (var(--card-buffer-size) * 5) );
             height: var(--medium-font-size);
             transform: translateY(calc(-1 * var(--medium-font-size)));
-            border-bottom-left-radius: calc(${cardRadius} * 2);
-            border-bottom-right-radius: calc(${cardRadius} * 2);
+            //border-bottom-left-radius: calc(${cardRadius} * 2);
+            //border-bottom-right-radius: calc(${cardRadius} * 2);
+            pointer-events: none;
           }    
           #deck-selection-area.overflowing #more-indicator {
             background-color: var(--dark-red-bg-color);
             color: white;
+            pointer-events: all;
           }    
           #deck-selection-area #more-indicator:after {
+            
             content: 'defeat opponents to win cards';
           }
           #deck-selection-area.overflowing #more-indicator:after {
