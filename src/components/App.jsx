@@ -2287,10 +2287,10 @@ class App extends React.Component {
         }
       }
       let newUserData = { ...this.state.userStatus, ...newData }
-      newUserData.playerName = username;
+      newUserData.playerName = newData.playerName;
       newUserData.cookieID = newToken;
       let newPlayerNames = { ...this.state.playerNames };
-      newPlayerNames.user = username;
+      newPlayerNames.user = newData.playerName;
       let newCardSelection = [...this.state.cardSelection];
       newUserData.wonCards.map(prizeIndex => {
         newCardSelection.push(prizeCards[prizeIndex]);
