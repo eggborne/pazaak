@@ -32,7 +32,6 @@ function PlayingAsIndicator(props) {
           flex-direction: column;
           justify-content: flex-end;
           color: #bfb;
-          line-height: 175%;
           flex-grow: 1;
           height: 100%;
           font-size: ${nameSize};
@@ -48,7 +47,7 @@ function PlayingAsIndicator(props) {
         }
         #header-credits-display {
           color: #afa;
-          font-size: calc(var(--header-height) / 3);
+          font-size: calc(var(--header-height) / 3.5);
           display: ${props.playerName || 'none'};
         }
       `}</style>

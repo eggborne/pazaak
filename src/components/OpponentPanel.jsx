@@ -221,13 +221,16 @@ function OpponentPanel(props) {
             justify-content: center;
             align-items: center;
             border-radius: 10%;      
-            opacity: ${props.defeated && '0.75'};      
+            opacity: ${props.defeated && '0.65'};      
           }
           #defeated-message {
             position: absolute;
             font-family:var(--title-font);
             font-size: var(--medium-font-size);
             color: red;
+            z-index: 12;
+            transform-origin: 50% 50%;
+            transform: rotate(-2deg);
             display: ${!props.defeated && 'none'};
           }
         `}
@@ -238,7 +241,7 @@ function OpponentPanel(props) {
         </div>
         {props.selected &&
           <div id='portrait-area'>
-          <div id='defeated-message'>DEFEATED</div>
+            <div id='defeated-message'>DEFEATED</div>
             <PlayerPortrait type='opponent-panel' hidden={!props.available} size={portraitSize} cpu={true} spriteIndex={props.index} displayName={''} />
           </div>
         }
@@ -274,8 +277,8 @@ function OpponentPanel(props) {
             <div className='opponent-prize-label inner-red-panel'>Prize</div>
             {(props.selected && !props.defeated) ?                            
               <div className='opponent-prize-cards'>
-              {props.character.prize.cards.map((card, i) => {
-                card = prizeCards[card];
+                {props.character.prize.cards.map((card, i) => {
+                  card = prizeCards[card];
                   let key = i * (props.index + 1);
                   let displayCard = (<Card key={key} id={key} context={'opponent-prize'} size={'prize'} value={card.value} type={card.type} clickFunction={props.clickFunction} />);
                   // if (!props.available) {
