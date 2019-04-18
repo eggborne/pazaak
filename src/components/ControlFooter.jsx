@@ -21,7 +21,7 @@ function ControlFooter(props) {
       <style jsx>{`
         #control-footer {                   
           box-sizing: border-box;
-          position: fixed;
+          position: absolute;
           bottom: 0;
           width: 100%;
           height: var(--control-footer-height);
@@ -155,7 +155,7 @@ function ControlFooter(props) {
       }
       {(props.phase === 'splashScreen') &&
       <div id='footer-contents' className='shadowed-text'>
-        <div><a href='https://github.com/eggborne'>GitHub</a></div>
+        <div><a href='https://github.com/eggborne/pazaak'>GitHub</a></div>
         <div><a href='mailto:mike@eggborne.com'>Contact</a></div>
       </div>
       }
@@ -185,18 +185,18 @@ function ControlFooter(props) {
         <div id='get-ready-message' className='shadowed-text'>Get Ready...</div>
       }
       {props.phase === 'gameStarted' &&
-          <>
-            <div id='control-footer-button-area'>
-              <button {...{ [props.clickFunction]: props.onClickEndTurn }} className='move-button' id='end-turn-button'>End Turn</button>
-              <div>
-                <button {...{ [props.clickFunction]: props.onClickSwitchSign }} className='move-button disabled-button hidden-button' id='switch-sign-button'>+/-</button>
-              </div>
-              <button {...{ [props.clickFunction]: props.onClickStand }} className='move-button' id='stand-button'>Stand</button>
-              <Hamburger onClickHamburger={props.onClickHamburger}
-                clickFunction={props.clickFunction}
-              />
+        <>
+          <div id='control-footer-button-area'>
+            <button {...{ [props.clickFunction]: props.onClickEndTurn }} className='move-button' id='end-turn-button'>End Turn</button>
+            <div>
+              <button {...{ [props.clickFunction]: props.onClickSwitchSign }} className='move-button disabled-button hidden-button' id='switch-sign-button'>+/-</button>
             </div>
-          </>
+            <button {...{ [props.clickFunction]: props.onClickStand }} className='move-button' id='stand-button'>Stand</button>
+            <Hamburger onClickHamburger={props.onClickHamburger}
+              clickFunction={props.clickFunction}
+            />
+          </div>
+        </>
       }
 
 
