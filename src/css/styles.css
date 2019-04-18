@@ -3,6 +3,7 @@
   --max-width: 100vh;
   --main-opacity: 0;
   --header-height: 7vh;
+  --header-height: 11vw;
   --intro-width: 76vw;
   --top-margin: var(--header-height);
   --inner-height: calc(100% - (var(--top-margin) + var(--control-footer-height)));
@@ -15,7 +16,10 @@
   --medium-font-size: 3vh;
   --med-large-font-size: 4.5vh;
   --large-font-size: 6vh;
-  --main-bg-color: rgba(107, 121, 138, 1);
+
+  --main-bg-color: transparent;
+  /* --main-bg-color: rgba(107, 121, 138, 1); */
+
   --main-text-color: rgb(255, 247, 213);
   --option-on-color: rgb(94, 128, 94);
   --option-on-color: rgb(113, 151, 113);
@@ -43,10 +47,12 @@
   --yellow-move-color: rgba(89, 107, 7, 0.3);
   --red-move-color: rgba(107, 7, 7, 0.3);
 
-  --red-bg-color: #560000;
-  /* --red-bg-color: rgba(86, 0, 0, 0.0); */
-  --medium-red-bg-color: #490000;
-  --dark-red-bg-color: #380000;
+  --red-bg-color: transparent;
+  /* --red-bg-color: #560000; */
+  --medium-red-bg-color: transparent;
+  /* --medium-red-bg-color: #490000; */
+  --dark-red-bg-color: transparent;
+  /* --dark-red-bg-color: #380000; */
 
   --card-bg-color: #ccc;
   --card-text-color: #ffffff;
@@ -167,11 +173,11 @@ body {
   /* height: 100%; */
   background-position: center;
   opacity: 0;
-  transition: opacity 500ms ease;
+  transition: opacity 1000ms ease;
 }
 #container {
   overflow: hidden;
-  position: absolute;
+  position: fixed;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -181,6 +187,7 @@ body {
   width: 100%;
   min-width: var(--min-width);
   margin: 0 auto;
+  padding: 0;
   /* background-color: var(--main-bg-color); */
   color: var(--main-text-color);
   transition: background-color 300ms ease;
