@@ -159,7 +159,7 @@ export const incrementSetWins = (playerName) => {
   });
 };
 export const incrementMatchWins = (amount, playerName, newDefeatedArray, newCredits, wonCards) => {
-  console.log('sending new credits', newCredits)
+  console.log('sending new credits', newCredits);
   return axios({
     method: 'post',
     url: 'https://www.eggborne.com/scripts/updatepazaakroundwins.php',
@@ -237,7 +237,7 @@ export const checkUsername = (username) => {
       username: username
     }
   });
-}
+};
 export const attemptUserCreation = (loginObj) => {
   return axios({
     method: 'post',
@@ -247,9 +247,9 @@ export const attemptUserCreation = (loginObj) => {
     },
     data: JSON.stringify(loginObj)
   });
-}
+};
 export const getUserWithCookie = (cookieObj) => {
-  console.log('sending', cookieObj)
+  console.log('sending', cookieObj);
   return axios({
     method: 'post',
     url: 'https://www.eggborne.com/scripts/pazaakgetuserwithtoken.php',
@@ -258,9 +258,9 @@ export const getUserWithCookie = (cookieObj) => {
     },
     data: JSON.stringify(cookieObj)
   });
-}
+};
 export const getUserWithPass = (loginObj) => {
-  console.log('logging in with', loginObj)
+  console.log('logging in with', loginObj);
   return axios({
     method: 'post',
     url: 'https://www.eggborne.com/scripts/pazaakgetuserwithpass.php',
@@ -269,4 +269,4 @@ export const getUserWithPass = (loginObj) => {
     },
     data: JSON.stringify(loginObj)
   });
-}
+};
