@@ -1,9 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PlayingAsIndicator from './PlayingAsIndicator';
+import { isFullScreen } from '../scripts/util';
 
 function Header(props) {
   console.big('Header rendering');
+  let headerOffPosition = 'translateY(calc((var(--header-height) - var(--menu-border-width)) * -1))';
+  if (isFullScreen()) {
+    headerOffPosition = 'translateY(calc((var(--header-height)) * -1))';
+  }
   return (
     <div id='header-container'>
       <style jsx>{`
@@ -34,7 +39,7 @@ function Header(props) {
           border-radius: 0;
           border-bottom-color: transparent;
           z-index: 1;
-          transform: ${props.showing || 'translateY(calc((var(--header-height) - var(--menu-border-width)) * -1))'};
+          transform: ${props.showing || headerOffPosition};
           transition: transform 300ms ease;
           
         }
@@ -52,7 +57,7 @@ function Header(props) {
           text-align: right;
           flex-grow: 1;
           opacity: ${!props.readyToFill && 0};
-          margin-right: calc(var(--header-height) - var(--menu-border-width));
+          margin-right: calc(var(--header-height));
         }
         #header-title {
           font-family: var(--title-font);
@@ -65,7 +70,7 @@ function Header(props) {
           opacity: ${props.readyToFill && 0.8};
           width: auto;
           height: calc(var(--header-height) - var(--menu-border-width));          
-          transition: opacity 150ms ease, background-color 150ms ease;
+          transition: opacity 150ms ease, background-color 150ms ease, outline 75ms linear;
           transition-delay: 5ms;
           border-bottom-left-radius: var(--menu-border-width);
           border-top-left-radius: var(--menu-border-width);
@@ -83,8 +88,16 @@ function Header(props) {
           display: ${props.showing || 'none'};
         }
         .corner-button-on {
-          background-color: var(--dark-red-bg-color);
           opacity: 1 !important;
+        }
+        #header-title > div:first-child:after {
+          content: 'loading...';
+          margin-left: 5vw;
+          //position: absolute;
+          font-family: var(--main-font);
+          font-size: var(--small-font-size);
+          opacity: ${props.readyToFill && 0};
+          transition: opacity 210ms ease;
         }
 
       `}</style>
@@ -93,7 +106,7 @@ function Header(props) {
           <div>Pazaak.online</div>
         </div>
         <div id='user-info-area'>
-          <PlayingAsIndicator playerName={props.playerName} playerCredits={props.playerCredits} uniqueId={props.uniqueId} />
+          <PlayingAsIndicator playerName={props.playerName} playerCredits={props.playerCredits} userID={props.userID} />
         </div>      
       </div>
       <svg id='user-account-icon' xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='2 0 20 24'>
