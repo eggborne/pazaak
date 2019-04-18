@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Card from './Card';
 
-function DeckSelectionScreen(props) {
-  const [scrolledToEnd, setScrolled] = useState(false);
+const drawCardFromSelection = (selection, cardCounts, value, type) => {
+  let cardName = 'value|' + value + ' type|' + type;
+  console.log('clicked cardname', cardName)
+  let copies = cardCounts[cardName];
+  console.log('copies', copies);
+  let newCardCounts = { ...cardCounts };
+  newCardCounts[cardName] = copies - 1;
+  setCardCounts(newCardCounts)
+}
+function DeckSelectionScreen(props) {  
   console.big('DeckSelectionScreen rendering');
   console.info(props);
   console.big('DeckSelectionScreen rendering');
@@ -11,6 +19,42 @@ function DeckSelectionScreen(props) {
     document.getElementById('deck-select-screen').style.opacity = 1;
     document.getElementById('deck-select-screen').style.transform = 'none';
   }, 1);
+  let originalSelectionCards = props.cardSelection;
+  let uniqueCardList = [];
+  let wonCardCounts = {};
+  let actualCardList = [];
+  let alteredCardList = [];
+  originalSelectionCards.map((cardObj, i, arr) => {
+    if (cardObj !== '') {
+      actualCardList.push(cardObj);      
+    }
+  });
+  let actualDeck = props.userDeck;
+  console.log('actualDeck', actualDeck)
+  actualCardList.map((cardObj, i, arr) => {
+    let copiesInArray = [...arr].filter(c => c.value === cardObj.value && c.type === cardObj.type).length;
+    let cardName = 'value|' + cardObj.value + ' type|' + cardObj.type;
+    if (![...uniqueCardList].filter(c => c.value === cardObj.value && c.type === cardObj.type).length) {
+      uniqueCardList.push(cardObj);
+    }
+    if (!wonCardCounts[cardName]) {
+      wonCardCounts[cardName] = copiesInArray;
+    }
+    if ([...actualDeck].filter(c => c.id === cardObj.id).length) {
+      // one or more have been selected, remove from count
+      wonCardCounts[cardName] -= [...actualDeck].filter(c => c.id === cardObj.id).length
+    } else {
+      // still unselected; include in altered list
+      alteredCardList.push(cardObj);
+    }
+  });
+
+  console.log('originalSelectionCards',originalSelectionCards)
+  console.log('uniqueCardList',uniqueCardList)
+  console.log('wonCardCounts',wonCardCounts)
+  console.log('actualCardList', actualCardList)
+
+  const cardCounts = wonCardCounts;
   let selectionCardSize = 'mini';
   let selectedCardSize = 'mini';
   let cardsLeft = 10 - props.userDeck.length;
@@ -40,14 +84,29 @@ function DeckSelectionScreen(props) {
       document.getElementById('deck-ready-button').classList.add('disabled-button');
     });
   }
-  let cardSelectionGrid = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
-  props.cardSelection.map((card, i) => {
-    console.log('card', i, 'is', card)
+  
+  let cardSelectionGrid = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+  uniqueCardList.map((card, i) => {
+  // props.cardSelection.map((card, i) => {
+    console.log('card', i, 'is', card.id);    
+    let cardName = 'value|' + card.value + ' type|' + card.type;
+
+    console.log('making with cardName', cardName)
     cardSelectionGrid[i] = (
       <Card
         id={card.id}
         context={'deck-selection-option'}
-        onClickCard={props.onClickCard}
+        ownedCount={cardCounts[cardName]}
+        onClickCard={(event) => {
+          let cardName = 'value|' + card.value + ' type|' + card.type;
+          let copies = cardCounts[cardName];
+          let targetCards = [];
+          if (props.userDeck.length < 10 && copies > 0) {
+            targetCards = actualCardList.filter(cardObj => cardObj.value === card.value && cardObj.type === card.type);
+            let targetCard = targetCards[copies-1];
+            props.onClickSelectionCard(event, targetCard);            
+          }
+        }}
         size={selectionCardSize}
         value={card.value}
         type={card.type}
@@ -64,7 +123,18 @@ function DeckSelectionScreen(props) {
     console.log('inserting')
     console.info(card)
     userSelectedGrid[i] = (
-      <Card id={card.id} context={'deck-selected'} onClickCard={props.onClickCard} size={selectedCardSize} value={card.value} type={card.type} inDeck={true} clickFunction={props.clickFunction} />
+      <Card
+        id={card.id}
+        context={'deck-selected'} 
+        onClickCard={(event) => {          
+          props.onClickSelectedCard(event, card)
+        }} 
+        size={selectedCardSize} 
+        value={card.value} 
+        type={card.type} 
+        inDeck={true} 
+        clickFunction={props.clickFunction}
+      />
     );
   });
   // let cardWidth = getComputedStyle(element).getPropertyValue(`--${selectionCardSize}-card-width)`);
@@ -78,7 +148,7 @@ function DeckSelectionScreen(props) {
   console.info('userSelectedGrid')
   console.info(userSelectedGrid);
   let cardsOverflowing = props.cardSelection.length > 18;
-  console.log('overflowing?', cardsOverflowing)
+  
   return (
     <div id="deck-select-screen">
       <style jsx>
@@ -110,45 +180,13 @@ function DeckSelectionScreen(props) {
             padding: calc(var(--menu-border-radius) * 2);
             padding-top: 0;
           }
-          #more-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: var(--small-font-size);
-            //background-color: #000000aa;
-            color: #999;
-            padding: 0;
-            //opacity: ${(!cardsOverflowing || scrolledToEnd) ? 0 : 0.6};
-            opacity: ${(cardsOverflowing && scrolledToEnd) ? 0 : 0.75};
-            pointer-events: ${(cardsOverflowing && scrolledToEnd) ? 'none' : 'all'};
-            transition: opacity 210ms ease;
-            position: absolute;
-            width: calc((${cardWidth} * 6) + (var(--card-buffer-size) * 5) );
-            height: var(--medium-font-size);
-            transform: translateY(calc(-1 * var(--medium-font-size)));
-            //border-bottom-left-radius: calc(${cardRadius} * 2);
-            //border-bottom-right-radius: calc(${cardRadius} * 2);
-            pointer-events: none;
-          }    
-          #deck-selection-area.overflowing #more-indicator {
-            background-color: var(--dark-red-bg-color);
-            color: white;
-            pointer-events: all;
-          }    
-          #deck-selection-area #more-indicator:after {
-            
-            content: 'defeat opponents to win cards';
-          }
-          #deck-selection-area.overflowing #more-indicator:after {
-            content: '\u2193 more \u2193';
-          }
           #deck-selection-grid {                            
             display: grid;
             grid-template-columns: ${cardWidth} ${cardWidth} ${cardWidth} ${cardWidth} ${cardWidth} ${cardWidth};
-            grid-template-rows: ${cardHeight} ${cardHeight} ${cardHeight} ${cardHeight} ${cardHeight};
+            grid-template-rows: ${cardHeight} ${cardHeight} ${cardHeight};
             grid-column-gap: var(--card-buffer-size);
             grid-row-gap: var(--card-buffer-size);
-            max-height: calc(${cardHeight} * 4);
+            max-height: calc((${cardHeight} * 4) + (var(--card-buffer-size) * 3));
             overflow-y: auto;
             scroll-behavior: smooth;
           }
@@ -207,28 +245,13 @@ function DeckSelectionScreen(props) {
       <div id="cards-area">
         <div id="deck-selection-area" className={cardsOverflowing ? 'overflowing' : undefined}>
           <div id='available-deck-title' className="smaller shadowed-text">AVAILABLE CARDS</div>
-          <div onScroll={(event) => {
-            let toEnd = (event.target.scrollHeight - event.target.scrollTop) === event.target.clientHeight;
-            let atEnd = event.target.scrollTop >= Math.abs(event.target.clientHeight - event.target.scrollHeight) - 1;
-            console.pink('END', toEnd)
-            console.pink('ATEND', atEnd)
-            console.info('is',  (event.target.scrollTop), '>=',(event.target.clientHeight - event.target.scrollHeight))
-            console.log(`selectionGrid.scrollTop, selectionGrid.scrollHeight, clientHeight`, event.target.scrollTop, event.target.scrollHeight, event.target.clientHeight)
-            console.info('scrolling!', event.target.scrollTop, toEnd);
-            if (atEnd && !scrolledToEnd) {
-              setScrolled(true);
-              console.orange('AT END! >>>>>>>>>>')
-            } else if (!atEnd && scrolledToEnd) {
-              setScrolled(false);
-            }
-          }}
-            id="deck-selection-grid">
+          <div id="deck-selection-grid">
             {cardSelectionGrid.map((card, i) => {
               let cardKey = card.props ? card.props.id : i;
               return <div key={'selection-'+cardKey}>{card}</div>;
             })}
           </div>
-          <div onClick={(event) => {
+          {/* <div onClick={(event) => {
             console.log('clickaed bard!', event);
             let selectionGrid = document.getElementById('deck-selection-grid');
             console.info('top, height, clientheuigt', selectionGrid.scrollTop,selectionGrid.scrollHeight,selectionGrid.clientHeight)
@@ -237,7 +260,7 @@ function DeckSelectionScreen(props) {
             // setTimeout(() => {
             //   setScrolled(true);
             // },100);
-          }} id='more-indicator'></div>
+          }} id='more-indicator'></div> */}
         </div>
         <div id="preview-deck-area">
           <div id="preview-deck-title" className="smaller shadowed-text">
@@ -245,8 +268,7 @@ function DeckSelectionScreen(props) {
           </div>
           <div id="preview-deck-grid">
             {userSelectedGrid.map((card, i) => {
-              let cardKey = card.props ? card.props.id : i;
-              console.log('laying userSelectedGrid card', cardKey);
+              let cardKey = card.props ? card.props.id : i;              
               return <div key={'selected-'+cardKey}>{card}</div>;
             })}
           </div>
@@ -260,6 +282,7 @@ DeckSelectionScreen.propTypes = {
   cardSelection: PropTypes.array,
   userDeck: PropTypes.array,
   onClickCard: PropTypes.func,
+  onClickSelectionCard: PropTypes.func,
   onClickBack: PropTypes.func,
   clickFunction: PropTypes.string
 };
