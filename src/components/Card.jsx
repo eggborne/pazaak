@@ -56,10 +56,14 @@ function Card(props) {
           border-radius: ${cardRadius};
           border-width: ${cardBorderSize};
           opacity: ${animated && 0.1};
+          opacity: ${props.ownedCount > 0 || 0};
           transform: ${animated && 'scale(1.25)'};
           transition: ${animated && 'transform 210ms ease, opacity 210ms ease'};
           will-change: ${animated && 'transform, opacity'};
-        }        
+        }
+        .card > * {
+          pointer-events: none;
+        }      
         .inner-band {
           background-color: ${color};
           border-radius: ${bandRadius};
@@ -160,6 +164,7 @@ function areEqual(prevProps, nextProps) {
     prevProps.inDeck === nextProps.inDeck
     && prevProps.value === nextProps.value
     && prevProps.size.height === nextProps.size.height
+    && prevProps.ownedCount === nextProps.ownedCount
   );
   return equalTest;
 }
