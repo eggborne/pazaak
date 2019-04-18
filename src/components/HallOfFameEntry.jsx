@@ -2,12 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import PlayerPortrait from './PlayerPortrait';
 import { getTimeSinceFromSeconds } from '../scripts/util';
-
-
-let characters = require('../scripts/characters');
+import { characters } from '../scripts/characters';
 
 function HallOfFameEntry(props) {
-  console.warn('rendering HallOfFameEntry', props.entry)
+  console.warn('rendering HallOfFameEntry', props.entry);
   let bgColor = '#58717a';
   let isSelf = props.entry.playerName === props.loggedInAs;
   if (isSelf) {
@@ -21,7 +19,7 @@ function HallOfFameEntry(props) {
   if (props.entry.totalSets == 0) {
     setWinPercent = '0';
   }
-  let characterArray = Object.keys(characters.characters);
+  let characterArray = Object.keys(characters);
   let lastLogin = getTimeSinceFromSeconds(parseInt(props.now) - parseInt(props.entry.lastLogin));
   let rowHeight = props.portraitSize / 3;
   let originalDefeatedList = [...props.entry.cpuDefeated];
@@ -30,12 +28,13 @@ function HallOfFameEntry(props) {
   originalDefeatedList.map((opponentName, i, arr) => {
     let isOriginal = arr.indexOf(opponentName) === i;
     if (isOriginal) {
-      entryCpuDefeated.push(opponentName)
+      entryCpuDefeated.push(opponentName);
       entryDefeatCounts[opponentName] = 1;
     } else {
       entryDefeatCounts[opponentName] += 1;
     }    
   });
+  entryCpuDefeated = entryCpuDefeated.sort((a, b) => Object.keys(characters).indexOf(a) - Object.keys(characters).indexOf(b));
   return (
     <div id={`high-score-entry-${props.entry.id}`} className='high-score-entry red-panel'>
       <style jsx>{`
@@ -158,7 +157,7 @@ function HallOfFameEntry(props) {
           {entryCpuDefeated.length > 0 &&
             entryCpuDefeated.map((cpuName, i) => {
               let portraitIndex = characterArray.indexOf(cpuName);
-              return <PlayerPortrait key={i} isSelf={false} size={props.portraitSize / 2} cpu={true} spriteIndex={portraitIndex} countDisplay={entryDefeatCounts[cpuName]} displayName={''} type={'mini'} />;
+              return <PlayerPortrait key={i} isSelf={false} size={props.portraitSize / 2.5} cpu={true} spriteIndex={portraitIndex} countDisplay={entryDefeatCounts[cpuName]} displayName={''} type={'mini'} />;
             })
           }          
         </div>

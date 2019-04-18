@@ -20,14 +20,14 @@ function UserCard(props) {
     defeatedArray = [];
   }
   let wonArray = props.wonCards;
-  console.info(wonArray)
+  console.info(wonArray);
   let originalDefeatedList = [...props.playerObj.cpuDefeated];
   let entryCpuDefeated = [];
   let entryDefeatCounts = {};
   originalDefeatedList.map((opponentName, i, arr) => {
     let isOriginal = arr.indexOf(opponentName) === i;
     if (isOriginal) {
-      entryCpuDefeated.push(opponentName)
+      entryCpuDefeated.push(opponentName);
       entryDefeatCounts[opponentName] = 1;
     } else {
       entryDefeatCounts[opponentName] += 1;
@@ -51,6 +51,7 @@ function UserCard(props) {
       wonCardCounts[cardName] = copiesInArray;
     }
   });
+  entryCpuDefeated = entryCpuDefeated.sort((a, b) => Object.keys(characters).indexOf(a) - Object.keys(characters).indexOf(b));
   console.info('originalWonCardsList',originalWonCardsList, 'uniqueCardList', uniqueCardList, 'wonCardCounts', wonCardCounts, 'actualCardList', actualCardList);
   return (
     <div id='user-info-grid' className='shadowed-text'>
@@ -170,8 +171,8 @@ function UserCard(props) {
         <div id='won-list' >
           {uniqueCardList.length > 0 && uniqueCardList.map((card, i) => {
             // let card = prizeCards[cardIndex];
-            console.info('doing cardindex', i)
-            console.info('doing card', card)
+            console.info('doing cardindex', i);
+            console.info('doing card', card);
             let cardName = `value|${card.value} type|${card.type}`;
             return (
               <div key={i}>
@@ -205,7 +206,7 @@ UserCard.propTypes = {
 
 function areEqual(prevProps, nextProps) {
   let equalTest = prevProps.totalSets == nextProps.totalSets;
-  console.log('prevProps.totalSets == nextProps.totalSets', equalTest)
+  console.log('prevProps.totalSets == nextProps.totalSets', equalTest);
   return equalTest;
 }
 
