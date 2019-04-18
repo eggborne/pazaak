@@ -10,7 +10,7 @@ function checkHandPluses(app, standAt) {
     if (app.state.opponentHand[i].type === '+' || app.state.opponentHand[i].type === plusMinusSymbol) {
       let potentialScore = app.state.opponentTotal + card.value;
       if (!app.state.turnStatus.opponent.playedCard && potentialScore >= standAt && potentialScore <= 20) {
-        console.warn('FOUND a winning card!')
+        console.warn('FOUND a winning card!');
         winnerCard = { id: card.id, value: card.value, type: card.type };
         break;
       } else {
@@ -20,7 +20,7 @@ function checkHandPluses(app, standAt) {
       console.warn(`CPU looked at card ${i} (#card-${card.id} ${card.value} ${card.type}), but it can't help because it's a ${card.type} type!`);
     }
   }
-  console.warn('returning', winnerCard)
+  console.warn('returning', winnerCard);
   return winnerCard;
 }
 
@@ -64,12 +64,12 @@ export function makeOpponentMove(app) {
       } else {
         console.warn('userTotal was <= 20!');
         if (cpuTotal < userTotal) {
-          console.warn('opponentTotal < userTotal.')
+          console.warn('opponentTotal < userTotal.');
           standAt = userTotal + 1;
           if (standAt > 20) {
             standAt = 20;
           }
-          console.warn('standAt changed to', standAt)
+          console.warn('standAt changed to', standAt);
           // search hand for winning card
           let cardToPlay = checkHandPluses(app, standAt);
           if (cardToPlay) {
@@ -119,7 +119,7 @@ export function makeOpponentMove(app) {
     } else {
       console.warn('User is still in play.');
       if (safeToDraw) {
-        console.warn('safeToDraw = true. Ending turn.')
+        console.warn('safeToDraw = true. Ending turn.');
         
 
       } else {
@@ -127,7 +127,7 @@ export function makeOpponentMove(app) {
         console.warn('userTotal is', userTotal);
         
         if (cpuTotal >= standAt) {
-          console.warn('cpuTotal >= standAt. CPU Standing.', cpuTotal, standAt)
+          console.warn('cpuTotal >= standAt. CPU Standing.', cpuTotal, standAt);
           standCPU(app);
           stood = true;
         } else {
