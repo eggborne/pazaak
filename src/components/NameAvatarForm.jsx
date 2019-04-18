@@ -96,7 +96,7 @@ class NameAvatarForm extends React.PureComponent {
     this.props.onClickRegister(loginObj);
   }
 
-  handleClickLogIn = (event) => {
+  handleClickLogIn = (event, thenStart) => {
     event.preventDefault();
     let loginObj = {
       // userID: this.props.
@@ -106,9 +106,8 @@ class NameAvatarForm extends React.PureComponent {
     }
     console.pink('logging in with')
     console.info(loginObj)
-    this.props.onClickLogIn(loginObj);
+    this.props.onClickLogIn(loginObj, thenStart);
   }
-
   render() {
     console.info('NameAvatarForm rendering', this.props);
     let imageSource = this.state.imageSource;
@@ -132,7 +131,7 @@ class NameAvatarForm extends React.PureComponent {
     let registerButtonClass = mode === 'registering' ? 'login-button' : 'login-button hollow';
     let loginButtonClass = mode === 'loggingIn' ? 'login-button' : 'login-button hollow';
     let nameOK = this.state.usernameEntered.length && !this.state.usernameError;
-    let passOK = !this.state.passEntered.length || this.state.passEntered.length >= 6;
+    let passOK = this.state.passEntered.length >= 6;
     let passesOK = !this.state.confirmPassEntered.length || (this.state.passEntered === this.state.confirmPassEntered);
     let passesMatch = passOK && (this.state.passEntered === this.state.confirmPassEntered);
     let sendDisabled = !passOK || !nameOK;
@@ -147,19 +146,35 @@ class NameAvatarForm extends React.PureComponent {
       passClass = passOK && passesMatch ? 'player-input' : 'player-input bad-input';
       repeatPassClass = passOK && passesMatch ? 'player-input' : 'player-input bad-input';
       submitAction = this.handleClickRegister;
-    }
+    }   
     let usernameMessageClass = this.state.usernameError === 'name taken' ? 'input-message name-taken slid-on' :
       this.state.usernameEntered.length ? 'input-message slid-on' : 'input-message';
     let passMessageClass = this.state.passError === 'too short' ? 'input-message too-short slid-on' : 
       this.state.passEntered.length ? 'input-message slid-on' : 'input-message';
       let repeatPassMessageClass = this.state.repeatPassError === 'no match' ? 'input-message no-match slid-on' :
       this.state.passEntered.length ? 'input-message slid-on' : 'input-message';
+    let startLabelText = 'Play as guest';
+    let startLabelClass = 'button-label';
+    if (mode === 'loggingIn') {
+      if (!sendDisabled) {
+        startLabelText = 'Play!'
+        startLabelClass = 'button-label throbbing'
+      }
+    }
+    let playButtonAction = (event) => {
+      if (mode === 'loggingIn' && sendDisabled) {
+        // playing as guest
+        console.warn('playing as Guest');
+        this.props.onClickStart(event);
+      }
+      if (mode === 'loggingIn' && !sendDisabled) {
+        this.handleClickLogIn(event, true);
+        
+      }
+    }
     return (
       <div id="name-avatar-form">
         <style jsx>{`
-          #name-avatar-form {
-
-          }
           .input-area,
           .logged-in-area {
             box-sizing: border-box;
@@ -247,26 +262,18 @@ class NameAvatarForm extends React.PureComponent {
             display: ${!remembered || 'none'};
           }
           #unlogged-panel {
-            //display: flex;
-            //flex-direction: column;
-            //align-items: center;
             display: grid;
             grid-template-columns: 1fr;
             grid-template-rows: 0.55fr 0.3fr;
             min-width: var(--intro-width);
             max-width: var(--intro-width);
             grid-row-gap: 1vh;
-            
-            //border-top-left-radius: 0;
             transition: all 300ms ease;
           }
           #unlogged-panel > * {
             transition: all 300ms ease;
           }
           #unlogged-panel.registering {
-            //position: absolute;
-            //left: calc((100vw - var(--intro-width)) / 2);
-            //top: calc(100vw - var(--intro-width));
             grid-template-rows: 0.55fr 0.15fr 0.15fr;
             justify-content: stretch;
             align-content: stretch;
@@ -278,13 +285,9 @@ class NameAvatarForm extends React.PureComponent {
           }
           #unlogged-button-area > button {
             font-size: var(--small-font-size);
-            //flex-grow: 1;
             padding: 2vh;
             width: 50%;
-          }
-          #avatar-area {
-
-          }
+          }          
           .player-input {
             font-family: var(--main-font);
             font-size: var(--main-text-size);
@@ -299,7 +302,6 @@ class NameAvatarForm extends React.PureComponent {
             display: ${remembered && 'none'};            
             border-radius: var(--menu-border-width);
             outline-color: green;
-            //width: 100%;        
           }
           .player-input.bad-input {
             outline-color: red;
@@ -367,7 +369,7 @@ class NameAvatarForm extends React.PureComponent {
           }
           #logged-in-display {
             font-family: var(--main-font);
-            font-size: 0.75em;
+            font-size: var(--small-font-size);
             box-sizing: border-box;
             margin: 1rem;
             margin-top: 0;
@@ -379,7 +381,7 @@ class NameAvatarForm extends React.PureComponent {
           }
           #remember-check-area {
             padding: 0;
-            font-size: calc(var(--small-font-size) / 1.1);
+            font-size: calc(var(--main-text-size) / 1.25);
             display: flex;
             align-items: center;
           }
@@ -438,7 +440,7 @@ class NameAvatarForm extends React.PureComponent {
             animation: fade 3000ms forwards ease;
           }
           #start-button {
-            font-size: ${remembered ? '6vh' : '3vh'};
+            font-size: ${(remembered || (mode === 'loggingIn' && !sendDisabled)) ? '6vh' : '3vh'};
             width: 100%;
             height: 14vh;
             min-height: 12vh;
@@ -448,12 +450,14 @@ class NameAvatarForm extends React.PureComponent {
             display: ${(!remembered && mode === 'registering') && 'none'};
           }
           #start-button-label {
-            animation: throb 1200ms infinite;
+            //animation: throb 1200ms infinite;
             animation-delay: 200ms;
             z-index: 0;
+            opacity: 0.5;
           }
-          .throbbing {
-            animation: throb 1000ms infinite;
+          #start-button-label.throbbing {
+            opacity: 1;
+            animation: throb 1200ms infinite;
           }
           .user-avatar-area {
             min-width: 0;
@@ -506,7 +510,7 @@ class NameAvatarForm extends React.PureComponent {
               </div>
               <input autoComplete='on' type='text' name="player-name" id="player-name-input" maxLength="24" placeholder="Guest" defaultValue={this.props.loggedInAs} />                              
               <button {...{ [this.props.clickFunction]: this.props.onClickStart }} className="intro-button" id="start-button">
-                <div id="start-button-label" className="button-label">
+                <div id="start-button-label" className="button-label throbbing">
                 Play!
                 </div>
               </button>
@@ -523,7 +527,7 @@ class NameAvatarForm extends React.PureComponent {
                   <input autoComplete='on' type='password' onChange={this.handleInputChange} name="player-pass" id="player-pass-input" className={passClass} maxLength="24" placeholder="Password" />
                   {mode === 'registering' &&
                     <>
-                    <input autoComplete='on' type='password' onChange={this.handleInputChange} name="player-repeat-pass" id="player-repeat-pass-input" className={repeatPassClass} maxLength="24" placeholder="Repeat Password" />
+                    <input type='password' onChange={this.handleInputChange} name="player-repeat-pass" id="player-repeat-pass-input" className={repeatPassClass} maxLength="24" placeholder="Repeat Password" />
                     <div id='repeat-pass-input-message' className={repeatPassMessageClass}></div>
                     </>
                   }
@@ -588,9 +592,9 @@ class NameAvatarForm extends React.PureComponent {
                   </div>
                 }
               </div>
-              <button type='button' className="intro-button" id="start-button">
-                <div id="start-button-label" className="button-label">
-                  Play as guest
+              <button {...{ [this.props.clickFunction]: playButtonAction }} type='button' className="intro-button" id="start-button">
+                <div id="start-button-label" className={startLabelClass}>
+                  {startLabelText}
                 </div>
               </button>
             </form>
