@@ -3,12 +3,13 @@ import NameGenerator from './namegenerator.js';
 
 const nameGenerator = new NameGenerator();
 
-export const getStarWarsName = (rules) => {
+export const getStarWarsName = (rules, style) => {
+  console.log('util got', style)
   console.log(nameGenerator.namePatterns)
-  let newName = nameGenerator.getName(rules, 'random');
+  let newName = nameGenerator.getName(rules, style);
   if (newName.invalid || newName.banned) {
-    console.error('got invalid!', newName.fullName)
-    return getStarWarsName(rules);
+    console.error('got invalid!', newName.fullName);
+    return getStarWarsName(rules, style);
   }
   return newName.fullName;
 }

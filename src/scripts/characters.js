@@ -675,42 +675,42 @@ export const characters = {
       panel: '"All matches begin with Nu and end with Nu."'
     }
   },
-  random: {
+  'random|yoda': {
     name: 'random',
     displayName: 'random',
     strategy: defaultStrategy
   },
-  random2: {
+  'random|poe': {
     name: 'random2',
     displayName: 'random2',
     strategy: defaultStrategy
   },
-  random3: {
+  'random|han': {
     name: 'random3',
     displayName: 'random3',
     strategy: defaultStrategy
   },
-  random4: {
+  'random|mace': {
     name: 'random4',
     displayName: 'random4',
     strategy: defaultStrategy
   },
-  random5: {
+  'random|jar-jar': {
     name: 'random5',
     displayName: 'random5',
     strategy: defaultStrategy
   },
-  random6: {
+  'random|obi-wan': {
     name: 'random6',
     displayName: 'random6',
     strategy: defaultStrategy
   },
-  random7: {
+  'random|jabba': {
     name: 'random7',
     displayName: 'random7',
     strategy: defaultStrategy
   },
-  random8: {
+  'random|kylo': {
     name: 'random8',
     displayName: 'random8',
     strategy: defaultStrategy

@@ -400,7 +400,7 @@ export default class NameGenerator {
           mode = this.basicStyles[randomInt(0, this.basicStyles.length - 1)];
         }
       }
-      // // console.error('mode', mode)
+      console.error('mode', mode)
       let newName = this.produceName(this.namePatterns[mode]);
       nameData = newName;
       firstName = newName.wordUnits.firstName.join('');

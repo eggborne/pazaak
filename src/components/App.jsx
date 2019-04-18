@@ -22,6 +22,8 @@ import * as AI from '../scripts/ai';
 import * as Util from '../scripts/util';
 import { characters, prizeCards } from '../scripts/characters';
 
+const nameStyles = ['han', 'mace', 'kylo', 'poe', 'obi-wan', 'jar-jar', 'jabba', 'yoda'];
+
 let clickFunction = window.PointerEvent ? 'onPointerDown' : window.TouchEvent ? 'onTouchStart' : 'onClick';
 
 console.error('USING CLICK -------', clickFunction, ' ------------------------');
@@ -442,8 +444,8 @@ class App extends React.Component {
     if (!Util.randomInt(0, 8)) {
       upperLimit = Object.keys(characters).length - 1;
     }
-    let characterArray = Object.keys(characters).slice(16, upperLimit);
-    let rando = characterArray[Util.randomInt(0, characterArray.length - 1)];
+    let randomCharacterArray = Object.keys(characters).slice(16, upperLimit);
+    let rando = randomCharacterArray[Util.randomInt(0, randomCharacterArray.length - 1)];
     return rando;
   }
   handleFullscreenChange = () => {
@@ -530,8 +532,12 @@ class App extends React.Component {
       let randomDeck = this.createRandomDeck();
       let randomOpponent = this.getRandomOpponent();
       let namesCopy = { ...this.state.playerNames };
-      if (randomOpponent.slice(0,6) === 'random') {
-        let randomName = Util.getStarWarsName(this.state.nameRules, 'random');
+      if (randomOpponent.slice(0, 6) === 'random') {
+        let randomStyle = randomOpponent.split('|')[1];
+        console.log('got randomOpponent', randomOpponent)
+        console.log('got randomStyle', randomStyle)
+        // let randomStyle = nameStyles[Util.randomInt(0, nameStyles.length - 1)];        
+        let randomName = Util.getStarWarsName(this.state.nameRules, randomStyle);
         characters[randomOpponent].name = randomOpponent;
         characters[randomOpponent].displayName = randomName;
       }
