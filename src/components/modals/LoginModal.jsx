@@ -23,7 +23,7 @@ function LoginModal(props) {
           }
           #login-modal {
             box-sizing: border-box;
-            width: 70vw;
+            width: var(--intro-width);
             min-height: 50vh;
             min-width: 300px;
             font-size: var(--main-font-size);

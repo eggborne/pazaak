@@ -26,7 +26,7 @@ function ResultModal(props) {
           font-family: var(--title-font);
           box-sizing: border-box;
           position: absolute;
-          width: 75vmin;
+          width: var(--intro-width);
           margin-left: 12.5vmin;
           color: var(--main-text-color);
           border-radius: var(--menu-border-radius);
