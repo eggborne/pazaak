@@ -13,7 +13,7 @@ function ControlFooter(props) {
         if (document.getElementById('footer-contents')) {
           document.getElementById('footer-contents').classList.add('showing');
         }
-      },500)
+      },500);
       
     } else {
       if (document.getElementById('control-footer').classList.contains('retracted')) {

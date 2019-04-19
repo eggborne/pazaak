@@ -48,7 +48,7 @@ export const prizeCards = [
   { id: 60, value: 0, type: '' },
   { id: 59, value: 0, type: '' },
   { id: 58, value: 0, type: '' }
-]
+];
 
 export const characters = {
   jarjarbinks: {

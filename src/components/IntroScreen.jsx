@@ -20,7 +20,7 @@ function IntroScreen(props) {
   }
   // let registering = document.getElementById('unlogged-panel') && document.getElementById('unlogged-panel').classList.contains('registering');
   let registering = props.mode === 'registering';
-  console.pink('registering?', registering)
+  console.pink('registering?', registering);
   return (
     <div id="intro-screen">
       <style jsx>{`
@@ -114,8 +114,8 @@ function IntroScreen(props) {
             // mode={props.mode}
             checkUsername={props.checkUsername}
             userStatus={props.userStatus}
-          userAvatarIndex={props.userStatus.avatarIndex}
-          loggedInAs={props.loggedInAs}
+            userAvatarIndex={props.userStatus.avatarIndex}
+            loggedInAs={props.loggedInAs}
             onClickAvatar={props.onClickAvatar}
             onClickStart={props.onClickStart}
             onClickLogOut={props.onClickLogOut}
@@ -172,7 +172,7 @@ function areEqual(prevProps, nextProps) {
     prevProps.mode == nextProps.mode &&
     prevProps.loggedInAs == nextProps.loggedInAs;
   
-  console.orange('introscreen equal?', equalTest)
+  console.orange('introscreen equal?', equalTest);
   return equalTest;
 }
 
