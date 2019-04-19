@@ -192,13 +192,14 @@ function DeckSelectionScreen(props) {
           }
           #deck-select-title {
             font-family: var(--title-font);height: calc(var(--header-height) / 1.5);
-            font-size: calc(var(--header-height) / 2);
+            font-size: var(--med-large-font-size);
             box-sizing: border-box;
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100vw;
             height: calc(var(--header-height) / 1.25);
+            padding-top: 2vh;
           }
           #preview-deck-area {
             display: flex;
@@ -233,6 +234,7 @@ function DeckSelectionScreen(props) {
           }
           #choose-text {
             font-family: var(--main-font);
+            padding-top: 2vh;
           }
         `}
       </style>
