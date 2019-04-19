@@ -97,9 +97,9 @@ function PlayerPortrait(props) {
         }
         .opponent-defeat-count {
           position: absolute;
-          width: var(--small-font-size);
-          height: var(--small-font-size);
-          font-size: var(--small-font-size);
+          width: ${props.size / 3}px;
+          //height: ${props.size / 5};
+          font-size: ${props.size / 3}px;
           background: #00000099;
           color: white;
           display: flex;
@@ -107,7 +107,7 @@ function PlayerPortrait(props) {
           justify-content: center;
           right: 0;
           bottom: 0;
-          padding: calc(var(--small-font-size) / 6);
+          padding: calc(var(--small-font-size) / 8);
           border-top-left-radius: calc(var(--small-font-size) / 3);
         }
         video {
