@@ -3,7 +3,7 @@
   --max-width: 100vh;
   --main-opacity: 0;
   --header-height: 7vh;
-  --header-height: 11vw;
+  --header-height: 12vw;
   --intro-width: 76vw;
   --top-margin: var(--header-height);
   --inner-height: calc(100% - (var(--top-margin) + var(--control-footer-height)));
@@ -349,6 +349,7 @@ button {
   cursor: pointer;
   border: solid var(--button-border-color);
   border-width: var(--button-border-width);
+  transition: background-color 210ms ease;
 }
 .pressed-button {
   color: red !important;
