@@ -20,7 +20,7 @@ function OpponentPanel(props) {
   let quoteLength = props.character.quotes.panel.length;
   let quoteTextSize = 'calc(var(--medium-font-size) / 1.25)';
   if (props.available) {
-    if (quoteLength > 50) {
+    if (quoteLength > 30) {
       quoteTextSize = 'var(--small-font-size)';
     }
     if (quoteLength > 70) {
@@ -57,7 +57,7 @@ function OpponentPanel(props) {
             will-change: transform;
             width: 90%;
             display: ${props.selected || 'none'};
-            transition: transform 210ms linear, opacity 210ms ease;
+            transition: transform 110ms linear, opacity 210ms ease;
             will-change: transform, opacity;
           }
           .left-opponent-panel {
