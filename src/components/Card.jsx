@@ -147,7 +147,7 @@ function Card(props) {
 Card.propTypes = {
   id: PropTypes.number,
   context: PropTypes.string,
-  ownedCount: PropTypes.string,
+  ownedCount: PropTypes.number,
   size: PropTypes.string,
   value: PropTypes.oneOfType([
     PropTypes.string,
