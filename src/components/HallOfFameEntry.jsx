@@ -123,7 +123,6 @@ function HallOfFameEntry(props) {
           padding-top: ${props.entry.cpuDefeated.length > 0 && 'var(--menu-border-width)'};
           padding-bottom: ${props.entry.cpuDefeated.length > 0 && 'var(--menu-border-width)'};
           grid-column-end: span 3;
-          justify-content: flex-start !important;
           display: inline-flex;
           flex-wrap: wrap;
         }
@@ -157,7 +156,7 @@ function HallOfFameEntry(props) {
           {entryCpuDefeated.length > 0 &&
             entryCpuDefeated.map((cpuName, i) => {
               let portraitIndex = characterArray.indexOf(cpuName);
-              return <PlayerPortrait key={i} isSelf={false} size={props.portraitSize / 2.5} cpu={true} spriteIndex={portraitIndex} countDisplay={entryDefeatCounts[cpuName]} displayName={''} type={'mini'} />;
+              return <PlayerPortrait key={i} isSelf={false} size={props.portraitSize / 2.95} cpu={true} spriteIndex={portraitIndex} countDisplay={entryDefeatCounts[cpuName]} displayName={''} type={'mini'} />;
             })
           }          
         </div>
