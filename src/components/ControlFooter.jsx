@@ -9,9 +9,18 @@ function ControlFooter(props) {
   setTimeout(() => {
     if (props.readyToShow && props.phase === 'splashScreen') {
       document.getElementById('control-footer').classList.add('retracted');
+      setTimeout(() => {
+        if (document.getElementById('footer-contents')) {
+          document.getElementById('footer-contents').classList.add('showing');
+        }
+      },500)
+      
     } else {
       if (document.getElementById('control-footer').classList.contains('retracted')) {
-        document.getElementById('control-footer').classList.remove('retracted');
+        document.getElementById('control-footer').classList.remove('retracted');        
+        if (document.getElementById('footer-contents')) {
+          document.getElementById('footer-contents').classList.remove('showing');
+        }
       }
     }
   }, 1);
@@ -52,7 +61,7 @@ function ControlFooter(props) {
         .move-button {
           //width: 40%;
           font-size: calc(var(--micro-card-width) / 2);
-         
+          transition: background-color 210ms ease;
         }
         #end-turn-button {
           border-top-right-radius: ${props.currentOptions.panelSize == 0 && '0'};
@@ -120,9 +129,22 @@ function ControlFooter(props) {
           display: inline-flex;
           align-items: flex-start;
           padding-top: var(--menu-border-radius);
-          justify-content: space-around;
+          justify-content: center;
+          padding-left: calc(var(--menu-border-radius) * 2);
+          padding-right: calc(var(--menu-border-radius) * 2);
           width: 100%;
           font-size: calc(var(--menu-border-width) * 2.25);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 300ms ease;
+        }
+        #footer-contents.showing {
+          opacity: 1;
+          pointer-events: all;
+        }
+        #credit, #credit a {
+          text-shadow: none;
+          color: #ffffff77;
         }
         #get-ready-message {
           font-family: var(--title-font);
@@ -155,8 +177,10 @@ function ControlFooter(props) {
       }
       {(props.phase === 'splashScreen') &&
       <div id='footer-contents' className='shadowed-text'>
-        <div><a href='https://github.com/eggborne/pazaak'>GitHub</a></div>
-        <div><a href='mailto:mike@eggborne.com'>Contact</a></div>
+        {/* <div><a href='https://github.com/eggborne/pazaak'>GitHub</a></div> */}
+        <div id='credit'>by <a href='https://mikedonovan.dev'>mikedonovan.dev</a></div>
+
+        {/* <div><a href='mailto:mike@eggborne.com'>Contact</a></div> */}
       </div>
       }
       {(props.phase === 'selectingMode') &&
