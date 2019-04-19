@@ -264,8 +264,7 @@ class App extends React.Component {
     //document.getElementById('debug-touch-display').innerHTML += '<p>' + error + '</p>';
   };
 
-  componentDidMount() {
-    
+  componentDidMount() {    
     // document.getElementById('container').style.height = window.innerHeight + 'px';
     document.getElementById('container').style.minHeight = window.innerHeight + 'px';
     // if (this.state.options.ambience) {
@@ -317,8 +316,7 @@ class App extends React.Component {
       document.addEventListener('DOMContentLoaded', () => {           
         console.big('DOM LOADED');        
         this.sizeCards();
-        this.delayEvents.domLoaded = true;
-        
+        this.delayEvents.domLoaded = true;        
 
         // setTimeout(() => {
         //   document.getElementById('starfield').style.opacity = 1;
@@ -338,7 +336,9 @@ class App extends React.Component {
       window.addEventListener('load', () => {
         console.big('PAGE LOADED');
         this.delayEvents.pageLoaded = true;
-        
+        if (window.innerWidth > window.innerHeight) {
+          alert('Visit on a mobile device in portrait mode for best results')
+        }
       });
     } else {
       // `DOMContentLoaded` has already fired
@@ -1237,6 +1237,9 @@ class App extends React.Component {
     this.callMoveIndicator('user', buttonText, this.state.options.moveIndicatorTime);
     if (buttonText === 'End Turn') {
       if (!this.state.turnStatus.opponent.standing) {
+        Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
+          el.classList.add('disabled-button');
+        });
         setTimeout(() => {
           this.changeTurn('opponent');
         }, this.state.options.moveIndicatorTime);
@@ -1275,6 +1278,9 @@ class App extends React.Component {
     let turnStatusCopy = Object.assign({}, this.state.turnStatus);
     if (buttonText === 'Stand') {
       turnStatusCopy.user.standing = true;
+      Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
+        el.classList.add('disabled-button');
+      });
       setTimeout(() => {
         this.changeTurn('opponent');
       }, this.state.options.moveIndicatorTime);
@@ -1610,15 +1616,17 @@ class App extends React.Component {
     if (this.state.turn === 'user') {
       newTurn = 'opponent';
       setTimeout(() => {
-        Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
-          el.classList.add('disabled-button');
-        });
+        // Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
+        //   el.classList.add('disabled-button');
+        // });
       }, this.state.options.flashInterval);
     } else {
       newTurn = 'user';
-      Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
-        el.classList.remove('disabled-button');
-      });
+      setTimeout(() => {
+        Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
+          el.classList.remove('disabled-button');
+        });
+      }, this.state.options.dealWaitTime * 2);
     }
     this.setState({
       turn: newTurn
@@ -2380,6 +2388,15 @@ class App extends React.Component {
     });
   }
 
+  handleClickSwitchVersusMode = (event, newMode) => {
+    console.log('switcing to', newMode)
+    let vsCPU = newMode === 'vsCPU' ? true : false;
+    console.log('setting vs to', vsCPU)
+    this.setState({
+      vsCPU: vsCPU
+    })
+  }
+
   render() {
     let phase = this.state.phase;
     let onIntroPhase = phase === 'showingOptions' || phase === 'showingInstructions' || phase === 'showingHallOfFame';
@@ -2482,9 +2499,11 @@ class App extends React.Component {
           {pageLoaded && this.state.checkedCookie && phase === 'selectingMode' && (
             <ModeSelectScreen
               phase={phase}
+              vsCPU={this.state.vsCPU}
               cpuDefeated={this.state.userStatus.cpuDefeated.filter((opponentName, i, arr) => arr.indexOf(opponentName) === i).length}
               cardsWon={this.state.userStatus.wonCards.length}
               modeSelected={this.state.gameMode}
+              onClickSwitchVersusMode={this.handleClickSwitchVersusMode}
               onClickCampaign={this.handleClickCampaign}
               onClickQuickMatch={this.handleClickQuickMatch}
               onClickBack={event => {
