@@ -64,6 +64,7 @@ function Header(props) {
           line-height: 100%;
           align-self: flex-start;
           margin-top: calc(var(--header-height) / 6);
+          margin-left: var(--menu-border-width);
         }
         #user-account-icon {
           box-sizing: border-box;
