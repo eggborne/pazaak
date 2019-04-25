@@ -126,13 +126,12 @@ function ControlFooter(props) {
         #footer-contents {
           font-family: var(--secondary-font);          
           color: var(--main-text-color);
-          display: inline-flex;
-          align-items: flex-start;
-          padding-top: var(--menu-border-radius);
+          display: flex;
+          align-items: center;
           justify-content: center;
-          padding-left: calc(var(--menu-border-radius) * 2);
-          padding-right: calc(var(--menu-border-radius) * 2);
+          padding: 0;
           width: 100%;
+          height: calc(var(--control-footer-height) - var(--footer-retracted-amount) - (var(--menu-border-width) * 3));
           font-size: calc(var(--menu-border-width) * 2.25);
           opacity: 0;
           pointer-events: none;
@@ -143,7 +142,6 @@ function ControlFooter(props) {
           pointer-events: all;
         }
         #credit, #credit a {
-          text-shadow: none;
           color: #ffffff77;
         }
         #get-ready-message {
@@ -176,35 +174,33 @@ function ControlFooter(props) {
       </div>
       }
       {(props.phase === 'splashScreen') &&
-      <div id='footer-contents' className='shadowed-text'>
-        {/* <div><a href='https://github.com/eggborne/pazaak'>GitHub</a></div> */}
+      <div id='footer-contents'>
         <div id='credit'>by <a href='https://mikedonovan.dev'>mikedonovan.dev</a></div>
-
-        {/* <div><a href='mailto:mike@eggborne.com'>Contact</a></div> */}
       </div>
       }
       {(props.phase === 'selectingMode') &&
       <div className='back-footer'>
         <button {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'splashScreen') }} className='footer-back-button shadowed-text'>{'<'}</button>
-        <button {...{ [props.clickFunction]: props.onClickSelectMode }} className='footer-button'>OK</button>
+        <button {...{ [props.clickFunction]: props.onClickSelectMode }} className={props.vsCPU ? 'footer-button' : 'footer-button disabled-button'}>OK</button>
         <div></div>
       </div>
       }
+        {(props.phase === 'selectingDeck') &&
+        <div className='back-footer'>
+          <button {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'selectingMode') }} id='deck-select-back-button' className='footer-back-button shadowed-text'>{'<'}</button>
+          <button {...{ [props.clickFunction]: props.onClickOpponentReady }} className='footer-button disabled-button' id='deck-ready-button'>OK</button>
+          <button {...{ [props.clickFunction]: props.onClickRandomize }} className='shadowed-text' id='randomize-button'>Random</button><div></div>
+        </div>
+        }
       {(props.phase === 'selectingOpponent') &&
       <div className='back-footer'>
-        <button {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'selectingMode') }} className='footer-back-button shadowed-text'>{'<'}</button>
-        <button id='opponent-ready-button' {...{ [props.clickFunction]: props.onClickOpponentReady }} className='footer-button'>OK</button>
+        <button {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'selectingDeck') }} className='footer-back-button shadowed-text'>{'<'}</button>
+        <button id='opponent-ready-button' {...{ [props.clickFunction]: props.onClickPlay }} className='footer-button'>Start!</button>
+        {/* <button id='opponent-ready-button' {...{ [props.clickFunction]: props.onClickOpponentReady }} className='footer-button'>Start!</button> */}
         <div></div>
       </div>
       }
 
-      {(props.phase === 'selectingDeck') &&
-      <div className='back-footer'>
-        <button {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'selectingOpponent') }} id='deck-select-back-button' className='footer-back-button shadowed-text'>{'<'}</button>
-        <button {...{ [props.clickFunction]: props.onClickPlay }} className='footer-button disabled-button' id='deck-ready-button'>Start!</button>
-        <button {...{ [props.clickFunction]: props.onClickRandomize }} className='shadowed-text' id='randomize-button'>Random</button><div></div>
-      </div>
-      }
       {props.phase === 'versusScreen' &&
         <div id='get-ready-message' className='shadowed-text'>Get Ready...</div>
       }
@@ -230,6 +226,7 @@ function ControlFooter(props) {
 
 ControlFooter.propTypes = {
   phase: PropTypes.string,
+  vsCPU: PropTypes.bool,
   readyToShow: PropTypes.bool,
   cardSize: PropTypes.object,
   currentOptions: PropTypes.object,
@@ -250,6 +247,9 @@ ControlFooter.propTypes = {
 
 // export default ControlFooter;
 function areEqual(prevProps, nextProps) {
-  return prevProps.phase == nextProps.phase && prevProps.readyToShow == nextProps.readyToShow && prevProps.currentOptions.panelSize == nextProps.currentOptions.panelSize;
+  return prevProps.phase == nextProps.phase
+    && prevProps.readyToShow == nextProps.readyToShow
+    && prevProps.currentOptions.panelSize == nextProps.currentOptions.panelSize
+    && prevProps.vsCPU == nextProps.vsCPU;
 }
 export default React.memo(ControlFooter, areEqual);
