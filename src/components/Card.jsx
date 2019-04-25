@@ -55,8 +55,8 @@ function Card(props) {
           height: ${cardHeight};
           border-radius: ${cardRadius};
           border-width: ${cardBorderSize};
-          opacity: ${animated && 0.1};
-          opacity: ${props.ownedCount > 0 || 0};
+          opacity: ${animated ? 0.1 : 1};
+          opacity: ${(props.context === 'deck-selection-option' && props.ownedCount === 0) && 0.1};
           transform: ${animated && 'scale(1.25)'};
           transition: ${animated && 'transform 210ms ease, opacity 210ms ease'};
           will-change: ${animated && 'transform, opacity'};
@@ -118,7 +118,7 @@ function Card(props) {
           font-size: var(--small-font-size);
           background: #00000099;
           color: white;
-        display: ${props.ownedCount > 1 ? 'flex' : 'none'};
+          display: ${props.ownedCount > 1 ? 'flex' : 'none'};
           align-content: center;
           justify-content: center;
           right: 0;
@@ -159,14 +159,14 @@ Card.propTypes = {
   clickFunction: PropTypes.string
 };
 
-function areEqual(prevProps, nextProps) {
-  let equalTest = (
-    prevProps.inDeck === nextProps.inDeck
-    && prevProps.value === nextProps.value
-    && prevProps.size.height === nextProps.size.height
-    && prevProps.ownedCount === nextProps.ownedCount
-  );
-  return equalTest;
-}
+// function areEqual(prevProps, nextProps) {
+//   let equalTest = (
+//     prevProps.inDeck === nextProps.inDeck
+//     && prevProps.value === nextProps.value
+//     && prevProps.size.height === nextProps.size.height
+//     && prevProps.ownedCount === nextProps.ownedCount
+//   );
+//   return equalTest;
+// }
 // export default React.memo(Card, areEqual);
 export default Card;
