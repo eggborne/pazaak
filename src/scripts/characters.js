@@ -331,7 +331,7 @@ export const characters = {
     placeOfOrigin: 'Earth',
     skillLevel: 9,
     prize: {
-      credits: 5000,
+      credits: 4000,
       cards: [11,12]
     },
     strategy: {
@@ -409,7 +409,7 @@ export const characters = {
     placeOfOrigin: 'Unknown',
     skillLevel: 10,
     prize: {
-      credits: 15000,
+      credits: 25000,
       cards: [15,16]
     },
     strategy: {
