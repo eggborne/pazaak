@@ -60,6 +60,7 @@ class App extends React.Component {
       gameMode: 'campaign',
       vsCPU: true,
       cpuOpponent: 'jarjarbinks',
+      lastCPUOpponent: 'jarjarbinks',
       lastWinner: null,
       lastFirstTurn: 'user',
       playerNames: {
@@ -130,6 +131,7 @@ class App extends React.Component {
       userWins: 0,
       opponentWins: 0,
       turn: 'user',
+      currentWager: 12,
       userStatus: {
         phase: 'splashScreen',
         playerName: undefined,
@@ -449,7 +451,6 @@ class App extends React.Component {
     return rando;
   }
   handleFullscreenChange = () => {
-    console.log('calling handleFullscreenChange with fullScreenAttempts', fullScreenAttempts);
     if (fullScreenAttempts === 2) {
       document.getElementById('header').style.backgroundColor = 'yellow';
     }
@@ -458,19 +459,24 @@ class App extends React.Component {
     }
     this.checkIfViewHeightChangedInMs(250).then(changed => {
       let currentHeight = window.innerHeight;
-      console.log(`##################### ------------------ CHANGED from ${this.state.lastHeight} to ${currentHeight}`);
-      console.log('after initial checkIfViewHeightChangedInMs promise, changed is: --> ' + changed);
       let full = Util.isFullScreen() ? true : false;
       let newOptions = { ...this.state.options };
-      console.log(`############ now full? ${full}`);
       newOptions.fullScreen = full
+      
       if (changed) {
+        // add or remove bottom-border and top margin
+        if (full) {
+          this.setHeaderVisible(true);
+          this.setHeaderVisible(false);
+        } else {
+          ROOT.style.setProperty('--top-margin', 'var(--menu-border-width');
+          setTimeout(() => {
+            document.getElementById('header').classList.add('intact');
+          });
+        }
         this.setState({
           options: newOptions
-        }, () => {
-            this.forceUpdate();
-          // setTimeout(this.sizeCards, 500)
-        });
+        }, () => this.forceUpdate());
       }
     });
   };
@@ -523,32 +529,49 @@ class App extends React.Component {
     }
   };
 
+  handleClickWagerMore = () => {
+    this.callConfirmModal('ENTER WAGER', 'numberInput', { confirm: 'OK', cancel: 'NEVER MIND' }, () => {
+      let wager = parseInt(document.getElementById('wager-input').value);
+      console.log('wager', wager);
+      this.setState({
+        currentWager: wager
+      }, () => {
+        this.dismissConfirmModal();     
+      });
+    })
+  }
+
   handleClickSelectMode = () => {
     if (this.state.gameMode === 'campaign') {
+      console.green('changiong to selectingDeck')
       this.setState({
-        phase: 'selectingOpponent'
-      })
-    } else {
+        // phase: 'selectingOpponent'
+        phase: 'selectingDeck'
+      });
+    } else {          
+      this.callConfirmModal('ENTER WAGER', 'numberInput', { confirm: 'OK', cancel: 'NEVER MIND' }, () => {          
       let randomDeck = this.createRandomDeck();
       let randomOpponent = this.getRandomOpponent();
       let namesCopy = { ...this.state.playerNames };
       if (randomOpponent.slice(0, 6) === 'random') {
         let randomStyle = randomOpponent.split('|')[1];
-        console.log('got randomOpponent', randomOpponent)
-        console.log('got randomStyle', randomStyle)
-        // let randomStyle = nameStyles[Util.randomInt(0, nameStyles.length - 1)];        
         let randomName = Util.getStarWarsName(this.state.nameRules, randomStyle);
         characters[randomOpponent].name = randomOpponent;
         characters[randomOpponent].displayName = randomName;
       }
       namesCopy.opponent = characters[randomOpponent].displayName;
+      let wager = parseInt(document.getElementById('wager-input').value);
+      console.log('wager', wager);
       this.setState({
+        currentWager: wager,
         userDeck: randomDeck,
         cpuOpponent: randomOpponent,
         playerNames: namesCopy
       }, () => {
-        this.initiateGame();          
-      })
+        this.dismissConfirmModal();
+        this.initiateGame();              
+      });
+    })
     }  
   };  
   getPlayerRecords() {
@@ -1163,7 +1186,7 @@ class App extends React.Component {
   handleClickOpponentReady = (event) => {
     event.preventDefault();
     this.setState({
-      phase: 'selectingDeck',
+      phase: 'selectingOpponent',
     });
   };
   initiateGame = () => {
@@ -1184,10 +1207,10 @@ class App extends React.Component {
         }, () => {
             setTimeout(() => {
               this.dealToPlayerGrid('user');
-            }, 600);
+            }, 800);
           this.sizeCards();
         });
-      }, 2800);
+      }, 2300);
     });
   }
   handleClickPlay = event => {
@@ -1534,13 +1557,16 @@ class App extends React.Component {
         if (winner === 'user') {
           // USER won
           DB.incrementSetWins(playerName);
+          // if (newWins === 3) {
           if (newWins === 1) {
+            let creditPrize = parseInt(this.state.currentWager);
             if (this.state.gameMode === 'campaign') {
+              creditPrize = characters[this.state.cpuOpponent].prize.credits;
               let newCards = [];
               let characterArray = Object.keys(characters);
               newUserStatus.cpuDefeated.push(this.state.cpuOpponent);
               newUserStatus.cpuDefeated = newUserStatus.cpuDefeated.sort(opponentName => characterArray.indexOf(opponentName));
-              newUserStatus.credits += characters[this.state.cpuOpponent].prize.credits;
+              // let creditPrize = characters[this.state.cpuOpponent].prize.credits;
               characters[this.state.cpuOpponent].prize.cards.map((cardIndex) => {
                 // don't add prize cards if already won
                 // newUserStatus.wonCards.push(cardIndex);
@@ -1554,14 +1580,12 @@ class App extends React.Component {
                 console.pink('USER WON NEW CARDS!');                              
                 newCards.map(index => {
                   newUserStatus.wonCards.push(index)
-                  newCardSelection.push(prizeCards[index]);
+                  newCardSelection.push(prizeCards[index]);                  
                 });
-                // let indexArr = newUserStatus.wonCards.toString().split(',');
-                // indexArr.map(index => {
-                //   newCardSelection.push(prizeCards[index]);
-                // });
               }
             }
+            console.big('USER WON ' + creditPrize)
+            newUserStatus.credits += creditPrize;
             console.info('sending', newUserStatus.wonCards)
             DB.incrementMatchWins(1, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, JSON.stringify(newUserStatus.wonCards));
             DB.incrementMatches(playerName);
@@ -1584,7 +1608,8 @@ class App extends React.Component {
           [`${winner}Wins`]: newWins,
           lastWinner: winner,
           userStatus: newUserStatus,
-          cardSelection: newCardSelection
+          cardSelection: newCardSelection,
+          currentWager: 0
         },
         () => {
           this.callResultModal(winner);
@@ -1602,7 +1627,8 @@ class App extends React.Component {
         {
           turn: null,
           lastWinner: null,
-          userStatus: newUserStatus
+          userStatus: newUserStatus,
+          currentWager: 0
         },
         () => {
           this.callResultModal('tie');
@@ -2134,15 +2160,21 @@ class App extends React.Component {
   };
 
   handleClickCampaign = () => {
-    this.setState({
-      gameMode: 'campaign'
-    });
+    if (this.state.gameMode !== 'campaign') {
+      this.setState({
+        gameMode: 'campaign',
+        cpuOpponent: this.state.lastCPUOpponent
+      });
+    }
   };
 
   handleClickQuickMatch = () => {
-    this.setState({
-      gameMode: 'quick'
-    });
+    if (this.state.gameMode !== 'quick') {
+      this.setState({
+        gameMode: 'quick',
+        lastCPUOpponent: this.state.cpuOpponent
+      });
+    }
   };
 
   handleChangeBackgroundColor = (newColor, elementType) => {
@@ -2199,14 +2231,14 @@ class App extends React.Component {
         }
     })
   }
-  setHeaderVisible = (visible) => {
+  setHeaderVisible = (visible, isFull=Util.isFullScreen()) => {
     if (visible) {
       ROOT.style.setProperty('--top-margin', 'var(--header-height');
       setTimeout(() => {
         document.getElementById('header').classList.remove('intact');
-      }, 1)
+      });
     } else {
-      if (Util.isFullScreen()) {
+      if (isFull) {
         ROOT.style.setProperty('--top-margin', '0px');        
       } else {
         ROOT.style.setProperty('--top-margin', 'var(--menu-border-width');
@@ -2546,6 +2578,8 @@ class App extends React.Component {
               characterArray={characterArray}
               onClickPanel={this.handleClickOpponentPanel}
               onClickOpponentReady={this.handleClickOpponentReady}
+              onClickWagerMore={this.handleClickWagerMore}
+              currentWager={this.state.currentWager}
               onClickBack={this.handleClickBack}
               clickFunction={clickFunction}
             />
@@ -2572,6 +2606,7 @@ class App extends React.Component {
       
         <ControlFooter
           phase={phase}
+          vsCPU={this.state.vsCPU}
           readyToShow={this.state.checkedCookie}
           currentOptions={this.state.options}
           onToggleOption={this.handleToggleOption}
@@ -2618,6 +2653,8 @@ class App extends React.Component {
           <>
             <ConfirmModal
               showing={this.state.confirmMessage.showing}
+              credits={this.state.credits}
+              minimumWager={this.state.gameMode === 'campaign' ? characters[this.state.cpuOpponent].prize.credits : 225}
               messageData={this.state.confirmMessage}
               buttonText={this.state.confirmMessage.buttonText}
               onClickConfirmButton={this.handleClickConfirmButton}
