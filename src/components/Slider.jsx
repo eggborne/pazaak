@@ -193,7 +193,10 @@ Slider.propTypes = {
   min: PropTypes.number,
   steps: PropTypes.number,
   bgColor: PropTypes.string,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
   home: PropTypes.string,
   type: PropTypes.string,
   color: PropTypes.string,
