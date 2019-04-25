@@ -33,58 +33,78 @@ function ResultModal(props) {
           z-index: 5;
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: stretch;
           justify-content: center;
           line-height: 2.5rem;
-          transform: scale(0.75) translateY(-67.5%);
-          opacity: 0;
           transition: transform 600ms ease, opacity 300ms ease;
           will-change: transform, opacity;
-          padding: 2vh;
+          padding: 1vh;
+          transform: scale(0.75) translateY(-67.5%);
+          opacity: 0;
           pointer-events: none;   
-          top: calc(50vh - (var(--control-footer-height) /2) + var(--top-margin));
+          //top: calc(50vh - (var(--control-footer-height) /2) + var(--top-margin));
           transform-origin: center center;
           border-color: var(--trans-black-bg-color) !important;
         }
         #result-title {
+          width: 100%;
+          flex-grow: 3;
           font-size: 1.75rem;
           text-align: center;
+          background: var(--trans-black-bg-color);
+          border-color: var(--trans-black-bg-color) !important;
         }
         #result-body {
           display: flex;
           flex-direction: column;
           align-items: center;
           font-size: 1.5rem;
-          padding: 1rem;
+          //padding: 1rem;
         }
         #result-winner {
           font-size: 1.25rem;
         }
         #result-scores {
+          font-family: var(--main-font);
           font-size: 1rem;
-          text-align: center;
+          display: flex;
+          width: 100%;
+        }
+        #result-button-area {
+          width:100%;
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+          background: var(--trans-black-bg-color);
+          border-color: var(--trans-black-bg-color) !important;
         }
         #result-ok-button, #result-main-menu-button {
           box-sizing: border-box;
           font-size: 1.25rem;
           padding: 1.5rem 2rem 1.5rem 2rem;
-          margin-bottom: 0.5rem;
+          //margin-bottom: 0.5rem;
         }
       `}
       </style>
-      <div className='shadowed-text' id='result-title'>
+      <div className='shadowed-text inner-red-panel' id='result-title'>
         {props.titleText}
       </div>
       <div className='shadowed-text' id='result-body'>
-        <div style={winnerStyle} id='result-winner'>{props.winner}</div>
+        {/* <div style={winnerStyle} id='result-winner'>{props.winner}</div> */}
         <div style={scoresStyle} id='result-scores'>
-          {props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span><br />{props.playerNames.opponent}: <span style={opponentScoreStyle}>{props.finalScores.opponent}</span>
+          <div>{props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span></div>
+          <div>{props.playerNames.opponent}: <span style={opponentScoreStyle}>{props.finalScores.opponent}</span></div>
         </div>
       </div>
-      <button {...{ [props.clickFunction]: props.onClickResultButton1 }} className='pointer' id='result-ok-button'>{props.buttonText}</button>
-      {props.matchOver &&
-        <button {...{ [props.clickFunction]: props.onClickResultButton2 }} className='pointer' id='result-main-menu-button'>{props.buttonText2}</button>
-      }
+      <div id='result-button-area' className='inner-red-panel'>
+        <button {...{ [props.clickFunction]: props.onClickResultButton1 }} className='pointer' id='result-ok-button'>{props.buttonText}</button>
+        {props.matchOver &&
+          <button {...{ [props.clickFunction]: props.onClickResultButton2 }} className='pointer' id='result-main-menu-button'>{props.buttonText2}</button>
+        }
+      </div>
     </div>
   );
 }
