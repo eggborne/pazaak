@@ -236,6 +236,10 @@ class OptionsPanel extends React.PureComponent {
           .option-tab-button.selected-tab > i {
             opacity: 1;
           }
+          .option-tab-button.selected-tab {
+            border-color: var(--button-text-color);
+            border-style: inset;
+          }
           .option-tab-button {
             width: calc(33.33% - (var(--menu-border-width) / 1.5));
             padding: calc(var(--small-font-size));
