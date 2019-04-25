@@ -71,7 +71,6 @@ function DeckSelectionScreen(props) {
     chooseStyle.color = 'green';
     requestAnimationFrame(() => {
       document.getElementById('deck-ready-button').classList.remove('disabled-button');
-      document.getElementById('deck-ready-button').classList.add('throbbing');
     });
   } else {
     if (cardsLeft < 10) {
@@ -80,7 +79,6 @@ function DeckSelectionScreen(props) {
       chooseText = `choose ${cardsLeft} card${cardPlural}`;
     }
     requestAnimationFrame(() => {
-      document.getElementById('deck-ready-button').classList.remove('throbbing');
       document.getElementById('deck-ready-button').classList.add('disabled-button');
     });
   }
@@ -253,16 +251,6 @@ function DeckSelectionScreen(props) {
               return <div key={'selection-'+cardKey}>{card}</div>;
             })}
           </div>
-          {/* <div onClick={(event) => {
-            console.log('clickaed bard!', event);
-            let selectionGrid = document.getElementById('deck-selection-grid');
-            console.info('top, height, clientheuigt', selectionGrid.scrollTop,selectionGrid.scrollHeight,selectionGrid.clientHeight)
-            selectionGrid.scrollTop = selectionGrid.scrollHeight - selectionGrid.clientHeight;
-            console.log('set scrolltop to', selectionGrid.scrollTop);
-            // setTimeout(() => {
-            //   setScrolled(true);
-            // },100);
-          }} id='more-indicator'></div> */}
         </div>
         <div id="preview-deck-area">
           <div id="preview-deck-title" className="smaller shadowed-text">
@@ -273,8 +261,7 @@ function DeckSelectionScreen(props) {
               let cardKey = card.props ? card.props.id : i;              
               return <div key={'selected-'+cardKey}>{card}</div>;
             })}
-          </div>
-        
+          </div>        
         </div>
       </div>
     </div>
