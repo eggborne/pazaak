@@ -32,20 +32,23 @@ class OpponentSelectScreen extends React.Component {
       document.getElementById('next-opponent-button').style.transform = 'scale(1)';
     }, true);
   }
-  shouldComponentUpdate(nextProps, nextState) {
-    if (this.props.phase != 'selectingOpponent' && nextProps.phase == 'selectingOpponent') {
+  shouldComponentUpdate(prevProps, nextState) {
+    if (this.props.phase != 'selectingOpponent' && prevProps.phase == 'selectingOpponent') {
       requestAnimationFrame(() => {
         document.getElementById('opponent-select-screen').style.transform = 'none';
       });
     }
-    if (this.props.phase == 'selectingOpponent' && nextProps.phase != 'selectingOpponent') {
+    if (this.props.phase == 'selectingOpponent' && prevProps.phase != 'selectingOpponent') {
       document.getElementById('opponent-select-screen').style.transform = 'scale(0.95)';
     }
     return (
-      (this.props.phase != 'selectingOpponent' && nextProps.phase == 'selectingOpponent') ||
-      (this.props.phase == 'selectingOpponent' && nextProps.phase != 'selectingOpponent') ||
+      (this.props.phase != 'selectingOpponent' && prevProps.phase == 'selectingOpponent') ||
+      (this.props.phase == 'selectingOpponent' && prevProps.phase != 'selectingOpponent') ||
+      this.props.userDefeated.length != prevProps.userDefeated.length ||
+      this.props.userCredits != prevProps.userCredits ||
       this.state.selectedOpponent != nextState.selectedOpponent ||
-      this.state.showDefeated != nextState.showDefeated
+      this.state.showDefeated != nextState.showDefeated ||
+      prevProps.currentWager != this.props.currentWager
     );
   }
   onClickPrev = () => {
@@ -93,18 +96,15 @@ class OpponentSelectScreen extends React.Component {
     }
   };
   onToggleDefeated = () => {
-    console.log('toggling defeaeted', this.state.selectedOpponent);
     let lowestUndefeated = 0;
     let newOpponentName;
     [...this.props.userDefeated].map(defeatedOpponentName => {
-      console.log('chararr', this.props.characterArray);
       let rank = 0;      
       this.props.characterArray.map((charObj, r, arr) => {
         if (charObj.name === defeatedOpponentName) {
           rank = r;
         }
       })
-      console.log(defeatedOpponentName, 'ranks', rank);
       if (rank > lowestUndefeated) {
         lowestUndefeated = rank;
         newOpponentName = defeatedOpponentName;
@@ -114,21 +114,14 @@ class OpponentSelectScreen extends React.Component {
       lowestUndefeated = this.state.selectedOpponent-1;
     }
     let newSelectedOpponent = this.state.selectedOpponent;
-
-    console.info('lowestUndefeated', lowestUndefeated)
-    console.info('this.props.userDefeated', this.props.userDefeated)
-    console.info('newOpponentName', newOpponentName)
     if (this.props.userDefeated.indexOf(newOpponentName) > -1) {
-      console.green(newOpponentName,'defeated')
       newSelectedOpponent = lowestUndefeated + 1;
-    } else {
-      console.pink(newOpponentName,' ---- NOT defeated')
     }
-    console.orange('newSelectedOpponent ' + newSelectedOpponent);
-
     this.setState({
       showDefeated: !this.state.showDefeated,
-      selectedOpponent: newSelectedOpponent
+      selectedOpponent: newSelectedOpponent,
+    }, () => {
+       this.props.onClickPanel(this.props.characterArray[this.state.selectedOpponent].name);
     });
   }
 
@@ -139,22 +132,28 @@ class OpponentSelectScreen extends React.Component {
     let opponentArray = [];
     let opponentListIndexes = [];
     let actualList = [...opponentList];
+    let numberDefeated = [...this.props.userDefeated].filter((elem, pos, arr) => {
+      return arr.indexOf(elem) == pos;
+    }).length;
+    console.orange('numdef', numberDefeated)
     for (var i = 0; i < 16; i++) {
       let character = opponentList[i];
       let available = this.props.userCredits >= character.prize.credits;
-      let slideAmount = this.state.selectedOpponent > this.state.lastSelectedOpponent ? 50 : -50;
+      let slideAmount = opponentIndex > this.state.lastSelectedOpponent ? 50 : -50;
       let opponentDefeated = this.props.userDefeated.indexOf(character.name) > -1;
-      if (this.state.showDefeated || (!this.state.showDefeated && !opponentDefeated)) {
+      if ((this.state.showDefeated || numberDefeated === 16)|| (!this.state.showDefeated && !opponentDefeated)) {
         opponentArray.push(
           <OpponentPanel
             key={i}
-            selected={this.state.selectedOpponent === i}
+            selected={opponentIndex === i}
             defeated={opponentDefeated}
             available={available}
             slideAmount={slideAmount}
             portraitSource={this.props.portraitSources.opponent}
             index={i}
             character={character}
+            onClickWagerMore={this.props.onClickWagerMore}
+            currentWager={this.props.currentWager}
             clickFunction={this.props.clickFunction}
           />
         );
@@ -166,12 +165,14 @@ class OpponentSelectScreen extends React.Component {
     console.info('actualList', actualList)
     console.info('opponentArray', opponentArray)
     console.info('opponentListIndexes', opponentListIndexes)
-    let selectedAvailable = this.props.userCredits >= opponentList[this.state.selectedOpponent].prize.credits;
+    let selectedAvailable = this.props.userCredits >= opponentList[opponentIndex].prize.credits;
     setTimeout(() => {
       if (!selectedAvailable) {
         document.getElementById('opponent-ready-button').classList.add('disabled-button');
-      } else {
+        document.getElementById('opponent-ready-button').classList.remove('throbbing');
+      } else if (document.getElementById('opponent-ready-button')) {
         document.getElementById('opponent-ready-button').classList.remove('disabled-button');
+        document.getElementById('opponent-ready-button').classList.add('throbbing');
       }
     });
     return (
@@ -223,12 +224,12 @@ class OpponentSelectScreen extends React.Component {
             transition: all 150ms ease;
           }
           #prev-opponent-button {
-            opacity: ${(this.state.selectedOpponent > 0 && opponentListIndexes.indexOf(this.state.selectedOpponent - 1) > -1) || '0.25'};
-            pointer-events: ${(this.state.selectedOpponent > 0 && opponentListIndexes.indexOf(this.state.selectedOpponent - 1) > -1) || 'none'};
+            opacity: ${(opponentIndex > 0 && opponentListIndexes.indexOf(opponentIndex - 1) > -1) || '0.25'};
+            pointer-events: ${(opponentIndex > 0 && opponentListIndexes.indexOf(opponentIndex - 1) > -1) || 'none'};
           }
           #next-opponent-button {
-            opacity: ${(this.state.selectedOpponent < 15 && opponentListIndexes.indexOf(this.state.selectedOpponent + 1) > -1) || '0.25'};
-            pointer-events: ${(this.state.selectedOpponent < 15 && opponentListIndexes.indexOf(this.state.selectedOpponent + 1) > -1) || 'none'};
+            opacity: ${(opponentIndex < 15 && opponentListIndexes.indexOf(opponentIndex + 1) > -1) || '0.25'};
+            pointer-events: ${(opponentIndex < 15 && opponentListIndexes.indexOf(opponentIndex + 1) > -1) || 'none'};
           }
           #show-defeated-toggle {
             display: flex;
@@ -237,13 +238,14 @@ class OpponentSelectScreen extends React.Component {
             text-align: center;
             background-color: var(--button-bg-color);
             border-radius: var(--menu-border-radius);
-            padding: 3vw;
+            padding: 2vw;
             padding-left: 3vw;
             padding-right: 3vw;
             font-size: 3.5vw;
             color: #ddd;
             align-self: center;
             margin-bottom: 2vh;
+            border: calc(var(--menu-border-width) / 2) solid var(--button-border-color);
           }
           #defeated {
             color: ${this.state.showDefeated ? '#ddd' : 'red'}
@@ -264,15 +266,17 @@ class OpponentSelectScreen extends React.Component {
           }
         `}</style>
         <div className='pre-header shadowed-text' id='opponent-select-title'>
-          Choose Your Opponent
+          Choose Opponent
         </div>
         
         <div id='opponent-select-area' className='shadowed-text'>
-        <div id='show-defeated-toggle' onClick={this.onToggleDefeated}>
-          Show defeated: <span id='defeated'>{this.state.showDefeated ? 'ON' : 'OFF'}</span>
-        </div>
+          {numberDefeated < 16 &&
+            <div id='show-defeated-toggle' onClick={this.onToggleDefeated}>
+              Show defeated: <span id='defeated'>{this.state.showDefeated ? 'ON' : 'OFF'}</span>
+            </div>
+          }
           <div id='featured-opponent-area'>{opponentArray}</div>
-          <div id='index-display'>{this.state.selectedOpponent + 1} / ???</div>
+          <div id='index-display'>{opponentIndex + 1} / ???</div>
           <div id='opponent-select-button-area'>
             <button
               {...{ [this.props.clickFunction]: this.onClickPrev }}
@@ -301,10 +305,12 @@ OpponentSelectScreen.propTypes = {
   userCredits: PropTypes.number,
   userDefeated: PropTypes.array,
   readyToList: PropTypes.bool,
+  currentWager: PropTypes.number,
   listRange: PropTypes.object,
   portraitSources: PropTypes.object,
   characters: PropTypes.object,
   characterArray: PropTypes.array,
+  onClickWagerMore: PropTypes.func,
   onClickOpponentReady: PropTypes.func,
   onClickPanel: PropTypes.func,
   onClickBack: PropTypes.func,
