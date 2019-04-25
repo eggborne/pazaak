@@ -488,6 +488,8 @@ class NameAvatarForm extends React.PureComponent {
         `}</style>
         {remembered && (
           <>
+                      <form onSubmit={(event) => submitAction(event)} className='pointer' id='name-avatar-input-form'>
+
             <div id="logged-in-header" className="input-label input-area red-panel shadowed-text">
               <div id="logged-in-text" className="inner-red-panel"> <small>Logged in as</small> <span id="name-text">{this.props.loggedInAs}</span> </div>
             </div>
@@ -514,7 +516,8 @@ class NameAvatarForm extends React.PureComponent {
                 Play!
                 </div>
               </button>
-            </div>
+              </div>
+              </form>
             </>
         )}
         {!remembered && (
