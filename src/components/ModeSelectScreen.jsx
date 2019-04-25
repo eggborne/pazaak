@@ -152,6 +152,7 @@ function ModeSelectScreen(props) {
         #online-indicator {
           font-family: var(--main-font);
           font-size: 0.75em;
+          color: ${onlineCount || 'red'};
         }
         .versus-selector.selected {
           background-color: #00ff0066;
@@ -205,10 +206,9 @@ function ModeSelectScreen(props) {
             </div>
           </div>            
         </div>
-
         <div id='human-mode-choices'>
           <div>
-            unavailable :(
+            no humans online :(
           </div>
         </div>        
         
