@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import OpponentPanel from '../OpponentPanel';
 
 function ConfirmModal(props) {
+  const [userWager, changeWager] = useState(null);
+  console.log('minimumWager Opp', props.minimumWager)
   let headerFontSize = 'calc(var(--medium-font-size) * 1.5)';
+  let wagerOK = parseInt(userWager) >= parseInt(props.minimumWager);
+  setTimeout(() => {
+    if (userWager === null && document.getElementById('wager-input') && !wagerOK) {
+      document.getElementById('wager-input').value = props.minimumWager
+    }
+  })
   return (
     <div id="confirm-modal-bg" className={props.showing && 'confirm-modal-showing'}>
       <style jsx>
@@ -24,7 +33,6 @@ function ConfirmModal(props) {
           #confirm-modal {
             box-sizing: border-box;
             width: var(--intro-width);
-            min-height: 50vh;
             min-width: 300px;
             font-size: var(--main-font-size);
             transform: scale(0.95);
@@ -40,7 +48,7 @@ function ConfirmModal(props) {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 100%;
+            height: 24vh;
             width: 100%;
           }
           .confirm-modal-showing {
@@ -79,6 +87,21 @@ function ConfirmModal(props) {
             font-size: calc(var(--medium-font-size) * 1.5);
             color: var(--option-off-color);
             margin-bottom: 2vh;
+            min-height: 11vh;
+            line-height: 0;
+          }
+          #wager-input {
+            font-family: var(--main-font);
+            font-size: var(--main-text-size);
+            background-color: var(--name-input-color);
+            color: var(--name-input-text-color);
+            padding: var(--menu-border-radius);
+            -webkit-user-select: text; /* Chrome all / Safari all */
+            -moz-user-select: text; /* Firefox all */
+            -ms-user-select: text; /* IE 10+ */
+            user-select: text;
+            border-radius: var(--menu-border-width);
+            text-align: center;    
           }
         `}
       </style>
@@ -87,7 +110,18 @@ function ConfirmModal(props) {
           {props.messageData.titleText}
         </div>
         <div className="modal-body shadowed-text" id="confirm-body">
-          {props.messageData.bodyText}
+          {props.messageData.bodyText === 'numberInput' ?
+            <input id='wager-input' 
+              onChange={(event) => {              
+                let wager = parseInt(event.target.value);
+                changeWager(wager);              
+              }}
+              type='number'
+              placeholder={`min. ${props.minimumWager}`}
+            />          
+            :
+            props.messageData.bodyText
+          }
         </div>
         <div id="modal-inner-border" className="inner-red-panel">
           <div id="confirm-button-area">
@@ -105,6 +139,8 @@ function ConfirmModal(props) {
 }
 
 ConfirmModal.propTypes = {
+  credits: PropTypes.number,
+  minimumWager: PropTypes.number,
   showing: PropTypes.bool,
   messageData: PropTypes.object,
   buttonText: PropTypes.object,
