@@ -44,6 +44,10 @@ function OpponentPanel(props) {
     document.getElementById(`${charName}-panel`).style.transform = 'none';
   }, 1);
   let panelQuote = props.available ? props.character.quotes.panel : '(transmission unavailable)';
+  let wagerDisplay = props.character.prize.credits;
+  if (parseInt(props.currentWager) > wagerDisplay) {
+    wagerDisplay = props.currentWager
+  }
   return (
     <div id={`${charName}-panel`} className={`opponent-select-entry red-panel ${props.available || 'unavailable'}`}>
       <style jsx>
@@ -109,30 +113,38 @@ function OpponentPanel(props) {
           .opponent-prize-body {
             display: inline-flex;
             padding: var(--opponent-panel-padding);
-            line-height: 100%;
+            line-height: 100%;            
             height: 100%;
             align-items: center;
             justify-content: center;
+            justify-content: space-around;
             border: 1px solid var(--dark-red-bg-color);
             border-top: 0;
             border-radius: 0 0 var(--menu-border-width) var(--menu-border-width);
           }   
+          #wager-more-button {
+            font-size: 3vw;
+            max-width: 18vw;
+            padding-top: 1vw;
+            padding-bottom: 1vw;
+          }
           .opponent-prize-credits {
             font-family: var(--title-font);
-            font-size: var(--medium-font-size);
+            font-size: 4.5vw;
             color: green;
           }
           .opponent-prize-cards {
             padding: var(--opponent-panel-padding);
-            display: inline-flex;
-            align-items: center;
+            //display: inline-flex;
+            //align-items: center;
+            display: grid;
+            grid-template-rows: var(--prize-card-height);
+            grid-template-columns: var(--prize-card-width) var(--prize-card-width) var(--prize-card-width) var(--prize-card-width) var(--prize-card-width);
+            grid-column-gap: 0.5vw;
             border: 1px solid var(--dark-red-bg-color);
             border-top: 0;
             border-radius: 0 0 var(--menu-border-width) var(--menu-border-width);
             min-height: var(--prize-card-height)
-          }
-          .opponent-prize-cards > .card {
-            transform: scale(0.5) !important;
           }
           .difficulty-area {
             display: flex;
@@ -232,7 +244,7 @@ function OpponentPanel(props) {
             transform-origin: 50% 50%;
             transform: rotate(-2deg);
             display: ${!props.defeated && 'none'};
-          }
+          }         
         `}
       </style>
       <div className='left-opponent-panel'>
@@ -268,9 +280,15 @@ function OpponentPanel(props) {
             </div>
           </div>
           <div className='opponent-prize-area'>
-            <div className='opponent-prize-label inner-red-panel'>Minimum Wager</div>
+            <div className='opponent-prize-label inner-red-panel'>Wager (min. {props.character.prize.credits})</div>
             <div className={'opponent-prize-body'}>
-              <div className={`opponent-prize-credits ${props.available || 'big-throbbing'}`}>{props.character.prize.credits}</div>
+              <div className={`opponent-prize-credits ${props.available || 'big-throbbing'}`}>{wagerDisplay}</div>
+              <button
+                id='wager-more-button' 
+                onClick={props.onClickWagerMore}
+              >
+                Change Wager
+              </button>
             </div>
           </div>
           <div className='opponent-prize-area'>
@@ -281,9 +299,9 @@ function OpponentPanel(props) {
                   card = prizeCards[card];
                   let key = i * (props.index + 1);
                   let displayCard = (<Card key={key} id={key} context={'opponent-prize'} size={'prize'} value={card.value} type={card.type} clickFunction={props.clickFunction} />);
-                  // if (!props.available) {
-                  //   displayCard = (<CardBack key={key} id={key} context={'opponent-prize'} size={'prize'} />);
-                  // }
+                  if (!props.available) {
+                    displayCard = (<CardBack key={key} id={key} context={'opponent-prize'} size={'prize'} />);
+                  }
                   return displayCard;
                 })}
               </div>
@@ -305,11 +323,21 @@ OpponentPanel.propTypes = {
   available: PropTypes.bool,
   slideAmount: PropTypes.number,
   character: PropTypes.object,
+  currentWager: PropTypes.number,
+  onClickWagerMore: PropTypes.func,
   clickFunction: PropTypes.string
 };
 
 function areEqual(prevProps, nextProps) {
-  return prevProps.selected == nextProps.selected;
+  let equalTest = prevProps.selected == nextProps.selected 
+  && prevProps.defeated == nextProps.defeated
+  && prevProps.available == nextProps.available
+    && (prevProps.currentWager == nextProps.currentWager);
+  if (!prevProps.selected && !nextProps.selected) {
+    equalTest = true;
+  }
+  console.log('equal?', equalTest)
+  return equalTest;
 }
 
 // export default OpponentPanel;
