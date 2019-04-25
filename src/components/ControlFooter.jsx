@@ -185,13 +185,13 @@ function ControlFooter(props) {
         <div></div>
       </div>
       }
-        {(props.phase === 'selectingDeck') &&
+      {(props.phase === 'selectingDeck') &&
         <div className='back-footer'>
           <button {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'selectingMode') }} id='deck-select-back-button' className='footer-back-button shadowed-text'>{'<'}</button>
           <button {...{ [props.clickFunction]: props.onClickOpponentReady }} className='footer-button disabled-button' id='deck-ready-button'>OK</button>
           <button {...{ [props.clickFunction]: props.onClickRandomize }} className='shadowed-text' id='randomize-button'>Random</button><div></div>
         </div>
-        }
+      }
       {(props.phase === 'selectingOpponent') &&
       <div className='back-footer'>
         <button {...{ [props.clickFunction]: (event) => props.onClickBack(event, 'selectingDeck') }} className='footer-back-button shadowed-text'>{'<'}</button>

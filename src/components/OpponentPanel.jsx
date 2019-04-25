@@ -46,7 +46,7 @@ function OpponentPanel(props) {
   let panelQuote = props.available ? props.character.quotes.panel : '(transmission unavailable)';
   let wagerDisplay = props.character.prize.credits;
   if (parseInt(props.currentWager) > wagerDisplay) {
-    wagerDisplay = props.currentWager
+    wagerDisplay = props.currentWager;
   }
   return (
     <div id={`${charName}-panel`} className={`opponent-select-entry red-panel ${props.available || 'unavailable'}`}>
@@ -336,7 +336,7 @@ function areEqual(prevProps, nextProps) {
   if (!prevProps.selected && !nextProps.selected) {
     equalTest = true;
   }
-  console.log('equal?', equalTest)
+  console.log('equal?', equalTest);
   return equalTest;
 }
 

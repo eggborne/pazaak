@@ -4,14 +4,14 @@ import OpponentPanel from '../OpponentPanel';
 
 function ConfirmModal(props) {
   const [userWager, changeWager] = useState(null);
-  console.log('minimumWager Opp', props.minimumWager)
+  console.log('minimumWager Opp', props.minimumWager);
   let headerFontSize = 'calc(var(--medium-font-size) * 1.5)';
   let wagerOK = parseInt(userWager) >= parseInt(props.minimumWager);
   setTimeout(() => {
     if (userWager === null && document.getElementById('wager-input') && !wagerOK) {
-      document.getElementById('wager-input').value = props.minimumWager
+      document.getElementById('wager-input').value = props.minimumWager;
     }
-  })
+  });
   return (
     <div id="confirm-modal-bg" className={props.showing && 'confirm-modal-showing'}>
       <style jsx>
