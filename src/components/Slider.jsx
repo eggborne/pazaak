@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function Slider(props) {
-  console.pink('Slider rendering - ' + props.home + ' ' + props.type + ' value: ' + props.value);
   if (typeof props.value !== 'number') {
     console.orange( props.home + ' ' + props.type + ' had not a number');
   }
@@ -26,7 +25,6 @@ function Slider(props) {
     if (newX < homeX) {
       newX = homeX;
     }
-    // document.getElementById(`${props.home}-${props.type}-slider-knob`).style.marginLeft = newX + 'px';
     let newValue = newX / endX;
     if (newValue < 0) { 
       newValue = 0;
@@ -58,7 +56,6 @@ function Slider(props) {
     if (newX < homeX) {
       newX = homeX;
     }
-    // document.getElementById(`${props.home}-${props.type}-slider-knob`).style.marginLeft = newX + 'px';
     let newValue = newX / endX;
     if (newValue < 0) {
       newValue = 0;
@@ -73,12 +70,8 @@ function Slider(props) {
   if (!document.getElementById(`${props.home}-${props.type}-slider`)) {
     let clickHandler = window.PointerEvent ? ['pointerdown', 'pointermove', 'pointerup'] : window.TouchEvent ? ['touchstart', 'touchmove', 'touchend'] : ['mousedown', 'mousemove', 'mouseup'];
     setTimeout(() => {
-      // document.getElementById(`${props.home}-${props.type}-slider`).addEventListener('pointerdown', handleTouch);
-      // document.getElementById(`${props.home}-${props.type}-slider`).addEventListener('pointermove', handleTouchMove);
-      // document.getElementById(`${props.home}-${props.type}-slider`).addEventListener('pointerup', handleTouch);
       document.getElementById(`${props.home}-${props.type}-slider`).addEventListener(clickHandler[0], handleTouch, false);
       document.getElementById(`${props.home}-${props.type}-slider`).addEventListener(clickHandler[1], handleTouchMove, false);
-      // document.getElementById(`${props.home}-${props.type}-slider`).addEventListener(clickHandler[2], handleTouch);
     }, 5);
   }
   let displayValue = Math.round(props.value * props.steps);
@@ -140,7 +133,7 @@ function Slider(props) {
           align-items: center;
           z-index: 4;
           margin-left: calc(${Math.round(props.value * 100)}% - (var(--knob-size) / 2));
-          color: black;
+          color: ${!props.blankKnob && 'black'};
           text-shadow: none;
           font-size: calc(var(--micro-card-width) * ${(parseFloat(props.value) < 1) && !props.labels ? 0.4 : 0.3});
         }
@@ -185,7 +178,8 @@ Slider.defaultProps = {
   value: 0,
   bgColor: '#222',
   disabled: false,
-  showing: true
+  showing: true,
+  blankKnob: false
 };
 
 Slider.propTypes = {
