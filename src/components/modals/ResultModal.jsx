@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import PlayerPortrait from '../PlayerPortrait';
+import Card from '../Card';
 
 function ResultModal(props) {
-  console.big('ResultModal rendering');
+  console.info('ResultModal rendering', props);
   let userScoreStyle = { color: 'white' };
   let opponentScoreStyle = { color: 'white' };
   let winnerStyle = { display: 'none' };
-  let scoresStyle = { display: 'block' };
+  let scoresStyle = { display: 'flex' };
   if (!props.matchOver) {
     if (props.winner === 'user') {
       userScoreStyle = { color: 'green' };
@@ -19,6 +21,9 @@ function ResultModal(props) {
     winnerStyle = { display: 'block' };
     scoresStyle = { display: 'none' };
   }
+  let portraitSize = window.innerHeight / 8;
+  let winnerIndex = props[`${props.winner}Index`] || 0;
+  let winnerName = props.playerNames[props.winner] || 'balls';
   return (
     <div id='result-modal' className='red-panel'>
       <style jsx>{`
@@ -27,6 +32,7 @@ function ResultModal(props) {
           box-sizing: border-box;
           position: absolute;
           width: var(--intro-width);
+          min-height: 50vh;
           margin-left: 12.5vmin;
           color: var(--main-text-color);
           border-radius: var(--menu-border-radius);
@@ -34,65 +40,128 @@ function ResultModal(props) {
           display: flex;
           flex-direction: column;
           align-items: stretch;
-          justify-content: center;
-          line-height: 2.5rem;
+          justify-content: space-between;
           transition: transform 600ms ease, opacity 300ms ease;
           will-change: transform, opacity;
           padding: 1vh;
-          transform: scale(0.75) translateY(-67.5%);
+          transform: scale(0.8);
           opacity: 0;
           pointer-events: none;   
-          //top: calc(50vh - (var(--control-footer-height) /2) + var(--top-margin));
           transform-origin: center center;
           border-color: var(--trans-black-bg-color) !important;
         }
         #result-title {
           width: 100%;
-          flex-grow: 3;
-          font-size: 1.75rem;
-          text-align: center;
+          font-size: 2rem;
+          display: flex;
+          justify-content: ${props.matchOver ? 'space-between' : 'center'};
+          align-items: center;
           background: var(--trans-black-bg-color);
           border-color: var(--trans-black-bg-color) !important;
+          flex-grow: 1;
+          line-height: 100%;
+          padding: calc(var(--menu-border-radius) * 2);
         }
         #result-body {
           display: flex;
           flex-direction: column;
-          align-items: center;
           font-size: 1.5rem;
-          //padding: 1rem;
+          flex-grow: 1;
         }
         #result-winner {
           font-size: 1.25rem;
         }
         #result-scores {
+          flex-direction: column;
           font-family: var(--main-font);
           font-size: 1rem;
+          align-items: center;
+          justify-content: space-between;
+          padding: var(--menu-border-radius);
+        }
+        #result-scores > div {
+          margin: 2vh;
+        }
+        #result-prize {
+          padding: var(--menu-border-radius);
           display: flex;
-          width: 100%;
+          flex-direction: column;
+          align-items: center;
+          justify-content: space-around;
+        }
+        #result-prize > div {
+                
+        }
+        #prize-card-list {
+          display: flex;
         }
         #result-button-area {
-          width:100%;
-          flex-grow: 1;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 2rem;
           background: var(--trans-black-bg-color);
           border-color: var(--trans-black-bg-color) !important;
+          flex-grow: 2;
+          padding: calc(var(--menu-border-radius) * 2);
         }
         #result-ok-button, #result-main-menu-button {
           box-sizing: border-box;
           font-size: 1.25rem;
           padding: 1.5rem 2rem 1.5rem 2rem;
-          //margin-bottom: 0.5rem;
+        }
+        #result-ok-button {          
+          margin-bottom: ${props.matchOver && '2vh'};
+        }
+        .credit-wager {
+
+        }
+        .credit-wager.won {
+          color: green;
+        }
+        .credit-wager.lost {
+          color: red;
         }
       `}
       </style>
       <div className='shadowed-text inner-red-panel' id='result-title'>
-        {props.titleText}
+        <div>{props.titleText}</div>
+        {props.matchOver &&
+          <div>
+            <PlayerPortrait cpu={props.winner === 'opponent'} size={portraitSize} spriteIndex={winnerIndex} displayName={winnerName} type={'mini'} />
+          </div>
+        }
       </div>
       <div className='shadowed-text' id='result-body'>
+        {props.matchOver &&
+          <div id='result-prize'>
+            {props.winner === 'user' ? 
+            <>
+              <div>You won:</div>
+              <div className={'credit-wager won'}>{props.currentWager} credits</div>
+              {props.prizeCards && 
+                <div id='prize-card-list'>
+                {props.prizeCards.length > 0 && props.prizeCards.map((card, i) => {
+                  // let card = prizeCards[cardIndex];
+                console.info('doing cardindex', i);
+                console.info('doing card', card);
+                let cardName = `value|${card.value} type|${card.type}`;
+                return (
+                  <div key={i}>
+                    <Card clickFunction={() => null} id={i} context={'prize-card'} size={'prize'} value={card.value} type={card.type} />
+                  </div>);
+              })}
+                </div>
+              }
+            </>
+            :
+            <>
+              <div>You lost:</div>
+              <div className={'credit-wager lost'}>{props.currentWager} credits</div>
+            </>            
+          }
+          </div>
+      }
         {/* <div style={winnerStyle} id='result-winner'>{props.winner}</div> */}
         <div style={scoresStyle} id='result-scores'>
           <div>{props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span></div>
@@ -100,7 +169,7 @@ function ResultModal(props) {
         </div>
       </div>
       <div id='result-button-area' className='inner-red-panel'>
-        <button {...{ [props.clickFunction]: props.onClickResultButton1 }} className='pointer' id='result-ok-button'>{props.buttonText}</button>
+        {!props.matchOver && <button {...{ [props.clickFunction]: props.onClickResultButton1 }} className='pointer' id='result-ok-button'>{props.buttonText}</button>}
         {props.matchOver &&
           <button {...{ [props.clickFunction]: props.onClickResultButton2 }} className='pointer' id='result-main-menu-button'>{props.buttonText2}</button>
         }
@@ -117,8 +186,12 @@ ResultModal.propTypes = {
   finalScores: PropTypes.object,
   buttonText: PropTypes.string,
   buttonText2: PropTypes.string,
+  userIndex: PropTypes.number,
+  opponentIndex: PropTypes.number,
   onClickResultButton1: PropTypes.func,
   onClickResultButton2: PropTypes.func,
+  currentWager: PropTypes.number,
+  prizeCards: PropTypes.array,
   clickFunction: PropTypes.string
 };
 
