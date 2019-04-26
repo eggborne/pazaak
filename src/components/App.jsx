@@ -131,7 +131,7 @@ class App extends React.Component {
       userWins: 0,
       opponentWins: 0,
       turn: 'user',
-      currentWager: 12,
+      currentWager: 25,
       userStatus: {
         phase: 'splashScreen',
         playerName: undefined,
@@ -186,7 +186,7 @@ class App extends React.Component {
         }
       },
       toastMessage: '',
-      defaultBackgroundColor: 'rgba(255, 121, 138, 1)',
+      defaultBackgroundColor: 'rgba(65, 255, 138, 1)',
       defaultPanelColor: 'rgba(255, 0, 0, 1)',
       defaultPanelShade: 0.4,
       options: {
@@ -375,7 +375,7 @@ class App extends React.Component {
     // let perfectHeight = availableHeight / 7.8;
     let perfectHeight = availableHeight / 6.5;
 
-    //this.callToast('availheight ' + availableHeight, 'vertical');
+    //this.showSaveIcon();
 
     let proposedRatio = perfectHeight / perfectWidth;
 
@@ -549,7 +549,7 @@ class App extends React.Component {
         phase: 'selectingDeck'
       });
     } else {          
-      this.callConfirmModal('ENTER WAGER', 'numberInput', { confirm: 'OK', cancel: 'NEVER MIND' }, () => {          
+      this.callConfirmModal('ENTER WAGER', 'numberInput', { confirm: 'START!', cancel: 'NEVER MIND' }, () => {          
       let randomDeck = this.createRandomDeck();
       let randomOpponent = this.getRandomOpponent();
       let namesCopy = { ...this.state.playerNames };
@@ -982,7 +982,7 @@ class App extends React.Component {
             let optionsString = JSON.stringify(optionsCopy);
             DB.updatePreferences(this.state.userID, optionsString).then((response) => {
               if (this.state.phase === 'showingOptions' || this.state.phase === 'gameStarted') {
-                this.callToast('Setting saved.', 'vertical');
+                this.showSaveIcon();
               }
             });
           }
@@ -993,25 +993,11 @@ class App extends React.Component {
     }
   };
 
-  callToast = (message, direction) => {
-    document.getElementById('user-account-icon').style.outline = 'var(--menu-border-width) solid rgba(255, 255, 255, 0.6)';
+  showSaveIcon = () => {
+    document.getElementById('save-icon').classList.add('showing');
     setTimeout(() => {
-      document.getElementById('user-account-icon').style.outline = 'none';
-    }, 150);
-    // let el = document.getElementById(`toast-${direction}`);
-    // if (el.timeout) {
-    //   clearTimeout(el.timeout);
-    // }
-    // el.style.transitionDuration = '200ms';
-    // el.classList.add('toast-on');
-    // el.timeout = setTimeout(() => {
-    //   el.style.transitionDuration = '1000ms';
-    //   el.classList.remove('toast-on');
-      
-    // }, 1600);
-    // this.setState({
-    //   toastMessage: message
-    // });
+      document.getElementById('save-icon').classList.remove('showing');
+    }, 420);
   }
 
   applyStateOptions = forceDirection => {
@@ -1557,11 +1543,11 @@ class App extends React.Component {
         if (winner === 'user') {
           // USER won
           DB.incrementSetWins(playerName);
-          // if (newWins === 3) {
-          if (newWins === 1) {
+          if (newWins === 3) {
+          // if (newWins === 1) {
             let creditPrize = parseInt(this.state.currentWager);
             if (this.state.gameMode === 'campaign') {
-              creditPrize = characters[this.state.cpuOpponent].prize.credits;
+              // creditPrize = characters[this.state.cpuOpponent].prize.credits;
               let newCards = [];
               let characterArray = Object.keys(characters);
               newUserStatus.cpuDefeated.push(this.state.cpuOpponent);
@@ -1609,7 +1595,7 @@ class App extends React.Component {
           lastWinner: winner,
           userStatus: newUserStatus,
           cardSelection: newCardSelection,
-          currentWager: 0
+          //currentWager: 0
         },
         () => {
           this.callResultModal(winner);
@@ -1628,7 +1614,7 @@ class App extends React.Component {
           turn: null,
           lastWinner: null,
           userStatus: newUserStatus,
-          currentWager: 0
+          //currentWager: 0
         },
         () => {
           this.callResultModal('tie');
@@ -1805,7 +1791,8 @@ class App extends React.Component {
     let postMatch = false;
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
       postMatch = true;
-      bgColor = 'var(--house-card-color)';
+      // bgColor = 'var(--house-card-color)';
+      bgColor = 'var(--red-bg-color)';
       title = 'MATCH\nWINNER';
       winnerDisplay = this.state.playerNames[winner];
       if (this.state.gameMode === 'campaign') {
@@ -1813,7 +1800,6 @@ class App extends React.Component {
           buttonText = 'Rematch';
         } else {
           buttonText = 'New Match';
-          // DB.incrementMatchWins(this.state.userStatus.loggedInAs);
         }
         buttonText2 = 'Main Menu';
       } else if (this.state.gameMode === 'quick') {
@@ -1821,7 +1807,6 @@ class App extends React.Component {
           buttonText = 'Rematch';
         } else {
           buttonText = 'New Match';
-          // DB.incrementMatchWins(this.state.userStatus.loggedInAs);
         }
         buttonText2 = 'Main Menu';
       }
@@ -1832,7 +1817,7 @@ class App extends React.Component {
     this.setState({
       resultMessage: {
         title: title,
-        winner: winnerDisplay,
+        winner: winner,
         buttonText: buttonText,
         buttonText2: buttonText2
       }
@@ -2030,9 +2015,11 @@ class App extends React.Component {
   };
 
   handleClickOpponentPanel = opponentName => {
+    let opponentWager = characters[opponentName].prize.credits;
     this.setState(
       {
-        cpuOpponent: opponentName
+        cpuOpponent: opponentName,
+        currentWager: opponentWager
       },
       () => {
         let namesCopy = Object.assign({}, this.state.playerNames);
@@ -2126,7 +2113,7 @@ class App extends React.Component {
     }
   };
   handleClickHamburgerQuit = event => {
-    this.callConfirmModal('Quit match?', 'You will forfeit and your progress will be lost.', { confirm: 'Do it', cancel: 'Never mind' }, () => {
+    this.callConfirmModal('Quit match?', 'forfeit', { confirm: 'Do it', cancel: 'Never mind' }, () => {
       document.getElementById('hamburger-menu').classList.remove('hamburger-on');      
       this.resetBoard('user', true);
       this.dismissConfirmModal();
@@ -2208,7 +2195,7 @@ class App extends React.Component {
           ROOT.style.setProperty('--dark-red-bg-color', Util.shadeRGBAColor(newPanelColor, -0.4));
           let metaThemeColor = document.querySelector("meta[name=theme-color]");
           metaThemeColor.setAttribute("content", newPanelColor);
-          // this.callToast('set newoptions.panelColor ' + finalColorString + ' to shade ' + this.state.options.panelShade + ' for newPanelColor ' + newPanelColor, 'vertical');
+          // this.showSaveIcon();
 
         }
 
@@ -2221,7 +2208,7 @@ class App extends React.Component {
             let optionsString = JSON.stringify(optionsCopy);
             DB.updatePreferences(this.state.userID, optionsString).then((response) => {
               if (this.state.phase === 'showingOptions' || this.state.phase === 'gameStarted') {
-               this.callToast(`Color saved.`, 'vertical');
+               this.showSaveIcon();
               }
             });
           }
@@ -2305,7 +2292,7 @@ class App extends React.Component {
                 }
               }
               // if (this.state.phase === 'showingOptions' || this.state.phase === 'gameStarted') {
-              //   this.callToast(`${typeName[0].toUpperCase()}${typeName.substr(1, typeName.length)} setting saved.`, 'vertical');
+              //   this.showSaveIcon();
               // }
           });
           this.setState({
@@ -2446,7 +2433,17 @@ class App extends React.Component {
       logMode = 'registering';
     }
     console.orange('APP logMode?', logMode);
-    console.error('AT RENDER APP STATE is', this.state)
+    console.error('AT RENDER APP STATE is', this.state);
+    console.info(characterArray);
+    let prizeCardArray;
+    if (this.state.vsCPU && characters[this.state.cpuOpponent].prize) {
+      prizeCardArray = [];
+      let indexes = characters[this.state.cpuOpponent].prize.cards;
+      indexes.map(ind => {
+        prizeCardArray.push(prizeCards[ind]);
+      });
+    }
+    
     return (      
       <div id="container">          
         <Toast message={this.state.toastMessage} />
@@ -2633,8 +2630,12 @@ class App extends React.Component {
               user: this.state.userTotal,
               opponent: this.state.opponentTotal
             }}
+            userIndex={this.state.userStatus.avatarIndex}
+            opponentIndex={characterArray.indexOf(characters[this.state.cpuOpponent])}
             buttonText={this.state.resultMessage.buttonText}
             buttonText2={this.state.resultMessage.buttonText2}
+            currentWager={this.state.currentWager}
+            prizeCards={prizeCardArray}
             clickFunction={clickFunction}
           />
         )}
@@ -2653,8 +2654,9 @@ class App extends React.Component {
           <>
             <ConfirmModal
               showing={this.state.confirmMessage.showing}
-              credits={this.state.credits}
-              minimumWager={this.state.gameMode === 'campaign' ? characters[this.state.cpuOpponent].prize.credits : 225}
+              credits={this.state.userStatus.credits}
+              minimumWager={this.state.gameMode === 'campaign' ? characters[this.state.cpuOpponent].prize.credits : 25}
+              currentWager={this.state.currentWager}
               messageData={this.state.confirmMessage}
               buttonText={this.state.confirmMessage.buttonText}
               onClickConfirmButton={this.handleClickConfirmButton}
@@ -2666,6 +2668,9 @@ class App extends React.Component {
         {(phase === 'versusScreen' || phase === 'gameStarted') &&
           <VersusScreen phase={phase} userData={this.state.userStatus} opponentData={characters[this.state.cpuOpponent]} opponentAvatarIndex={characterArray.indexOf(characters[this.state.cpuOpponent])} />
         }
+        <div id='save-icon'>
+          <i className="material-icons">save</i>
+        </div>
       </div>
     );
   }
