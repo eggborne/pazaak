@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import OpponentPanel from '../OpponentPanel';
+import Slider from '../Slider';
 
 function ConfirmModal(props) {
-  const [userWager, changeWager] = useState(null);
-  console.log('minimumWager Opp', props.minimumWager);
+  const [userWager, changeWager] = useState(props.minimumWager);
   let headerFontSize = 'calc(var(--medium-font-size) * 1.5)';
-  let wagerOK = parseInt(userWager) >= parseInt(props.minimumWager);
-  setTimeout(() => {
-    if (userWager === null && document.getElementById('wager-input') && !wagerOK) {
-      document.getElementById('wager-input').value = props.minimumWager;
+  let wagerSliderValue = userWager / (props.credits);
+  useEffect(() => {
+    if (userWager <= props.minimumWager) {
+      wagerSliderValue = 0;  
+      changeWager(props.minimumWager)
     }
   });
   return (
@@ -72,23 +72,31 @@ function ConfirmModal(props) {
             height: 11vmax;
           }
           #confirm-body {
-            min-height: 11vmax;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding-left: 2vmin;
-            padding-right: 2vmin;
+            padding: 4vh 2vmin;
+          }
+          .slider-knob {
+            color: 'none' !important;
+            background: green !important;
           }
           .confirm-button {
             font-size: var(--medium-font-size);
             width: 100%;
+            height: 50%;
           }
           #confirm-ok-button {
             font-size: calc(var(--medium-font-size) * 1.5);
             color: var(--option-off-color);
             margin-bottom: 2vh;
             min-height: 11vh;
+            padding: 5vh;
             line-height: 0;
+          }
+          #wager-input-area {
+            display: flex;
+            flex-direction: column;
           }
           #wager-input {
             font-family: var(--main-font);
@@ -103,6 +111,9 @@ function ConfirmModal(props) {
             border-radius: var(--menu-border-width);
             text-align: center;    
           }
+          #wager-slider {
+            opacity: 0.5;
+          }
         `}
       </style>
       <div id="confirm-modal" className={`red-panel ${props.showing && 'confirm-modal-showing'}`}>
@@ -110,24 +121,53 @@ function ConfirmModal(props) {
           {props.messageData.titleText}
         </div>
         <div className="modal-body shadowed-text" id="confirm-body">
-          {props.messageData.bodyText === 'numberInput' ?
-            <input id='wager-input' 
-              onChange={(event) => {              
-                let wager = parseInt(event.target.value);
-                changeWager(wager);              
-              }}
-              type='number'
-              placeholder={`min. ${props.minimumWager}`}
-            />          
-            :
+          {props.messageData.bodyText === 'numberInput' &&
+            
+            <div id='wager-input-area'>
+              <input readOnly id='wager-input'
+                value={userWager}
+                type='number'
+              />
+              <br />
+              {/* <input
+              className='slider'
+                onChange={(event) => {
+                  let newValue = Math.round(event.target.value);
+                  document.getElementById('wager-input').value = newValue;
+                }}
+                type='range' step={0.05} min='50' max={props.credits}
+              /> */}
+            <Slider type='wager-control'
+              id='wager-slider'
+              steps={20}
+              showing={true}
+              bgColor={'white'}
+              home={'confirm-body'}
+              value={wagerSliderValue}
+              blankKnob={true}
+              changeSliderValue={(type, newValue) => {
+                console.log('touch newValue', newValue)
+                console.log('userWager', userWager)
+                console.log('userWager / props.credits', userWager / props.credits)
+                newValue = Math.round(newValue * (props.credits));
+                document.getElementById('wager-input').value = newValue > props.minimumWager ? newValue : props.minimumWager;     
+                changeWager(newValue);           
+              }} />
+            </div>
+          }
+          {props.messageData.bodyText === 'forfeit' &&
+            <div>
+              You will forfeit the game and lose {props.currentWager} credits.
+            </div>
+
+          }
+          {props.messageData.bodyText.split(' ').length > 1 &&
             props.messageData.bodyText
           }
         </div>
         <div id="modal-inner-border" className="inner-red-panel">
           <div id="confirm-button-area">
-            <button className="confirm-button" id="confirm-ok-button">
-              {props.buttonText.confirm}
-            </button>
+            <button className="confirm-button" id="confirm-ok-button"></button>
             <button {...{ [props.clickFunction]: props.onClickCancelButton }} className="confirm-button" id="confirm-cancel-button">
               {props.buttonText.cancel}
             </button>
@@ -141,6 +181,7 @@ function ConfirmModal(props) {
 ConfirmModal.propTypes = {
   credits: PropTypes.number,
   minimumWager: PropTypes.number,
+  currentWager: PropTypes.number,  
   showing: PropTypes.bool,
   messageData: PropTypes.object,
   buttonText: PropTypes.object,
