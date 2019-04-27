@@ -173,7 +173,7 @@ export const characters = {
     displayName: 'IG-88',
     species: 'Droid',
     placeOfOrigin: 'Halowan',
-    skillLevel: 5,
+    skillLevel: 4,
     prize: {
       credits: 300,
       cards: [4,5]
@@ -212,7 +212,7 @@ export const characters = {
     displayName: 'Yoda',
     species: 'Unknown',
     placeOfOrigin: 'Dagobah',
-    skillLevel: 7,
+    skillLevel: 5,
     prize: {
       credits: 600,
       cards: [6,7]
@@ -251,7 +251,7 @@ export const characters = {
     displayName: 'The Emperor',
     species: 'Human',
     placeOfOrigin: 'Naboo',
-    skillLevel: 8,
+    skillLevel: 6,
     prize: {
       credits: 1200,
       cards: [8,9]
@@ -290,7 +290,7 @@ export const characters = {
     displayName: 'E.T.',
     species: 'Asogian',
     placeOfOrigin: 'Brodo Asogi',
-    skillLevel: 9,
+    skillLevel: 7,
     prize: {
       credits: 2400,
       cards: [10]
@@ -329,7 +329,7 @@ export const characters = {
     displayName: 'The T-1000',
     species: 'Cyborg',
     placeOfOrigin: 'Earth',
-    skillLevel: 9,
+    skillLevel: 8,
     prize: {
       credits: 4000,
       cards: [11,12]
@@ -446,7 +446,7 @@ export const characters = {
     displayName: 'Caiaphas',
     species: 'Human',
     placeOfOrigin: 'Earth',
-    skillLevel: 10,
+    skillLevel: 11,
     prize: {
       credits: 40000,
       cards: [17,18]
@@ -485,7 +485,7 @@ export const characters = {
     displayName: 'Kuato',
     species: 'Mutant',
     placeOfOrigin: 'Mars',
-    skillLevel: 11,
+    skillLevel: 12,
     prize: {
       credits: 100000,
       cards: [19,20]
@@ -524,7 +524,7 @@ export const characters = {
     displayName: 'Blaine the Monorail',
     species: 'Cyborg',
     placeOfOrigin: 'Mid-World',
-    skillLevel: 12,
+    skillLevel: 13,
     prize: {
       credits: 500000,
       cards: [21,22]
@@ -563,7 +563,7 @@ export const characters = {
     displayName: 'King Jaffe Joffer',
     species: 'Human',
     placeOfOrigin: 'Earth',
-    skillLevel: 13,
+    skillLevel: 14,
     prize: {
       credits: 1000000,
       cards: [23,24]
