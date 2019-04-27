@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import PlayerPortrait from './PlayerPortrait';
 import Card from './Card';
@@ -18,13 +18,13 @@ function OpponentPanel(props) {
   let totalLength = props.character.displayName.length;
   let nameFontSize = 'var(--medium-font-size)';
   let quoteLength = props.character.quotes.panel.length;
-  let quoteTextSize = 'calc(var(--medium-font-size) / 1.25)';
+  let quoteTextSize = '5vw';
   if (props.available) {
     if (quoteLength > 30) {
-      quoteTextSize = 'var(--small-font-size)';
+      quoteTextSize = '4.5vw';
     }
-    if (quoteLength > 70) {
-      quoteTextSize = 'calc(var(--small-font-size) * 0.8)';
+    if (quoteLength > 55) {
+      quoteTextSize = '4vw';
     }
     if ((wordsInName <= 2 && totalLength > 8) || (wordsInName > 2 && totalLength > 12)) {
       nameFontSize = 'var(--small-med-font-size)';
@@ -33,21 +33,31 @@ function OpponentPanel(props) {
       nameFontSize = '1.75vh';
     }
   } else {
-    quoteTextSize = 'calc(var(--small-font-size) * 0.75)';
+    quoteTextSize = '4vw';
   }
-  if (document.getElementById(`${charName}-panel`) && document.getElementById(`${charName}-panel`).style.opacity) {
-    document.getElementById(`${charName}-panel`).style.opacity = 0;
-    document.getElementById(`${charName}-panel`).style.transform = `translateX(${props.slideAmount}%)`;
+  if (document.getElementById(`${charName}-panel`)) {
   }
-  setTimeout(() => {
-    document.getElementById(`${charName}-panel`).style.opacity = 1;
-    document.getElementById(`${charName}-panel`).style.transform = 'none';
-  }, 1);
+  let slideAmount = props.slideAmount;
+  let selected = props.selected
+  let panelEl = document.getElementById(`${charName}-panel`);
+  useEffect(() => {
+    if (panelEl && props.selected) {
+      panelEl.style.opacity = 1;
+    }
+  });
   let panelQuote = props.available ? props.character.quotes.panel : '(transmission unavailable)';
   let wagerDisplay = props.character.prize.credits;
   if (parseInt(props.currentWager) > wagerDisplay) {
     wagerDisplay = props.currentWager;
   }
+  let creditFontSize = ((window.innerWidth / 5) / props.currentWager.toString().length);
+  if (creditFontSize < window.innerWidth / 22) {
+    creditFontSize = window.innerWidth / 22
+  }
+  if (creditFontSize > window.innerWidth / 15) {
+    creditFontSize = window.innerWidth / 15
+  }
+  creditFontSize = creditFontSize + 'px';
   return (
     <div id={`${charName}-panel`} className={`opponent-select-entry red-panel ${props.available || 'unavailable'}`}>
       <style jsx>
@@ -56,11 +66,12 @@ function OpponentPanel(props) {
             --opponent-panel-padding: calc(var(--menu-border-width) * 2);
             box-sizing: border-box;
             display: grid;
-            grid-template-columns: 35vw 1fr;
-            grid-column-gap: var(--opponent-panel-padding);
+            grid-template-columns: 35vw 45vw;
+            justify-content: space-around;
             will-change: transform;
             width: 90%;
             display: ${props.selected || 'none'};
+            opacity: ${props.selected || '0'};
             transition: transform 110ms linear, opacity 210ms ease;
             will-change: transform, opacity;
           }
@@ -73,6 +84,7 @@ function OpponentPanel(props) {
           }
           .opponent-description {
             font-size: var(--small-font-size);
+            font-size: 3.5vw;
           }
           .opponent-quote {
             box-sizing: border-box;
@@ -86,6 +98,7 @@ function OpponentPanel(props) {
             min-height: var(--normal-card-height);
             text-align: ${props.available || 'center'};
             width: ${props.available || '100%'};
+            font-size: ${quoteTextSize};
           }
           .opponent-name-area {
             grid-column-start: 1;
@@ -95,6 +108,7 @@ function OpponentPanel(props) {
             color: yellow;
             padding: var(--opponent-panel-padding);
             height: 100%;
+            font-size: ${nameFontSize};
           }
           .opponent-stats-grid {
             box-sizing: border-box;
@@ -113,11 +127,11 @@ function OpponentPanel(props) {
           .opponent-prize-body {
             display: inline-flex;
             padding: var(--opponent-panel-padding);
+            padding-left: 0;
             line-height: 100%;            
             height: 100%;
             align-items: center;
-            justify-content: center;
-            justify-content: space-around;
+            justify-content: space-between;
             border: 1px solid var(--dark-red-bg-color);
             border-top: 0;
             border-radius: 0 0 var(--menu-border-width) var(--menu-border-width);
@@ -130,16 +144,16 @@ function OpponentPanel(props) {
           }
           .opponent-prize-credits {
             font-family: var(--title-font);
-            font-size: 4.5vw;
+            font-size: ${creditFontSize};
             color: green;
+            text-align: center;
+            width: 100%;
           }
           .opponent-prize-cards {
-            padding: var(--opponent-panel-padding);
-            //display: inline-flex;
-            //align-items: center;
+            padding: var(--opponent-panel-padding);  
             display: grid;
             grid-template-rows: var(--prize-card-height);
-            grid-template-columns: var(--prize-card-width) var(--prize-card-width) var(--prize-card-width) var(--prize-card-width) var(--prize-card-width);
+            grid-template-columns: var(--prize-card-width) var(--prize-card-width) var(--prize-card-width);
             grid-column-gap: 0.5vw;
             border: 1px solid var(--dark-red-bg-color);
             border-top: 0;
@@ -188,20 +202,9 @@ function OpponentPanel(props) {
             width: 100%;
             padding: var(--menu-border-width);
           }
-          #${charName}-name-area {
-            font-size: ${nameFontSize};
-          }
-          #${charName}-name-area::before {
-            content: ${'\''+props.character.displayName+'\''};
-          }
-          #${charName}-quote {
-            font-size: ${quoteTextSize};
-          }
+    
           .unavailable .opponent-prize-credits {
             color: red !important;
-          }
-          .unavailable .opponent-name-area::before {
-            content: '???' !important;
           }
           .unavailable .player-portrait {
             opacity: 0.2 !important;
@@ -216,13 +219,13 @@ function OpponentPanel(props) {
           }
           @keyframes big-throb {
             0% {
-              transform: scale(1);
+              transform: scale(1.05);
             }
             50% {
-              transform: scale(1.25);
+              transform: scale(0.9);
             }
             100% {
-              transform: scale(1);
+              transform: scale(1.05);
             }
           }
           .big-throbbing {
@@ -248,13 +251,13 @@ function OpponentPanel(props) {
         `}
       </style>
       <div className='left-opponent-panel'>
-        <div id={`${charName}-name-area`} className='opponent-name-area inner-red-panel'>
-          {/* {props.character.displayName} */}
+        <div id={`${charName}-name-area`} className='opponent-name-area inner-red-panel'>          
+          {props.available ? props.character.displayName : '???'}
         </div>
         {props.selected &&
           <div id='portrait-area'>
             <div id='defeated-message'>DEFEATED</div>
-            <PlayerPortrait type='opponent-panel' hidden={!props.available} size={portraitSize} cpu={true} spriteIndex={props.index} displayName={''} />
+            <PlayerPortrait type='opponent-panel' hidden={!props.available} size={portraitSize} cpu={true} spriteIndex={props.available ? props.index : -1} displayName={''} />
           </div>
         }
         <div id={`${charName}-quote`} className='opponent-quote'>
