@@ -1,24 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Card from './Card';
 
-const drawCardFromSelection = (selection, cardCounts, value, type) => {
-  let cardName = 'value|' + value + ' type|' + type;
-  console.log('clicked cardname', cardName)
-  let copies = cardCounts[cardName];
-  console.log('copies', copies);
-  let newCardCounts = { ...cardCounts };
-  newCardCounts[cardName] = copies - 1;
-  setCardCounts(newCardCounts)
-}
 function DeckSelectionScreen(props) {  
-  console.big('DeckSelectionScreen rendering');
-  console.info(props);
-  console.big('DeckSelectionScreen rendering');
-  setTimeout(() => {
-    document.getElementById('deck-select-screen').style.opacity = 1;
-    document.getElementById('deck-select-screen').style.transform = 'none';
-  }, 1);
+  useEffect(() => {    
+    document.getElementById('deck-select-screen').classList.add('showing')
+  });
   let originalSelectionCards = props.cardSelection;
   let uniqueCardList = [];
   let wonCardCounts = {};
@@ -163,6 +150,10 @@ function DeckSelectionScreen(props) {
             transform: scale(1.05);
             transition: transform 300ms ease, opacity 300ms ease;
             will-change: transform, opacity;
+          }
+          #deck-select-screen.showing {          
+            opacity: 1;
+            transform: none;
           }
           #cards-area {
             display: flex;

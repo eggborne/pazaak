@@ -129,30 +129,22 @@ function ConfirmModal(props) {
                 type='number'
               />
               <br />
-              {/* <input
-              className='slider'
-                onChange={(event) => {
-                  let newValue = Math.round(event.target.value);
-                  document.getElementById('wager-input').value = newValue;
-                }}
-                type='range' step={0.05} min='50' max={props.credits}
-              /> */}
-            <Slider type='wager-control'
-              id='wager-slider'
-              steps={20}
-              showing={true}
-              bgColor={'white'}
-              home={'confirm-body'}
-              value={wagerSliderValue}
-              blankKnob={true}
-              changeSliderValue={(type, newValue) => {
-                console.log('touch newValue', newValue)
-                console.log('userWager', userWager)
-                console.log('userWager / props.credits', userWager / props.credits)
-                newValue = Math.round(newValue * (props.credits));
-                document.getElementById('wager-input').value = newValue > props.minimumWager ? newValue : props.minimumWager;     
-                changeWager(newValue);           
-              }} />
+              <Slider type='wager-control'
+                id='wager-slider'
+                steps={20}
+                showing={true}
+                bgColor={'white'}
+                home={'confirm-body'}
+                value={wagerSliderValue}
+                blankKnob={true}
+                changeSliderValue={(type, newValue) => {
+                  console.log('touch newValue', newValue)
+                  console.log('userWager', userWager)
+                  console.log('userWager / props.credits', userWager / props.credits)
+                  newValue = Math.round(newValue * (props.credits));
+                  document.getElementById('wager-input').value = newValue > props.minimumWager ? newValue : props.minimumWager;     
+                  changeWager(newValue);
+                }} />
             </div>
           }
           {props.messageData.bodyText === 'forfeit' &&

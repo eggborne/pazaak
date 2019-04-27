@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { portraitSources } from '../scripts/db';
 import { randomInt } from '../scripts/util';
@@ -6,14 +6,9 @@ import { randomInt } from '../scripts/util';
 const staticSource = 'https://pazaak.online/assets/images/statictv.webm';
 
 function PlayerPortrait(props) {
-  console.orange('PlayerPortrait rendering - ' + props.displayName);
-  if (props.type === 'opponent-panel' && !props.hidden) {
-    setTimeout(() => {
-      document.getElementById(`opponent-select-portrait-cover-${props.spriteIndex}`).style.opacity =  0;
-    },2);
-  }
+  console.orange('PlayerPortrait rendering - ' + props.displayName);  
   let unhiddenStatic = 0.4 + randomInt(-2, 1) / 10;
-  let staticFadeTime = 500 + randomInt(-200, 1000);  
+  let staticFadeTime = 500 + randomInt(-200, 800);  
   let portraitSize = props.size;
   let sheetWidth = portraitSize * 8;
   let sheetHeight = portraitSize * 3;
@@ -51,6 +46,11 @@ function PlayerPortrait(props) {
   let coverId = '';
   if (props.type === 'opponent-panel') {
     coverId = `opponent-select-portrait-cover-${props.spriteIndex}`;
+    useEffect(() => {
+      if (props.type === 'opponent-panel' && !props.hidden) {
+        requestAnimationFrame(() => { document.getElementById(coverId).style.opacity = 0 });        
+      }
+    })
   }
   return (
     <div className={'player-portrait'} style={ props.style }>
@@ -87,6 +87,7 @@ function PlayerPortrait(props) {
           width: 100%;
           height: 32%;
           font-size: ${labelFontSize}px;
+          font-family: var(--main-font);
           background-color: rgba(0, 0, 0, 0.5);
           box-sizing: border-box;
           text-align: center;

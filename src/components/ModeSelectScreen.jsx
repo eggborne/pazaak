@@ -1,11 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 function ModeSelectScreen(props) {
-  requestAnimationFrame(() => {
-    if (document.getElementById('mode-select-screen')) {
-      document.getElementById('mode-select-screen').style.transform = 'none';
-    }
+  useEffect(() => {    
+    document.getElementById('mode-select-screen').classList.add('showing')
   });
   let modeSelected = props.modeSelected;
   let onlineCount = 0;
@@ -18,11 +16,14 @@ function ModeSelectScreen(props) {
           line-height: 100%;
           align-items: center;
           transform: translateY(calc(var(--shift-distance) / -2));
-          transition: transform var(--shift-duration) ease, opacity var(--shift-duration) ease;
-          will-change: transform, opacity;
+          transition: transform var(--shift-duration) ease;
+          will-change: transform;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
+        }
+        #mode-select-screen.showing {          
+          transform: none;
         }
         #mode-title-area {
           padding-top: 1vh;
@@ -180,7 +181,6 @@ function ModeSelectScreen(props) {
       <div id='lower-panel'>
 
         <div id="cpu-mode-choices">
-          {/* <div  {...{ [props.clickFunction]: props.onClickCampaign }} className={'mode-panel' + (modeSelected === 'campaign') && ' mode-selected-panel' }> */}
           <div {...{ [props.clickFunction]: props.onClickCampaign }} className={`mode-panel red-panel ${modeSelected === 'campaign' && 'mode-selected-panel'}`}>
             <div>
               <div className={`mode-button ${modeSelected === 'campaign' && 'mode-selected-button'}`} id="campaign-button">

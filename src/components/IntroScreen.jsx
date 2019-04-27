@@ -1,26 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import NameAvatarForm from './NameAvatarForm';
 
 function IntroScreen(props) {
   console.info('IntroScreen RENDERING', props);
-  let mainOpacity = document.documentElement.style.getPropertyValue('--main-opacity');
-  if (props.readyToShow && !mainOpacity) {
-    setTimeout(() => {
-      document.documentElement.style.setProperty('--main-opacity', 1);
-      document.getElementById('intro-screen-body').style.transform = 'none';
-      document.getElementById('intro-screen-body').style.opacity = 1;
-    },1);
-  } else if (props.readyToShow && props.phase === 'splashScreen') {
-    setTimeout(() => {
-      document.getElementById('intro-screen-body').style.transform = 'none';
-      document.getElementById('intro-screen-body').style.opacity = 1;
-      document.getElementById('intro-screen-body').style.pointerEvents = 'all';
-    },1);
-  }
-  // let registering = document.getElementById('unlogged-panel') && document.getElementById('unlogged-panel').classList.contains('registering');
-  let registering = props.mode === 'registering';
-  console.pink('registering?', registering);
+  useEffect(() => {
+    let mainOpacity = document.documentElement.style.getPropertyValue('--main-opacity');
+    if (props.readyToShow && !mainOpacity) {
+      requestAnimationFrame(() => {
+        document.documentElement.style.setProperty('--main-opacity', 1);
+        document.getElementById('intro-screen-body').style.transform = 'none';
+        document.getElementById('intro-screen-body').style.opacity = 1;
+      });
+    } else if (props.readyToShow && props.phase === 'splashScreen') {
+        document.getElementById('intro-screen-body').style.transform = 'none';
+        document.getElementById('intro-screen-body').style.opacity = 1;
+        document.getElementById('intro-screen-body').style.pointerEvents = 'all';
+    }
+  })
   return (
     <div id="intro-screen">
       <style jsx>{`

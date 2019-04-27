@@ -1,14 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 function InstructionsScreen(props) {
   console.big('InstructionsScreen rendering');
-  if (props.phase === 'showingInstructions') {
-    setTimeout(() => {
-      document.getElementById('instructions-screen').style.transform = 'none';
-      document.getElementById('instructions-screen').style.opacity = 1;
-    },1);
-  }
+  useEffect(() => {
+    console.log('called inst useEffect')
+    let instructionsEl = document.getElementById('instructions-screen');
+    if (props.phase === 'showingInstructions') {
+      instructionsEl.style.transform = 'none';
+      instructionsEl.style.opacity = 1;
+    } else {
+      instructionsEl.style.transitionDuration = 'var(--shift-duration-out)';
+      instructionsEl.style.opacity = 0;     
+      setTimeout(() => {
+        instructionsEl.style.transform = 'translateX(var(--shift-distance))';
+      }, 300);
+    }
+  });
   return (
     <div id="instructions-screen" className='shadowed-text'>
       <style jsx>{`
@@ -61,7 +69,7 @@ function InstructionsScreen(props) {
         </p>
         <h3>Cut in the sublight engines.</h3>
         <p>
-          What the...? Aw, we've come out of hyperspace into a meteor shower. Some kind of asteroid collision. It's not on any of the charts. What's going on? Our position is correct, except...no,
+          What the...? Aw, we've come out of hyperspace into a meteor shower. Some kind of asteroid collision. It's not on any of the charts. What's going on? Our position is correct, except... no,
           Alderaan! What do you mean? Where is it? Thats what I'm trying to tell you, kid. It ain't there. It's been totally blown away. What? How?
         </p>
         <h3>Where are those transmissions you intercepted?</h3>
@@ -85,24 +93,13 @@ InstructionsScreen.propTypes = {
   onClickBack: PropTypes.func,
   clickFunction: PropTypes.string
 };
-
 function areEqual(prevProps, nextProps) {
   let leaving = prevProps.phase == 'showingInstructions' && nextProps.phase != 'showingInstructions';
   let entering = prevProps.phase != 'showingInstructions' && nextProps.phase == 'showingInstructions';
-  if (leaving) {
-    document.getElementById('instructions-screen').style.transitionDuration = 'var(--shift-duration-out)';
-    document.getElementById('instructions-screen').style.opacity = 0;
-    setTimeout(() => {
-      document.getElementById('instructions-screen').style.transform = 'translateX(var(--shift-distance))';
-    }, 300);
-  }
-  if (entering) {
-    document.getElementById('instructions-screen').style.transitionDuration = 'var(--shift-duration)';
-    document.getElementById('instructions-screen').style.opacity = 1;
-  }
   return (prevProps.readyToShow == nextProps.readyToShow
     && !leaving
     && !entering);
 }
 
 export default React.memo(InstructionsScreen, areEqual);
+// export default InstructionsScreen;

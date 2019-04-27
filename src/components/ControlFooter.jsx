@@ -1,29 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Hamburger from './Hamburger';
 
 function ControlFooter(props) {
-  // let onIntroPhase = (props.phase === 'showingOptions' || props.phase === 'showingInstructions' || props.phase === 'showingHallOfFame');
-  console.big('ControlFooter rendering ' + props.currentOptions.panelSize);
-  
-  setTimeout(() => {
+  useEffect(() => {
     if (props.readyToShow && props.phase === 'splashScreen') {
       document.getElementById('control-footer').classList.add('retracted');
       setTimeout(() => {
         if (document.getElementById('footer-contents')) {
           document.getElementById('footer-contents').classList.add('showing');
         }
-      },500);
-      
+      }, 420);
     } else {
       if (document.getElementById('control-footer').classList.contains('retracted')) {
-        document.getElementById('control-footer').classList.remove('retracted');        
+        document.getElementById('control-footer').classList.remove('retracted');
         if (document.getElementById('footer-contents')) {
           document.getElementById('footer-contents').classList.remove('showing');
         }
       }
     }
-  }, 1);
+  });
   let backButtonOnly = (props.phase === 'showingOptions' || props.phase === 'showingHallOfFame' || props.phase === 'showingInstructions');
   return (
     <div id='control-footer' className={`red-panel ${props.readyToShow || 'hidden'}` }>
