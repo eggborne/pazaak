@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 function Card(props) {
+  console.error('CARD', props.context, 'rendering')
   let color;
   let altColor;
   let cornerSymbol = props.type;
@@ -39,12 +40,13 @@ function Card(props) {
   let animated = (props.context !== 'deck-selection-option')
     && (props.context !== 'opponent-prize');
   if (animated) {
-    setTimeout(() => {
-      if (document.getElementById(`${props.context}-card-${props.id}`)) {
-        document.getElementById(`${props.context}-card-${props.id}`).style.opacity = 1;
-        document.getElementById(`${props.context}-card-${props.id}`).style.transform = 'none';
+    useEffect(() => {
+      let cardEl = document.getElementById(`${props.context}-card-${props.id}`);
+      if (cardEl) {
+        cardEl.style.opacity = 1;
+        cardEl.style.transform = 'none';
       }
-    },50);
+    });
   }
   return (
     <div id={`${props.context}-card-${props.id}`} {...{ [props.clickFunction]: clickAction }} className='card'>
@@ -159,14 +161,13 @@ Card.propTypes = {
   clickFunction: PropTypes.string
 };
 
-// function areEqual(prevProps, nextProps) {
-//   let equalTest = (
-//     prevProps.inDeck === nextProps.inDeck
-//     && prevProps.value === nextProps.value
-//     && prevProps.size.height === nextProps.size.height
-//     && prevProps.ownedCount === nextProps.ownedCount
-//   );
-//   return equalTest;
-// }
-// export default React.memo(Card, areEqual);
-export default Card;
+function areEqual(prevProps, nextProps) {
+  let equalTest = (
+    prevProps.inDeck === nextProps.inDeck
+    && prevProps.value === nextProps.value
+    && prevProps.size.height === nextProps.size.height
+    && prevProps.ownedCount === nextProps.ownedCount
+  );
+  return equalTest;
+}
+export default React.memo(Card, areEqual);
