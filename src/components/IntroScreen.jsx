@@ -13,11 +13,11 @@ function IntroScreen(props) {
         document.getElementById('intro-screen-body').style.opacity = 1;
       });
     } else if (props.readyToShow && props.phase === 'splashScreen') {
-        document.getElementById('intro-screen-body').style.transform = 'none';
-        document.getElementById('intro-screen-body').style.opacity = 1;
-        document.getElementById('intro-screen-body').style.pointerEvents = 'all';
+      document.getElementById('intro-screen-body').style.transform = 'none';
+      document.getElementById('intro-screen-body').style.opacity = 1;
+      document.getElementById('intro-screen-body').style.pointerEvents = 'all';
     }
-  })
+  });
   return (
     <div id="intro-screen">
       <style jsx>{`

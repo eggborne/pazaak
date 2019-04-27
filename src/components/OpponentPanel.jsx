@@ -38,7 +38,7 @@ function OpponentPanel(props) {
   if (document.getElementById(`${charName}-panel`)) {
   }
   let slideAmount = props.slideAmount;
-  let selected = props.selected
+  let selected = props.selected;
   let panelEl = document.getElementById(`${charName}-panel`);
   useEffect(() => {
     if (panelEl && props.selected) {
@@ -52,10 +52,10 @@ function OpponentPanel(props) {
   }
   let creditFontSize = ((window.innerWidth / 5) / props.currentWager.toString().length);
   if (creditFontSize < window.innerWidth / 22) {
-    creditFontSize = window.innerWidth / 22
+    creditFontSize = window.innerWidth / 22;
   }
   if (creditFontSize > window.innerWidth / 15) {
-    creditFontSize = window.innerWidth / 15
+    creditFontSize = window.innerWidth / 15;
   }
   creditFontSize = creditFontSize + 'px';
   return (

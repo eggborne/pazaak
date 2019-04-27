@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 function Card(props) {
-  console.error('CARD', props.context, 'rendering')
+  console.error('CARD', props.context, 'rendering');
   let color;
   let altColor;
   let cornerSymbol = props.type;

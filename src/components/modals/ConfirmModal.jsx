@@ -9,7 +9,7 @@ function ConfirmModal(props) {
   useEffect(() => {
     if (userWager <= props.minimumWager) {
       wagerSliderValue = 0;  
-      changeWager(props.minimumWager)
+      changeWager(props.minimumWager);
     }
   });
   return (
@@ -138,9 +138,9 @@ function ConfirmModal(props) {
                 value={wagerSliderValue}
                 blankKnob={true}
                 changeSliderValue={(type, newValue) => {
-                  console.log('touch newValue', newValue)
-                  console.log('userWager', userWager)
-                  console.log('userWager / props.credits', userWager / props.credits)
+                  console.log('touch newValue', newValue);
+                  console.log('userWager', userWager);
+                  console.log('userWager / props.credits', userWager / props.credits);
                   newValue = Math.round(newValue * (props.credits));
                   document.getElementById('wager-input').value = newValue > props.minimumWager ? newValue : props.minimumWager;     
                   changeWager(newValue);

@@ -48,9 +48,9 @@ function PlayerPortrait(props) {
     coverId = `opponent-select-portrait-cover-${props.spriteIndex}`;
     useEffect(() => {
       if (props.type === 'opponent-panel' && !props.hidden) {
-        requestAnimationFrame(() => { document.getElementById(coverId).style.opacity = 0 });        
+        requestAnimationFrame(() => { document.getElementById(coverId).style.opacity = 0; });        
       }
-    })
+    });
   }
   return (
     <div className={'player-portrait'} style={ props.style }>

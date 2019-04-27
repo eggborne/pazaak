@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 function InstructionsScreen(props) {
   console.big('InstructionsScreen rendering');
   useEffect(() => {
-    console.log('called inst useEffect')
+    console.log('called inst useEffect');
     let instructionsEl = document.getElementById('instructions-screen');
     if (props.phase === 'showingInstructions') {
       instructionsEl.style.transform = 'none';

@@ -141,27 +141,27 @@ function ResultModal(props) {
               <div className={'credit-wager won'}>{props.currentWager} credits</div>
               {props.prizeCards && 
                 <div id='prize-card-list'>
-                {props.prizeCards.length > 0 && props.prizeCards.map((card, i) => {
+                  {props.prizeCards.length > 0 && props.prizeCards.map((card, i) => {
                   // let card = prizeCards[cardIndex];
-                console.info('doing cardindex', i);
-                console.info('doing card', card);
-                let cardName = `value|${card.value} type|${card.type}`;
-                return (
-                  <div key={i}>
-                    <Card clickFunction={() => null} id={i} context={'prize-card'} size={'prize'} value={card.value} type={card.type} />
-                  </div>);
-              })}
+                    console.info('doing cardindex', i);
+                    console.info('doing card', card);
+                    let cardName = `value|${card.value} type|${card.type}`;
+                    return (
+                      <div key={i}>
+                        <Card clickFunction={() => null} id={i} context={'prize-card'} size={'prize'} value={card.value} type={card.type} />
+                      </div>);
+                  })}
                 </div>
               }
             </>
-            :
+              :
             <>
               <div>You lost:</div>
               <div className={'credit-wager lost'}>{props.currentWager} credits</div>
             </>            
-          }
+            }
           </div>
-      }
+        }
         {/* <div style={winnerStyle} id='result-winner'>{props.winner}</div> */}
         <div style={scoresStyle} id='result-scores'>
           <div>{props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span></div>

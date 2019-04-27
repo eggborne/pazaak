@@ -4,7 +4,7 @@ import Card from './Card';
 
 function DeckSelectionScreen(props) {  
   useEffect(() => {    
-    document.getElementById('deck-select-screen').classList.add('showing')
+    document.getElementById('deck-select-screen').classList.add('showing');
   });
   let originalSelectionCards = props.cardSelection;
   let uniqueCardList = [];
@@ -17,7 +17,7 @@ function DeckSelectionScreen(props) {
     }
   });
   let actualDeck = props.userDeck;
-  console.log('actualDeck', actualDeck)
+  console.log('actualDeck', actualDeck);
   actualCardList.map((cardObj, i, arr) => {
     let copiesInArray = [...arr].filter(c => c.value === cardObj.value && c.type === cardObj.type).length;
     let cardName = 'value|' + cardObj.value + ' type|' + cardObj.type;
@@ -29,17 +29,17 @@ function DeckSelectionScreen(props) {
     }
     if ([...actualDeck].filter(c => c.id === cardObj.id).length) {
       // one or more have been selected, remove from count
-      wonCardCounts[cardName] -= [...actualDeck].filter(c => c.id === cardObj.id).length
+      wonCardCounts[cardName] -= [...actualDeck].filter(c => c.id === cardObj.id).length;
     } else {
       // still unselected; include in altered list
       alteredCardList.push(cardObj);
     }
   });
 
-  console.log('originalSelectionCards',originalSelectionCards)
-  console.log('uniqueCardList',uniqueCardList)
-  console.log('wonCardCounts',wonCardCounts)
-  console.log('actualCardList', actualCardList)
+  console.log('originalSelectionCards',originalSelectionCards);
+  console.log('uniqueCardList',uniqueCardList);
+  console.log('wonCardCounts',wonCardCounts);
+  console.log('actualCardList', actualCardList);
 
   const cardCounts = wonCardCounts;
   let selectionCardSize = 'mini';
@@ -76,7 +76,7 @@ function DeckSelectionScreen(props) {
     console.log('card', i, 'is', card.id);    
     let cardName = 'value|' + card.value + ' type|' + card.type;
 
-    console.log('making with cardName', cardName)
+    console.log('making with cardName', cardName);
     cardSelectionGrid[i] = (
       <Card
         id={card.id}
@@ -105,14 +105,14 @@ function DeckSelectionScreen(props) {
     props.userDeck = [];
   }
   props.userDeck.map((card, i) => {
-    console.log('inserting')
-    console.info(card)
+    console.log('inserting');
+    console.info(card);
     userSelectedGrid[i] = (
       <Card
         id={card.id}
         context={'deck-selected'} 
         onClickCard={(event) => {          
-          props.onClickSelectedCard(event, card)
+          props.onClickSelectedCard(event, card);
         }} 
         size={selectedCardSize} 
         value={card.value} 
@@ -130,7 +130,7 @@ function DeckSelectionScreen(props) {
   let previewCardHeight = `var(--${selectedCardSize}-card-height)`;
   let cardRadius = `calc(var(--${selectionCardSize}-card-width) / 18)`;
   let cardBorder = `calc(var(--${selectedCardSize}-card-height) / 100)`;
-  console.info('userSelectedGrid')
+  console.info('userSelectedGrid');
   console.info(userSelectedGrid);
   let cardsOverflowing = props.cardSelection.length > 18;
   

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 function ModeSelectScreen(props) {
   useEffect(() => {    
-    document.getElementById('mode-select-screen').classList.add('showing')
+    document.getElementById('mode-select-screen').classList.add('showing');
   });
   let modeSelected = props.modeSelected;
   let onlineCount = 0;
