@@ -52,10 +52,9 @@ class OpponentSelectScreen extends React.Component {
     );
   }
   onClickPrev = () => {
-    if (this.state.selectedOpponent > 0 && Date.now() - this.state.lastChanged > 210) {
+    if (this.state.selectedOpponent > 0 && Date.now() - this.state.lastChanged > 105) {
       let prevIndex = this.state.selectedOpponent - 1;
       document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
-      document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `scale(0.95)`;
       this.setState({
         lastChanged: Date.now()
       });
@@ -74,10 +73,9 @@ class OpponentSelectScreen extends React.Component {
     }
   };
   onClickNext = () => {
-    if (this.state.selectedOpponent < 15 && Date.now() - this.state.lastChanged > 210) {
+    if (this.state.selectedOpponent < 15 && Date.now() - this.state.lastChanged > 105) {
       let nextIndex = this.state.selectedOpponent + 1;
       document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
-      document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.transform = `scale(0.95)`;
       this.setState({
         lastChanged: Date.now()
       });
@@ -139,7 +137,7 @@ class OpponentSelectScreen extends React.Component {
     for (var i = 0; i < 16; i++) {
       let character = opponentList[i];
       let available = this.props.userCredits >= character.prize.credits;
-      let slideAmount = opponentIndex > this.state.lastSelectedOpponent ? 50 : -50;
+      let slideAmount = opponentIndex > this.state.lastSelectedOpponent ? 20 : -20;
       let opponentDefeated = this.props.userDefeated.indexOf(character.name) > -1;
       if ((this.state.showDefeated || numberDefeated === 16)|| (!this.state.showDefeated && !opponentDefeated)) {
         opponentArray.push(
