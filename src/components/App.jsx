@@ -609,33 +609,6 @@ class App extends React.Component {
     }
   }
 
-  incrementPlayerTotalGames = (playerName, type) => {
-    if (type === 'matches') {
-      DB.incrementMatches(playerName);
-    }
-    if (type === 'sets') {
-      DB.incrementSets(playerName);
-    }
-    let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
-    console.log('trying to call funcName?', funcName);
-
-    // eval(funcName)(playerName);
-  };
-
-  incrementPlayerScore = (playerName, type) => {
-    console.log('type?', type)
-    if (type === 'matches') {
-      DB.incrementMatchWins(playerName);
-    }
-    if (type === 'sets') {
-      DB.incrementSetWins(playerName);
-    }
-    let funcName = `DB.increment${type[0].toUpperCase()}${type.slice(1, type.length)}`;
-    console.log('trying to call funcName?', funcName);
-
-    // eval(funcName)(playerName);
-  };
-
   playSound = sound => {
     if (this.state.options.sound) {
       sounds[sound].play();
@@ -1537,42 +1510,31 @@ class App extends React.Component {
       let newWins = this.state[`${winner}Wins`] + 1;
       if (this.state.playerNames.user !== 'Guest' && this.state.loggedInAs) {
         let playerName = this.state.loggedInAs;
-        // this.incrementPlayerTotalGames(playerName, 'sets');
         DB.incrementSets(playerName);
         newUserStatus.totalSets++;
+        let creditPrize = parseInt(this.state.currentWager);
         if (winner === 'user') {
-          // USER won
           DB.incrementSetWins(playerName);
           if (newWins === 3) {
-          // if (newWins === 1) {
-            let creditPrize = parseInt(this.state.currentWager);
             if (this.state.gameMode === 'campaign') {
-              // creditPrize = characters[this.state.cpuOpponent].prize.credits;
               let newCards = [];
               let characterArray = Object.keys(characters);
               newUserStatus.cpuDefeated.push(this.state.cpuOpponent);
               newUserStatus.cpuDefeated = newUserStatus.cpuDefeated.sort(opponentName => characterArray.indexOf(opponentName));
-              // let creditPrize = characters[this.state.cpuOpponent].prize.credits;
               characters[this.state.cpuOpponent].prize.cards.map((cardIndex) => {
                 // don't add prize cards if already won
-                // newUserStatus.wonCards.push(cardIndex);
                 if (!newUserStatus.wonCards.includes(cardIndex)) {
                   newCards.push(cardIndex)
-                } else {
-                  console.green('wonCards already had card index', cardIndex)
                 }
               });              
               if (newCards.length) {
-                console.pink('USER WON NEW CARDS!');                              
                 newCards.map(index => {
                   newUserStatus.wonCards.push(index)
                   newCardSelection.push(prizeCards[index]);                  
                 });
               }
             }
-            console.big('USER WON ' + creditPrize)
             newUserStatus.credits += creditPrize;
-            console.info('sending', newUserStatus.wonCards)
             DB.incrementMatchWins(1, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, JSON.stringify(newUserStatus.wonCards));
             DB.incrementMatches(playerName);
             newUserStatus.matchWins++;
@@ -1581,7 +1543,7 @@ class App extends React.Component {
         } else {
           // CPU won
           if (newWins === 3) {
-            newUserStatus.credits -= characters[this.state.cpuOpponent].prize.credits;
+            newUserStatus.credits -= creditPrize;
             DB.incrementMatchWins(0, playerName, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, JSON.stringify(newUserStatus.wonCards));
             DB.incrementMatches(playerName);
             newUserStatus.totalMatches++;
@@ -1595,7 +1557,6 @@ class App extends React.Component {
           lastWinner: winner,
           userStatus: newUserStatus,
           cardSelection: newCardSelection,
-          //currentWager: 0
         },
         () => {
           this.callResultModal(winner);
@@ -1614,7 +1575,6 @@ class App extends React.Component {
           turn: null,
           lastWinner: null,
           userStatus: newUserStatus,
-          //currentWager: 0
         },
         () => {
           this.callResultModal('tie');
@@ -1627,11 +1587,6 @@ class App extends React.Component {
     let newTurn;
     if (this.state.turn === 'user') {
       newTurn = 'opponent';
-      setTimeout(() => {
-        // Array.from(document.getElementsByClassName('move-button')).map((el, i) => {
-        //   el.classList.add('disabled-button');
-        // });
-      }, this.state.options.flashInterval);
     } else {
       newTurn = 'user';
       setTimeout(() => {
@@ -2114,10 +2069,20 @@ class App extends React.Component {
   };
   handleClickHamburgerQuit = event => {
     this.callConfirmModal('Quit match?', 'forfeit', { confirm: 'Do it', cancel: 'Never mind' }, () => {
-      document.getElementById('hamburger-menu').classList.remove('hamburger-on');      
-      this.resetBoard('user', true);
-      this.dismissConfirmModal();
-      document.getElementById('shade').classList.remove('shade-on');
+      let newUserStatus = {...this.state.userStatus};
+      newUserStatus.credits -= this.state.currentWager;
+      this.setState({
+        userStatus: newUserStatus
+      }, () => {
+        if (this.state.userID) {
+          DB.incrementMatchWins(0, this.state.loggedInAs, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, JSON.stringify(newUserStatus.wonCards)).then(() => {
+            document.getElementById('hamburger-menu').classList.remove('hamburger-on');      
+            this.resetBoard('user', true);
+            this.dismissConfirmModal();
+            document.getElementById('shade').classList.remove('shade-on');  
+          });
+        }
+      })
     });
   };
   callMoveIndicator = (player, message, duration) => {
