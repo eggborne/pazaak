@@ -204,7 +204,7 @@ export const characters = {
       { id: 9, value: 3, type: '±' }
     ],
     quotes: {
-      panel: '"MISSION: DESTROY PLAYER SCORE"'
+      panel: '"MISSION: DESTROY PLAYER"'
     }
   },
   yoda: {
@@ -406,7 +406,7 @@ export const characters = {
     name: 'joecamel',
     displayName: 'Joe Camel',
     species: 'Toon',
-    placeOfOrigin: 'Unknown',
+    placeOfOrigin: 'Earth',
     skillLevel: 10,
     prize: {
       credits: 25000,
