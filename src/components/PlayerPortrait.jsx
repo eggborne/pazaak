@@ -62,7 +62,7 @@ function PlayerPortrait(props) {
           border: ${borderWidth}px solid var(--dark-red-bg-color);
           display: flex;
           align-items: flex-end;
-          background-image: url(${source});
+          background-image: ${props.spriteIndex > -1 ? `url(${source})` : 'none'};
           background-size: ${sheetWidth}px ${sheetHeight}px;
           width: ${portraitSize}px;
           max-width: ${portraitSize}px;
