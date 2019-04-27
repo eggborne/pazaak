@@ -54,7 +54,6 @@ class OpponentSelectScreen extends React.Component {
   onClickPrev = () => {
     if (this.state.selectedOpponent > 0 && Date.now() - this.state.lastChanged > 105) {
       let prevIndex = this.state.selectedOpponent - 1;
-      document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
       this.setState({
         lastChanged: Date.now()
       });
@@ -75,7 +74,6 @@ class OpponentSelectScreen extends React.Component {
   onClickNext = () => {
     if (this.state.selectedOpponent < 15 && Date.now() - this.state.lastChanged > 105) {
       let nextIndex = this.state.selectedOpponent + 1;
-      document.getElementById( `${this.props.characterArray[this.state.selectedOpponent].name}-panel`).style.opacity = 0;
       this.setState({
         lastChanged: Date.now()
       });
