@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import PlayerPortrait from './PlayerPortrait';
 import Card from './Card';
 import CardBack from './CardBack';
-import { characters, prizeCards } from '../scripts/characters';
+import { prizeCards } from '../scripts/characters';
 
 function OpponentPanel(props) {
   console.error('OpponentPanel rendering ---', props);
@@ -16,21 +16,21 @@ function OpponentPanel(props) {
   let portraitSize = window.innerWidth * 0.35;
   let wordsInName = props.character.displayName.split(' ').length;
   let totalLength = props.character.displayName.length;
-  let nameFontSize = 'var(--medium-font-size)';
+  let nameFontSize = '6.5vw';
+  if ((wordsInName <= 2 && totalLength > 8) || (wordsInName > 2 && totalLength > 12)) {
+    nameFontSize = '5vw';
+  }
+  if (wordsInName > 2 && totalLength > 18) {
+    nameFontSize = '4vw';
+  }
   let quoteLength = props.character.quotes.panel.length;
-  let quoteTextSize = '5vw';
+  let quoteTextSize = '4.5vw';
   if (props.available) {
     if (quoteLength > 30) {
-      quoteTextSize = '4.5vw';
-    }
-    if (quoteLength > 55) {
       quoteTextSize = '4vw';
     }
-    if ((wordsInName <= 2 && totalLength > 8) || (wordsInName > 2 && totalLength > 12)) {
-      nameFontSize = 'var(--small-med-font-size)';
-    }
-    if (wordsInName > 2 && totalLength > 18) {
-      nameFontSize = '1.75vh';
+    if (quoteLength > 55) {
+      quoteTextSize = '3.5vw';
     }
   } else {
     quoteTextSize = '4vw';
@@ -40,19 +40,14 @@ function OpponentPanel(props) {
   let slideAmount = props.slideAmount;
   let selected = props.selected;
   let panelEl = document.getElementById(`${charName}-panel`);
-  useEffect(() => {
-    if (panelEl && props.selected) {
-      panelEl.style.opacity = 1;
-    }
-  });
   let panelQuote = props.available ? props.character.quotes.panel : '(transmission unavailable)';
   let wagerDisplay = props.character.prize.credits;
   if (parseInt(props.currentWager) > wagerDisplay) {
     wagerDisplay = props.currentWager;
   }
   let creditFontSize = ((window.innerWidth / 5) / props.currentWager.toString().length);
-  if (creditFontSize < window.innerWidth / 22) {
-    creditFontSize = window.innerWidth / 22;
+  if (creditFontSize < window.innerWidth / 26) {
+    creditFontSize = window.innerWidth / 26;
   }
   if (creditFontSize > window.innerWidth / 15) {
     creditFontSize = window.innerWidth / 15;
@@ -105,6 +100,7 @@ function OpponentPanel(props) {
             display: flex;
             align-items: center;
             justify-content: center;
+            text-align:center;
             color: yellow;
             padding: var(--opponent-panel-padding);
             height: 100%;
@@ -247,7 +243,10 @@ function OpponentPanel(props) {
             transform-origin: 50% 50%;
             transform: rotate(-2deg);
             display: ${!props.defeated && 'none'};
-          }         
+          }
+          #min-display {
+            font-size: 0.9em;
+          } 
         `}
       </style>
       <div className='left-opponent-panel'>
@@ -283,7 +282,7 @@ function OpponentPanel(props) {
             </div>
           </div>
           <div className='opponent-prize-area'>
-            <div className='opponent-prize-label inner-red-panel'>Wager (min. {props.character.prize.credits})</div>
+            <div className='opponent-prize-label inner-red-panel'>Wager <span id='min-display'>(min. {props.character.prize.credits})</span></div>
             <div className={'opponent-prize-body'}>
               <div className={`opponent-prize-credits ${props.available || 'big-throbbing'}`}>{wagerDisplay}</div>
               <button
