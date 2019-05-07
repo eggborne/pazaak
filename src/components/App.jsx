@@ -2138,8 +2138,8 @@ class App extends React.Component {
         userStatus: newUserStatus
       }, () => {
         if (this.state.userID) {
+          document.getElementById('hamburger-menu').classList.remove('hamburger-on');      
           DB.incrementMatchWins(0, this.state.loggedInAs, JSON.stringify(newUserStatus.cpuDefeated), newUserStatus.credits, JSON.stringify(newUserStatus.wonCards)).then(() => {
-            document.getElementById('hamburger-menu').classList.remove('hamburger-on');      
             this.resetBoard('user', true);
             this.dismissConfirmModal();
             document.getElementById('shade').classList.remove('shade-on');  
