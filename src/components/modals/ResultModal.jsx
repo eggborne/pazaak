@@ -22,6 +22,7 @@ function ResultModal(props) {
   let portraitSize = window.innerHeight / 8;
   let winnerIndex = props[`${props.winner}Index`] || 0;
   let winnerName = props.playerNames[props.winner] || null;
+  let cardsAtStake = props.prizeCards || [];
   return (
     <div id='result-modal' className='red-panel'>
       <style jsx>{`
@@ -145,7 +146,7 @@ function ResultModal(props) {
             <>
               <div id='cards-label'>Cards won:</div>
               <div id='prize-card-list'>
-                {props.prizeCards.length > 0 && props.prizeCards.map((card, i) => {
+                {cardsAtStake.length > 0 && cardsAtStake.map((card, i) => {
                   // let card = prizeCards[cardIndex];
                   console.info('doing cardindex', i);
                   console.info('doing card', card);
@@ -199,5 +200,5 @@ function areEqual(prevProps, nextProps) {
   return nextProps.currentTurn === null;
 }
 
-// export default ResultModal;
-export default React.memo(ResultModal, areEqual);
+export default ResultModal;
+// export default React.memo(ResultModal, areEqual);
