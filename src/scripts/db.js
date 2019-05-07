@@ -270,3 +270,50 @@ export const getUserWithPass = (loginObj) => {
     data: JSON.stringify(loginObj)
   });
 };
+export const addCurrentUser = (userObj) => {
+  console.log('adding current user', userObj);
+  return axios({
+    method: 'post',
+    url: 'https://www.eggborne.com/scripts/pazaakaddcurrentuser.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    },
+    data: JSON.stringify(userObj)
+  });
+};
+export const getOnlineUsers = () =>
+  axios({
+    method: 'get',
+    url: 'https://www.eggborne.com/scripts/pazaakgetonlineusers.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    }
+  });
+export const deleteCurrentUserByID = (userID) => 
+  axios({
+    method: 'post',
+    url: 'https://www.eggborne.com/scripts/removepazaakactiveuser.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    },
+    data: { userID: userID }
+  });
+export const handshake = (userObj) => {
+  console.log('handshaking current user', userObj);
+  return axios({
+    method: 'post',
+    url: 'https://www.eggborne.com/scripts/pazaakhandshake.php',
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    },
+    data: JSON.stringify(userObj)
+  });
+};
+// export const getServerTime = () =>
+//   axios({
+//     method: 'get',
+//     url: 'https://www.eggborne.com/scripts/getservertime.php',
+//     headers: {
+//       'Content-type': 'application/x-www-form-urlencoded'
+//     }
+//   });
