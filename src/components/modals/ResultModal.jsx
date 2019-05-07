@@ -7,7 +7,6 @@ function ResultModal(props) {
   console.info('ResultModal rendering', props);
   let userScoreStyle = { color: 'white' };
   let opponentScoreStyle = { color: 'white' };
-  let winnerStyle = { display: 'none' };
   let scoresStyle = { display: 'flex' };
   if (!props.matchOver) {
     if (props.winner === 'user') {
@@ -18,12 +17,11 @@ function ResultModal(props) {
       opponentScoreStyle = { color: 'green' };
     }
   } else {
-    winnerStyle = { display: 'block' };
     scoresStyle = { display: 'none' };
   }
   let portraitSize = window.innerHeight / 8;
   let winnerIndex = props[`${props.winner}Index`] || 0;
-  let winnerName = props.playerNames[props.winner] || 'balls';
+  let winnerName = props.playerNames[props.winner] || null;
   return (
     <div id='result-modal' className='red-panel'>
       <style jsx>{`
@@ -41,14 +39,14 @@ function ResultModal(props) {
           flex-direction: column;
           align-items: stretch;
           justify-content: space-between;
-          transition: transform 600ms ease, opacity 300ms ease;
-          will-change: transform, opacity;
           padding: 1vh;
-          transform: scale(0.8);
+          transform: scale(0.9);
           opacity: 0;
           pointer-events: none;   
           transform-origin: center center;
           border-color: var(--trans-black-bg-color) !important;
+          transition: transform 600ms ease, opacity 300ms ease;
+          will-change: transform, opacity;
         }
         #result-title {
           width: 100%;
@@ -65,6 +63,7 @@ function ResultModal(props) {
         #result-body {
           display: flex;
           flex-direction: column;
+          justify-content: end;
           font-size: 1.5rem;
           flex-grow: 1;
         }
@@ -76,21 +75,19 @@ function ResultModal(props) {
           font-family: var(--main-font);
           font-size: 1rem;
           align-items: center;
-          justify-content: space-between;
-          padding: var(--menu-border-radius);
-        }
-        #result-scores > div {
-          margin: 2vh;
+          justify-content: space-around;
+          flex-grow: 1;
+          padding: 2vw;
         }
         #result-prize {
-          padding: var(--menu-border-radius);
-          display: flex;
-          flex-direction: column;
+          display: grid;
+          grid-template-columns: 0.7fr 0.3fr;
+          grid-template-rows: 0.25fr 0.25fr 0.5fr;
           align-items: center;
-          justify-content: space-around;
+          padding: 3vw;
         }
         #result-prize > div {
-                
+          
         }
         #prize-card-list {
           display: flex;
@@ -113,60 +110,56 @@ function ResultModal(props) {
         #result-ok-button {          
           margin-bottom: ${props.matchOver && '2vh'};
         }
-        .credit-wager {
-
+        #credits-label, #cards-label {
+          font-family: var(--main-font);
+          font-size: 4vw;
         }
-        .credit-wager.won {
-          color: green;
+        #prize-amount {
+          color: ${props.winner === 'user' ? 'green' : 'red'}
         }
-        .credit-wager.lost {
-          color: red;
+        #result-modal.modal-on {
+          transform: scale(1) !important;
+          pointer-events: all !important;
+          opacity: 1 !important;
         }
       `}
       </style>
       <div className='shadowed-text inner-red-panel' id='result-title'>
         <div>{props.titleText}</div>
-        {props.matchOver &&
+        {props.titleText === 'MATCH\nWINNER' &&
           <div>
             <PlayerPortrait cpu={props.winner === 'opponent'} size={portraitSize} spriteIndex={winnerIndex} displayName={winnerName} type={'mini'} />
           </div>
         }
       </div>
       <div className='shadowed-text' id='result-body'>
-        {props.matchOver &&
-          <div id='result-prize'>
-            {props.winner === 'user' ? 
-            <>
-              <div>You won:</div>
-              <div className={'credit-wager won'}>{props.currentWager} credits</div>
-              {props.prizeCards && 
-                <div id='prize-card-list'>
-                  {props.prizeCards.length > 0 && props.prizeCards.map((card, i) => {
-                  // let card = prizeCards[cardIndex];
-                    console.info('doing cardindex', i);
-                    console.info('doing card', card);
-                    let cardName = `value|${card.value} type|${card.type}`;
-                    return (
-                      <div key={i}>
-                        <Card clickFunction={() => null} id={i} context={'prize-card'} size={'prize'} value={card.value} type={card.type} />
-                      </div>);
-                  })}
-                </div>
-              }
-            </>
-              :
-            <>
-              <div>You lost:</div>
-              <div className={'credit-wager lost'}>{props.currentWager} credits</div>
-            </>            
-            }
-          </div>
-        }
-        {/* <div style={winnerStyle} id='result-winner'>{props.winner}</div> */}
         <div style={scoresStyle} id='result-scores'>
           <div>{props.playerNames.user}: <span style={userScoreStyle}>{props.finalScores.user}</span></div>
           <div>{props.playerNames.opponent}: <span style={opponentScoreStyle}>{props.finalScores.opponent}</span></div>
         </div>
+        {props.titleText === 'MATCH\nWINNER' &&
+          <div id='result-prize'>
+            <div id='credits-label'>Credits {props.winner === 'user' ? 'won:' : 'lost:'}</div>
+            <div id='prize-amount'>{props.currentWager}</div>
+            {props.winner === 'user' &&
+            <>
+              <div id='cards-label'>Cards won:</div>
+              <div id='prize-card-list'>
+                {props.prizeCards.length > 0 && props.prizeCards.map((card, i) => {
+                  // let card = prizeCards[cardIndex];
+                  console.info('doing cardindex', i);
+                  console.info('doing card', card);
+                  let cardName = `value|${card.value} type|${card.type}`;
+                  return (
+                    <div key={i}>
+                      <Card clickFunction={() => null} id={i} context={'prize-card'} size={'prize'} value={card.value} type={card.type} />
+                    </div>);
+                })}
+              </div>
+            </>
+            }
+          </div>
+        }
       </div>
       <div id='result-button-area' className='inner-red-panel'>
         {!props.matchOver && <button {...{ [props.clickFunction]: props.onClickResultButton1 }} className='pointer' id='result-ok-button'>{props.buttonText}</button>}
@@ -182,6 +175,7 @@ ResultModal.propTypes = {
   titleText: PropTypes.string,
   playerNames: PropTypes.object,
   winner: PropTypes.string,
+  currentTurn: PropTypes.string,
   matchOver: PropTypes.bool,
   finalScores: PropTypes.object,
   buttonText: PropTypes.string,
@@ -196,8 +190,14 @@ ResultModal.propTypes = {
 };
 
 function areEqual(prevProps, nextProps) {
-  return prevProps.matchOver === nextProps.matchOver;
+  let equalTest =
+    prevProps.currentTurn == nextProps.currentTurn
+    && prevProps.titleText == nextProps.titleText
+    && prevProps.winner == nextProps.winner
+    ;
+  console.log('ResultModal equal:', equalTest);
+  return nextProps.currentTurn === null;
 }
 
-export default ResultModal;
-// export default React.memo(ResultModal, areEqual);
+// export default ResultModal;
+export default React.memo(ResultModal, areEqual);
