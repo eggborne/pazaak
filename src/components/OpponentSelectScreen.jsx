@@ -16,7 +16,7 @@ class OpponentSelectScreen extends React.Component {
   componentDidMount() {
     document.getElementById('prev-opponent-button').addEventListener('touchstart', () => {
       document.getElementById('prev-opponent-button').style.backgroundColor = '#080808';
-      document.getElementById('prev-opponent-button').style.transform = 'scale(0.95)';
+      document.getElementById('prev-opponent-button').style.transform = 'scale(0.975)';
     }, true);
     document.getElementById('prev-opponent-button').addEventListener('touchend', () => {
       document.getElementById('prev-opponent-button').style.backgroundColor =
@@ -25,7 +25,7 @@ class OpponentSelectScreen extends React.Component {
     }, true);
     document.getElementById('next-opponent-button').addEventListener('touchstart', () => {
       document.getElementById('next-opponent-button').style.backgroundColor = '#080808';
-      document.getElementById('next-opponent-button').style.transform = 'scale(0.95)';
+      document.getElementById('next-opponent-button').style.transform = 'scale(0.975)';
     }, true);
     document.getElementById('next-opponent-button').addEventListener('touchend', () => {
       document.getElementById('next-opponent-button').style.backgroundColor = 'var(--button-bg-color)';
@@ -39,7 +39,7 @@ class OpponentSelectScreen extends React.Component {
       });
     }
     if (this.props.phase == 'selectingOpponent' && prevProps.phase != 'selectingOpponent') {
-      document.getElementById('opponent-select-screen').style.transform = 'scale(0.95)';
+      document.getElementById('opponent-select-screen').style.transform = 'scale(1.05)';
     }
     return (
       (this.props.phase != 'selectingOpponent' && prevProps.phase == 'selectingOpponent') ||
@@ -65,10 +65,10 @@ class OpponentSelectScreen extends React.Component {
           },
           () => {
             this.props.onClickPanel(this.props.characterArray[this.state.selectedOpponent].name);
-            document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).classList.add('flickering');
+            //document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).classList.add('flickering');
           }
         );
-      }, 105);
+      }, 50);
     }
   };
   onClickNext = () => {
@@ -85,10 +85,10 @@ class OpponentSelectScreen extends React.Component {
           },
           () => {
             this.props.onClickPanel(this.props.characterArray[this.state.selectedOpponent].name);
-            document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).classList.add('flickering');
+            //document.getElementById(`${this.props.characterArray[this.state.selectedOpponent].name}-panel`).classList.add('flickering');
           }
         );
-      }, 105);
+      }, 50);
     }
   };
   onToggleDefeated = () => {
@@ -184,7 +184,7 @@ class OpponentSelectScreen extends React.Component {
             flex-direction: column;
             align-items: center;
             height: 100%;
-            transform: scale(0.95);
+            transform: scale(1.05);
             transition: transform 300ms ease, opacity 300ms ease;
           }
           #opponent-select-title {
@@ -217,7 +217,7 @@ class OpponentSelectScreen extends React.Component {
             height: var(--normal-card-width);
             padding-left: calc(var(--menu-border-width) * 2);
             padding-right: calc(var(--menu-border-width) * 2);
-            transition: all 150ms ease;
+            transition: all 100ms ease;
           }
           #prev-opponent-button {
             opacity: ${(opponentIndex > 0 && opponentListIndexes.indexOf(opponentIndex - 1) > -1) || '0.25'};
@@ -266,7 +266,7 @@ class OpponentSelectScreen extends React.Component {
         </div>
         
         <div id='opponent-select-area' className='shadowed-text'>
-          {numberDefeated < 16 &&
+          {numberDefeated < 16 && false &&
             <div id='show-defeated-toggle' onClick={this.onToggleDefeated}>
               Show defeated: <span id='defeated'>{this.state.showDefeated ? 'ON' : 'OFF'}</span>
             </div>
