@@ -91,8 +91,8 @@ export const checkCookie = (app) => {
       userStatus: userStatusCopy,
       // checkedCookie: true,
     }, () => {         
-        document.getElementById('starfield').play();
-        app.getUserRecordWithCookie(cookieResponse);
+      document.getElementById('starfield').play();
+      app.getUserRecordWithCookie(cookieResponse);
     });
   } else {  
     let playerNames = { ...app.state.playerNames };
@@ -105,7 +105,7 @@ export const checkCookie = (app) => {
       playerNames: playerNames
     }, () => {
       app.handleChangeBackgroundColor(app.state.defaultBackgroundColor, 'background');
-      app.handleChangeBackgroundColor([app.state.defaultPanelColor, app.state.defaultPanelShade], 'panel');        
+      app.handleChangeBackgroundColor([app.state.defaultPanelColor, app.state.defaultPanelShade], 'panel');      
     });
     console.error('No cookie found. Leaving state.userStatus.cookieID undefined. Animating starfield.');
     document.getElementById('player-name-input').disabled = false;
