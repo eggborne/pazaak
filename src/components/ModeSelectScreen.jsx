@@ -15,7 +15,7 @@ function ModeSelectScreen(props) {
           font-family: var(--title-font);
           line-height: 100%;
           align-items: center;
-          transform: translateY(calc(var(--shift-distance) / -2));
+          transform: scale(1.05);
           transition: transform var(--shift-duration) ease;
           will-change: transform;
           display: flex;
@@ -208,7 +208,16 @@ function ModeSelectScreen(props) {
         </div>
         <div id='human-mode-choices'>
           <div>
-            no humans online :(
+            {props.usersOnline.length ? 
+              <div id='users-online-list'>
+                {props.usersOnline.map(userEntry => {
+
+                  return (<div>{userEntry.username}</div>);
+                })}
+              </div>
+              :
+              <div>no humans online :(</div>          
+            }
           </div>
         </div>        
         
@@ -218,6 +227,7 @@ function ModeSelectScreen(props) {
 }
 ModeSelectScreen.propTypes = {
   phase: PropTypes.string,
+  usersOnline: PropTypes.array,
   vsCPU: PropTypes.bool,
   cpuDefeated: PropTypes.number,
   cardsWon: PropTypes.number,
