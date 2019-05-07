@@ -29,7 +29,8 @@
   --hamburger-menu-width: calc(var(--normal-card-width) * 4);
   --button-bg-color: rgb(15, 14, 17);
   --disabled-button-bg-color: #312e2e;
-  --button-text-color: #5cb3ff;
+  /* --button-text-color: #5cb3ff; */
+  --button-text-color: #009DF0;
   --special-button-text-color: #e4c951;
   --special-button-text-color: #e4c951;
   --button-border-color: rgb(25, 24, 39);
