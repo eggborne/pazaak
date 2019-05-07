@@ -41,11 +41,13 @@ function Card(props) {
     && (props.context !== 'opponent-prize');
   if (animated) {
     useEffect(() => {
-      let cardEl = document.getElementById(`${props.context}-card-${props.id}`);
-      if (cardEl) {
-        cardEl.style.opacity = 1;
-        cardEl.style.transform = 'none';
-      }
+      requestAnimationFrame(() => {
+        let cardEl = document.getElementById(`${props.context}-card-${props.id}`);
+        if (cardEl) {
+          cardEl.style.opacity = 1;
+          cardEl.style.transform = 'none';
+        }
+      });
     });
   }
   return (
@@ -170,4 +172,5 @@ function areEqual(prevProps, nextProps) {
   );
   return equalTest;
 }
-export default React.memo(Card, areEqual);
+// export default React.memo(Card, areEqual);
+export default Card;
