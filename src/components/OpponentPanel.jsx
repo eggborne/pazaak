@@ -12,10 +12,11 @@ function OpponentPanel(props) {
   if (props.character.skillLevel > 10) {
     maxSkill = props.character.skillLevel;
   }
+  let displayName = props.available ? props.character.displayName : '???';
   let skillArray = Array.apply(null, Array(maxSkill)).map(function () { });
   let portraitSize = window.innerWidth * 0.35;
-  let wordsInName = props.character.displayName.split(' ').length;
-  let totalLength = props.character.displayName.length;
+  let wordsInName = displayName.split(' ').length;
+  let totalLength = displayName.length;
   let nameFontSize = '6.5vw';
   if ((wordsInName <= 2 && totalLength > 8) || (wordsInName > 2 && totalLength > 12)) {
     nameFontSize = '5vw';
@@ -37,9 +38,6 @@ function OpponentPanel(props) {
   }
   if (document.getElementById(`${charName}-panel`)) {
   }
-  let slideAmount = props.slideAmount;
-  let selected = props.selected;
-  let panelEl = document.getElementById(`${charName}-panel`);
   let panelQuote = props.available ? props.character.quotes.panel : '(transmission unavailable)';
   let wagerDisplay = props.character.prize.credits;
   if (parseInt(props.currentWager) > wagerDisplay) {
@@ -67,8 +65,6 @@ function OpponentPanel(props) {
             width: 90%;
             display: ${props.selected || 'none'};
             opacity: ${props.selected || '0'};
-            transition: transform 110ms linear, opacity 210ms ease;
-            will-change: transform, opacity;
           }
           .left-opponent-panel {
             display: grid;
@@ -251,7 +247,7 @@ function OpponentPanel(props) {
       </style>
       <div className='left-opponent-panel'>
         <div id={`${charName}-name-area`} className='opponent-name-area inner-red-panel'>          
-          {props.available ? props.character.displayName : '???'}
+          {displayName}
         </div>
         {props.selected &&
           <div id='portrait-area'>
