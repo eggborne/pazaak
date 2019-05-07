@@ -37,6 +37,8 @@ const RULES = {
   }
 };
 
+let updateRate = 2000;
+
 let sounds = {};
 
 let lastGotRecords = 0;
@@ -221,10 +223,13 @@ class App extends React.Component {
       },
       inputHasFocus: true,
       keyboardShowing: false,
-      highScores: this.getPlayerRecords()
+      highScores: 
+      this.getPlayerRecords()
         .then(response => {
           Util.checkCookie(this);
+          
         }),
+      usersOnline: [],
       lastWidth: window.innerWidth,
       lastHeight: window.innerHeight,
       lastChangedSlider: 0,
@@ -267,6 +272,21 @@ class App extends React.Component {
   };
 
   componentDidMount() {    
+
+    // setInterval(() => {
+    //   let userObj = {
+    //     userID: this.state.userID,
+    //     username: this.state.loggedInAs,
+    //     phase: this.state.phase,
+    //     opponent: this.state.playerNames.opponent,
+    //   }
+    //   console.log('sincelastping app interval sending handshake obj', userObj)
+    //   DB.handshake(userObj).then(response => {
+    //     console.log('sincelastping handshake responded', response)
+    //   })
+    //   this.getOnlineUserList();
+    // }, updateRate);
+
     // document.getElementById('container').style.height = window.innerHeight + 'px';
     document.getElementById('container').style.minHeight = window.innerHeight + 'px';
     // if (this.state.options.ambience) {
@@ -339,7 +359,7 @@ class App extends React.Component {
         console.big('PAGE LOADED');
         this.delayEvents.pageLoaded = true;
         if (window.innerWidth > window.innerHeight) {
-          alert('Visit on a mobile device in portrait mode for best results')
+          alert('Visit on a mobile device in portrait mode for best results :|')
         }
       });
     } else {
@@ -347,9 +367,9 @@ class App extends React.Component {
       console.info('already loaded at App mount');
     }
     window.addEventListener('fullscreenchange', this.handleFullscreenChange);
-    window.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
-    window.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
-    window.addEventListener('msfullscreenchange', this.handleFullscreenChange);
+    // window.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    // window.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    // window.addEventListener('msfullscreenchange', this.handleFullscreenChange);
 
     // window.addEventListener('resize', this.sizeCards);
 
@@ -441,6 +461,45 @@ class App extends React.Component {
     }
     return deck;
   }
+  deletedExpiredUsers = (userArr) => {
+    userArr.forEach(userID => {
+      console.log('deleting', userID)
+      DB.deleteCurrentUserByID(userID);
+    })
+  }
+  getOnlineUserList = (skipAudit) => {
+    DB.getOnlineUsers().then(usersResponse => {
+      DB.getServerTime().then(response => {
+        let usersOnline = usersResponse.data;
+        if (!skipAudit) {
+          let serverTime = new Date(response.data);
+          console.log('sinceLastPing got servertime', serverTime);
+          let userArr = usersResponse.data;
+          // usersOnline = [];
+          let expiredUsers = [];
+          userArr.forEach(userObj => {
+            let lastPing = new Date(userObj.lastPing);
+            let sinceLastPing = serverTime - lastPing;
+            console.log(userObj, 'sinceLastPing', sinceLastPing);
+            console.log(userObj.userID, 'sincelastPing userObj.userID');
+            console.log(this.state.userID, 'sinceLastPing this.state.userID');
+            userObj.username += ' ' + sinceLastPing;
+            // if (userObj.userID === this.state.userID || sinceLastPing < 10000) {
+            //   usersOnline.push(userObj);
+            // } else {
+            //   expiredUsers.push(userObj.userID);
+            //   console.log('rejected for sinceLastPing too old:', this.state.userID, sinceLastPing)
+            // }
+          });
+          console.log('sinceLastPing prepared for deletin:', expiredUsers)
+          // this.deletedExpiredUsers(expiredUsers);
+        }
+        this.setState({
+          usersOnline: usersOnline
+        });
+      })
+    });
+  }
   getRandomOpponent = () => {
     let upperLimit = 24;
     if (!Util.randomInt(0, 8)) {
@@ -530,7 +589,7 @@ class App extends React.Component {
   };
 
   handleClickWagerMore = () => {
-    this.callConfirmModal('ENTER WAGER', 'numberInput', { confirm: 'OK', cancel: 'NEVER MIND' }, () => {
+    this.callConfirmModal('WAGER', 'numberInput', { confirm: 'OK', cancel: 'NEVER MIND' }, () => {
       let wager = parseInt(document.getElementById('wager-input').value);
       console.log('wager', wager);
       this.setState({
@@ -549,7 +608,7 @@ class App extends React.Component {
         phase: 'selectingDeck'
       });
     } else {          
-      this.callConfirmModal('ENTER WAGER', 'numberInput', { confirm: 'START!', cancel: 'NEVER MIND' }, () => {          
+      this.callConfirmModal('WAGER', 'numberInput', { confirm: 'START!', cancel: 'NEVER MIND' }, () => {          
       let randomDeck = this.createRandomDeck();
       let randomOpponent = this.getRandomOpponent();
       let namesCopy = { ...this.state.playerNames };
@@ -1727,6 +1786,7 @@ class App extends React.Component {
     });
   };
   callResultModal = winner => {
+    console.big('calling res mod')
     let bgColor = 'var(--red-bg-color)';
     let title;
     let winnerDisplay = winner;
@@ -1735,18 +1795,16 @@ class App extends React.Component {
     if (winner === 'user') {
       this.playSound('win');
       title = 'YOU WIN';
-      bgColor = 'green';
+      bgColor = 'var(--option-on-color)';
     } else if (winner === 'opponent') {
       this.playSound('lose');
       title = 'YOU LOSE';
+      bgColor = 'var(--option-off-color)';
     } else {
       title = "It's a tie";
-      bgColor = 'var(--main-bg-color)';
+      bgColor = 'var(--red-bg-color)';
     }
-    let postMatch = false;
     if (this.state.userWins === 3 || this.state.opponentWins === 3) {
-      postMatch = true;
-      // bgColor = 'var(--house-card-color)';
       bgColor = 'var(--red-bg-color)';
       title = 'MATCH\nWINNER';
       winnerDisplay = this.state.playerNames[winner];
@@ -1769,6 +1827,7 @@ class App extends React.Component {
     let modal = document.getElementById('result-modal');
     modal.style.backgroundColor = bgColor;
     modal.classList.add('modal-on');
+    console.big('added modal-on to classList')
     this.setState({
       resultMessage: {
         title: title,
@@ -1781,8 +1840,10 @@ class App extends React.Component {
   dismissResultModal = () => {
     let modal = document.getElementById('result-modal');    
     modal.classList.remove('modal-on');
+    console.big('removed modal-on to classList')
   };
   callConfirmModal = (titleText, bodyText, buttonText, confirmAction, noCancel) => {
+    // let newOkButton = document.getElementById('confirm-ok-button');
     let okButton = document.getElementById('confirm-ok-button');
     let newOkButton = okButton.cloneNode(true);
     okButton.parentNode.prepend(newOkButton);
@@ -1805,7 +1866,7 @@ class App extends React.Component {
     );
   };
   dismissConfirmModal = () => {
-    document.getElementById('confirm-modal').classList.remove('confirm-modal-showing');
+    
     this.setState({
       confirmMessage: {
         showing: false,
@@ -1813,6 +1874,8 @@ class App extends React.Component {
         bodyText: '',
         buttonText: {}
       }
+    }, () => {
+      document.getElementById('confirm-modal').classList.remove('confirm-modal-showing');
     });
   }
 
@@ -2317,7 +2380,8 @@ class App extends React.Component {
         Util.setCookie('pazaak', JSON.stringify({ username: this.state.loggedInAs, userID: this.state.userID, cookieID: this.state.userStatus.cookieID }), 365);
         console.log('getUserRecordWithCookie set cookie to:', { username: this.state.loggedInAs, userID: this.state.userID, cookieID: this.state.userStatus.cookieID });
           this.applyStateOptions('on');
-          resolve();
+          // this.getOnlineUserList();
+        resolve();
       });
     })
   }
@@ -2359,7 +2423,7 @@ class App extends React.Component {
     })
   }
 
-  getUserRecordWithCookie = (cookieObj) => {
+  getUserRecordWithCookie = (cookieObj) => {    
     DB.getUserWithCookie(cookieObj).then(response => {
       if (response.data[0] === null) {
         Util.setCookie('pazaak', null, 0);
@@ -2369,6 +2433,18 @@ class App extends React.Component {
       let newData = response.data[0];
       let newToken = response.data[1];
       this.integrateLoggedInUser(cookieObj.username, newData, newToken);
+      // .then(() => {
+      //   let userObj = {
+      //     userID: this.state.userID,
+      //     username: this.state.loggedInAs,
+      //     phase: this.state.phase,
+      //     opponent: this.state.playerNames.opponent,
+      //   }
+      //   console.log('addCurrentUser sending', userObj)
+      //   DB.addCurrentUser(userObj).then(response => {
+      //     console.log('addCurrentUser responded', response)
+      //   })
+      // });
     });
   }
 
@@ -2493,6 +2569,7 @@ class App extends React.Component {
           {pageLoaded && this.state.checkedCookie && phase === 'selectingMode' && (
             <ModeSelectScreen
               phase={phase}
+              usersOnline={this.state.usersOnline}
               vsCPU={this.state.vsCPU}
               cpuDefeated={this.state.userStatus.cpuDefeated.filter((opponentName, i, arr) => arr.indexOf(opponentName) === i).length}
               cardsWon={this.state.userStatus.wonCards.length}
@@ -2590,6 +2667,7 @@ class App extends React.Component {
             titleText={this.state.resultMessage.title}
             playerNames={this.state.playerNames}
             winner={this.state.resultMessage.winner}
+            currentTurn={this.state.turn}
             matchOver={this.state.userWins === 3 || this.state.opponentWins === 3}
             finalScores={{
               user: this.state.userTotal,
