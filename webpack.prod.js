@@ -65,7 +65,7 @@ module.exports = {
   },
   output: {
     path: resolve(__dirname, 'dist'),
-    publicPath: 'https://pazaak.online/dist/',
+    publicPath: 'https://mikedonovan.dev/pazaak/dist/',
     filename: 'app.bundle.js'
   }
 };

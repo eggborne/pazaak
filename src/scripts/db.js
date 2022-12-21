@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 export const portraitSources = {
-  user: 'https://pazaak.online/assets/images/avatarsheetlq.jpg',
-  opponent: 'https://pazaak.online/assets/images/opponentsheet.jpg'
+  user: 'https://mikedonovan.dev/pazaak/assets/images/avatarsheetlq.jpg',
+  opponent: 'https://mikedonovan.dev/pazaak/assets/images/opponentsheet.jpg'
 };
 
 export function deleteUserRecord(userId) {

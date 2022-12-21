@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { portraitSources } from '../scripts/db';
 import { randomInt } from '../scripts/util';
 
-const staticSource = 'https://pazaak.online/assets/images/statictv.webm';
+const staticSource = 'https://mikedonovan.dev/pazaak/assets/images/statictv.webm';
 
 function PlayerPortrait(props) {
   console.orange('PlayerPortrait rendering - ' + props.displayName);  

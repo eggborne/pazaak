@@ -6,7 +6,7 @@ class NameAvatarForm extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      imageSource: 'https://pazaak.online/assets/images/avatarsheetlq.jpg',
+      imageSource: 'https://mikedonovan.dev/pazaak/assets/images/avatarsheetlq.jpg',
       mode: 'loggingIn',
       usernameEntered: '',
       passEntered: '',

@@ -676,11 +676,11 @@ class App extends React.Component {
 
   loadSounds = () => {
     sounds = {
-      click: new Audio('https://pazaak.online/assets/sounds/click.wav'),
-      draw: new Audio('https://pazaak.online/assets/sounds/drawcard.wav'),
-      turn: new Audio('https://pazaak.online/assets/sounds/startturn.wav'),
-      lose: new Audio('https://pazaak.online/assets/sounds/lose.wav'),
-      win: new Audio('https://pazaak.online/assets/sounds/win.wav')
+      click: new Audio('https://mikedonovan.dev/pazaak/assets/sounds/click.wav'),
+      draw: new Audio('https://mikedonovan.dev/pazaak/assets/sounds/drawcard.wav'),
+      turn: new Audio('https://mikedonovan.dev/pazaak/assets/sounds/startturn.wav'),
+      lose: new Audio('https://mikedonovan.dev/pazaak/assets/sounds/lose.wav'),
+      win: new Audio('https://mikedonovan.dev/pazaak/assets/sounds/win.wav')
     };
     this.setState({
       sounds: sounds
@@ -2489,10 +2489,10 @@ class App extends React.Component {
       <div id="container">          
         <Toast message={this.state.toastMessage} />
         <video id='starfield' loop={true} muted={true}>
-          <source src="https://pazaak.online/assets/images/starfieldlq.mp4" type="video/mp4" />
+          <source src="https://mikedonovan.dev/pazaak/assets/images/starfieldlq.mp4" type="video/mp4" />
         </video>
         <audio id='ambience' loop={true}>
-          <source src="https://pazaak.online/assets/sounds/ambience.mp3" type="audio/mp3" />
+          <source src="https://mikedonovan.dev/pazaak/assets/sounds/ambience.mp3" type="audio/mp3" />
         </audio>
         <audio id='music' loop={true}>
           <source src="https://eggborne.com/music/keepyourheadup.ogx" type="audio/mp3" />
